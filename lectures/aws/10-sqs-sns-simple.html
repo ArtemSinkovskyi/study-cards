@@ -171,7 +171,7 @@
 <h2>Крок 4. Шифрування й вартість</h2>
 <p><strong>Шифрування:</strong></p>
 <ul>
-<li><strong>SSE-SQS</strong> (<code>SqsManagedSseEnabled</code>): ключем керує SQS, сторінка цін згадує плату лише за виклики KMS, тож для SSE-SQS окремої плати немає <em>(не звірено остаточно)</em>.</li>
+<li><strong>SSE-SQS</strong> (<code>SqsManagedSseEnabled</code>): ключем керує SQS, окремої плати немає (платять лише за виклики KMS при SSE-KMS); нові черги шифруються SSE-SQS за замовчуванням (з жовтня 2022); анонімні запити до зашифрованої черги відхиляються.</li>
 <li><strong>SSE-KMS</strong>: свій ключ або <code>alias/aws/sqs</code>, плата за виклики KMS, <code>data key reuse period</code> 60 с - 24 год, типово 300 с.</li>
 <li>Шифрується <strong>лише тіло</strong>. Атрибути, ID, час, метрики ні.</li>
 <li>Шифрується те, що надіслано <strong>після</strong> вмикання.</li>

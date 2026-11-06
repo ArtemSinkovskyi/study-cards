@@ -196,7 +196,7 @@
 <h2>Крок 7. EKS, Copilot, інше</h2>
 <ul>
 <li><strong>EKS</strong> це Kubernetes: <strong>manifests</strong> (<code>Deployment</code>, <code>Service</code>), <code>kubectl apply</code>. Обирають, якщо вже є Kubernetes чи потрібна портативність. ECS простіше й тісніше з AWS, EKS стандарт K8s.</li>
-<li><strong>IRSA / Pod Identity</strong> аналог task role для подів <em>(не звірено)</em>.</li>
+<li><strong>IRSA</strong> (через OIDC-провайдер кластера) і <strong>EKS Pod Identity</strong> (через асоціацію пода з роллю, потрібен агент Pod Identity) це аналоги task role для подів; AWS радить Pod Identity.</li>
 <li><strong>AWS Copilot</strong> CLI для ECS-середовищ (згадано в навичці 3.2.4).</li>
 <li><strong>Elastic Beanstalk</strong> розібрано в <a href="22-gaps-simple.html">лекції 22</a>.</li>
 <li><strong>App Runner</strong> в in-scope не значиться.</li>

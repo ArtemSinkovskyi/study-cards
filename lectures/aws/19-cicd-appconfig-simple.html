@@ -149,7 +149,7 @@
 <li>вимкнений <strong>transition</strong> зупиняє просування далі;</li>
 <li><strong>manual approval</strong> додається дією;</li>
 <li>ланцюг dev → staging → prod (навичка 3.3.5);</li>
-<li>помилка дії зупиняє pipeline <em>(не звірено)</em>; це також подія для EventBridge → SNS (навичка 4.2.3).</li>
+<li>помилка дії зупиняє pipeline; про неї можна отримати сповіщення: правило EventBridge на подію <code>CodePipeline Pipeline Execution State Change</code> зі станом <code>FAILED</code> веде в SNS (навичка 4.2.3);</li>
 </ul>
 <h2>Крок 4. CodeBuild</h2>
 <p>Файл <strong><code>buildspec.yml</code> у корені</strong> репозиторію (можна інший шлях). Складається з <code>version: 0.2</code>, <code>env</code>, <code>phases</code>, <code>artifacts</code>, <code>cache</code>, <code>reports</code>.</p>
@@ -167,7 +167,7 @@
 <li>пріоритет змінних: запуск &gt; проєкт &gt; buildspec;</li>
 <li><code>finally</code> виконується, навіть якщо команда впала;</li>
 <li><code>on-failure</code>: <code>ABORT</code>, <code>CONTINUE</code>, <code>RETRY</code>;</li>
-<li>логи йдуть у CloudWatch Logs чи S3 <em>(не звірено)</em>;</li>
+<li>логи йдуть у CloudWatch Logs (типово) чи в S3 (за налаштуванням);</li>
 <li>кеш прискорює збірку; <code>reports</code> дають звіти тестів.</li>
 </ul>
 <h2>Крок 5. CodeDeploy</h2>
@@ -301,7 +301,7 @@
 <p>Lambda читає AppConfig через <strong>розширення</strong>: воно піднімає локальний HTTP-сервер на порту <strong>2772</strong> (за замовчуванням), а функція звертається до нього, а не до API. Ролі потрібні <code>appconfig:StartConfigurationSession</code> і <code>appconfig:GetLatestConfiguration</code>.</p>
 <h2>Крок 10. Інші інструменти</h2>
 <ul>
-<li><strong>CodeArtifact:</strong> приватний репозиторій пакетів npm, Maven, PyPI <em>(не звірено)</em>.</li>
+<li><strong>CodeArtifact:</strong> приватний репозиторій пакетів (npm, Maven, PyPI, NuGet, Cargo, Ruby, Swift, generic); умикається upstream до публічних репозиторіїв (він лише імпортує пакети, назад нічого не публікує).</li>
 <li><strong>Amplify:</strong> хостинг фронтенду, гілка дає середовище.</li>
 <li><strong>CloudShell:</strong> термінал у браузері.</li>
 <li><strong>AI для CI/CD</strong> (навичка 3.3.9): автоматичні перевірки, Kiro.</li>
