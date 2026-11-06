@@ -25,6 +25,11 @@
   .tw table.two th, .tw table.two td { min-width:0; }
   .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
   .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
   .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
   @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
@@ -164,7 +169,7 @@
 <p><strong>Безпека лежить на вас.</strong> Шлях типу <code>/memories/../../secrets.env</code> виходить за каталог (path traversal). Перевіряйте кожен шлях: починається з <code>/memories</code>, канонізуйте, відхиляйте <code>../</code> і <code>%2e%2e%2f</code>.</p>
 <p>Пам'ять поєднують із ущільненням: підсумок зберігає загальне, а пам'ять усе, що <strong>має</strong> пережити підсумок.</p>
 <p><strong>Багатосесійний шаблон:</strong> перша сесія створює журнал прогресу й чекліст, кожна наступна починає з їх читання, наприкінці оновлює журнал. Функцію позначайте завершеною лише після наскрізної перевірки.</p>
-<h2>Що запам'ятати на іспит</h2>
+<div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>Два режими ущільнення: за запитом (блок першим, ви прибираєте підсумовані) і за порогом (150 000, мінімум 50 000).</li>
 <li>Вартість це сума <code>usage.iterations</code>.</li>
@@ -176,7 +181,7 @@
 <li><code>redacted_thinking</code> теж повертають без змін.</li>
 <li>Memory tool клієнтський: path traversal захищаєте ви.</li>
 </ol>
-<h2>Перевірте себе</h2>
+</div><h2>Перевірте себе</h2>
 <ol>
 <li>Де має стояти блок <code>compaction</code> у режимі за запитом?</li>
 <li>Як порахувати вартість із ущільненням?</li>

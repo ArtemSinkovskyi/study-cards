@@ -25,6 +25,11 @@
   .tw table.two th, .tw table.two td { min-width:0; }
   .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
   .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
   .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
   @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
@@ -210,7 +215,7 @@
 <li><strong>Prompt hook</strong> повертає <code>{&quot;ok&quot;: true|false, &quot;reason&quot;}</code>; для <code>Stop</code> <code>ok: false</code> змушує Claude працювати далі, для <code>PreToolUse</code> забороняє виклик.</li>
 <li><strong>Безпека:</strong> command hooks виконуються <strong>з усіма правами вашого користувача</strong>. У режимі <code>-p</code> (без діалогу довіри) hooks із <code>.claude/settings.json</code> репозиторію <strong>запускаються без перевірки довіри</strong>. Перед скриптуванням <code>claude -p</code> над чужим репозиторієм перегляньте його <code>.claude/</code>.</li>
 </ul>
-<h2>Що запам'ятати на іспит</h2>
+<div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>Effort за замовчуванням <code>high</code>, на Opus 5.5 і Haiku 5.5 <code>medium</code>. Це сигнал, жорстка стеля <code>max_tokens</code>.</li>
 <li>Зміна верхнього effort скидає кеш, per-message effort ні.</li>
@@ -222,7 +227,7 @@
 <li>Async hook не блокує. Prompt hook на <code>PermissionRequest</code> не діє.</li>
 <li>У режимі <code>-p</code> hooks із репозиторію запускаються без діалогу довіри.</li>
 </ol>
-<h2>Перевірте себе</h2>
+</div><h2>Перевірте себе</h2>
 <ol>
 <li>Яке значення effort за замовчуванням на Opus 5.5?</li>
 <li>Який мінімум <code>task_budget.total</code>?</li>

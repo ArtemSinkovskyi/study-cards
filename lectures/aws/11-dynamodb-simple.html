@@ -25,6 +25,11 @@
   .tw table.two th, .tw table.two td { min-width:0; }
   .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
   .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
   .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
   @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
@@ -245,7 +250,7 @@
 <li>Перемкнути provisioned на on-demand можна до <strong>4 разів за 24 години</strong>, назад будь-коли.</li>
 <li>Типові квоти: 40 000 RCU і 40 000 WCU на таблицю, 80 000 на акаунт для provisioned. Піднімаються через Service Quotas.</li>
 </ul>
-<h2>Що запам'ятати на іспит</h2>
+<div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>Спершу запити, потім ключі. PK має мати багато різних значень.</li>
 <li><code>GetItem</code> за повним ключем, <code>Query</code> за одним PK, <code>Scan</code> усю таблицю.</li>
@@ -254,7 +259,7 @@
 <li>Strongly consistent коштує вдвічі більше й не працює на GSI та Streams.</li>
 <li>1 RCU це 4 КБ strongly, 1 WCU це 1 КБ. Завжди округлюйте вгору.</li>
 </ol>
-<h2>Перевірте себе</h2>
+</div><h2>Перевірте себе</h2>
 <ol>
 <li>Чому <code>PK = status</code> погана ідея?</li>
 <li>Чим <code>Query</code> відрізняється від <code>Scan</code>?</li>

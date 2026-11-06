@@ -25,6 +25,11 @@
   .tw table.two th, .tw table.two td { min-width:0; }
   .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
   .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
   .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
   @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
@@ -396,7 +401,7 @@
 </table></div>
 <h2>Крок 9. Ціни</h2>
 <p>Тарифікується: зберігання (ГБ-місяць), запити (PUT і GET окремо), вихідний трафік в інтернет, опційні функції. <strong>Вхідний трафік у S3 безкоштовний; передавання між S3 і сервісами AWS у тому самому регіоні безкоштовне.</strong></p>
-<h2>Що запам'ятати на іспит</h2>
+<div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>S3 плоский: ключ плюс префікси. Префікси задають межі прав, подій і lifecycle.</li>
 <li>Сильна консистентність з 2020 року.</li>
@@ -409,7 +414,7 @@
 <li>Multipart обов'язковий понад 5 ГБ, до 10 000 частин.</li>
 <li>3500 записів і 5500 читань на секунду на префікс.</li>
 </ol>
-<h2>Перевірте себе</h2>
+</div><h2>Перевірте себе</h2>
 <ol>
 <li>Чому S3 називають плоским, хоча в консолі є «теки»?</li>
 <li>Який клас для даних, що читаються раз на квартал, але мають віддаватися миттєво?</li>

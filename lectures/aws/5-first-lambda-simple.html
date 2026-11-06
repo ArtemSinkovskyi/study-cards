@@ -25,6 +25,11 @@
   .tw table.two th, .tw table.two td { min-width:0; }
   .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
   .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
   .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
   @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
@@ -362,7 +367,7 @@
 <li>бакет клієнтських файлів: приватний, доступ лише через сервіс за токеном, події немає, Lambda не запускається (і прав у неї на нього нема).</li>
 </ul>
 <p>Мініатюри публічні, а приватні файли (плани, фото) лишаються приватними.</p>
-<h2>Що запам'ятати на іспит</h2>
+<div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>Handler <code>index.handler</code>, сигнатура <code>(event, context)</code>. Async: помилку кидають, щоб Lambda повторила.</li>
 <li>Змінні середовища до 4 КБ; секрети в Secrets Manager чи Parameter Store.</li>
@@ -376,7 +381,7 @@
 <li>Приватний S3 за CDN: CloudFront плюс OAC.</li>
 <li>Пам'ять для CPU; Power Tuning; arm64 дешевше на 20%.</li>
 </ol>
-<h2>Перевірте себе</h2>
+</div><h2>Перевірте себе</h2>
 <ol>
 <li>Чому в async-функції помилку кидають, а не тихо виходять?</li>
 <li>Що станеться, якщо забути змінну середовища, прочитану поза handler?</li>

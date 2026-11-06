@@ -25,6 +25,11 @@
   .tw table.two th, .tw table.two td { min-width:0; }
   .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
   .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
   .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
   @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
@@ -258,7 +263,7 @@
 <li>Метрики: <code>Count</code>, <code>4XXError</code>, <code>5XXError</code>, <code>Latency</code> (весь шлях), <code>IntegrationLatency</code> (лише бекенд). Різниця двох це час у самому Gateway.</li>
 <li><strong>ALB проти API Gateway:</strong> ALB це балансувальник без авторизації й usage plans, а API Gateway керує API.</li>
 </ul>
-<h2>Що запам'ятати на іспит</h2>
+<div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>Просунуті функції лише в REST API, HTTP API дешевший.</li>
 <li>Lambda proxy: <code>statusCode</code> і рядок <code>body</code>, інакше 502.</li>
@@ -268,7 +273,7 @@
 <li>Файли йдуть через presigned URL, а не через API.</li>
 <li>Presigned живе не довше за облікові дані, що його створили.</li>
 </ol>
-<h2>Перевірте себе</h2>
+</div><h2>Перевірте себе</h2>
 <ol>
 <li>Потрібні кеш, API keys і валідація. Який тип API?</li>
 <li>Клієнт отримує 502. Що не так із Lambda?</li>

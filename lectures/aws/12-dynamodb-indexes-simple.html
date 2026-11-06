@@ -25,6 +25,11 @@
   .tw table.two th, .tw table.two td { min-width:0; }
   .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
   .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
   .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
   @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
@@ -281,7 +286,7 @@
 <li>права функції: <code>GetItem</code>, <code>PutItem</code>, <code>UpdateItem</code>, <code>DeleteItem</code>.</li>
 </ul>
 <p>Важливо: ідемпотентність захищає від <strong>подвійної роботи</strong>, а не від помилок. Powertools не зберігає результат упалої функції, тож подія все одно може дійти до DLQ.</p>
-<h2>Що запам'ятати на іспит</h2>
+<div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>Запит не лягає на ключ: GSI (будь-коли, будь-який ключ, лише eventually).</li>
 <li>LSI: той самий PK, лише при створенні таблиці, strongly можна.</li>
@@ -293,7 +298,7 @@
 <li>On-demand для непередбачуваного, provisioned для стабільного.</li>
 <li>Streams 24 години, чотири типи запису, читає Lambda.</li>
 </ol>
-<h2>Перевірте себе</h2>
+</div><h2>Перевірте себе</h2>
 <ol>
 <li>Назвіть чотири різниці між GSI і LSI.</li>
 <li>Таблицю вже створено. Чи можна додати LSI? А GSI?</li>

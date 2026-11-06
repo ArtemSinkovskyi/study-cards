@@ -25,6 +25,11 @@
   .tw table.two th, .tw table.two td { min-width:0; }
   .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
   .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
   .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
   @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
@@ -171,7 +176,7 @@ show(response);
 <li><strong>pause_turn.</strong> Серверні інструменти мають свій внутрішній цикл, обмежений 10 кругами. Коли він упирається в ліміт, приходить <code>pause_turn</code>: «ще не закінчено». Просто надішліть розмову знову.</li>
 <li><strong>disable_parallel_tool_use.</strong> Вимикає паралельні виклики. Параметр лежить <strong>всередині <code>tool_choice</code></strong>, а не окремо.</li>
 </ul>
-<h2>Що запам'ятати на іспит</h2>
+<div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>Модель просить, ваш код виконує.</li>
 <li>Цикл іде, поки <code>stop_reason</code> дорівнює <code>tool_use</code>.</li>
@@ -180,7 +185,7 @@ show(response);
 <li>Ліміт кругів ставите самі.</li>
 <li><code>pause_turn</code> означає «надішли знову».</li>
 </ol>
-<h2>Перевірте себе</h2>
+</div><h2>Перевірте себе</h2>
 <ol>
 <li>Хто насправді виконує <code>get_weather</code>?</li>
 <li>Що робити, коли <code>stop_reason</code> дорівнює <code>end_turn</code>?</li>

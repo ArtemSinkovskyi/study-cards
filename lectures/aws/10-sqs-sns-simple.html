@@ -25,6 +25,11 @@
   .tw table.two th, .tw table.two td { min-width:0; }
   .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
   .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
   .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
   @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
@@ -428,7 +433,7 @@
 <li>Фаза Init тарифікується.</li>
 <li>Alarm CloudWatch оцінює більше точок, ніж <code>EvaluationPeriods</code>: реальна breaching-точка тримає <code>ALARM</code>, доки не випаде з діапазону.</li>
 </ul>
-<h2>Що запам'ятати на іспит</h2>
+<div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>SQS платить за запити (64 КБ = 1 запит), не за зберігання. Retention до 14 днів, visibility до 12 год, long polling до 20 с.</li>
 <li>Standard: at-least-once і best-effort порядок. FIFO: <code>.fifo</code>, <code>MessageGroupId</code>, дедуплікація 5 хв.</li>
@@ -440,7 +445,7 @@
 <li>Fan-out: топік плюс чергa на споживача, queue policy з <code>aws:SourceArn</code>, raw delivery прибирає конверт.</li>
 <li>Redrive працює лише для DLQ з SQS-джерелом.</li>
 </ol>
-<h2>Перевірте себе</h2>
+</div><h2>Перевірте себе</h2>
 <ol>
 <li>За що платять у SQS? Скільки запитів коштує повідомлення 1 МіБ?</li>
 <li>Що буде, якщо не видалити повідомлення після обробки?</li>

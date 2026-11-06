@@ -25,6 +25,11 @@
   .tw table.two th, .tw table.two td { min-width:0; }
   .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
   .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
   .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
   @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
@@ -147,7 +152,7 @@
 <h2>Крок 9. Tool runner</h2>
 <p>Замість власного циклу (лекція 2) SDK може вести цикл сам: ви описуєте інструменти як функції, runner виконує їх і веде розмову. Помилки він теж обгортає в <code>is_error</code>.</p>
 <p>Коли потрібен <strong>ручний цикл</strong>: схвалення людиною, власне логування, умовне виконання.</p>
-<h2>Що запам'ятати на іспит</h2>
+<div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>Опис інструмента це найважливіший фактор. Мінімум 3-4 речення, з обмеженнями.</li>
 <li><code>any</code> і <code>tool</code> дають 400 на Opus 5.5, Sonnet 5.5, Fable 5.1, Mythos 5.1.</li>
@@ -157,7 +162,7 @@
 <li>MCP connector: лише інструменти, лише публічний HTTPS, без STDIO.</li>
 <li>Режим лише читання: denylist чи allowlist у <code>mcp_toolset</code>.</li>
 </ol>
-<h2>Перевірте себе</h2>
+</div><h2>Перевірте себе</h2>
 <ol>
 <li>Що модель знає про ваш інструмент?</li>
 <li>Що поверне <code>tool_choice: any</code> на Opus 5.5?</li>
