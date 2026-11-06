@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 6 (просто): Lambda для іспиту</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; }
+  th { background:#fff; }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; word-break:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 6 (просто): Lambda для іспиту</h1>
+<blockquote>
+<p>Середній рівень: усі правила й числа з повної лекції, але простими словами й без розповіді про наш проєкт. Повна: ../6-lambda-theory-dva-c02.md. Автор повної лекції дав числа з пам'яті, їх варто звірити з документацією AWS.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>Lambda на іспиті це кілька запитань, що повторюються:</strong> як її викликають, що буде при помилці, які в неї права, які ліміти, як викотити нову версію.</p>
+<p>Три речі, що розв'язують більшість питань:</p>
+<ol>
+<li><strong>Спосіб виклику</strong> (sync, async, poll) визначає, хто повторює спробу і куди йде помилка.</li>
+<li><strong>Права йдуть у два боки:</strong> execution role (що функція може) і resource-based policy (хто може її викликати).</li>
+<li><strong>Усе at-least-once:</strong> подія може прийти двічі, тому потрібна ідемпотентність.</li>
+</ol>
+<h2>Крок 1. Життєвий цикл і cold start</h2>
+<p>Lambda не тримає код «увімкненим». На виклик вона бере <strong>execution environment</strong> (ізольована мікро-ВМ) і проходить фази:</p>
+<table>
+<thead>
+<tr>
+<th>Фаза</th>
+<th>Що відбувається</th>
+<th>Нюанси</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Init</strong></td>
+<td>запуск runtime і код <strong>поза handler</strong> (імпорти, <code>new S3Client()</code>, читання конфігурації)</td>
+<td>ліміт <strong>10 с</strong>; за новими правилами Init тарифікується, тож важкий Init коштує грошей</td>
+</tr>
+<tr>
+<td><strong>Invoke</strong></td>
+<td>виклик <code>handler(event, context)</code></td>
+<td>одне середовище обробляє <strong>один виклик за раз</strong></td>
+</tr>
+<tr>
+<td><strong>Shutdown</strong></td>
+<td>середовище гасять після бездіяльності</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Cold start</strong> це Init плюс завантаження коду: перший виклик, ріст навантаження, нова версія чи зміна конфігурації. <strong>Warm start</strong> пропускає Init.</p>
+<p>Що живе між викликами в теплому середовищі: глобальні змінні, клієнти SDK, з'єднання з БД, файли в <code>/tmp</code>. Але розраховувати на це як на кеш не можна. Дані конкретного запиту <strong>не можна</strong> класти в глобальні змінні (наступний запит побачить чужі).</p>
+<p>Пастки:</p>
+<ul>
+<li>«Як не відкривати з'єднання з БД на кожен виклик?» відповідь: ініціалізація <strong>поза handler</strong>.</li>
+<li>«Як зменшити cold start?» менший пакет, менше залежностей, більше пам'яті (більше CPU), <strong>SnapStart</strong>, <strong>provisioned concurrency</strong>.</li>
+<li>Одне середовище не обробляє два виклики одночасно, для паралелізму Lambda створює нові середовища.</li>
+<li><code>/tmp</code> єдине місце для запису: 512 МБ за замовчуванням, до 10 ГБ.</li>
+<li><strong>SnapStart</strong> робить знімок після Init і відновлює його замість холодного старту. Мережеві з'єднання й унікальні значення, створені в Init, після відновлення застарілі (для цього є runtime hooks). Підтримують Java, Python, .NET <em>(не звірено)</em>.</li>
+</ul>
+<h2>Крок 2. Ресурси й ліміти</h2>
+<p>Ці числа питають прямо.</p>
+<table>
+<thead>
+<tr>
+<th>Що</th>
+<th>Значення</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Timeout</td>
+<td>за замовчуванням <strong>3 с</strong>, максимум <strong>15 хв (900 с)</strong></td>
+</tr>
+<tr>
+<td>Пам'ять</td>
+<td><strong>128 МБ - 10 240 МБ</strong>, крок 1 МБ</td>
+</tr>
+<tr>
+<td>CPU</td>
+<td>росте з пам'яттю; <strong>1769 МБ = 1 vCPU</strong>, 10 ГБ приблизно 6 vCPU</td>
+</tr>
+<tr>
+<td><code>/tmp</code></td>
+<td>512 МБ, до <strong>10 ГБ</strong></td>
+</tr>
+<tr>
+<td>Змінні середовища</td>
+<td><strong>4 КБ</strong> сумарно</td>
+</tr>
+<tr>
+<td>Payload sync</td>
+<td><strong>6 МБ</strong></td>
+</tr>
+<tr>
+<td>Payload async</td>
+<td><strong>1 МБ</strong> (раніше 256 КБ; у старих матеріалах для іспиту ще трапляється 256 КБ)</td>
+</tr>
+<tr>
+<td>Deployment package</td>
+<td>zip напряму <strong>50 МБ</strong>; розпаковано з layers <strong>250 МБ</strong>; container image <strong>10 ГБ</strong></td>
+</tr>
+<tr>
+<td>Layers</td>
+<td>до <strong>5</strong> на функцію</td>
+</tr>
+<tr>
+<td>Concurrency акаунта</td>
+<td><strong>1000</strong> на регіон (можна підняти); у нових акаунтів стартова квота нижча</td>
+</tr>
+<tr>
+<td>Init</td>
+<td><strong>10 с</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Тарифікація:</strong> кількість викликів плюс <strong>GB-секунди</strong> (пам'ять × тривалість). Free tier назавжди: 1 млн викликів і 400 000 GB-с на місяць. <strong>arm64</strong> дешевший приблизно на 20%.</p>
+<p>Більше пам'яті дає більше CPU і коротший виклик, тож 128 МБ не завжди найдешевше. Для підбору є <strong>AWS Lambda Power Tuning</strong>.</p>
+<p>Пастки:</p>
+<ul>
+<li>Функція падає на timeout: збільшити timeout (до 900 с) або пам'ять. Якщо обробка довша за 15 хв, то це не Lambda (Step Functions, ECS/Fargate, Batch).</li>
+<li>Не вистачає місця для файла: збільшити <code>/tmp</code> або працювати зі стрімом.</li>
+</ul>
+<h2>Крок 3. Три моделі виклику</h2>
+<p>Від способу виклику залежить усе інше.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Синхронний</th>
+<th>Асинхронний</th>
+<th>Event source mapping</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Хто викликає</td>
+<td>клієнт чекає</td>
+<td>джерело кидає подію і йде</td>
+<td><strong>сама Lambda</strong> опитує джерело</td>
+</tr>
+<tr>
+<td><code>InvocationType</code></td>
+<td><code>RequestResponse</code></td>
+<td><code>Event</code></td>
+<td>внутрішньо</td>
+</tr>
+<tr>
+<td>Джерела</td>
+<td>API Gateway, ALB, Function URL, Cognito, Lambda@Edge, SDK</td>
+<td><strong>S3, SNS, EventBridge</strong>, SES, CloudWatch Logs</td>
+<td><strong>SQS, Kinesis, DynamoDB Streams</strong>, Kafka (MSK), MQ</td>
+</tr>
+<tr>
+<td>Відповідь</td>
+<td>результат чи помилка йде <strong>викликачу</strong></td>
+<td>одразу <code>202</code>, результат ігнорується</td>
+<td>результат ігнорується, але успіх чи помилка керує джерелом</td>
+</tr>
+<tr>
+<td><strong>Хто повторює</strong></td>
+<td><strong>клієнт</strong></td>
+<td><strong>Lambda</strong>: 2 повтори</td>
+<td>Lambda через джерело</td>
+</tr>
+<tr>
+<td>Куди йде невдача</td>
+<td>клієнту</td>
+<td>DLQ чи on-failure destination</td>
+<td>SQS: DLQ <strong>черги</strong>; потоки: on-failure destination</td>
+</tr>
+<tr>
+<td>Формат події</td>
+<td>залежить від джерела</td>
+<td>залежить від джерела</td>
+<td>батч записів (<code>Records</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>Є ще <code>DryRun</code>: перевірка прав без виконання.</p>
+<p>Пастки:</p>
+<ul>
+<li>Викликає S3, SNS чи EventBridge: async.</li>
+<li>Lambda читає з SQS, Kinesis чи DynamoDB Streams: event source mapping, <strong>права на читання в execution role</strong>.</li>
+<li>Помилка API Gateway до Lambda: ніхто не повторює, це справа клієнта.</li>
+<li>Результат async-функції напряму не отримати: on-success destination або виклик синхронно.</li>
+</ul>
+<h2>Крок 4. Помилки й retries</h2>
+<h3>Асинхронний виклик</h3>
+<p>Подія потрапляє у внутрішню чергу Lambda. Якщо функція повернула помилку (exception, timeout, out of memory) або виклик <strong>throttled</strong>:</p>
+<ul>
+<li>Lambda <strong>повторює двічі</strong>, усього 3 спроби, паузи приблизно 1 хв, потім 2 хв;</li>
+<li>налаштування: <strong><code>MaximumRetryAttempts</code></strong> (0-2) і <strong><code>MaximumEventAgeInSeconds</code></strong> (60 с - 6 год, за замовчуванням 6 год);</li>
+<li>подія, яку не вдалося обробити або яка застаріла, йде в <strong>DLQ</strong> чи <strong>on-failure destination</strong>. Без них подія <strong>зникає</strong>.</li>
+</ul>
+<h3>DLQ проти destinations</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>DLQ</strong></th>
+<th><strong>Destinations</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Умова</td>
+<td>лише невдача</td>
+<td><strong>успіх і невдача</strong></td>
+</tr>
+<tr>
+<td>Куди</td>
+<td>SQS або SNS</td>
+<td>SQS, SNS, <strong>Lambda, EventBridge</strong> (S3 для невдач)</td>
+</tr>
+<tr>
+<td>Що в повідомленні</td>
+<td>подія</td>
+<td>подія <strong>плюс контекст</strong>: помилка, кількість спроб, <code>requestId</code></td>
+</tr>
+<tr>
+<td>Порада AWS</td>
+<td>старіший варіант</td>
+<td><strong>рекомендований</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Execution role має мати право писати в ціль (<code>sqs:SendMessage</code>, <code>sns:Publish</code>), інакше невдалі події втрачаються.</p>
+<h3>SQS як джерело</h3>
+<ul>
+<li>Lambda бере батч (до 10 повідомлень для standard, до 10 000 з batching window).</li>
+<li>Успіх: повідомлення видаляються. Помилка: <strong>усі повідомлення батча</strong> знову стають видимими після visibility timeout.</li>
+<li><strong>Visibility timeout черги не менше 6 × timeout функції</strong>. Інакше повідомлення повернеться, поки функція ще працює, і обробиться двічі.</li>
+<li><strong>DLQ налаштовується на самій черзі</strong> (<code>maxReceiveCount</code> у redrive policy), а не на Lambda. DLQ на функції для SQS не працює.</li>
+<li><strong>Partial batch response (<code>ReportBatchItemFailures</code>):</strong> функція повертає <code>batchItemFailures: [{ itemIdentifier }]</code>, і повертаються лише невдалі повідомлення.</li>
+<li><strong>FIFO:</strong> порядок у межах <strong>message group</strong>, помилка в одному блокує наступні в групі.</li>
+<li><strong>Maximum concurrency</strong> на event source mapping захищає БД від перевантаження.</li>
+</ul>
+<h3>Потоки (Kinesis, DynamoDB Streams)</h3>
+<ul>
+<li>Порядок у межах <strong>шарда</strong>. Один батч на шард одночасно (<strong>parallelization factor</strong> до 10).</li>
+<li><strong>Помилка блокує шард:</strong> Lambda повторює той самий батч, доки він не пройде або дані не застаріють (<code>MaximumRecordAgeInSeconds</code>). Це «poison pill».</li>
+<li>Захист: <code>BisectBatchOnFunctionError</code> (ділить батч навпіл), <code>MaximumRetryAttempts</code>, <code>MaximumRecordAgeInSeconds</code>, <strong>on-failure destination</strong> (SQS чи SNS), <code>ReportBatchItemFailures</code>.</li>
+<li><strong><code>IteratorAge</code></strong> показує відставання від потоку. Зростає: не встигаєте (додати шарди, parallelization factor, пам'ять).</li>
+<li>Початкова позиція: <code>TRIM_HORIZON</code> (з початку), <code>LATEST</code> (нові), <code>AT_TIMESTAMP</code>.</li>
+</ul>
+<h3>Ідемпотентність</h3>
+<p>Усе вище <strong>at-least-once</strong>: подія може прийти двічі. Функція має витримати повтор (запис у той самий ключ або Powertools Idempotency плюс DynamoDB).</p>
+<p>Пастки:</p>
+<ul>
+<li>Async-Lambda впала: 2 повтори, потім DLQ чи destination.</li>
+<li>SQS-повідомлення обробляються двічі: visibility timeout замалий або немає ідемпотентності.</li>
+<li>Один поганий запис блокує шард: bisect, max record age, on-failure destination.</li>
+<li>Куди DLQ для SQS-тригера: на чергу.</li>
+</ul>
+<h2>Крок 5. Concurrency і throttling</h2>
+<p><strong>Concurrency</strong> це кількість викликів, що виконуються одночасно, приблизно <code>запитів за секунду × тривалість у секундах</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Тип</th>
+<th>Що</th>
+<th>Платно</th>
+<th>Нюанс</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Unreserved</strong></td>
+<td>спільний пул акаунта (1000 на регіон)</td>
+<td>ні</td>
+<td>усі функції без резервів ділять залишок</td>
+</tr>
+<tr>
+<td><strong>Reserved</strong></td>
+<td>гарантована <strong>і обмежена зверху</strong> частина ліміту</td>
+<td>ні</td>
+<td><code>0</code> вимикає функцію; захищає інших від цієї й цю від інших</td>
+</tr>
+<tr>
+<td><strong>Provisioned</strong></td>
+<td>заздалегідь прогріті середовища</td>
+<td><strong>так</strong></td>
+<td>лише на <strong>версію чи alias</strong>, не на <code>$LATEST</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Throttling:</strong></p>
+<ul>
+<li>sync: клієнт отримує <strong>429 <code>TooManyRequestsException</code></strong> і повторює сам;</li>
+<li>async: Lambda повторює сама (до <code>MaximumEventAgeInSeconds</code>);</li>
+<li>SQS: повідомлення повертаються в чергу, Lambda зменшує паралелізм опитування.</li>
+</ul>
+<p>Масштабування: Lambda додає середовища пачками (до 1000 нових на функцію кожні 10 с) аж до ліміту.</p>
+<p>Метрики: <code>ConcurrentExecutions</code>, <code>Throttles</code>, <code>UnreservedConcurrentExecutions</code>.</p>
+<p><strong>Правило нерезервованого залишку:</strong> не можна зарезервувати стільки, щоб нерезервованих лишилось менше <strong>100</strong> (у старих матеріалах трапляється 10, це застаріло). Тому в акаунті з квотою 10 резервувати можна 0, а <code>ReservedConcurrentExecutions</code> відхилять під час деплою.</p>
+<p>Пастки: одна функція з'їла весь ліміт, а інші отримують 429: reserved concurrency для критичних. Захистити БД від Lambda: reserved concurrency або max concurrency на SQS mapping.</p>
+<h2>Крок 6. Права: два напрямки</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Execution role</strong></th>
+<th><strong>Resource-based policy</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Питання</td>
+<td>що <strong>функція</strong> може робити</td>
+<td>хто може <strong>викликати функцію</strong></td>
+</tr>
+<tr>
+<td>Де живе</td>
+<td>IAM-роль з довірою <code>lambda.amazonaws.com</code></td>
+<td>прикріплена до самої функції</td>
+</tr>
+<tr>
+<td>Приклад</td>
+<td><code>s3:GetObject</code>, <code>logs:*</code></td>
+<td><code>lambda:InvokeFunction</code> для <code>events.amazonaws.com</code> з <code>SourceArn</code></td>
+</tr>
+<tr>
+<td>SAM / Terraform</td>
+<td><code>Policies</code> у функції / <code>aws_iam_role</code></td>
+<td>SAM створює сам для <code>Events</code>; у Terraform це <code>aws_lambda_permission</code></td>
+</tr>
+<tr>
+<td>Cross-account</td>
+<td>роль в акаунті функції</td>
+<td>головний спосіб дати <strong>чужому акаунту</strong> викликати функцію</td>
+</tr>
+</tbody>
+</table>
+<p>Базові політики: <code>AWSLambdaBasicExecutionRole</code> (логи), <code>AWSLambdaVPCAccessExecutionRole</code> (VPC), <code>AWSXRayDaemonWriteAccess</code> (X-Ray).</p>
+<p><strong>Push чи poll:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Тип джерела</th>
+<th>Що потрібно</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Push</strong> (S3, SNS, EventBridge, API GW)</td>
+<td><strong>resource-based policy</strong> на функції</td>
+</tr>
+<tr>
+<td><strong>Poll</strong> (SQS, Kinesis, DynamoDB Streams)</td>
+<td><strong>execution role</strong> з правами читання (<code>sqs:ReceiveMessage</code>, <code>DeleteMessage</code>, <code>GetQueueAttributes</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>«Чому Lambda не отримує повідомлення з SQS» відповідь: у ролі немає прав.</p>
+<p>Пастки:</p>
+<ul>
+<li>Least privilege: не <code>s3:*</code> на <code>*</code>, а конкретні дії на конкретні префікси.</li>
+<li>Lambda отримує тимчасові ключі ролі як змінні середовища, ключі в коді не потрібні.</li>
+<li><code>AccessDenied</code> на <code>GetObject</code>: перевірте роль, політику бакета і KMS-ключ.</li>
+</ul>
+<h2>Крок 7. Версії, aliases, traffic shifting</h2>
+<table>
+<thead>
+<tr>
+<th>Поняття</th>
+<th>Що</th>
+<th>Змінне?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>$LATEST</code></strong></td>
+<td>поточний робочий код</td>
+<td><strong>так</strong></td>
+</tr>
+<tr>
+<td><strong>Версія</strong> (1, 2, ...)</td>
+<td>знімок коду <strong>і конфігурації</strong></td>
+<td><strong>ні</strong></td>
+</tr>
+<tr>
+<td><strong>Alias</strong> (<code>prod</code>)</td>
+<td>іменований вказівник на версію</td>
+<td>вказівник можна переставити</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Кожна версія й alias мають власний ARN.</li>
+<li><strong>Alias може вказувати на дві версії з вагами</strong> (90% і 10%): canary.</li>
+<li>Alias <strong>не може</strong> вказувати на інший alias. Зважений розподіл лише між <strong>двома</strong> версіями.</li>
+<li>Тригери й дозволи вішають на <strong>alias</strong>, тоді перемикання версії не потребує переналаштування.</li>
+<li>Змінні середовища фіксуються разом з версією; щоб змінити, публікують нову.</li>
+<li>Provisioned concurrency працює на версії чи alias.</li>
+</ul>
+<p>Пастки: опублікована версія не змінюється (змінюється лише <code>$LATEST</code>). Відкат: переставити alias на попередню версію.</p>
+<h2>Крок 8. Пакування</h2>
+<p><strong>Layers:</strong></p>
+<ul>
+<li>окремий zip із залежностями, <strong>до 5 на функцію</strong>;</li>
+<li>розпаковується в <strong><code>/opt</code></strong> (Node: <code>/opt/nodejs/node_modules</code>, Python: <code>/opt/python</code>);</li>
+<li>версіонуються, можна ділити між функціями й акаунтами;</li>
+<li><strong>входять у ліміт 250 МБ</strong>;</li>
+<li><strong>не підтримуються</strong> для функцій як container image.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Ситуація</th>
+<th>Рішення</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>код з залежностями менше 50 МБ</td>
+<td>zip напряму</td>
+</tr>
+<tr>
+<td>zip більше 50 МБ (до 250 МБ розпаковано)</td>
+<td>завантажити через S3</td>
+</tr>
+<tr>
+<td>спільна залежність для кількох функцій</td>
+<td>layer</td>
+</tr>
+<tr>
+<td>понад 250 МБ (ML-модель, ffmpeg, Chromium)</td>
+<td>container image з ECR (до 10 ГБ)</td>
+</tr>
+<tr>
+<td>нативна залежність працює локально, падає в Lambda (<code>invalid ELF header</code>)</td>
+<td>збірка під Linux і архітектуру Lambda</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Container images:</strong> образи AWS або власні з <strong>Runtime Interface Client</strong>; локально запускаються через <strong>Runtime Interface Emulator</strong>. Образ береться лише з ECR того ж регіону.</p>
+<h2>Крок 9. Конфігурація й секрети</h2>
+<table>
+<thead>
+<tr>
+<th>Спосіб</th>
+<th>Коли</th>
+<th>Нюанс</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Змінні середовища</td>
+<td>нечутлива конфігурація</td>
+<td>до 4 КБ, шифруються в спокої KMS</td>
+</tr>
+<tr>
+<td>SSM Parameter Store</td>
+<td>конфіг і малі секрети</td>
+<td><code>String</code>, <code>StringList</code>, <code>SecureString</code> (KMS), стандартний рівень безкоштовний, без автоматичної ротації</td>
+</tr>
+<tr>
+<td>Secrets Manager</td>
+<td>секрети з <strong>ротацією</strong></td>
+<td>платний за секрет, ротація через Lambda</td>
+</tr>
+</tbody>
+</table>
+<p>Читайте секрети <strong>в Init</strong> і кешуйте (Lambda extension «Parameters and Secrets» чи Powertools Parameters), інакше кожен виклик ходить в API.</p>
+<p><strong>Encryption helpers</strong> шифрують змінні на стороні клієнта, тоді в ролі потрібен <code>kms:Decrypt</code>.</p>
+<p>Пастки: «паролі в змінних середовища, як безпечніше?» Secrets Manager чи <code>SecureString</code>. «Пароль треба автоматично міняти» Secrets Manager.</p>
+<h2>Крок 10. Спостережуваність</h2>
+<p><strong>Логи.</strong> Log group <code>/aws/lambda/&lt;назва&gt;</code>. Retention за замовчуванням «ніколи не видаляти». У кожному виклику рядки <code>START</code>, <code>END</code>, <code>REPORT</code> (<code>Duration</code>, <code>Billed Duration</code>, <code>Memory Size</code>, <code>Max Memory Used</code>, <code>Init Duration</code> лише при cold start). <strong>Logs Insights</strong> запитує структуровані JSON-логи. <strong>Metric filter</strong> перетворює шаблон у логах на метрику.</p>
+<p><strong>Метрики:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Метрика</th>
+<th>Означає</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Invocations</code></td>
+<td>кількість викликів</td>
+</tr>
+<tr>
+<td><code>Errors</code></td>
+<td>виклики з помилкою функції</td>
+</tr>
+<tr>
+<td><code>Throttles</code></td>
+<td>відхилені через concurrency (<strong>не входять</strong> в <code>Errors</code>)</td>
+</tr>
+<tr>
+<td><code>Duration</code></td>
+<td>тривалість</td>
+</tr>
+<tr>
+<td><code>ConcurrentExecutions</code></td>
+<td>паралельні виконання</td>
+</tr>
+<tr>
+<td><code>IteratorAge</code></td>
+<td>відставання від потоку</td>
+</tr>
+<tr>
+<td><code>AsyncEventAge</code>, <code>DeadLetterErrors</code>, <code>DestinationDeliveryFailures</code></td>
+<td>здоров'я async-черги</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Custom metrics</strong> без викликів API: <strong>Embedded Metric Format (EMF)</strong>, спеціальний JSON у лог (Powertools Metrics). <code>PutMetricData</code> платний і повільніший.</p>
+<p><strong>X-Ray:</strong> увімкнути <strong>Active tracing</strong> і роль <code>AWSXRayDaemonWriteAccess</code>. Segment це функція, subsegment це виклики всередині. <strong>Annotations</strong> індексовані (по них шукають), <strong>Metadata</strong> ні. Заголовок <code>X-Amzn-Trace-Id</code> передає трейс далі. Sampling за замовчуванням 1 запит на секунду плюс 5%.</p>
+<p>Пастки: вузьке місце між сервісами: X-Ray. Алярм на помилки: alarm на <code>Errors</code>. Throttling не видно в <code>Errors</code>: дивіться <code>Throttles</code>.</p>
+<h2>Крок 11. Lambda у VPC</h2>
+<ul>
+<li>За замовчуванням Lambda <strong>поза</strong> вашою VPC: має інтернет і публічні AWS API.</li>
+<li>Щоб дістатися до приватних ресурсів (RDS), підключають до VPC: <strong>підмережі плюс security groups</strong>, роль <code>AWSLambdaVPCAccessExecutionRole</code>.</li>
+<li><strong>Побічний ефект:</strong> функція у VPC <strong>втрачає інтернет</strong>, навіть у публічній підмережі. Рішення: приватна підмережа плюс <strong>NAT Gateway</strong> або <strong>VPC endpoints</strong>.</li>
+<li><strong>Gateway endpoint</strong> (S3, DynamoDB, безкоштовний) і <strong>Interface endpoint</strong> (інші сервіси, платний, PrivateLink).</li>
+</ul>
+<p>Пастка: «Lambda у VPC не бачить S3, DynamoDB чи інтернет» відповідь: NAT або VPC endpoint.</p>
+<h2>Крок 12. API Gateway, Function URL, ALB</h2>
+<p>Це синхронні джерела.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Що</th>
+<th>Нюанси</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Gateway (REST, HTTP API)</td>
+<td>повноцінний API: авторизація, throttling, кеш, usage plans</td>
+<td><strong>proxy integration</strong>: Lambda отримує весь запит і сама формує відповідь</td>
+</tr>
+<tr>
+<td>Function URL</td>
+<td>вбудована HTTPS-адреса функції</td>
+<td>auth <code>AWS_IAM</code> чи <code>NONE</code>, є CORS; простіше й дешевше, без можливостей API Gateway</td>
+</tr>
+<tr>
+<td>ALB</td>
+<td>балансувальник з Lambda як ціллю</td>
+<td>коли ALB уже є</td>
+</tr>
+</tbody>
+</table>
+<p>Відповідь для proxy: <code>{ &quot;statusCode&quot;: 200, &quot;headers&quot;: {...}, &quot;body&quot;: &quot;...&quot;, &quot;isBase64Encoded&quot;: false }</code>. <code>body</code> це <strong>рядок</strong>, а не об'єкт. Неправильний формат дає <strong>502</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Код</th>
+<th>Причина</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>429</strong></td>
+<td>throttling: перевищено concurrency</td>
+</tr>
+<tr>
+<td><strong>502</strong></td>
+<td>неправильний формат відповіді (proxy) або падіння функції</td>
+</tr>
+<tr>
+<td><strong>504</strong></td>
+<td>timeout інтеграції: за замовчуванням до 29 с, навіть якщо функція має 15 хв (для Regional і Private REST API з червня 2024 можна підняти до 300 с; для HTTP API ні)</td>
+</tr>
+<tr>
+<td><strong>403</strong></td>
+<td>немає права викликати (resource policy)</td>
+</tr>
+<tr>
+<td><strong>413</strong></td>
+<td>payload більший за ліміт</td>
+</tr>
+</tbody>
+</table>
+<h2>Крок 13. SAM і CodeDeploy</h2>
+<p><strong>SAM</strong> це шаблон плюс CLI. Шаблон це CloudFormation з <code>Transform: AWS::Serverless-2016-10-31</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Тип</th>
+<th>Створює</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AWS::Serverless::Function</code></td>
+<td>Lambda плюс роль плюс тригери (<code>Events</code>)</td>
+</tr>
+<tr>
+<td><code>AWS::Serverless::Api</code> / <code>HttpApi</code></td>
+<td>API Gateway</td>
+</tr>
+<tr>
+<td><code>AWS::Serverless::SimpleTable</code></td>
+<td>таблиця DynamoDB</td>
+</tr>
+<tr>
+<td><code>AWS::Serverless::LayerVersion</code></td>
+<td>layer</td>
+</tr>
+<tr>
+<td><code>AWS::Serverless::StateMachine</code></td>
+<td>Step Functions</td>
+</tr>
+<tr>
+<td><code>AWS::Serverless::Application</code></td>
+<td>вкладений застосунок</td>
+</tr>
+</tbody>
+</table>
+<p><code>Globals</code> це спільні налаштування для всіх функцій.</p>
+<table>
+<thead>
+<tr>
+<th>Команда</th>
+<th>Що робить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>sam init</code></td>
+<td>створює проєкт</td>
+</tr>
+<tr>
+<td><code>sam build</code></td>
+<td>збирає (<code>--use-container</code> збирає в Docker-образі Lambda)</td>
+</tr>
+<tr>
+<td><code>sam local invoke</code></td>
+<td>запускає функцію локально з тестовою подією</td>
+</tr>
+<tr>
+<td><code>sam local start-api</code></td>
+<td>піднімає локальний API</td>
+</tr>
+<tr>
+<td><code>sam validate</code></td>
+<td>перевіряє шаблон</td>
+</tr>
+<tr>
+<td><code>sam deploy</code> (<code>--guided</code>)</td>
+<td>пакує й розгортає через CloudFormation</td>
+</tr>
+<tr>
+<td><code>sam sync</code></td>
+<td>швидка синхронізація під час розробки (не для prod)</td>
+</tr>
+<tr>
+<td><code>sam logs</code></td>
+<td>читає логи</td>
+</tr>
+<tr>
+<td><code>sam pipeline</code></td>
+<td>генерує CI/CD</td>
+</tr>
+</tbody>
+</table>
+<p><strong>CodeDeploy і <code>DeploymentPreference</code>.</strong> З <code>AutoPublishAlias</code> SAM публікує версію і веде alias, а CodeDeploy змінює вагу трафіку:</p>
+<table>
+<thead>
+<tr>
+<th>Тип</th>
+<th>Як зміщується трафік</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Canary10Percent5Minutes</code></td>
+<td>10% одразу, решта через 5 хв</td>
+</tr>
+<tr>
+<td><code>Linear10PercentEvery1Minute</code></td>
+<td>+10% щохвилини</td>
+</tr>
+<tr>
+<td><code>AllAtOnce</code></td>
+<td>усе одразу</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong><code>Hooks</code>:</strong> <code>PreTraffic</code> і <code>PostTraffic</code> це Lambda-функції для перевірки до і після зміщення трафіку.</li>
+<li><strong><code>Alarms</code>:</strong> якщо alarm спрацював під час розгортання, CodeDeploy <strong>автоматично відкочує</strong>.</li>
+</ul>
+<h2>Шпаргалка: симптом і відповідь</h2>
+<table>
+<thead>
+<tr>
+<th>Симптом</th>
+<th>Відповідь</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>повільно через відкриття з'єднань на кожен виклик</td>
+<td>ініціалізація поза handler</td>
+</tr>
+<tr>
+<td><code>invalid ELF header</code></td>
+<td>збірка під Linux і архітектуру функції</td>
+</tr>
+<tr>
+<td>пакет 70 МБ не завантажується напряму</td>
+<td>через S3</td>
+</tr>
+<tr>
+<td>залежності більше 250 МБ</td>
+<td>container image (ECR)</td>
+</tr>
+<tr>
+<td>спільна бібліотека для багатьох функцій</td>
+<td>layer</td>
+</tr>
+<tr>
+<td>Java Lambda повільно стартує</td>
+<td>SnapStart, provisioned concurrency</td>
+</tr>
+<tr>
+<td>cold start заважає sync API</td>
+<td>provisioned concurrency на alias</td>
+</tr>
+<tr>
+<td>async-подія зникла після помилок</td>
+<td>немає DLQ чи destination</td>
+</tr>
+<tr>
+<td>потрібен успіх <strong>і</strong> невдача async</td>
+<td>destinations</td>
+</tr>
+<tr>
+<td>SQS обробляє двічі</td>
+<td>visibility timeout менше 6× timeout функції; немає ідемпотентності</td>
+</tr>
+<tr>
+<td>поганий запис зупиняє шард Kinesis</td>
+<td>bisect, max record age, on-failure destination</td>
+</tr>
+<tr>
+<td>функція не читає з SQS</td>
+<td>права в execution role</td>
+</tr>
+<tr>
+<td>EventBridge чи S3 не викликає функцію</td>
+<td>resource-based policy</td>
+</tr>
+<tr>
+<td>cross-account виклик функції</td>
+<td>resource-based policy</td>
+</tr>
+<tr>
+<td>429 від Lambda</td>
+<td>ліміт concurrency</td>
+</tr>
+<tr>
+<td>одна функція з'їла весь ліміт</td>
+<td>reserved concurrency</td>
+</tr>
+<tr>
+<td>502 від API Gateway</td>
+<td>формат proxy-відповіді</td>
+</tr>
+<tr>
+<td>504 від API Gateway</td>
+<td>timeout інтеграції (приблизно 29 с)</td>
+</tr>
+<tr>
+<td>Lambda у VPC без інтернету чи S3</td>
+<td>NAT або VPC endpoint</td>
+</tr>
+<tr>
+<td>секрети з ротацією</td>
+<td>Secrets Manager</td>
+</tr>
+<tr>
+<td>кастомні метрики без API</td>
+<td>EMF</td>
+</tr>
+<tr>
+<td>обробка більше 15 хв</td>
+<td>не Lambda</td>
+</tr>
+<tr>
+<td>оркестрація кількох Lambda</td>
+<td><strong>Step Functions</strong>, а не Lambda з Lambda (платите за очікування)</td>
+</tr>
+</tbody>
+</table>
+<h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>Timeout 3 с за замовчуванням, максимум 15 хв. Пам'ять 128 МБ - 10 ГБ, CPU росте з пам'яттю.</li>
+<li>Sync повторює клієнт. Async: 2 повтори, потім DLQ чи destination. Poll: за правилами джерела.</li>
+<li>DLQ для SQS на чергу. Visibility timeout не менше 6× timeout функції.</li>
+<li>Push-джерела потребують resource-based policy, poll-джерела права в execution role.</li>
+<li>Версії незмінні, alias можна переставити, canary це alias із двома версіями.</li>
+<li>Throttles не входять в Errors. Reserved гарантує і обмежує, provisioned прогріває і платний.</li>
+<li>Layers до 5, у <code>/opt</code>, не для container image. Понад 250 МБ: container image.</li>
+<li>502 це формат відповіді, 504 це timeout інтеграції.</li>
+</ol>
+<h2>Перевірте себе</h2>
+<ol>
+<li>Які фази проходить execution environment?</li>
+<li>Чим cold start відрізняється від warm start? Три способи його зменшити.</li>
+<li>Чому <code>new S3Client()</code> стоїть поза handler?</li>
+<li>Три моделі виклику й по два джерела.</li>
+<li>Скільки разів Lambda повторює async-виклик і що буде без DLQ?</li>
+<li>Чим destinations кращі за DLQ?</li>
+<li>Де налаштовується DLQ для SQS-тригера?</li>
+<li>Що буде зі шардом Kinesis, якщо функція падає на одному записі?</li>
+<li>Чим reserved відрізняється від provisioned concurrency?</li>
+<li>Чим execution role відрізняється від resource-based policy?</li>
+<li>Чим версія відрізняється від alias?</li>
+<li>Де зберігати пароль БД, який треба ротувати?</li>
+<li>Чому Lambda у VPC втрачає доступ до інтернету?</li>
+<li>Чим <code>Errors</code> відрізняється від <code>Throttles</code>?</li>
+<li>Що означає <code>Canary10Percent5Minutes</code> і як працює автовідкат?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>Init (код поза handler, до 10 с), Invoke, Shutdown.</li>
+<li>Cold start це Init плюс завантаження коду, warm пропускає Init. Менший пакет, більше пам'яті, SnapStart чи provisioned concurrency.</li>
+<li>Щоб клієнт і з'єднання створювалися один раз на середовище й перевикористовувалися.</li>
+<li>Sync (API Gateway, ALB), async (S3, SNS, EventBridge), poll (SQS, Kinesis).</li>
+<li>Два повтори, усього три спроби. Без DLQ чи destination подія зникає.</li>
+<li>Фіксують і успіх, і невдачу, ведуть у SQS, SNS, Lambda, EventBridge, додають контекст помилки.</li>
+<li>На самій черзі (redrive policy з <code>maxReceiveCount</code>).</li>
+<li>Шард блокується, батч повторюється, доки не пройде чи не застаріє. Захист: bisect, max record age, on-failure destination.</li>
+<li>Reserved гарантує й обмежує зверху (безкоштовно). Provisioned прогріває середовища (платно, лише на версію чи alias).</li>
+<li>Execution role: що функція може. Resource-based policy: хто може її викликати.</li>
+<li>Версія це незмінний знімок, alias це вказівник, який можна переставити (і зважити між двома версіями).</li>
+<li>Secrets Manager.</li>
+<li>У неї нема публічної IP. Потрібен NAT Gateway (приватна підмережа) чи VPC endpoint.</li>
+<li><code>Errors</code> це помилки функції. <code>Throttles</code> це відмови через concurrency, вони в <code>Errors</code> не входять.</li>
+<li>10% трафіку одразу, решта через 5 хв. Якщо alarm спрацював, CodeDeploy відкочує.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 6-lambda-theory-dva-c02.md.</p>
+
+<nav class="pager"><a href="5-first-lambda-simple.html">← Лекція 5</a><a href="7-sam-simple.html">Лекція 7 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

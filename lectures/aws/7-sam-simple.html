@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 7 (просто): SAM, шаблон і деплой</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; }
+  th { background:#fff; }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; word-break:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 7 (просто): SAM, шаблон і деплой</h1>
+<blockquote>
+<p>Середній рівень: усі правила й числа з повної лекції, але простими словами й без розповіді про наш проєкт, встановлення на Windows та проблеми. Повна: ../7-sam-template-deploy.md. Числа в повній лекції дані з пам'яті, їх варто звірити з документацією AWS. Це тема Deployment (на C03 це 22% іспиту).</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>SAM це надбудова над CloudFormation з короткими типами для serverless і власним CLI.</strong> Один блок <code>Function</code> з <code>Events</code> розгортається в кілька ресурсів: функція, роль, правило, дозвіл. Деплой іде через CloudFormation: change set, потім стек.</p>
+<h2>Крок 1. Словник</h2>
+<table>
+<thead>
+<tr>
+<th>Термін</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SAM</strong></td>
+<td>Serverless Application Model: шаблон плюс CLI</td>
+</tr>
+<tr>
+<td><strong>CloudFormation</strong></td>
+<td>сервіс AWS, що створює ресурси за декларативним шаблоном і веде їх як <strong>стек</strong></td>
+</tr>
+<tr>
+<td><strong>Stack</strong></td>
+<td>група ресурсів, якою керують як цілим</td>
+</tr>
+<tr>
+<td><strong>Change set</strong></td>
+<td>перелік змін до виконання (як <code>terraform plan</code>)</td>
+</tr>
+<tr>
+<td><strong>Transform</strong></td>
+<td>макрос, що розгортає SAM у CloudFormation</td>
+</tr>
+<tr>
+<td><strong>Execution role</strong></td>
+<td>роль, яку функція приймає під час роботи</td>
+</tr>
+<tr>
+<td><strong>Alias</strong></td>
+<td>іменований вказівник на версію функції</td>
+</tr>
+<tr>
+<td><strong>Canary deployment</strong></td>
+<td>поступовий перехід: спершу малий відсоток трафіку</td>
+</tr>
+<tr>
+<td><strong>DLQ</strong></td>
+<td>черга для подій, які не вдалося обробити</td>
+</tr>
+<tr>
+<td><strong>Capabilities</strong></td>
+<td>явна згода на створення IAM-ресурсів</td>
+</tr>
+<tr>
+<td><strong>Outputs</strong></td>
+<td>значення, які стек показує після деплою</td>
+</tr>
+<tr>
+<td><strong>CodeDeploy</strong></td>
+<td>сервіс поступового перемикання трафіку між версіями Lambda</td>
+</tr>
+</tbody>
+</table>
+<h2>Крок 2. Як працює SAM</h2>
+<ul>
+<li><strong>Шаблон</strong> з рядком <code>Transform: AWS::Serverless-2016-10-31</code>. CloudFormation розгортає короткі типи <code>AWS::Serverless::*</code> у звичайні ресурси (<code>AWS::Lambda::Function</code>, <code>AWS::IAM::Role</code>, <code>AWS::Events::Rule</code>, <code>AWS::Lambda::Permission</code>).</li>
+<li><strong>CLI:</strong> <code>sam validate</code>, <code>sam build</code>, <code>sam local invoke</code>, <code>sam deploy</code>, <code>sam sync</code>, <code>sam logs</code>.</li>
+<li>Деплой: створюється <strong>change set</strong>, його виконання створює чи оновлює <strong>стек</strong>. Відкат стеку повертає все до попереднього стану.</li>
+</ul>
+<p>Типи SAM для іспиту: <code>AWS::Serverless::Function</code>, <code>Api</code>, <code>HttpApi</code>, <code>SimpleTable</code> (DynamoDB), <code>LayerVersion</code>, <code>Application</code>, <code>StateMachine</code>, <code>Connector</code>.</p>
+<p>Docker потрібен SAM лише для <code>sam local invoke</code> і <code>sam build --use-container</code>. Для <code>sam validate</code> і <code>sam deploy</code> не потрібен.</p>
+<h2>Крок 3. Шаблон по блоках</h2>
+<h3>Шапка і параметри</h3>
+<ul>
+<li><code>AWSTemplateFormatVersion</code> має єдине допустиме значення <code>2010-09-09</code>.</li>
+<li><code>Transform</code> вмикає SAM.</li>
+<li><code>Parameters</code> значення, що передаються під час деплою (<code>--parameter-overrides</code>).</li>
+</ul>
+<h3>Функція</h3>
+<table>
+<thead>
+<tr>
+<th>Поле</th>
+<th>Зміст</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CodeUri</code></td>
+<td>шлях до коду відносно шаблону (можна вказати готову папку з пакетом)</td>
+</tr>
+<tr>
+<td><code>Handler</code></td>
+<td><code>index.handler</code> (файл <code>index</code>, експорт <code>handler</code>)</td>
+</tr>
+<tr>
+<td><code>Runtime</code></td>
+<td>наприклад <code>nodejs22.x</code></td>
+</tr>
+<tr>
+<td><code>Architectures</code></td>
+<td><code>[arm64]</code>: Graviton дешевший приблизно на 20%; zip мусить відповідати архітектурі</td>
+</tr>
+<tr>
+<td><code>MemorySize</code></td>
+<td>з пам'яттю зростає CPU (повне vCPU приблизно на 1769 МБ)</td>
+</tr>
+<tr>
+<td><code>Timeout</code></td>
+<td>максимум 900 с; для async можна довше, ніж для API Gateway (29 с)</td>
+</tr>
+<tr>
+<td><code>FunctionName</code></td>
+<td>явне ім'я; мінус: CloudFormation не замінить ресурс із фіксованим іменем без зміни імені</td>
+</tr>
+</tbody>
+</table>
+<p>Стандартний <code>sam build</code> не ставить бінарники (як sharp) під іншу архітектуру; <code>sam build --use-container</code> збирає в образі Lambda (для іншої архітектури це емуляція).</p>
+<h3>Змінні середовища</h3>
+<p>Блок <code>Environment.Variables</code>. Значення лапкують, щоб YAML не перетворив їх на числа. Сума обмежена <strong>4 КБ</strong>, секрети сюди не кладуть.</p>
+<h3>Права функції</h3>
+<p><code>Policies</code> у функції. SAM автоматично створює IAM-роль із довірою до <code>lambda.amazonaws.com</code> і політикою <code>AWSLambdaBasicExecutionRole</code>. Додавайте лише потрібне (читання з одного префікса, запис в інший): розділення префіксів ще й захищає від нескінченного циклу. <code>!Sub</code> підставляє значення параметра, <code>${AWS::Partition}</code> дає <code>aws</code> (чи <code>aws-cn</code>, <code>aws-us-gov</code>).</p>
+<p>Внутрішні функції CloudFormation, які питають: <code>!Ref</code>, <code>!Sub</code>, <code>!GetAtt</code>, <code>!Join</code>, <code>!If</code>, <code>Fn::ImportValue</code>.</p>
+<h3>Тригер: правило EventBridge</h3>
+<p><code>Events</code> з типом <code>EventBridgeRule</code> і <code>Pattern</code> (<code>source</code>, <code>detail-type</code>, <code>detail</code>, <code>prefix</code>). SAM створює правило <strong>і</strong> resource-based policy на функції (<code>AWS::Lambda::Permission</code>) для <code>events.amazonaws.com</code>. У Terraform без явного <code>aws_lambda_permission</code> правило не змогло б викликати функцію. Подія викликає функцію <strong>асинхронно</strong>.</p>
+<p>Чому EventBridge, а не пряма S3 notification: конфігурація сповіщень бакета одна на всіх, друга підписка перезаписала б першу. З EventBridge бакет вмикає прапорець один раз, а кожна функція додає власне правило.</p>
+<h3>Повтори і DLQ</h3>
+<pre><code>EventInvokeConfig:
+  MaximumRetryAttempts: 2
+  MaximumEventAgeInSeconds: 3600
+DeadLetterQueue:
+  Type: SQS
+  TargetArn: !GetAtt ThumbnailsDlq.Arn
+</code></pre>
+<ul>
+<li><code>MaximumRetryAttempts</code> допустимо 0-2, за замовчуванням 2: усього 3 спроби з паузами приблизно 1 і 2 хв.</li>
+<li><code>MaximumEventAgeInSeconds</code> від 60 с до 6 год.</li>
+<li><code>DeadLetterQueue</code> SAM сам додає до ролі <code>sqs:SendMessage</code>. Без DLQ чи destination невдала подія зникає. On-failure destination новіший і дає причину збою.</li>
+</ul>
+<h3>Логи</h3>
+<p>Без власного ресурсу <code>AWS::Logs::LogGroup</code> Lambda створює групу логів сама з retention «ніколи не видаляти». Описуйте групу в шаблоні (<code>RetentionInDays</code>) і прив'язуйте через <code>LoggingConfig.LogGroup</code>. При видаленні стеку логи теж прибираються.</p>
+<h3>Версії, alias і canary</h3>
+<ul>
+<li><strong><code>AutoPublishAlias: live</code>:</strong> при кожній зміні коду SAM публікує нову <strong>версію</strong> (незмінний знімок) і переставляє alias на неї. Події викликають alias.</li>
+<li><strong><code>DeploymentPreference</code></strong> робить зсув трафіку поступовим через <strong>CodeDeploy</strong>. Типи: <code>Canary10Percent5Minutes</code> (10% на 5 хв, далі 100%), <code>Linear10PercentEvery1Minute</code>, <code>AllAtOnce</code>.</li>
+<li><strong><code>Alarms</code>:</strong> якщо CloudWatch alarm спрацював під час розгортання, CodeDeploy автоматично відкочує alias.</li>
+<li><strong><code>Hooks</code>:</strong> <code>PreTraffic</code> і <code>PostTraffic</code>, функції перевірки до й після зсуву.</li>
+</ul>
+<h3>Alarm на помилки</h3>
+<p>Ім'я функції в alarm задають <strong>рядком</strong>, а не <code>!Ref</code>: функція посилається на alarm (в <code>DeploymentPreference</code>), alarm на функцію, і <code>!Ref</code> створив би циклічну залежність. <code>TreatMissingData: notBreaching</code>.</p>
+<h3>Outputs</h3>
+<p>Значення, які стек показує після деплою. Їх можна експортувати (<code>Export</code>) і використовувати в інших стеках через <code>Fn::ImportValue</code>.</p>
+<h2>Крок 4. CloudFront в SAM: де трапляється на іспиті</h2>
+<p><strong>1. Edge-optimized API Gateway.</strong> REST API (<code>AWS::Serverless::Api</code>) за замовчуванням має тип кінцевої точки <strong>EDGE</strong>: запити йдуть на найближчу точку CloudFront, керовану сервісом (її нема в вашій консолі CloudFront). Значення <code>EndpointConfiguration.Type</code>: <code>EDGE</code>, <code>REGIONAL</code>, <code>PRIVATE</code>. Для розкиданих клієнтів документація радить <code>REGIONAL</code> разом із <strong>власним</strong> CloudFront. Ознака EDGE: заголовки <code>Via ... CloudFront</code> і <code>X-Amz-Cf-Id</code>. HTTP API окремого edge-режиму не має, лише Regional.</p>
+<p><strong>2. Власний розподіл.</strong> <code>AWS::CloudFront::Distribution</code> пишуть поруч зі SAM-ресурсами. Origin це Regional API або S3 (приватний бакет з <strong>OAC</strong>). Сертифікат ACM для CloudFront мусить бути в <strong>us-east-1</strong>.</p>
+<p><strong>3. Lambda@Edge</strong> (функція на краю):</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Lambda@Edge</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Регіон</td>
+<td>функція лише в <strong>us-east-1</strong></td>
+</tr>
+<tr>
+<td>Версія</td>
+<td>лише <strong>пронумерована версія</strong>, не <code>$LATEST</code> і не alias</td>
+</tr>
+<tr>
+<td>Не підтримуються</td>
+<td>змінні середовища, VPC, DLQ, layers, X-Ray, provisioned concurrency, контейнерні образи, arm64</td>
+</tr>
+<tr>
+<td>Ephemeral storage</td>
+<td>не більше 512 МБ</td>
+</tr>
+<tr>
+<td>Runtime</td>
+<td>Node.js і Python</td>
+</tr>
+<tr>
+<td>Таймаут</td>
+<td>30 с</td>
+</tr>
+<tr>
+<td>Розмір архіву</td>
+<td>50 МБ стиснутого</td>
+</tr>
+<tr>
+<td>Розмір відповіді, згенерованої функцією</td>
+<td>40 КБ (viewer-події), 1 МБ (origin-події)</td>
+</tr>
+<tr>
+<td>Конкурентність</td>
+<td>1000 на регіон, спільна з усіма Lambda</td>
+</tr>
+</tbody>
+</table>
+<p>У SAM з <code>AutoPublishAlias</code> доступний атрибут <code>!Ref MyFunction.Version</code> (ARN версії), його підставляють в асоціацію CloudFront. Роль функції має довіряти і <code>lambda.amazonaws.com</code>, і <code>edgelambda.amazonaws.com</code>. Через us-east-1 функцію зазвичай виносять в окремий стек.</p>
+<p><strong>4. CloudFront Functions:</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>CloudFront Functions</th>
+<th>Lambda@Edge</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Складність</td>
+<td>прості перетворення заголовків, URL, перенаправлення</td>
+<td>складніша логіка, мережеві виклики</td>
+</tr>
+<tr>
+<td>Розмір функції</td>
+<td><strong>10 КБ</strong></td>
+<td>50 МБ</td>
+</tr>
+<tr>
+<td>Пам'ять</td>
+<td><strong>2 МБ</strong></td>
+<td>як у Lambda</td>
+</tr>
+<tr>
+<td>Ліміт на акаунт</td>
+<td>100 функцій</td>
+<td>100 на розподіл</td>
+</tr>
+<tr>
+<td>Мова</td>
+<td>JavaScript</td>
+<td>Node.js, Python</td>
+</tr>
+<tr>
+<td>Ціна</td>
+<td>дешевше</td>
+<td>дорожче</td>
+</tr>
+</tbody>
+</table>
+<p>Мнемоніка: <strong>легка, масова, дешева</strong> обробка на краю: CloudFront Functions. <strong>Важча або з мережею:</strong> Lambda@Edge.</p>
+<h2>Крок 5. Перевірка без деплою</h2>
+<ul>
+<li><code>sam validate --lint</code> перевіряє синтаксис і запускає cfn-lint (ловить неіснуючі властивості й неправильні типи).</li>
+<li>Червоний <code>NativeCommandError</code> після <code>sam validate</code> у PowerShell це повідомлення про телеметрію в stderr, а не помилка. Вимикається <code>SAM_CLI_TELEMETRY=0</code>.</li>
+<li>Ліміти Lambda для zip: 50 МБ стиснутого, 250 МБ розпакованого.</li>
+</ul>
+<p><strong>Аналог <code>terraform plan</code>: change set.</strong> <code>sam deploy --no-execute-changeset</code> створює change set і виводить таблицю змін (<code>Add</code>, <code>Modify</code>, <code>Remove</code>), але не виконує її. Слід в акаунті лишається: zip у S3 і порожній стек у статусі <code>REVIEW_IN_PROGRESS</code>. <code>sam deploy</code> за замовчуванням сам створює change set і питає підтвердження (вимикається <code>--no-confirm-changeset</code>).</p>
+<h2>Крок 6. Як деплоїти</h2>
+<p><code>sam deploy --stack-name ... --region ... --resolve-s3 --capabilities CAPABILITY_IAM</code></p>
+<ul>
+<li><code>--stack-name</code> назва стеку.</li>
+<li><code>--resolve-s3</code> SAM сам створює службовий бакет для артефактів (стек <code>aws-sam-cli-managed-default</code>). У CI краще <code>--s3-bucket</code>, тоді ролі не потрібні права на створення бакетів і політик.</li>
+<li><code>--capabilities CAPABILITY_IAM</code> явна згода на створення IAM-ролей. Для іменованих ролей потрібен <code>CAPABILITY_NAMED_IAM</code>.</li>
+<li><code>--guided</code> питає параметри й зберігає їх у <code>samconfig.toml</code>.</li>
+<li>Регіон вказуйте явно (з профілю він може бути іншим), інакше стек потрапить не туди, і правило EventBridge не побачить подій бакета.</li>
+<li>Порядок: спершу платформа (прапорець EventBridge на бакеті), потім стек.</li>
+</ul>
+<h2>Крок 7. CI/CD: GitHub Actions і OIDC</h2>
+<table>
+<thead>
+<tr>
+<th>Файл</th>
+<th>Коли</th>
+<th>Доступ до AWS</th>
+<th>Що робить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ci.yml</code></td>
+<td>PR і push у <code>main</code></td>
+<td>нема</td>
+<td><code>npm ci</code>, typecheck, тести, <code>package</code>, <code>sam validate --lint</code></td>
+</tr>
+<tr>
+<td><code>deploy.yml</code></td>
+<td>лише вручну (<code>workflow_dispatch</code>), лише з <code>main</code></td>
+<td>OIDC-роль</td>
+<td>тести, <code>package</code>, <code>sam deploy</code></td>
+</tr>
+</tbody>
+</table>
+<p>Розділення навмисне: код із PR не торкається акаунта. <code>sam validate --lint</code> працює офлайн. Параметр <code>dry_run</code> додає <code>--no-execute-changeset</code>.</p>
+<p><strong>Як workflow потрапляє в AWS без ключів:</strong></p>
+<ol>
+<li>Job має <code>permissions: id-token: write</code>, GitHub видає йому підписаний JWT (OIDC-токен) з <code>aud</code> і <code>sub</code>.</li>
+<li><code>aws-actions/configure-aws-credentials</code> викликає STS <strong><code>AssumeRoleWithWebIdentity</code></strong> з токеном і ARN ролі.</li>
+<li>STS перевіряє підпис через <strong>OIDC-провайдера</strong> <code>token.actions.githubusercontent.com</code>, зареєстрованого в IAM, і умови trust policy.</li>
+<li>Job отримує тимчасові ключі.</li>
+</ol>
+<p><strong>Trust policy</strong> пускає лише <code>aud = sts.amazonaws.com</code> і <code>sub = repo:&lt;організація&gt;/&lt;репозиторій&gt;:ref:refs/heads/main</code>. <strong>Без умови на <code>sub</code> будь-який репозиторій GitHub міг би отримати цю роль</strong> (класична помилка).</p>
+<p><strong>Права ролі CI</strong> (найменші привілеї; CloudFormation діє від імені користувача, тому потрібні права і на стек, і на кожен створюваний ресурс):</p>
+<table>
+<thead>
+<tr>
+<th>Блок</th>
+<th>Чому потрібен</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CloudFormation на стек</td>
+<td>створити й виконати change set</td>
+</tr>
+<tr>
+<td><code>cloudformation:CreateChangeSet</code> на <code>transform/Serverless-2016-10-31</code></td>
+<td>виконання макросу SAM</td>
+</tr>
+<tr>
+<td>S3 на бакет артефактів</td>
+<td><code>sam deploy</code> завантажує туди пакет</td>
+</tr>
+<tr>
+<td>Lambda</td>
+<td>функція, версії, alias, async-конфіг</td>
+</tr>
+<tr>
+<td>IAM на ролі стеку</td>
+<td>SAM створює execution-роль і роль CodeDeploy</td>
+</tr>
+<tr>
+<td>CodeDeploy</td>
+<td><code>DeploymentPreference</code> створює application і deployment group</td>
+</tr>
+<tr>
+<td>SQS, CloudWatch Logs, alarm, EventBridge</td>
+<td>DLQ, лог-група, alarm, правило</td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>iam:PassRole</code>:</strong> щоб передати роль сервісу (Lambda, CodeDeploy), потрібен <code>iam:PassRole</code> на цю роль. Звужуйте до конкретних ролей: <code>Resource: &quot;*&quot;</code> дозволяє передати навіть адмінську роль, це шлях до ескалації привілеїв. Більшість дій CodeDeploy не підтримує зручне обмеження за ресурсом, тому там <code>&quot;Resource&quot;: &quot;*&quot;</code>.</p>
+<p><strong>Що створити в AWS перед першим запуском:</strong> IAM OIDC-провайдер <code>token.actions.githubusercontent.com</code> (audience <code>sts.amazonaws.com</code>), роль CI з trust і permission policy, бакет артефактів, змінні репозиторію (ARN ролі, бакет).</p>
+<p><strong>Що відбувається на сервері під час деплою:</strong></p>
+<ol>
+<li><code>sam deploy</code> пакує <code>CodeUri</code>, завантажує zip у S3, створює change set.</li>
+<li>CloudFormation застосовує зміни.</li>
+<li><code>AutoPublishAlias</code> публікує нову версію й переставляє alias.</li>
+<li><code>DeploymentPreference</code> зсуває трафік (10% на 5 хв, стежить за alarm, потім решта). Alarm спрацював: автовідкат alias.</li>
+<li>Якщо оновлення стеку провалилось, CloudFormation відкочує стек до попереднього стану.</li>
+</ol>
+<h2>Крок 8. Тригер і alias у консолі</h2>
+<ul>
+<li>На сторінці функції тригерів нема: вона показує <code>$LATEST</code>. SAM через <code>AutoPublishAlias</code> вішає правило EventBridge і дозвіл <code>lambda:InvokeFunction</code> на <strong>alias</strong>, а не на функцію. Це навмисно: тригер на <code>$LATEST</code> обходив би canary.</li>
+<li><code>aws lambda get-policy</code> без <code>--qualifier</code> дає <code>ResourceNotFoundException</code>, з <code>--qualifier live</code> покаже принципал <code>events.amazonaws.com</code> і ресурс alias.</li>
+<li><strong>Режим виклику задає той, хто викликає:</strong> EventBridge, S3, SNS, <code>--invocation-type Event</code> це async; API Gateway, SDK, <code>RequestResponse</code> це sync; SQS і Kinesis це event source mapping. Розділ Asynchronous invocation і <code>EventInvokeConfig</code> діють лише для async.</li>
+<li><code>Destinations</code> порожній, якщо помилки ловить DLQ.</li>
+</ul>
+<h2>Крок 9. Execution role проти resource-based policy</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Execution role</th>
+<th>Resource-based policy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Питання</td>
+<td>що <strong>функція</strong> може робити</td>
+<td>хто може <strong>викликати</strong> функцію</td>
+</tr>
+<tr>
+<td>Де в консолі</td>
+<td>Configuration → Permissions → Execution role</td>
+<td>Configuration → Permissions → Resource-based policy statements (на alias)</td>
+</tr>
+<tr>
+<td>Створює SAM із</td>
+<td><code>Policies:</code> та <code>DeadLetterQueue</code></td>
+<td><code>Events:</code> (тип <code>EventBridgeRule</code>)</td>
+</tr>
+</tbody>
+</table>
+<p>Типова роль має три політики: <code>AWSLambdaBasicExecutionRole</code> (керована AWS, логи), вбудована з ваших <code>Policies:</code>, вбудована <code>DeadLetterQueuePolicy</code> (<code>sqs:SendMessage</code> на DLQ), яку SAM додав сам.</p>
+<h2>Що запам'ятати на іспит</h2>
+<ol>
+<li><code>Transform: AWS::Serverless-2016-10-31</code> розгортає SAM у CloudFormation. Деплой іде через change set і стек.</li>
+<li><code>AutoPublishAlias</code> створює версію й alias. <code>DeploymentPreference</code> зсуває трафік через CodeDeploy: Canary, Linear, AllAtOnce. Alarm дає автовідкат. <code>Hooks</code>: <code>PreTraffic</code>, <code>PostTraffic</code>.</li>
+<li><code>CAPABILITY_IAM</code> для автоімен, <code>CAPABILITY_NAMED_IAM</code> для іменованих ролей.</li>
+<li>Change set дозволяє переглянути зміни перед виконанням (<code>--no-execute-changeset</code>).</li>
+<li>CI без ключів: OIDC, <code>AssumeRoleWithWebIdentity</code>, trust policy з обмеженням <code>sub</code>.</li>
+<li><code>iam:PassRole</code> з <code>Resource: &quot;*&quot;</code> зазвичай неправильна відповідь.</li>
+<li>REST API типово EDGE (вбудований CloudFront). Lambda@Edge: us-east-1, лише версія, без env і VPC. CloudFront Functions: 10 КБ, JS, дешево.</li>
+<li>Тригер EventBridge висить на alias, а не на <code>$LATEST</code>.</li>
+<li>Нативні залежності потребують збірки під архітектуру функції.</li>
+</ol>
+<h2>Перевірте себе</h2>
+<ol>
+<li>Що робить рядок <code>Transform: AWS::Serverless-2016-10-31</code>?</li>
+<li>Які ресурси CloudFormation SAM створює з <code>AWS::Serverless::Function</code> з <code>Events: EventBridgeRule</code>?</li>
+<li>Скільки спроб має async-виклик за замовчуванням і куди потрапляє подія після всіх невдач?</li>
+<li>Чим <code>AutoPublishAlias</code> відрізняється від <code>DeploymentPreference</code>?</li>
+<li>Чому ім'я функції в alarm задають рядком, а не <code>!Ref</code>?</li>
+<li>Чому trust policy CI-ролі обов'язково обмежує <code>sub</code>?</li>
+<li>Який виклик STS використовує GitHub Actions без access key?</li>
+<li>Чим Canary відрізняється від Linear? Що відкочує деплой автоматично?</li>
+<li>Навіщо <code>iam:PassRole</code> і чому його звужують?</li>
+<li>Який тип кінцевої точки REST API типовий і де живе CloudFront?</li>
+<li>Чому Lambda@Edge не можна підключити до alias?</li>
+<li>Коли CloudFront Functions, а коли Lambda@Edge?</li>
+<li>Яка команда перевіряє шаблон без деплою і яка показує зміни без виконання?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>Вмикає макрос SAM: CloudFormation розгортає <code>AWS::Serverless::*</code> у звичайні ресурси.</li>
+<li>Lambda-функція, IAM-роль, правило EventBridge, <code>AWS::Lambda::Permission</code> (і за потреби alias, версія, DLQ-політика).</li>
+<li>3 спроби (1 плюс 2 повтори). Далі DLQ чи on-failure destination, інакше подія зникає.</li>
+<li><code>AutoPublishAlias</code> публікує версію й веде alias. <code>DeploymentPreference</code> робить зсув трафіку поступовим через CodeDeploy.</li>
+<li>Функція посилається на alarm, alarm на функцію: <code>!Ref</code> створив би циклічну залежність.</li>
+<li>Без цього будь-який репозиторій GitHub міг би отримати роль.</li>
+<li><code>AssumeRoleWithWebIdentity</code>.</li>
+<li>Canary: малий відсоток, потім решта. Linear: рівні кроки через інтервал. Автовідкат: CloudWatch alarm, на який посилається <code>Alarms</code>.</li>
+<li>Щоб передати роль сервісу (Lambda, CodeDeploy). Звужують, щоб не можна було передати адмінську роль.</li>
+<li>EDGE. CloudFront керований сервісом. Для власного: <code>REGIONAL</code> плюс власний CloudFront.</li>
+<li>Потрібна пронумерована версія, а не alias чи <code>$LATEST</code>.</li>
+<li>CloudFront Functions: прості перетворення заголовків і URL (10 КБ, JS, дешево). Lambda@Edge: важча логіка чи мережеві виклики.</li>
+<li><code>sam validate --lint</code> і <code>sam deploy --no-execute-changeset</code>.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 7-sam-template-deploy.md.</p>
+
+<nav class="pager"><a href="6-lambda-theory-simple.html">← Лекція 6</a><a href="8-ci-secrets-oidc-simple.html">Лекція 8 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

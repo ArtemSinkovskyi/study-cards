@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 11 (просто): DynamoDB, основи</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; }
+  th { background:#fff; }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; word-break:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 11 (просто): DynamoDB, основи</h1>
+<blockquote>
+<p>Середній рівень: усі правила й числа з повної лекції, але простими словами й без розповіді про наш проєкт. Повна: ../11-dynamodb.md.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>DynamoDB це база «ключ-значення»: ви наперед вирішуєте, які питання ставитимете, і під них обираєте ключі.</strong> Якщо питання не лягає на ключ, лишається повільний Scan.</p>
+<p>Це керована база без серверів: AWS сам масштабує її й зберігає копії.</p>
+<h2>Крок 1. Основні слова</h2>
+<table>
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>table</td>
+<td>таблиця</td>
+</tr>
+<tr>
+<td>item</td>
+<td>запис (як рядок у Postgres), до <strong>400 КБ</strong></td>
+</tr>
+<tr>
+<td>attribute</td>
+<td>поле запису; в різних записів можуть бути різні поля, обов'язковий лише ключ</td>
+</tr>
+<tr>
+<td>partition key (PK)</td>
+<td>ключ, за яким запис потрапляє в певний розділ (ще звуть hash key)</td>
+</tr>
+<tr>
+<td>sort key (SK)</td>
+<td>другий ключ, що впорядковує записи з однаковим PK (range key)</td>
+</tr>
+<tr>
+<td>partition</td>
+<td>фізичний розділ таблиці</td>
+</tr>
+<tr>
+<td>hot partition</td>
+<td>«гарячий» розділ: на нього йде забагато запитів</td>
+</tr>
+</tbody>
+</table>
+<p>У DynamoDB нема <code>JOIN</code> і довільних <code>WHERE</code>.</p>
+<h2>Крок 2. Ключ: найважливіше рішення</h2>
+<p>Первинний ключ буває двох видів:</p>
+<table>
+<thead>
+<tr>
+<th>Вид</th>
+<th>З чого складається</th>
+<th>Приклад</th>
+<th>Коли</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Простий</td>
+<td>лише PK</td>
+<td><code>eventId</code></td>
+<td>шукаємо один запис за точним id</td>
+</tr>
+<tr>
+<td>Складений</td>
+<td>PK + SK</td>
+<td><code>userId</code> + <code>orderDate</code></td>
+<td>потрібні «всі записи користувача за період»</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Правило для PK: багато різних значень.</strong> DynamoDB розкладає записи по розділах за значенням PK. Якщо значень мало, усе піде в кілька розділів.</p>
+<ul>
+<li>Добре: <code>PK = userId</code> (мільйони значень, навантаження рівномірне).</li>
+<li>Погано: <code>PK = status</code> («active»/«blocked»): усе в два розділи, виникає hot partition.</li>
+</ul>
+<h2>Крок 3. DynamoDB проти Postgres</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Postgres</th>
+<th>DynamoDB</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Запити</td>
+<td>SQL: будь-які <code>WHERE</code>, <code>JOIN</code></td>
+<td>лише за ключем або індексом</td>
+</tr>
+<tr>
+<td>Як проєктують</td>
+<td>спершу дані, потім запити</td>
+<td><strong>спершу запити</strong>, потім під них ключі</td>
+</tr>
+<tr>
+<td>Масштаб</td>
+<td>більший сервер</td>
+<td>більше розділів, майже без меж</td>
+</tr>
+<tr>
+<td>Оплата</td>
+<td>за сервер</td>
+<td>за запити або за зарезервовану потужність</td>
+</tr>
+</tbody>
+</table>
+<h2>Крок 4. Три способи читати</h2>
+<table>
+<thead>
+<tr>
+<th>Операція</th>
+<th>Що робить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GetItem</code></td>
+<td>один запис за <strong>повним</strong> ключем</td>
+</tr>
+<tr>
+<td><code>Query</code></td>
+<td>записи з <strong>одним</strong> partition key (можна з умовою на sort key)</td>
+</tr>
+<tr>
+<td><code>Scan</code></td>
+<td><strong>усю</strong> таблицю</td>
+</tr>
+</tbody>
+</table>
+<p>Приклад <code>Query</code> для таблиці замовлень (PK <code>userId</code>, SK <code>orderDate</code>): <code>userId = &quot;u42&quot;</code> (обов'язково, лише <code>=</code>) і за бажанням <code>orderDate BETWEEN ...</code>.</p>
+<p><code>Scan</code> доречний лише для разових експортів і маленьких таблиць.</p>
+<h3>Пастка 1: фільтр не економить</h3>
+<p><code>FilterExpression</code> застосовується <strong>після</strong> читання. DynamoDB спершу читає все, що підходить під ключ, потім відкидає зайве, а платите за все прочитане. Якщо часто потрібен фільтр за полем, потрібен <strong>індекс</strong> (лекція 12), а не фільтр.</p>
+<h3>Пастка 2: сторінки по 1 МБ</h3>
+<p>Один <code>Query</code> повертає не більше <strong>1 МБ</strong>. Якщо даних більше, у відповіді є <code>LastEvaluatedKey</code>. Його передають як <code>ExclusiveStartKey</code> у наступний запит. Кінець, коли <code>LastEvaluatedKey</code> нема.</p>
+<p>З фільтром сторінка може бути навіть порожньою, але з <code>LastEvaluatedKey</code>, бо ліміт 1 МБ рахується <strong>до</strong> фільтра. AWS CLI гортає сторінки сам, а в своєму коді (SDK) про це треба пам'ятати.</p>
+<h2>Крок 5. Консистентність: два режими читання</h2>
+<p>Коли запис отримав відповідь <code>200</code>, він уже надійно збережений. Але копій кілька, і читання може потрапити на копію, яка ще не оновилась.</p>
+<table>
+<thead>
+<tr>
+<th>Режим</th>
+<th>Що гарантує</th>
+<th>Ціна</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Eventually consistent (за замовчуванням)</td>
+<td>можна отримати трохи застаріле, за мить буде свіже</td>
+<td>1x</td>
+</tr>
+<tr>
+<td>Strongly consistent (<code>ConsistentRead: true</code>)</td>
+<td>завжди останній успішний запис</td>
+<td>2x</td>
+</tr>
+</tbody>
+</table>
+<p>Обмеження: strongly consistent читання є лише в <strong>таблиці та LSI</strong>. <strong>GSI і DynamoDB Streams завжди eventually consistent.</strong></p>
+<p>Чому не можна «прочитати, потім записати» для ідемпотентності: два повтори майже одночасно можуть обидва прочитати «ще не було» й обидва виконати роботу. Правильно використати <strong>умовний запис</strong> (лекція 12).</p>
+<h2>Крок 6. Рахуємо RCU і WCU (рецепт)</h2>
+<p>Потрібно лише для режиму <strong>provisioned</strong>, де ви наперед кажете, скільки читань і записів за секунду таблиця має витримувати. В режимі on-demand рахувати не треба.</p>
+<p>Дві цифри, які треба пам'ятати:</p>
+<ul>
+<li><strong>1 RCU</strong> = 1 читання за секунду, запис до <strong>4 КБ</strong>, strongly consistent (або 2 eventually consistent читання).</li>
+<li><strong>1 WCU</strong> = 1 запис за секунду, запис до <strong>1 КБ</strong>.</li>
+</ul>
+<h3>Рецепт для читання (3 кроки)</h3>
+<ol>
+<li>Розмір запису ÷ 4 КБ, <strong>округлити вгору</strong>: стільки одиниць на одне читання.</li>
+<li>Помножити на кількість читань за секунду.</li>
+<li>Якщо eventually consistent, поділити на 2.</li>
+</ol>
+<p><strong>Приклад 1.</strong> 80 читань/с, запис 3 КБ, strongly. Крок 1: 3 ÷ 4 = 0,75, вгору 1. Крок 2: 1 × 80 = 80. Крок 3: strongly, не ділимо. Відповідь <strong>80 RCU</strong>.</p>
+<p><strong>Приклад 2.</strong> 10 читань/с, запис 6 КБ, strongly. Крок 1: 6 ÷ 4 = 1,5, вгору 2. Крок 2: 2 × 10 = 20. Відповідь <strong>20 RCU</strong>.</p>
+<p><strong>Приклад 3.</strong> Те саме, але eventually. Кроки 1-2 дають 20, крок 3: 20 ÷ 2 = <strong>10 RCU</strong>.</p>
+<h3>Рецепт для запису (2 кроки)</h3>
+<ol>
+<li>Розмір запису ÷ 1 КБ, <strong>округлити вгору</strong>.</li>
+<li>Помножити на кількість записів за секунду.</li>
+</ol>
+<p><strong>Приклад 4.</strong> 100 записів/с, запис 512 байт. Крок 1: 0,5 КБ ÷ 1 = 0,5, вгору 1. Крок 2: 1 × 100 = <strong>100 WCU</strong>.</p>
+<h3>Спробуйте самі</h3>
+<p>Запис 3 КБ, 100 eventually consistent читань за секунду.</p>
+<details>
+<summary>Відповідь</summary>
+<p>Крок 1: 3 ÷ 4 = 0,75, вгору 1. Крок 2: 1 × 100 = 100. Крок 3: eventually, 100 ÷ 2 = <strong>50 RCU</strong>.</p>
+</details>
+<h2>Крок 7. Ще про provisioned</h2>
+<ul>
+<li>Платите за <strong>зарезервовану</strong> потужність щогодини, навіть якщо не використали.</li>
+<li><strong>Auto scaling</strong> сам підкручує RCU/WCU. AWS радить ціль <strong>70%</strong> використання.</li>
+<li>Перемкнути provisioned на on-demand можна до <strong>4 разів за 24 години</strong>, назад будь-коли.</li>
+<li>Типові квоти: 40 000 RCU і 40 000 WCU на таблицю, 80 000 на акаунт для provisioned. Піднімаються через Service Quotas.</li>
+</ul>
+<h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>Спершу запити, потім ключі. PK має мати багато різних значень.</li>
+<li><code>GetItem</code> за повним ключем, <code>Query</code> за одним PK, <code>Scan</code> усю таблицю.</li>
+<li><code>FilterExpression</code> застосовується після читання: за нього теж платите.</li>
+<li>Сторінки по 1 МБ, <code>LastEvaluatedKey</code> і <code>ExclusiveStartKey</code>.</li>
+<li>Strongly consistent коштує вдвічі більше й не працює на GSI та Streams.</li>
+<li>1 RCU це 4 КБ strongly, 1 WCU це 1 КБ. Завжди округлюйте вгору.</li>
+</ol>
+<h2>Перевірте себе</h2>
+<ol>
+<li>Чому <code>PK = status</code> погана ідея?</li>
+<li>Чим <code>Query</code> відрізняється від <code>Scan</code>?</li>
+<li>Чи економить <code>FilterExpression</code> вартість читання?</li>
+<li>Як отримати наступну сторінку результатів?</li>
+<li>Скільки RCU: запис 5 КБ, 20 читань/с, eventually consistent?</li>
+<li>Скільки WCU: запис 2,5 КБ, 10 записів/с?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>Мало різних значень: усе піде в кілька розділів (hot partition).</li>
+<li><code>Query</code> читає записи одного PK, <code>Scan</code> усю таблицю.</li>
+<li>Ні, фільтр застосовується після читання.</li>
+<li>Передати <code>LastEvaluatedKey</code> як <code>ExclusiveStartKey</code>.</li>
+<li>5 ÷ 4 = 1,25, вгору 2. 2 × 20 = 40. Eventually: 40 ÷ 2 = <strong>20 RCU</strong>.</li>
+<li>2,5 ÷ 1 = 2,5, вгору 3. 3 × 10 = <strong>30 WCU</strong>.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 11-dynamodb.md.</p>
+
+<nav class="pager"><a href="10-sqs-sns-simple.html">← Лекція 10</a><a href="12-dynamodb-indexes-simple.html">Лекція 12 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 20 (просто): потоки даних і Step Functions</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; }
+  th { background:#fff; }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; word-break:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 20 (просто): потоки даних і Step Functions</h1>
+<blockquote>
+<p>Середній рівень: усі правила з повної лекції, але простими словами й без розповіді про наш проєкт. Повна: ../20-streaming-step-functions.md. Факти, які в повній лекції «з пам'яті», тут із позначкою <em>(не звірено)</em>. Exam Guide не вимагає будувати ETL, лише розуміти, що обрати.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>Kinesis це річка, з якої п'ють багато хто і яка пам'ятає останні години чи дні. SQS це черга в касу: купив і пішов. Firehose це труба в басейн.</strong> Step Functions веде багатокроковий процес як машину станів.</p>
+<p>Навички: 1.1.1, 1.1.3, 1.1.6 (потоки), 1.1.8.</p>
+<h2>Крок 1. Словник</h2>
+<table>
+<thead>
+<tr>
+<th>Термін</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Kinesis Data Streams</strong></td>
+<td>потік записів у реальному часі, як Kafka</td>
+</tr>
+<tr>
+<td><strong>Amazon Data Firehose</strong></td>
+<td>доставка потоку в сховище без коду</td>
+</tr>
+<tr>
+<td><strong>Step Functions</strong></td>
+<td>оркестратор: процес як машина станів</td>
+</tr>
+<tr>
+<td><strong>Athena</strong></td>
+<td>SQL-запити по файлах у S3</td>
+</tr>
+<tr>
+<td>shard</td>
+<td>одиниця потужності Kinesis (як партиція Kafka)</td>
+</tr>
+<tr>
+<td>partition key</td>
+<td>визначає шард, дає порядок</td>
+</tr>
+<tr>
+<td>sequence number</td>
+<td>номер запису в шарді</td>
+</tr>
+<tr>
+<td>enhanced fan-out</td>
+<td>окремий канал читання</td>
+</tr>
+<tr>
+<td>ASL</td>
+<td>Amazon States Language (JSON-опис станів)</td>
+</tr>
+<tr>
+<td>saga</td>
+<td>ланцюг кроків із компенсаціями</td>
+</tr>
+</tbody>
+</table>
+<h2>Крок 2. Що обрати: головна таблиця</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>SQS</strong></th>
+<th><strong>SNS</strong></th>
+<th><strong>EventBridge</strong></th>
+<th><strong>Kinesis</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Модель</td>
+<td>черга</td>
+<td>pub/sub</td>
+<td>шина подій</td>
+<td>потік</td>
+</tr>
+<tr>
+<td>Хто читає</td>
+<td>один споживач на повідомлення</td>
+<td>усі підписники</td>
+<td>правила</td>
+<td>багато незалежних читачів</td>
+</tr>
+<tr>
+<td>Зберігання</td>
+<td>до 14 днів, до видалення</td>
+<td>ні</td>
+<td>архів (опція)</td>
+<td>24 год - 365 днів, <strong>повторне читання</strong></td>
+</tr>
+<tr>
+<td>Порядок</td>
+<td>FIFO</td>
+<td>FIFO</td>
+<td>немає</td>
+<td>у межах шарда</td>
+</tr>
+<tr>
+<td>Типово</td>
+<td>розвантажити сервіс</td>
+<td>сповістити всіх</td>
+<td>маршрутизувати події</td>
+<td>телеметрія, логи</td>
+</tr>
+</tbody>
+</table>
+<p>Правило: <strong>повторне читання, порядок, кілька споживачів, багато даних означає Kinesis.</strong> Це ще й про зв'язність (навичка 1.1.1): чим менше сервіси знають один про одного, тим слабша зв'язність.</p>
+<h2>Крок 3. Kinesis Data Streams</h2>
+<table>
+<thead>
+<tr>
+<th>Параметр</th>
+<th>Значення</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Запис на шард</td>
+<td><strong>1 МБ/с або 1000 записів/с</strong></td>
+</tr>
+<tr>
+<td>Читання на шард</td>
+<td><strong>2 МБ/с</strong></td>
+</tr>
+<tr>
+<td>Розмір запису</td>
+<td>до <strong>10 МіБ</strong></td>
+</tr>
+<tr>
+<td>Зберігання</td>
+<td>24 год, 7 днів, до 365 днів</td>
+</tr>
+<tr>
+<td>On-demand</td>
+<td>автомасштабування, старт 4 МБ/с, до 200 МБ/с</td>
+</tr>
+<tr>
+<td>Provisioned</td>
+<td>задаєте шарди, оплата за шард-годину</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Порядок:</strong> записи з однаковим partition key йдуть в один шард і лишаються в порядку. Поганий ключ дає hot shard, як у DynamoDB. Між шардами порядку нема.</li>
+<li><strong>Помилка</strong> <code>ProvisionedThroughputExceededException</code>: повторити з backoff, додати шарди. <code>SplitShard</code> збільшує, <code>MergeShards</code> зменшує.</li>
+<li><strong>Enhanced fan-out:</strong> кожен споживач отримує свої 2 МБ/с на шард через <code>SubscribeToShard</code>, а не ділить спільні.</li>
+</ul>
+<p>Порівняння з Kafka:</p>
+<table>
+<thead>
+<tr>
+<th>Kafka</th>
+<th>Kinesis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>topic</td>
+<td>stream</td>
+</tr>
+<tr>
+<td>partition</td>
+<td>shard</td>
+</tr>
+<tr>
+<td>key</td>
+<td>partition key</td>
+</tr>
+<tr>
+<td>offset</td>
+<td>sequence number</td>
+</tr>
+<tr>
+<td>consumer group</td>
+<td>consumer / KCL application</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Lambda читає Kinesis</strong> через event source mapping: пачками, по шарду. Параметри <em>(не звірено)</em>: <code>BatchSize</code>, <code>BisectBatchOnFunctionError</code> (поділ пачки навпіл), <code>MaximumRetryAttempts</code>, <code>OnFailure</code> destination. Без них одна «отруєна» запис блокує шард, поки не мине retention.</p>
+<p><strong>KCL (Kinesis Client Library)</strong> керує шардами й чекпойнтами в DynamoDB <em>(не звірено)</em>.</p>
+<h2>Крок 4. Data Firehose</h2>
+<p><strong>Доставка без коду:</strong> приймає дані, буферизує, кладе в S3, Redshift, OpenSearch, Snowflake, Splunk, HTTP та інші.</p>
+<ul>
+<li>буфер: розмір 1-128 МБ для S3 або інтервал 0-900 с, що настане раніше;</li>
+<li><strong>Lambda-трансформація:</strong> кожен запис повертається з <code>recordId</code>, <code>result</code> (<code>Ok</code>, <code>Dropped</code>, <code>ProcessingFailed</code>) і <code>data</code> у base64;</li>
+<li>перетворення в Parquet, стиснення, динамічні партиції;</li>
+<li>джерелом може бути Kinesis Data Streams.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Kinesis Data Streams</th>
+<th>Data Firehose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Час</td>
+<td>реальний</td>
+<td>майже реальний, через буфер</td>
+</tr>
+<tr>
+<td>Споживачі</td>
+<td>свої</td>
+<td>пункт призначення</td>
+</tr>
+<tr>
+<td>Зберігання, повторне читання</td>
+<td>так</td>
+<td>ні</td>
+</tr>
+<tr>
+<td>Керування</td>
+<td>шарди або on-demand</td>
+<td>не потрібне</td>
+</tr>
+</tbody>
+</table>
+<p>Правило: <strong>«зберегти потік у S3 без коду» означає Firehose.</strong></p>
+<p><strong>Athena:</strong> SQL по S3 без серверів, оплата за просканований обсяг <em>(не звірено)</em>. Parquet і партиції дешевші. Логи CloudTrail, ALB, S3 часто аналізують так.</p>
+<p><strong>OpenSearch:</strong> повнотекстовий пошук і дашборди логів (навичка 1.3.2).</p>
+<h2>Крок 5. Step Functions</h2>
+<p><strong>Оркестрація чи хореографія:</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Хореографія (EventBridge, SNS)</th>
+<th>Оркестрація (Step Functions)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Хто керує</td>
+<td>ніхто: сервіси реагують</td>
+<td>один процес знає весь шлях</td>
+</tr>
+<tr>
+<td>Видимість</td>
+<td>розкидана</td>
+<td>графічна історія кожного запуску</td>
+</tr>
+<tr>
+<td>Коли</td>
+<td>слабка зв'язність</td>
+<td>складні кроки, повтори, ручні кроки</td>
+</tr>
+</tbody>
+</table>
+<p>Опис це JSON <strong>Amazon States Language</strong>: <code>StartAt</code>, <code>States</code>, у кожного стану <code>Type</code>, <code>Resource</code>, <code>Next</code> чи <code>End</code>. Стан <code>Task</code> може викликати Lambda (<code>arn:aws:states:::lambda:invoke</code>), SNS (<code>...:sns:publish</code>) та інші. <code>Retry</code> задає повтори (<code>ErrorEquals</code>, <code>MaxAttempts</code>, <code>BackoffRate</code>), <code>Catch</code> перехоплює помилки (<code>States.ALL</code>) і веде в інший стан.</p>
+<p><strong>Типи станів</strong> <em>(не звірено)</em>: <code>Task</code>, <code>Choice</code>, <code>Parallel</code>, <code>Map</code>, <code>Wait</code>, <code>Pass</code>, <code>Succeed</code>, <code>Fail</code>.</p>
+<p><code>Retry</code> і <code>Catch</code> роблять стійкість декларативною (повтори з backoff, навичка 1.1.3) замість коду в кожній функції.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Standard</strong></th>
+<th><strong>Express</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Тривалість</td>
+<td>до 1 року <em>(не звірено)</em></td>
+<td>до 5 хв <em>(не звірено)</em></td>
+</tr>
+<tr>
+<td>Виконання</td>
+<td>exactly-once <em>(не звірено)</em></td>
+<td>at-least-once <em>(не звірено)</em></td>
+</tr>
+<tr>
+<td>Використання</td>
+<td>довгі процеси</td>
+<td>багато коротких подій</td>
+</tr>
+<tr>
+<td>Історія</td>
+<td>у консолі</td>
+<td>у CloudWatch Logs</td>
+</tr>
+</tbody>
+</table>
+<p>Документація: Standard ідемпотентні, Express дешевші й швидші, але не ідемпотентні.</p>
+<p><strong>Callback:</strong> <code>.waitForTaskToken</code> чекає зовнішню подію <em>(не звірено)</em>: людське підтвердження, ручний крок.</p>
+<p><strong>Lambda Durable Functions</strong> нова можливість: довгі процеси з контрольними точками прямо в Lambda, до року (на іспит навряд чи потрапить).</p>
+<p>Оркестрація кількох Lambda: Step Functions, а не виклик Lambda з Lambda (платите за очікування).</p>
+<h2>Крок 6. Стійкість: загальні прийоми (навичка 1.1.3)</h2>
+<ul>
+<li><strong>Retry з exponential backoff і jitter:</strong> кожна пауза довша, з випадковістю, щоб клієнти не били водночас;</li>
+<li><strong>Circuit breaker:</strong> припинити виклики зламаного сервісу;</li>
+<li><strong>Graceful degradation:</strong> AI-опис недоступний, показати фото без нього;</li>
+<li><strong>DLQ / destinations:</strong> куди падає нездійсненне;</li>
+<li><strong>Idempotency</strong>.</li>
+</ul>
+<p>SDK AWS має вбудовані повтори й режими <code>standard</code>, <code>adaptive</code> <em>(не звірено)</em>.</p>
+<h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>Повторне читання, порядок, багато споживачів: Kinesis.</li>
+<li>Шард: 1 МБ/с запис (або 1000 записів/с), 2 МБ/с читання.</li>
+<li>Retention Kinesis 24 год - 365 днів.</li>
+<li>Без коду в S3: Firehose. Firehose не зберігає потік для перечитування.</li>
+<li>Багатокроковий процес із повторами: Step Functions (<code>Retry</code>, <code>Catch</code>).</li>
+<li>Standard довгий, Express короткий і дешевий.</li>
+<li>Одна погана запис блокує шард: bisect, max record age, on-failure destination.</li>
+</ol>
+<h2>Перевірте себе</h2>
+<ol>
+<li>SQS чи Kinesis для трьох незалежних споживачів?</li>
+<li><code>ProvisionedThroughputExceededException</code> у Kinesis. Що робити?</li>
+<li>Чому записи в різних шардах не впорядковані?</li>
+<li>Як споживачам не ділити 2 МБ/с?</li>
+<li>Треба зберігати логи в S3 без коду. Який сервіс?</li>
+<li>Одна погана запис блокує шард. Як розв'язати?</li>
+<li>Як додати повтори в Step Functions?</li>
+<li>100 000 коротких подій за секунду: який тип workflow?</li>
+<li>Чим оркестрація відрізняється від хореографії?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>Kinesis: кілька незалежних читачів і повторне читання.</li>
+<li>Повторити з backoff, додати шарди (<code>SplitShard</code>) або перейти на on-demand.</li>
+<li>Порядок гарантується лише в межах шарда (за partition key).</li>
+<li>Enhanced fan-out: свої 2 МБ/с на споживача.</li>
+<li>Firehose.</li>
+<li><code>BisectBatchOnFunctionError</code>, <code>MaximumRetryAttempts</code>, <code>MaximumRecordAgeInSeconds</code>, on-failure destination.</li>
+<li>Поле <code>Retry</code> у стані (<code>ErrorEquals</code>, <code>MaxAttempts</code>, <code>BackoffRate</code>), помилки перехоплює <code>Catch</code>.</li>
+<li>Express.</li>
+<li>Оркестрація має одного керівника, що знає весь шлях і дає історію запусків. Хореографія: сервіси реагують на події самі.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 20-streaming-step-functions.md.</p>
+
+<nav class="pager"><a href="19-cicd-appconfig-simple.html">← Лекція 19</a><a href="21-ai-services-security-simple.html">Лекція 21 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

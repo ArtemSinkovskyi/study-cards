@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 2 (просто): S3, способи доступу й шифрування</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; }
+  th { background:#fff; }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; word-break:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 2 (просто): S3, способи доступу й шифрування</h1>
+<blockquote>
+<p>Середній рівень: усі правила з повної лекції, але простими словами й без розповіді про наш проєкт. Повна: ../2-s3-access-and-encryption.md. Автор повної лекції дав правила й числа для іспиту з пам'яті, їх варто звірити з документацією AWS.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>S3 на іспиті майже завжди питають про те, як дати доступ або як зашифрувати.</strong> Лекція це повна карта варіантів.</p>
+<p>Доступ у S3 це три шари:</p>
+<ol>
+<li><strong>IAM-політика</strong> (хто ти і що тобі можна).</li>
+<li><strong>Bucket policy</strong> (що бакет дозволяє чи забороняє).</li>
+<li><strong>Block Public Access</strong> (запобіжник проти випадкової публічності).</li>
+</ol>
+<p>В одному акаунті достатньо одного Allow. <strong>Явний Deny перемагає завжди.</strong></p>
+<h2>Крок 1. Способи надати доступ</h2>
+<table>
+<thead>
+<tr>
+<th>Спосіб</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IAM-політика на користувачі чи ролі</td>
+<td>«що може цей суб'єкт»</td>
+</tr>
+<tr>
+<td>Bucket policy</td>
+<td>«що можна з цим бакетом і кому»</td>
+</tr>
+<tr>
+<td>ACL</td>
+<td>застарілий механізм, зазвичай не потрібен</td>
+</tr>
+<tr>
+<td>Block Public Access</td>
+<td>запобіжник від публічності</td>
+</tr>
+<tr>
+<td>Presigned URL</td>
+<td>тимчасове посилання на об'єкт</td>
+</tr>
+<tr>
+<td>Access Points</td>
+<td>окрема точка входу з власною політикою на кожного споживача</td>
+</tr>
+<tr>
+<td>CloudFront + OAC</td>
+<td>приватний бакет за CDN</td>
+</tr>
+<tr>
+<td>VPC gateway endpoint</td>
+<td>доступ з VPC без інтернету</td>
+</tr>
+<tr>
+<td>Тимчасові ключі STS чи Cognito</td>
+<td>клієнт сам ходить у S3</td>
+</tr>
+<tr>
+<td>Object Lambda, Multi-Region Access Points</td>
+<td>перетворення даних, глобальна точка (лише теорія)</td>
+</tr>
+</tbody>
+</table>
+<h3>Bucket policy проти IAM-політики</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>IAM-політика</th>
+<th>Bucket policy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Прикріплена до</td>
+<td>суб'єкта</td>
+<td>бакета</td>
+</tr>
+<tr>
+<td><code>Principal</code></td>
+<td>нема</td>
+<td>обов'язковий</td>
+</tr>
+<tr>
+<td>Кращий вибір</td>
+<td>«що можуть мої користувачі»</td>
+<td>публічний доступ, cross-account, умови на кшталт <code>aws:SourceIp</code>, <code>aws:SecureTransport</code></td>
+</tr>
+</tbody>
+</table>
+<p>Bucket policy має ліміт <strong>20 КБ</strong>. Для іншого акаунта потрібні обидві сторони.</p>
+<p>Типові умови в bucket policy:</p>
+<ul>
+<li><code>aws:SecureTransport: false</code> разом із <code>Deny</code>: заборона HTTP без TLS;</li>
+<li><code>s3:x-amz-server-side-encryption: aws:kms</code> разом із <code>Deny</code> на <code>PutObject</code>: примусове шифрування;</li>
+<li><code>aws:SourceVpce</code> чи <code>aws:SourceIp</code>: доступ лише з певної мережі;</li>
+<li><code>aws:PrincipalOrgID</code>: усі акаунти організації.</li>
+</ul>
+<h3>Block Public Access</h3>
+<p>Чотири вимикачі, кожен окремо:</p>
+<table>
+<thead>
+<tr>
+<th>Вимикач</th>
+<th>Що робить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>block_public_acls</code></td>
+<td>відхиляє запити, що ставлять публічні ACL</td>
+</tr>
+<tr>
+<td><code>ignore_public_acls</code></td>
+<td>ігнорує вже наявні публічні ACL</td>
+</tr>
+<tr>
+<td><code>block_public_policy</code></td>
+<td>відхиляє bucket policy, що робить бакет публічним</td>
+</tr>
+<tr>
+<td><code>restrict_public_buckets</code></td>
+<td>обмежує доступ до бакета з публічною політикою лише власниками й сервісами AWS</td>
+</tr>
+</tbody>
+</table>
+<p>BPA <strong>сильніший за політику</strong>: навіть правильна публічна bucket policy не діє, доки BPA її блокує. Може діяти на рівні акаунта й бакета.</p>
+<p>Публічне читання роблять вузько: лише <code>GetObject</code> на потрібний префікс, без <code>ListBucket</code> для всіх.</p>
+<p><strong>Типова задача:</strong> публічна bucket policy є, а об'єкт не відкривається. Перевірте BPA (<code>block_public_policy</code>, <code>restrict_public_buckets</code>).</p>
+<h3>Presigned URL</h3>
+<p>Сервіс, у якого є права, підписує URL своїми ключами. Той, хто має посилання, діє <strong>від імені підписанта</strong>, поки діє термін.</p>
+<table>
+<thead>
+<tr>
+<th>Властивість</th>
+<th>Значення</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Коли</td>
+<td>віддати чи прийняти файл без публічного бакета й без видачі ключів клієнту</td>
+</tr>
+<tr>
+<td>Максимальний термін</td>
+<td>залежить від ключів: IAM-користувач до 7 діб, тимчасові ключі (роль) до терміну сеансу, найчастіше 1-12 год</td>
+</tr>
+<tr>
+<td>Права</td>
+<td>не більші за права підписанта. Якщо підписант втратив право, посилання перестає працювати</td>
+</tr>
+<tr>
+<td>Методи</td>
+<td>GET (скачати), PUT (завантажити), інші</td>
+</tr>
+</tbody>
+</table>
+<h3>Інше, що треба знати</h3>
+<ul>
+<li><strong>Access Points:</strong> коли одним бакетом користуються десятки команд, кожній дають точку входу з власною політикою замість однієї гігантської bucket policy.</li>
+<li><strong>CloudFront + OAC:</strong> бакет приватний, прочитати його може лише CDN. У bucket policy <code>Principal: cloudfront.amazonaws.com</code> з умовою <code>AWS:SourceArn</code> на конкретний дистрибутив. Стара назва OAI застаріла. Питання «приватний S3 за CDN» означає CloudFront і OAC.</li>
+<li><strong>VPC gateway endpoint:</strong> безкоштовний приватний шлях до S3 з VPC. З <code>aws:SourceVpce</code> у bucket policy обмежує доступ «лише з нашої VPC».</li>
+<li><strong>Cognito Identity Pool:</strong> мобільний застосунок отримує тимчасові ключі й пише в S3 сам, у «свою» теку через policy variable <code>${cognito-identity.amazonaws.com:sub}</code>.</li>
+</ul>
+<h2>Крок 2. Шифрування</h2>
+<p>Два напрямки: <strong>у спокої</strong> (at rest) і <strong>під час передавання</strong> (in transit).</p>
+<h3>У спокої: варіанти</h3>
+<table>
+<thead>
+<tr>
+<th>Варіант</th>
+<th>Хто тримає ключ</th>
+<th>Коротко</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SSE-S3</strong> (<code>AES256</code>)</td>
+<td>S3</td>
+<td>типово для всіх нових об'єктів (з січня 2023), безкоштовно, без налаштувань</td>
+</tr>
+<tr>
+<td><strong>SSE-KMS</strong> (<code>aws:kms</code>)</td>
+<td>KMS (ваш чи AWS-managed ключ)</td>
+<td>журнал у CloudTrail, політика ключа, можна відкликати доступ</td>
+</tr>
+<tr>
+<td><strong>DSSE-KMS</strong></td>
+<td>KMS</td>
+<td>два шари шифрування, для жорстких вимог</td>
+</tr>
+<tr>
+<td><strong>SSE-C</strong></td>
+<td><strong>клієнт</strong> передає ключ у кожному запиті</td>
+<td>AWS ключ не зберігає; лише HTTPS; з квітня 2026 вимкнено за замовчуванням</td>
+</tr>
+<tr>
+<td><strong>Client-side</strong></td>
+<td>клієнт шифрує до відправки</td>
+<td>AWS бачить лише шифротекст</td>
+</tr>
+</tbody>
+</table>
+<p>Хто тримає ключ: AWS мовчки це SSE-S3, AWS із журналом це SSE-KMS, ви щоразу це SSE-C, лише ви до відправки це client-side.</p>
+<p><strong>SSE-S3</strong> захищає від фізичного доступу до дисків, але <strong>не</strong> від того, хто має право <code>GetObject</code>: S3 розшифрує прозоро.</p>
+<p><strong>SSE-KMS</strong> додає ще один шар авторизації: для читання потрібен не лише <code>s3:GetObject</code>, а й <strong><code>kms:Decrypt</code></strong> на ключ. Класичне питання: «<code>AccessDenied</code> на читання, хоча <code>GetObject</code> дозволено» (бракує <code>kms:Decrypt</code>; для запису <code>kms:GenerateDataKey</code>). Мінуси:</p>
+<ul>
+<li>кожен виклик S3 викликає KMS, а в KMS є квоти запитів і окрема плата. Відповідь: <strong>S3 Bucket Key</strong>, що зменшує кількість викликів KMS (до 99%);</li>
+<li>AWS-managed ключ <code>aws/s3</code> не можна ділити між акаунтами, для cross-account потрібен свій (customer managed) ключ із відповідною key policy.</li>
+</ul>
+<p><strong>Envelope encryption:</strong> KMS шифрує напряму лише до <strong>4 КБ</strong>, тому для великих об'єктів KMS генерує data key (<code>GenerateDataKey</code>), дані шифруються ним, а в сховище йде зашифрований data key поруч.</p>
+<p><strong>SSE-C.</strong> Ключ іде в заголовках лише по HTTPS (HTTP відхиляється, а ключ, надісланий по HTTP, вважається скомпрометованим). S3 ключ не зберігає: загубили ключ, дані втрачені. Керовані сервіси AWS такі об'єкти нативно не розшифрують, а консоль SSE-C не підтримує. З квітня 2026 запити з SSE-C дають <code>403 AccessDenied</code>, доки не встановити <code>BlockedEncryptionTypes = NONE</code>.</p>
+<p><strong>Client-side.</strong> Бібліотека (наприклад, AWS Encryption SDK) шифрує до відправки. Захищає навіть від AWS і від помилки в політиці, але ви самі відповідаєте за ключі.</p>
+<p><strong>Примусове шифрування:</strong> bucket policy з <code>Deny</code> на <code>PutObject</code>, якщо заголовок <code>x-amz-server-side-encryption</code> не відповідає потрібному, або налаштування шифрування за замовчуванням на бакеті.</p>
+<h3>Під час передавання</h3>
+<p>Це HTTPS (TLS). Вимагати його можна політикою: <code>Deny</code> на <code>s3:*</code> для бакета й об'єктів з умовою <code>aws:SecureTransport</code> рівним <code>false</code>.</p>
+<h3>Захист від видалення й зміни</h3>
+<table>
+<thead>
+<tr>
+<th>Механізм</th>
+<th>Що робить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Versioning</td>
+<td>зберігає версії, видалення ставить delete marker</td>
+</tr>
+<tr>
+<td>MFA Delete</td>
+<td>видалення версій потребує MFA</td>
+</tr>
+<tr>
+<td>Object Lock (WORM)</td>
+<td>неможливо змінити чи видалити до дати (режими governance, compliance), є legal hold без терміну; працює лише з увімкненим версіонуванням, захищає конкретну версію</td>
+</tr>
+<tr>
+<td>Lifecycle</td>
+<td>автоматичне видалення чи перехід</td>
+</tr>
+</tbody>
+</table>
+<h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>Доступ у S3 це IAM, bucket policy і BPA. В одному акаунті достатньо одного Allow, Deny сильніший за все.</li>
+<li>Приватні файли віддають presigned URL. Публічні віддають bucket policy з вузьким префіксом чи CloudFront з OAC.</li>
+<li>SSE-S3 за замовчуванням. SSE-KMS дає аудит і потребує <code>kms:Decrypt</code>.</li>
+<li>Bucket Key зменшує виклики KMS до 99%.</li>
+<li>SSE-C ключ передає клієнт щоразу (лише HTTPS), client-side шифрує до відправки.</li>
+<li>Примусити HTTPS: <code>Deny</code> з <code>aws:SecureTransport: false</code>.</li>
+<li><code>aws/s3</code> не ділиться між акаунтами: для cross-account потрібен customer managed ключ.</li>
+</ol>
+<h2>Перевірте себе</h2>
+<ol>
+<li>Публічна bucket policy є, а об'єкт не відкривається. Що перевірити?</li>
+<li>Чим <code>block_public_policy</code> відрізняється від <code>restrict_public_buckets</code>?</li>
+<li>Чому presigned URL перестане працювати, якщо видалити ключ підписанта?</li>
+<li>У користувача є <code>s3:GetObject</code>, а читання SSE-KMS-об'єкта дає <code>AccessDenied</code>. Чому?</li>
+<li>Для чого Bucket Key?</li>
+<li>Чим SSE-C відрізняється від client-side encryption?</li>
+<li>Як примусити HTTPS і SSE-KMS політикою?</li>
+<li>Як віддати приватний бакет через CDN?</li>
+<li>Що обрати для cross-account читання зашифрованого об'єкта?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>Block Public Access (насамперед <code>block_public_policy</code> і <code>restrict_public_buckets</code>).</li>
+<li><code>block_public_policy</code> відхиляє нову публічну політику, <code>restrict_public_buckets</code> обмежує доступ до бакета, у якого політика вже публічна.</li>
+<li>Presigned URL має права підписанта. Без ключа (чи прав) посилання не працює.</li>
+<li>Бракує <code>kms:Decrypt</code> на ключ.</li>
+<li>Щоб зменшити кількість викликів KMS (до 99%) і витрати.</li>
+<li>SSE-C: шифрує S3, а клієнт передає ключ у кожному запиті. Client-side: клієнт шифрує сам до відправки й AWS не бачить відкритих даних.</li>
+<li><code>Deny</code> з умовами <code>aws:SecureTransport: false</code> і для <code>PutObject</code> з <code>x-amz-server-side-encryption</code>, що не дорівнює <code>aws:kms</code>.</li>
+<li>CloudFront з OAC і приватним бакетом.</li>
+<li>SSE-KMS з customer managed ключем і key policy, що дозволяє інший акаунт.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 2-s3-access-and-encryption.md.</p>
+
+<nav class="pager"><a href="1-iam-simple.html">← Лекція 1</a><a href="3-s3-in-depth-simple.html">Лекція 3 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

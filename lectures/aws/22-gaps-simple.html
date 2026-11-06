@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 22 (просто): що лишилось поза іншими лекціями</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; }
+  th { background:#fff; }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; word-break:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 22 (просто): що лишилось поза іншими лекціями</h1>
+<blockquote>
+<p>Середній рівень: усі правила з повної лекції, але простими словами. Повна: ../22-gaps-and-skill-map.md (там ще карта всіх 72 навичок, її тут нема). Факти, які в повній лекції «з пам'яті», тут із позначкою <em>(не звірено)</em>.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>Це все, що не вмістилося в профільні лекції: серіалізація, Elastic Beanstalk, Auto Scaling, конкурентність, бази даних, сховища, мінімум мережі, інструменти і що поза іспитом.</strong> Це дрібні теми, але кожна дає окреме питання.</p>
+<h2>Крок 1. Серіалізація (навичка 1.1.7)</h2>
+<p>Сервіси AWS обмінюються текстом і байтами, тому дані треба перетворювати при вході й виході.</p>
+<table>
+<thead>
+<tr>
+<th>Де</th>
+<th>Що відбувається</th>
+<th>Пастка</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lambda</td>
+<td>подія приходить об'єктом, відповідь серіалізується в JSON</td>
+<td><code>Date</code>, <code>BigInt</code>, цикли не переживуть JSON</td>
+</tr>
+<tr>
+<td>API Gateway proxy</td>
+<td><code>event.body</code> це <strong>рядок</strong></td>
+<td><code>JSON.parse</code> на вході, <code>JSON.stringify</code> на виході, інакше 502</td>
+</tr>
+<tr>
+<td>SQS</td>
+<td><code>Body</code> завжди рядок</td>
+<td>свій JSON кладете самі</td>
+</tr>
+<tr>
+<td>SNS → SQS</td>
+<td>конверт SNS всередині <code>Body</code></td>
+<td>подвійний <code>JSON.parse</code> або raw delivery</td>
+</tr>
+<tr>
+<td>Kinesis</td>
+<td><code>data</code> у події Lambda в <strong>base64</strong></td>
+<td><code>Buffer.from(data, &quot;base64&quot;).toString()</code></td>
+</tr>
+<tr>
+<td>Firehose</td>
+<td>повернути <code>data</code> теж треба в base64</td>
+<td></td>
+</tr>
+<tr>
+<td>DynamoDB низького рівня</td>
+<td>значення з типом: <code>{&quot;S&quot;:&quot;text&quot;}</code>, <code>{&quot;N&quot;:&quot;5&quot;}</code></td>
+<td>числа передаються рядком</td>
+</tr>
+<tr>
+<td>S3</td>
+<td><code>Body</code> це потік</td>
+<td><code>transformToByteArray()</code> чи <code>transformToString()</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>DynamoDB у коді.</strong> Щоб не писати типи вручну, беруть <strong>Document Client</strong> (<code>DynamoDBDocumentClient</code>) або <code>marshall</code> / <code>unmarshall</code> <em>(не звірено)</em>.</p>
+<p>Бінарні дані в JSON передають через <strong>base64</strong> (+33% розміру), тому файли не ганяють через API.</p>
+<h2>Крок 2. Elastic Beanstalk</h2>
+<p><strong>PaaS:</strong> завантажили код і отримали балансувальник, Auto Scaling і моніторинг. Зараз два варіанти: Beanstalk Standard і Beanstalk Cluster (на EKS).</p>
+<table>
+<thead>
+<tr>
+<th>Політика</th>
+<th>Простій</th>
+<th>Де код</th>
+<th>Відкат</th>
+<th>Час</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>All at once</strong></td>
+<td><strong>так</strong></td>
+<td>наявні інстанси</td>
+<td>ручний redeploy</td>
+<td>найшвидше</td>
+</tr>
+<tr>
+<td><strong>Rolling</strong></td>
+<td>ні, але менше потужності</td>
+<td>наявні</td>
+<td>ручний</td>
+<td>помірно</td>
+</tr>
+<tr>
+<td><strong>Rolling with additional batch</strong></td>
+<td>ні, потужність та сама</td>
+<td>нові й наявні</td>
+<td>ручний</td>
+<td>довше</td>
+</tr>
+<tr>
+<td><strong>Immutable</strong></td>
+<td>ні</td>
+<td>нові, друга ASG</td>
+<td>видалити нові</td>
+<td>найдовше</td>
+</tr>
+<tr>
+<td><strong>Traffic splitting</strong></td>
+<td>ні</td>
+<td>нові</td>
+<td>перенаправити трафік</td>
+<td>найдовше</td>
+</tr>
+<tr>
+<td><strong>Blue/green</strong></td>
+<td>ні</td>
+<td>нове середовище</td>
+<td><strong>swap URL</strong></td>
+<td>найдовше</td>
+</tr>
+</tbody>
+</table>
+<p>Як обирати за формулюванням:</p>
+<ul>
+<li>«Найшвидше, простій прийнятний»: All at once.</li>
+<li>«Без втрати потужності»: Rolling with additional batch.</li>
+<li>«Найбезпечніше, швидкий відкат»: Immutable.</li>
+<li>«Канарковий тест частиною трафіку»: Traffic splitting.</li>
+<li>«Несумісна версія, зміна ресурсів»: Blue/green, CNAME swap. Єдиний варіант зі зміною DNS.</li>
+</ul>
+<p>Конфігурація в репозиторії: каталог <code>.ebextensions</code> <em>(не звірено)</em>.</p>
+<h2>Крок 3. EC2 і Auto Scaling (навичка 4.3.1)</h2>
+<p><strong>Auto Scaling group (ASG)</strong> це група інстансів, якою керують разом. Може охоплювати кілька AZ, але не регіони.</p>
+<table>
+<thead>
+<tr>
+<th>Політика</th>
+<th>Як</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Target tracking</strong></td>
+<td>тримає метрику на цілі, як термостат</td>
+</tr>
+<tr>
+<td><strong>Step</strong></td>
+<td>сходинки за порогами alarm</td>
+</tr>
+<tr>
+<td><strong>Scheduled</strong></td>
+<td>за розкладом</td>
+</tr>
+<tr>
+<td><strong>Predictive</strong></td>
+<td>прогнозує навантаження заздалегідь</td>
+</tr>
+</tbody>
+</table>
+<p>ASG замінює інстанс, що не пройшов EC2 чи ELB health check.</p>
+<p><strong>Instance metadata:</strong> застосунок на EC2 отримує роль через IMDSv2 (<code>169.254.169.254</code>). Роль EC2 завжди краща за ключі <em>(не звірено)</em>.</p>
+<h2>Крок 4. Конкурентність (навичка 4.3.1)</h2>
+<table>
+<thead>
+<tr>
+<th>Поняття</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Provisioned concurrency</strong></td>
+<td>заздалегідь прогріті середовища Lambda</td>
+</tr>
+<tr>
+<td><strong>Connection pooling</strong></td>
+<td>перевикористання з'єднань; RDS Proxy</td>
+</tr>
+<tr>
+<td><strong>Thread pool</strong></td>
+<td>обмежена кількість робочих потоків; забагато дає тиск на базу</td>
+</tr>
+<tr>
+<td><strong>Keep-alive в SDK</strong></td>
+<td>HTTP-з'єднання перевикористовуються, менша затримка</td>
+</tr>
+</tbody>
+</table>
+<p>Головна ідея: кількість паралельних викликів має відповідати можливостям того, що позаду. 1000 Lambda × 1 з'єднання = 1000 з'єднань з RDS.</p>
+<h2>Крок 5. Бази даних</h2>
+<p><strong>RDS Proxy:</strong> керований проксі; <strong>пул з'єднань</strong>; Lambda входить через IAM-роль, облікові дані в Secrets Manager; перемикання до 66% швидше; код майже не змінюється, лише endpoint. Підтримує Aurora, RDS для PostgreSQL, MySQL, MariaDB, SQL Server.</p>
+<p><strong>RDS чи Aurora</strong> <em>(не звірено)</em>:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>RDS</th>
+<th>Aurora</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Сумісність</td>
+<td>кілька рушіїв</td>
+<td>MySQL, PostgreSQL</td>
+</tr>
+<tr>
+<td>Читання</td>
+<td>read replicas</td>
+<td>до 15 реплік, reader endpoint</td>
+</tr>
+<tr>
+<td>Зберігання</td>
+<td>EBS</td>
+<td>розподілене, три AZ, росте саме</td>
+</tr>
+<tr>
+<td>Без серверів</td>
+<td>ні</td>
+<td>Aurora Serverless v2</td>
+</tr>
+</tbody>
+</table>
+<p>Розрізняйте: <strong>Multi-AZ</strong> це доступність (резерв для перемикання). <strong>Read replica</strong> це масштабування читань, асинхронна.</p>
+<p><strong>OpenSearch:</strong> пошук по сайту, логи, моніторинг у реальному часі; дані надходять через Firehose; zero-ETL із DynamoDB робить таблицю доступною для пошуку за секунди. «Повнотекстовий пошук по DynamoDB» означає OpenSearch.</p>
+<h2>Крок 6. Сховище: EBS, EFS, S3</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>EBS</strong></th>
+<th><strong>EFS</strong></th>
+<th><strong>S3</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Тип</td>
+<td>блочний диск</td>
+<td>файлова система NFS</td>
+<td>об'єкти</td>
+</tr>
+<tr>
+<td>Підключення</td>
+<td>один EC2 у своїй AZ (зазвичай)</td>
+<td><strong>багато</strong> EC2, контейнери, Lambda</td>
+<td>HTTP API</td>
+</tr>
+<tr>
+<td>Коли</td>
+<td>диск бази на EC2</td>
+<td>спільні файли</td>
+<td>файли застосунку</td>
+</tr>
+</tbody>
+</table>
+<p><em>(не звірено)</em></p>
+<h2>Крок 7. Мережа: мінімум для розробника</h2>
+<p>Проєктування мереж Exam Guide виключає, але використання лишається (1.2.1, 2.3.2).</p>
+<table>
+<thead>
+<tr>
+<th>Потреба</th>
+<th>Сервіс</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lambda до RDS у приватній підмережі</td>
+<td>конфігурація VPC функції</td>
+</tr>
+<tr>
+<td>приватний виклик S3, DynamoDB</td>
+<td><strong>gateway endpoint</strong></td>
+</tr>
+<tr>
+<td>приватний виклик Bedrock та інших</td>
+<td><strong>interface endpoint (PrivateLink)</strong></td>
+</tr>
+<tr>
+<td>розподіл HTTP-трафіку</td>
+<td><strong>ALB</strong> (L7, шляхи)</td>
+</tr>
+<tr>
+<td>TCP, статичний IP, дуже великі обсяги</td>
+<td><strong>NLB</strong> (L4)</td>
+</tr>
+<tr>
+<td>DNS, перемикання за здоров'ям</td>
+<td><strong>Route 53</strong></td>
+</tr>
+<tr>
+<td>захист від SQL injection, XSS</td>
+<td><strong>WAF</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>WAF:</strong> на CloudFront, ALB, API Gateway, AppSync. Правила в <strong>web ACL</strong>. <strong>Rate-based rule</strong> обмежує запити з одного IP за 5 хв.</p>
+<p><strong>Shield</strong> офіційно <strong>поза межами</strong> іспиту.</p>
+<p>Lambda у VPC не має виходу в інтернет без NAT Gateway.</p>
+<h2>Крок 8. Інструменти</h2>
+<ul>
+<li><strong>CodeArtifact:</strong> приватні npm, Maven, PyPI; upstream до публічних; токен входу живе обмежений час <em>(не звірено)</em>.</li>
+<li><strong>Amplify:</strong> хостинг фронтенду; гілка дає середовище (навичка 3.2.4).</li>
+<li><strong>CloudShell:</strong> термінал у браузері з готовими обліковими даними.</li>
+<li><strong>AWS CLI:</strong> <code>--query</code> фільтрує вивід на клієнті (JMESPath), <code>--filter</code> на сервері; <code>--dry-run</code> для EC2; пагінація автоматична <em>(не звірено)</em>.</li>
+<li><strong>SDK:</strong> повтори вбудовані; регіон і облікові дані задаються ланцюжком.</li>
+</ul>
+<h2>Крок 9. Що офіційно поза іспитом</h2>
+<p>Зі сторінки Out-of-Scope: <strong>Amazon Rekognition, Polly, SageMaker AI, Strands Agents, Quick Sight, Connect, Elastic Transcoder, Shield, Storage Gateway, Snow Family, Transfer Family</strong>. Якщо така назва є у варіанті відповіді, це майже напевно не те.</p>
+<p><strong>Нове в C03 порівняно з C02:</strong> завдання 2.3 про AI-безпеку, AI-навички в 1.1, 3.2, 3.3, 4.1, 4.3, presigned URL (2.1), образи контейнерів (3.1), деплой контейнерів (3.3). Вага Troubleshooting виросла з 18% до 22%.</p>
+<h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>API Gateway proxy: <code>event.body</code> це рядок, <code>JSON.parse</code> на вході й <code>JSON.stringify</code> на виході.</li>
+<li>Kinesis <code>data</code> у Lambda в base64.</li>
+<li>Beanstalk: All at once швидко, але простій; Immutable найбезпечніше; Blue/green міняє DNS.</li>
+<li>Multi-AZ це доступність, read replica це масштабування читань.</li>
+<li>Lambda вичерпує з'єднання RDS: RDS Proxy.</li>
+<li>Спільні файли для багатьох EC2: EFS. Захист від SQL injection: WAF.</li>
+<li>Rekognition, Polly, SageMaker AI, Shield поза іспитом.</li>
+</ol>
+<h2>Перевірте себе</h2>
+<ol>
+<li>Чому Lambda в API Gateway мусить робити <code>JSON.parse(event.body)</code>?</li>
+<li>У якому вигляді Lambda отримує дані Kinesis?</li>
+<li>Як не писати <code>{&quot;S&quot;:&quot;...&quot;}</code> у DynamoDB вручну?</li>
+<li>Beanstalk: нульовий простій і без зниження потужності. Яка політика?</li>
+<li>Beanstalk: несумісна нова версія. Яка політика?</li>
+<li>Чим Multi-AZ відрізняється від read replica?</li>
+<li>1000 Lambda вичерпують з'єднання RDS. Що додати?</li>
+<li>Спільні файли для кількох EC2. Який сервіс?</li>
+<li>Захист API від SQL injection. Який сервіс?</li>
+<li>Чому Rekognition на C03 погана відповідь?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>У proxy-інтеграції <code>body</code> приходить рядком.</li>
+<li>У base64.</li>
+<li>Document Client (<code>DynamoDBDocumentClient</code>) або <code>marshall</code> / <code>unmarshall</code>.</li>
+<li>Rolling with additional batch (чи Immutable, якщо важливий швидкий відкат).</li>
+<li>Blue/green з CNAME swap.</li>
+<li>Multi-AZ це доступність (синхронний резерв), read replica це масштабування читань (асинхронна).</li>
+<li>RDS Proxy.</li>
+<li>EFS.</li>
+<li>WAF.</li>
+<li>Rekognition офіційно поза межами іспиту.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 22-gaps-and-skill-map.md.</p>
+
+<nav class="pager"><a href="21-ai-services-security-simple.html">← Лекція 21</a><span></span></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 5 (просто): Claude Code</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; }
+  th { background:#fff; }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; word-break:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 5 (просто): Claude Code</h1>
+<blockquote>
+<p>Спрощена версія. Повна: ../5-claude-code-memory-hooks-skills-permissions-subagents.md. Деталі, яких тут нема (усі події hooks, всі ключі налаштувань), дивіться там.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>Одні речі лише радять моделі, інші примусово забороняють.</strong> Іспит постійно питає саме про цю різницю.</p>
+<table>
+<thead>
+<tr>
+<th>Лише радить</th>
+<th>Примусово діє</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CLAUDE.md, rules, skills, auto memory</td>
+<td>Правила дозволів (deny), hooks з exit 2, managed settings, sandbox</td>
+</tr>
+</tbody>
+</table>
+<p>Для Spring-розробника: CLAUDE.md це як README чи Javadoc (читають, але ніхто не змушений), а <code>deny</code> і hooks як Spring Security чи фільтр (порушити не можна).</p>
+<p>Тому на питання «як <strong>гарантувати</strong> X» відповідь ніколи не «напишіть у CLAUDE.md».</p>
+<h2>Крок 1. CLAUDE.md</h2>
+<p>Це файл інструкцій, який Claude читає на початку кожної сесії. Це контекст, а не примусове правило.</p>
+<p>Правила для доброго файла:</p>
+<ul>
+<li>до <strong>200 рядків</strong>;</li>
+<li>конкретні інструкції («Use 2-space indentation», а не «форматуй гарно»);</li>
+<li>лише факти, потрібні в кожній сесії. Покрокові процедури краще в skill, а частину коду в rule з <code>paths</code>.</li>
+</ul>
+<p>Де лежить: <code>~/.claude/CLAUDE.md</code> (для вас), <code>./CLAUDE.md</code> (для проєкту), <code>./CLAUDE.local.md</code> (особисте, у <code>.gitignore</code>).</p>
+<p>Усі знайдені файли <strong>додаються разом</strong>, а не перекривають один одного. Файли в підкаталогах вантажаться, коли Claude торкається файлів там.</p>
+<h2>Крок 2. AGENTS.md</h2>
+<p>Загальний формат інструкцій для різних агентів. Правило читання:</p>
+<table>
+<thead>
+<tr>
+<th>У репозиторії</th>
+<th>Claude читає</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>лише <code>AGENTS.md</code></td>
+<td><code>AGENTS.md</code></td>
+</tr>
+<tr>
+<td><code>AGENTS.md</code> і <code>CLAUDE.md</code></td>
+<td>лише <code>CLAUDE.md</code></td>
+</tr>
+<tr>
+<td><code>CLAUDE.md</code>, що імпортує <code>@AGENTS.md</code></td>
+<td>обидва</td>
+</tr>
+</tbody>
+</table>
+<p>Тому в ai-ops <code>CLAUDE.md</code> просто містить <code>@AGENTS.md</code>.</p>
+<h2>Крок 3. Rules і auto memory</h2>
+<ul>
+<li><strong>Rules</strong> (<code>.claude/rules/</code>): окремі файли по темах. З <code>paths</code> вантажаться лише коли Claude працює з файлами за цим патерном.</li>
+<li><strong>Auto memory:</strong> нотатки, які Claude пише сам. Індекс <code>MEMORY.md</code> вантажиться на старті (<strong>перші 200 рядків чи 25 КБ</strong>), а файли тем лише на вимогу. Пам'ять локальна для машини.</li>
+</ul>
+<h2>Крок 4. Дозволи</h2>
+<p>Три типи правил: <strong>deny, ask, allow</strong>. Перевірка йде саме в цьому порядку, <strong>перший збіг вирішує</strong>.</p>
+<p>Звідси головне: <strong>allow не може зробити виняток із deny</strong>. Якщо в deny <code>Bash(aws *)</code>, то <code>Bash(aws s3 ls)</code> у allow не допоможе.</p>
+<p>Правила виконує сам Claude Code, а не модель. Промпт чи CLAUDE.md їх не змінюють.</p>
+<h3>Режими</h3>
+<table>
+<thead>
+<tr>
+<th>Режим</th>
+<th>Що робить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>default</code></td>
+<td>Питає при першому використанні інструмента</td>
+</tr>
+<tr>
+<td><code>acceptEdits</code></td>
+<td>Сам приймає редагування файлів</td>
+</tr>
+<tr>
+<td><code>plan</code></td>
+<td>Лише читає й планує, без змін</td>
+</tr>
+<tr>
+<td><code>auto</code></td>
+<td>Окрема модель-класифікатор перевіряє дії</td>
+</tr>
+<tr>
+<td><code>dontAsk</code></td>
+<td>Відмовляє у всьому, що питало б (для CI)</td>
+</tr>
+<tr>
+<td><code>bypassPermissions</code></td>
+<td>Без запитів, лише для ізольованих середовищ</td>
+</tr>
+</tbody>
+</table>
+<p>У <code>bypassPermissions</code> правила <strong>deny діють</strong>, а <strong>allow ні</strong>.</p>
+<h3>Правила Bash</h3>
+<ul>
+<li>Зірочку ставте <strong>після підкоманди</strong>: <code>Bash(git log *)</code> дозволяє лише <code>git log</code>, а <code>Bash(git *)</code> усі git-команди.</li>
+<li>Складена команда (<code>a &amp;&amp; b</code>) іде без запиту, лише якщо <strong>кожна частина</strong> дозволена.</li>
+<li><strong>Правило Bash не є межею безпеки.</strong> <code>Bash(curl *)</code> не зупинить <code>sh -c 'curl ...'</code> чи <code>/usr/bin/curl</code>. Для цього потрібна пісочниця чи hook.</li>
+</ul>
+<h3>Правила для файлів</h3>
+<ul>
+<li><code>Read(./.env)</code> у deny блокує читання, а також Edit і Write на цьому шляху.</li>
+<li>Правила <code>Grep(...)</code>, <code>Glob(...)</code> і <code>Write(...)</code> зі шляхом <strong>не діють</strong>: пишіть <code>Read(...)</code> чи <code>Edit(...)</code>.</li>
+<li>Файл <code>.claudeignore</code> <strong>не діє</strong>: переносьте в <code>Read</code> deny.</li>
+</ul>
+<h2>Крок 5. Hooks</h2>
+<p><strong>Hook</strong> це скрипт (чи запит), який Claude Code запускає на певну подію. Найважливіше:</p>
+<table>
+<thead>
+<tr>
+<th>Подія</th>
+<th>Коли</th>
+<th>Що можна</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PreToolUse</code></td>
+<td><strong>Перед</strong> інструментом</td>
+<td>Заблокувати</td>
+</tr>
+<tr>
+<td><code>PostToolUse</code></td>
+<td><strong>Після</strong> інструмента</td>
+<td>Нічого скасувати (вже виконано)</td>
+</tr>
+<tr>
+<td><code>UserPromptSubmit</code></td>
+<td>Перед обробкою промпта</td>
+<td>Заблокувати чи додати контекст</td>
+</tr>
+<tr>
+<td><code>Stop</code></td>
+<td>Коли Claude закінчив відповідати</td>
+<td>Не дати зупинитись</td>
+</tr>
+<tr>
+<td><code>SessionStart</code></td>
+<td>На початку сесії (з <code>compact</code> після ущільнення)</td>
+<td>Додати контекст</td>
+</tr>
+</tbody>
+</table>
+<p>Для Spring-розробника <code>PreToolUse</code> схожий на <code>HandlerInterceptor.preHandle</code>: може не пропустити виклик далі.</p>
+<h3>Коди виходу</h3>
+<table>
+<thead>
+<tr>
+<th>Код</th>
+<th>Що відбувається</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0</code></td>
+<td>Успіх</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td><strong>Блокує</strong> дію (stderr іде моделі як причина)</td>
+</tr>
+<tr>
+<td>інший, зокрема <code>1</code></td>
+<td>Не блокує, дія триває</td>
+</tr>
+</tbody>
+</table>
+<p><strong>2 блокує, 1 ні.</strong></p>
+<h3>Що ще знати</h3>
+<ul>
+<li>Рішення можна повернути JSON-ом у <code>hookSpecificOutput</code> (<code>permissionDecision</code>: <code>allow</code>, <code>deny</code>, <code>ask</code>, <code>defer</code>). Поле на верхньому рівні <strong>мовчки ігнорується</strong>.</li>
+<li><code>deny</code> у hook діє <strong>навіть у <code>bypassPermissions</code></strong>.</li>
+<li>Кілька hooks на одну подію виконуються паралельно, <strong>найсуворіше рішення виграє</strong> (<code>deny</code> &gt; <code>defer</code> &gt; <code>ask</code> &gt; <code>allow</code>).</li>
+<li><strong>Stop hook</strong> спрацьовує після кожної відповіді. Після <strong>8 блокувань поспіль</strong> Claude Code перекриває його. Скрипт має перевіряти поле <code>stop_hook_active</code>.</li>
+<li>Якщо hook впав чи вийшов таймаут, дія <strong>триває</strong> (щоб блокувати, потрібен <code>onFailure: &quot;block&quot;</code>).</li>
+<li>JSON у hook не діє, якщо перед ним щось друкує профіль оболонки (вивід має починатись із <code>{</code>).</li>
+</ul>
+<h2>Крок 6. Skills</h2>
+<p><strong>Skill</strong> це папка з <code>SKILL.md</code>: інструкції для певної задачі.</p>
+<ul>
+<li><strong>Опис завжди в контексті</strong>, повне тіло лише коли skill викликано.</li>
+<li>Дуже довгу процедуру винесіть із CLAUDE.md у skill: вона не коштує контексту, доки не потрібна.</li>
+<li><code>disable-model-invocation: true</code>: skill можете запустити лише ви (для деплою).</li>
+<li><code>context: fork</code>: skill виконується в окремому субагенті.</li>
+</ul>
+<h2>Крок 7. Субагенти</h2>
+<p><strong>Субагент</strong> це помічник з окремим вікном контексту.</p>
+<p>Головна користь: <strong>ізоляція контексту</strong>. Він виконує громіздкий пошук у своєму вікні й повертає лише підсумок.</p>
+<p>Можна обмежити його інструменти (<code>tools</code>) і дозволи. Вбудовані: <code>Explore</code> (швидкий пошук лише для читання), <code>Plan</code>, <code>general-purpose</code>.</p>
+<p>Ліміти за замовчуванням: до 3 рівнів вкладення, до 20 одночасно.</p>
+<h2>Крок 8. Налаштування</h2>
+<p>Пріоритет від найвищого: <strong>managed</strong>, командний рядок, <strong>local</strong>, <strong>shared project</strong>, <strong>user</strong>. Списки (наприклад, <code>allow</code>) зливаються, а не перекриваються. Це схоже на порядок джерел властивостей у Spring.</p>
+<p>Managed settings це налаштування організації, які користувач не може обійти.</p>
+<h2>Крок 9. Sandbox (коротко)</h2>
+<p>Це межа рівня операційної системи навколо shell-команд (Bash, PowerShell, Monitor). <strong>Вимкнений за замовчуванням.</strong> Файлові інструменти, MCP і hooks поза ним.</p>
+<p>Деталі в лекції 8.</p>
+<h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>CLAUDE.md радить. Deny, hooks і managed settings примушують.</li>
+<li>Порядок правил: deny, ask, allow. Allow не вирізає виняток із deny.</li>
+<li>Exit 2 блокує, exit 1 ні.</li>
+<li><code>deny</code> у hook і в правилах діє навіть у <code>bypassPermissions</code>.</li>
+<li>Правило Bash не межа безпеки.</li>
+<li><code>MEMORY.md</code> на старті: 200 рядків чи 25 КБ.</li>
+<li>AGENTS.md читається, лише коли нема CLAUDE.md (чи через імпорт).</li>
+<li>Субагент дає ізоляцію контексту.</li>
+<li>Stop hook: 8 продовжень поспіль, перевіряйте <code>stop_hook_active</code>.</li>
+</ol>
+<h2>Перевірте себе</h2>
+<ol>
+<li>Як <strong>гарантувати</strong>, що Claude не змінить <code>.env</code>?</li>
+<li>Що робить hook із кодом виходу 1?</li>
+<li>Що виграє: <code>deny Bash(aws *)</code> чи <code>allow Bash(aws s3 ls)</code>?</li>
+<li>Скільки <code>MEMORY.md</code> вантажиться на старті?</li>
+<li>Яка основна користь субагента?</li>
+<li>Що з skill завжди в контексті?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li><code>deny</code> для <code>Read</code> і <code>Edit</code> на <code>.env</code> чи PreToolUse hook із exit 2.</li>
+<li>Не блокує: дія триває.</li>
+<li><code>deny</code>.</li>
+<li>Перші 200 рядків чи 25 КБ.</li>
+<li>Ізоляція контексту.</li>
+<li>Лише опис.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 5-claude-code-memory-hooks-skills-permissions-subagents.md.</p>
+
+<nav class="pager"><a href="4-prompts-simple.html">← Лекція 4</a><a href="6-context-and-cache-simple.html">Лекція 6 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

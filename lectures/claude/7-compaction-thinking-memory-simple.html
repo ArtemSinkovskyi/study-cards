@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 7 (просто): ущільнення розмови, роздуми й пам&#x27;ять</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; }
+  th { background:#fff; }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; word-break:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 7 (просто): ущільнення розмови, роздуми й пам'ять</h1>
+<blockquote>
+<p>Спрощена версія. Повна: ../7-compaction-thinking-and-memory-tool.md. Повні таблиці моделей і коди помилок лишились лише там.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>Довга розмова не влазить у вікно, тому стару частину замінюють коротким підсумком. Роздуми моделі мають свої строгі правила повернення. А пам'ять зберігає те, що має пережити підсумок.</strong></p>
+<h2>Частина 1. Ущільнення (compaction)</h2>
+<p>Сервер сам пише підсумок старої частини розмови, і ви не пишете жодного коду підсумовування.</p>
+<p>Є <strong>два режими</strong>:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>За запитом (on-demand)</th>
+<th>За порогом (threshold)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Хто вирішує, коли</td>
+<td>Ви</td>
+<td>API, коли вхід сягає порогу</td>
+</tr>
+<tr>
+<td>Як вмикається</td>
+<td>Верхній параметр <code>compaction</code></td>
+<td>Редагування <code>compact_20260112</code> у <code>context_management</code></td>
+</tr>
+<tr>
+<td>Beta-заголовок</td>
+<td><code>compact-2026-09-04</code></td>
+<td><code>compact-2026-01-12</code></td>
+</tr>
+<tr>
+<td>Де блок підсумку</td>
+<td><strong>Першим</strong> у <code>messages</code></td>
+<td>Після підсумованого, API сам відкидає старе</td>
+</tr>
+</tbody>
+</table>
+<p>Документація радить <strong>режим за запитом</strong>, де він доступний. Обидва в beta.</p>
+<h3>Режим за запитом</h3>
+<ol>
+<li>Надсилаєте розмову з <code>&quot;compaction&quot;: {&quot;type&quot;: &quot;summarize&quot;}</code>.</li>
+<li>Відповідь: <strong>один блок <code>compaction</code></strong> і <code>stop_reason: &quot;compaction&quot;</code>. Відповіді моделі нема.</li>
+<li>Ставите цей блок <strong>першим</strong> у <code>messages</code> і <strong>прибираєте підсумовані повідомлення</strong>.</li>
+<li>Блок шлете <strong>точно як отримали</strong>, з підписом. Рівно один блок на запит.</li>
+</ol>
+<p>Дві помилки, які не дають жодного повідомлення:</p>
+<ul>
+<li>підсумовані повідомлення лишились <strong>після</strong> блока: API знову відправить їх моделі;</li>
+<li>блок <strong>не додали</strong> в наступний запит: модель не бачить підсумку.</li>
+</ul>
+<p>Якщо підсумовані повідомлення лишились <strong>перед</strong> блоком, буде 400.</p>
+<p>Ще правила:</p>
+<ul>
+<li><code>compaction</code> і <code>context_management</code> <strong>не можна</strong> в одному запиті;</li>
+<li>свій промпт підсумку: <code>instructions</code> до <strong>16 384 символів</strong>, він <strong>повністю замінює</strong> стандартний. Скажіть, що зберегти, і <strong>не викликати інструментів</strong>;</li>
+<li>якщо підсумку не вийшло, відповідь усе одно <strong>200 із порожнім вмістом</strong>, тож перевіряйте <code>stop_reason</code>;</li>
+<li>зображення, документи, завантаження й отримані URL у підсумованому <strong>зникають</strong>.</li>
+</ul>
+<h3>Режим за порогом</h3>
+<ul>
+<li>Поріг за замовчуванням <strong>150 000</strong> вхідних токенів, мінімум <strong>50 000</strong>.</li>
+<li>Блок приходить на початку відповіді; додавайте повний <code>response.content</code> разом із ним.</li>
+<li>Якщо в запиті є <code>tools</code>, модель інколи викликає інструмент замість підсумку, і блок має <code>content: null</code>. Тоді в <code>instructions</code> <strong>забороніть виклики інструментів</strong>.</li>
+<li>Можна зупинитись після підсумку (<code>pause_after_compaction</code>), щоб зберегти останні повідомлення.</li>
+</ul>
+<h3>Вартість</h3>
+<p>Підсумовування теж коштує. <strong>Рахуйте суму <code>usage.iterations</code></strong>, а не верхні <code>input_tokens</code> і <code>output_tokens</code> (вони не включають ущільнення).</p>
+<h2>Частина 2. Роздуми (thinking)</h2>
+<p>Нові моделі мають <strong>adaptive thinking</strong>: модель сама вирішує, думати й скільки. Блок <code>thinking</code> іде перед текстом і має <code>signature</code>: зашифровану копію повних роздумів.</p>
+<h3>Як показувати роздуми: display</h3>
+<table>
+<thead>
+<tr>
+<th>Значення</th>
+<th>Що дає</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>summarized</code></td>
+<td>Видно короткий підсумок роздумів</td>
+</tr>
+<tr>
+<td><code>omitted</code></td>
+<td>Блок приходить порожнім, підпис лишається</td>
+</tr>
+<tr>
+<td><code>updates</code> (beta)</td>
+<td>Короткі оновлення прогресу між викликами</td>
+</tr>
+</tbody>
+</table>
+<p><code>omitted</code> дає <strong>менше затримки до першого токена тексту, а вартість та сама</strong>. Платите за <strong>повні</strong> згенеровані роздуми, а не за видимий підсумок.</p>
+<h3>Що не можна</h3>
+<ul>
+<li><code>thinking: enabled</code> з <code>budget_tokens</code> на нових моделях (Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable, Mythos, Opus 5, Sonnet 5, Opus 4.8 і 4.7) дає <strong>400</strong>.</li>
+<li>Перемикати режим thinking <strong>посеред ходу з викликами інструментів</strong> не можна: API мовчки вимкне роздуми для того запиту. Перемикайте між ходами.</li>
+<li><strong>З версії API 2026-10-21</strong> будь-яке значення <code>temperature</code>, <code>top_p</code>, <code>top_k</code> дає 400 на кожній моделі.</li>
+</ul>
+<h3>Як повертати блоки</h3>
+<ul>
+<li>У межах ходу з інструментами блоки thinking <strong>обов'язково</strong> повертають без змін.</li>
+<li>Змінений блок дає 400.</li>
+<li>Є також <code>redacted_thinking</code>: зашифровані блоки без тексту, їх теж повертають без змін. Типова помилка: фільтр <code>block.type == &quot;thinking&quot;</code> мовчки губить їх і ламає протокол.</li>
+</ul>
+<h2>Частина 3. Memory tool</h2>
+<p>Це інструмент, яким Claude зберігає й читає файли між розмовами.</p>
+<p>Він <strong>клієнтський</strong>: Claude лише просить операцію, а виконує ваш застосунок над сховищем, яке ви контролюєте.</p>
+<ul>
+<li>Файли лежать у каталозі <code>/memories</code> (ваш код відображає його на реальне сховище).</li>
+<li>Команди: <code>view</code>, <code>create</code>, <code>str_replace</code>, <code>insert</code>, <code>delete</code>, <code>rename</code>.</li>
+<li>Кореневий <code>/memories</code> <strong>не можна</strong> видалити чи перейменувати.</li>
+</ul>
+<p><strong>Безпека лежить на вас.</strong> Шлях типу <code>/memories/../../secrets.env</code> виходить за каталог (path traversal). Перевіряйте кожен шлях: починається з <code>/memories</code>, канонізуйте, відхиляйте <code>../</code> і <code>%2e%2e%2f</code>.</p>
+<p>Пам'ять поєднують із ущільненням: підсумок зберігає загальне, а пам'ять усе, що <strong>має</strong> пережити підсумок.</p>
+<p><strong>Багатосесійний шаблон:</strong> перша сесія створює журнал прогресу й чекліст, кожна наступна починає з їх читання, наприкінці оновлює журнал. Функцію позначайте завершеною лише після наскрізної перевірки.</p>
+<h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>Два режими ущільнення: за запитом (блок першим, ви прибираєте підсумовані) і за порогом (150 000, мінімум 50 000).</li>
+<li>Вартість це сума <code>usage.iterations</code>.</li>
+<li>Без підсумку приходить 200 із порожнім вмістом: перевіряйте <code>stop_reason</code>.</li>
+<li><code>display: omitted</code> економить затримку, не гроші.</li>
+<li><code>enabled</code> з <code>budget_tokens</code> на нових моделях дає 400.</li>
+<li>Thinking не перемикають посеред ходу з інструментами.</li>
+<li><code>temperature</code> у версії API 2026-10-21 дає 400 на всіх моделях.</li>
+<li><code>redacted_thinking</code> теж повертають без змін.</li>
+<li>Memory tool клієнтський: path traversal захищаєте ви.</li>
+</ol>
+<h2>Перевірте себе</h2>
+<ol>
+<li>Де має стояти блок <code>compaction</code> у режимі за запитом?</li>
+<li>Як порахувати вартість із ущільненням?</li>
+<li>Що станеться, якщо підсумовані повідомлення лишились <strong>після</strong> блока?</li>
+<li>Що економить <code>display: omitted</code>?</li>
+<li>Що буде, якщо перемкнути thinking посеред ходу з інструментами?</li>
+<li>Хто виконує операції memory tool?</li>
+<li>Яка найважливіша перевірка в його обробнику?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>Першим у <code>messages</code>, підсумовані повідомлення прибрати.</li>
+<li>Сума записів <code>usage.iterations</code>.</li>
+<li>Помилки не буде, API знову надішле їх моделі.</li>
+<li>Затримку до першого токена. Вартість та сама.</li>
+<li>API мовчки вимкне роздуми для того запиту.</li>
+<li>Ваш застосунок.</li>
+<li>Що шлях лишається в <code>/memories</code> (канонізація, відмова <code>../</code>).</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 7-compaction-thinking-and-memory-tool.md.</p>
+
+<nav class="pager"><a href="6-context-and-cache-simple.html">← Лекція 6</a><a href="8-effort-budgets-sandbox-hooks-simple.html">Лекція 8 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

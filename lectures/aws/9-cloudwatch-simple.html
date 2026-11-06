@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 9 (просто): CloudWatch і CloudTrail</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; }
+  th { background:#fff; }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; word-break:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 9 (просто): CloudWatch і CloudTrail</h1>
+<blockquote>
+<p>Середній рівень: усі правила й числа з повної лекції, але простими словами й без розповіді про наш проєкт. Повна: ../9-cloudwatch.md. Ціни й ліміти в повній лекції звірено з документацією AWS на 2026-10-27; що не вдалося підтвердити, позначено <em>(не звірено)</em>. Це домен Troubleshooting and Optimization (22%) і частина Development.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>CloudWatch відповідає «як працює», CloudTrail «хто це зробив», X-Ray «де в ланцюжку».</strong> Метрики кажуть «що зламалося», логи «чому», трейс «де».</p>
+<h2>Крок 1. Словник</h2>
+<table>
+<thead>
+<tr>
+<th>Термін</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Метрика</strong></td>
+<td>часовий ряд чисел (<code>Errors</code> функції за хвилину); має namespace, ім'я, dimensions</td>
+</tr>
+<tr>
+<td><strong>Namespace</strong></td>
+<td>контейнер метрик сервісу (<code>AWS/Lambda</code>, <code>AWS/SQS</code>)</td>
+</tr>
+<tr>
+<td><strong>Dimension</strong></td>
+<td>пара «ім'я = значення», що уточнює метрику (<code>FunctionName=...</code>); <strong>кожна нова комбінація dimensions це нова метрика</strong></td>
+</tr>
+<tr>
+<td><strong>Alarm</strong></td>
+<td>правило, що стежить за <strong>однією</strong> метрикою й змінює стан</td>
+</tr>
+<tr>
+<td><strong>Log group / log stream</strong></td>
+<td>група логів (одна на функцію) і потоки в ній (по одному на середовище)</td>
+</tr>
+<tr>
+<td><strong>Logs Insights</strong></td>
+<td>мова запитів над логами</td>
+</tr>
+<tr>
+<td><strong>Dashboard</strong></td>
+<td>сторінка з віджетами</td>
+</tr>
+<tr>
+<td>statistic</td>
+<td>агрегація: Sum, Average, Maximum, p99</td>
+</tr>
+<tr>
+<td>period</td>
+<td>інтервал агрегації, секунди</td>
+</tr>
+<tr>
+<td><code>TreatMissingData</code></td>
+<td>що робити, коли даних нема</td>
+</tr>
+<tr>
+<td>composite alarm</td>
+<td>alarm, що поєднує інші alarm</td>
+</tr>
+<tr>
+<td>metric filter</td>
+<td>правило, що рахує патерни в логах як метрику</td>
+</tr>
+<tr>
+<td>subscription filter</td>
+<td>пересилання логів в інший сервіс</td>
+</tr>
+<tr>
+<td>EMF</td>
+<td>Embedded Metric Format: метрики прямо з JSON-логу</td>
+</tr>
+<tr>
+<td>Live Tail</td>
+<td>потік логів у реальному часі</td>
+</tr>
+</tbody>
+</table>
+<h2>Крок 2. Метрики Lambda без налаштування</h2>
+<p>Функція публікує в <code>AWS/Lambda</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Метрика</th>
+<th>Що означає</th>
+<th>Нюанс</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Invocations</code></td>
+<td>кількість викликів</td>
+<td>не рахує тротлінг</td>
+</tr>
+<tr>
+<td><code>Errors</code></td>
+<td>виклики з помилкою</td>
+<td><strong>не включає <code>Throttles</code></strong></td>
+</tr>
+<tr>
+<td><code>Throttles</code></td>
+<td>відхилені через ліміт паралельності</td>
+<td></td>
+</tr>
+<tr>
+<td><code>Duration</code></td>
+<td>тривалість</td>
+<td>статистики p50, p99</td>
+</tr>
+<tr>
+<td><code>ConcurrentExecutions</code></td>
+<td>паралельні виконання</td>
+<td></td>
+</tr>
+<tr>
+<td><code>AsyncEventAge</code></td>
+<td>вік async-події на момент обробки</td>
+<td>лише async</td>
+</tr>
+<tr>
+<td><code>AsyncEventsDropped</code></td>
+<td>async-події, відкинуті після повторів без DLQ</td>
+<td>лише async</td>
+</tr>
+<tr>
+<td><code>DeadLetterErrors</code></td>
+<td>не вдалося записати в DLQ</td>
+<td></td>
+</tr>
+<tr>
+<td><code>IteratorAge</code></td>
+<td>відставання потоку</td>
+<td>лише Kinesis і DynamoDB Streams</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Пастка іспиту: Lambda не публікує метрики пам'яті.</strong> Пам'ять видно лише в рядку <code>REPORT</code> (<code>Max Memory Used</code>). Метрик EC2 «пам'ять» і «диск» теж нема без CloudWatch Agent.</p>
+<h2>Крок 3. Логи</h2>
+<p>Функція пише stdout у log group <code>/aws/lambda/&lt;назва&gt;</code>. Для запису потрібна роль виконання (<code>logs:CreateLogStream</code>, <code>logs:PutLogEvents</code>, політика <code>AWSLambdaBasicExecutionRole</code>).</p>
+<p>Кожен виклик додає <code>START</code>, <code>END</code> і <code>REPORT</code> (<code>Duration</code>, <code>Billed Duration</code>, <code>Memory Size</code>, <code>Max Memory Used</code>, <code>Init Duration</code>). <strong><code>Init Duration</code> є лише при cold start і входить у <code>Billed Duration</code>.</strong></p>
+<p><strong>Retention.</strong> Допустимі значення: 1, 3, 5, 7, 14, 30, 60, 90 днів тощо, або «ніколи». <strong>Лог-групи, які AWS створює сам, мають «Never expire»</strong>, тому групу описують у шаблоні й вказують у <code>LoggingConfig.LogGroup</code>. Видалення після retention не миттєве: до <strong>72 годин</strong> після закінчення строку.</p>
+<h2>Крок 4. Alarm</h2>
+<p>Три стани: <code>OK</code>, <code>ALARM</code>, <code>INSUFFICIENT_DATA</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Параметр</th>
+<th>Зміст</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Namespace</code>, <code>MetricName</code>, <code>Dimensions</code></td>
+<td>що міряємо</td>
+</tr>
+<tr>
+<td><code>Statistic</code></td>
+<td>як агрегуємо в періоді (<code>Sum</code>)</td>
+</tr>
+<tr>
+<td><code>Period</code></td>
+<td>довжина одного datapoint (60 с для Lambda); метрики SQS надходять щохвилини, але можна ставити й 300 с</td>
+</tr>
+<tr>
+<td><code>EvaluationPeriods</code></td>
+<td>скільки періодів дивимось</td>
+</tr>
+<tr>
+<td><code>Threshold</code> і <code>ComparisonOperator</code></td>
+<td>умова</td>
+</tr>
+<tr>
+<td><code>TreatMissingData</code></td>
+<td><code>breaching</code>, <code>notBreaching</code>, <code>ignore</code>, <code>missing</code> (за замовчуванням)</td>
+</tr>
+<tr>
+<td><code>AlarmActions</code></td>
+<td>що робити в <code>ALARM</code> (SNS, Auto Scaling, EC2 stop/terminate/recover, Systems Manager)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Дії можна задати окремо для <code>ALARM</code>, <code>OK</code> і <code>INSUFFICIENT_DATA</code>. Якщо задано лише <code>AlarmActions</code>, листа про повернення в <code>OK</code> не буде.</li>
+<li><strong><code>TreatMissingData: notBreaching</code></strong> для рідкісних подій: без викликів метрика <code>Errors</code> не публікується, і без цього alarm пішов би в <code>INSUFFICIENT_DATA</code>.</li>
+<li>Метрики SQS публікуються лише поки <strong>черга активна</strong>, тому порожня черга дає <code>INSUFFICIENT_DATA</code>.</li>
+<li><strong>Datapoints to alarm</strong> («M з N»): спрацьовує, коли M з N останніх періодів порушують умову.</li>
+<li><strong>Composite alarm</strong> поєднує alarm логікою AND/OR і зменшує шум.</li>
+<li>Alarm на <strong>metric math</strong> рахується як кілька alarm-метрик.</li>
+<li>Alarm <code>Errors</code> може використовувати <strong>CodeDeploy</strong> під час canary для автоматичного відкату.</li>
+</ul>
+<h2>Крок 5. SNS для сповіщень</h2>
+<p>Alarm публікує в топік SNS, топік розсилає (email, SMS, HTTP, Lambda, SQS).</p>
+<ul>
+<li>Підписка за email створюється у стані <strong><code>PendingConfirmation</code></strong>: CloudFormation її не підтверджує, людина натискає <strong>Confirm subscription</strong> у листі від AWS. Доки не підтвердили, листів нема.</li>
+<li>Alarm CloudWatch <strong>не може публікувати в топік, зашифрований керованим ключем <code>alias/aws/sns</code></strong>: потрібен власний KMS-ключ із дозволом для <code>cloudwatch.amazonaws.com</code>.</li>
+<li>Типовий топік дозволяє публікувати принципалам власного акаунта.</li>
+</ul>
+<h2>Крок 6. Дашборд і зберігання метрик</h2>
+<p>Дашборд описують у шаблоні (<code>AWS::CloudWatch::Dashboard</code>, JSON, <code>!Sub</code>). Його ARN без регіону: <code>arn:aws:cloudwatch::&lt;акаунт&gt;:dashboard/...</code>.</p>
+<p><strong>Зберігання метрик:</strong> менше 60 с: 3 години; 1 хв: 15 днів; 5 хв: 63 дні; 1 год: 455 днів (приблизно 15 місяців). Тому графіки лишаються навіть після видалення ресурсів.</p>
+<h2>Крок 7. Logs Insights, metric filter, EMF</h2>
+<ul>
+<li><strong>Logs Insights:</strong> запит, наприклад <code>fields @timestamp, @message | filter @message like /ERROR/ | sort @timestamp desc | limit 20</code>. Платно за ГБ просканованих даних.</li>
+<li><strong>Metric filter:</strong> правило на патерн у логах, яке з кожного збігу робить значення власної метрики. Власні метрики поза free tier (10 безкоштовно) платні.</li>
+<li><strong>EMF:</strong> спеціальний JSON у stdout, з якого CloudWatch сам витягує метрики без <code>PutMetricData</code>. Рекомендований спосіб власних метрик у Lambda (Powertools).</li>
+<li><strong>Subscription filter:</strong> пересилає логи в Kinesis, Firehose або іншу Lambda.</li>
+</ul>
+<p><strong>Роздільна здатність:</strong> стандартна 1 хв, <strong>high-resolution</strong> до 1 с (<code>StorageResolution=1</code>, власні метрики через <code>PutMetricData</code>); high-res alarm з періодом 10 або 30 с. <code>PutMetricData</code> потребує <code>cloudwatch:PutMetricData</code>.</p>
+<h2>Крок 8. Ціни й як не потрапити на гроші</h2>
+<table>
+<thead>
+<tr>
+<th>Що</th>
+<th>Ціна</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Перші 10 стандартних alarm на акаунт</td>
+<td><strong>безкоштовно</strong> (рахується кількість alarm, не спрацювань)</td>
+</tr>
+<tr>
+<td>Далі</td>
+<td>близько 0,10 USD за alarm на місяць (high-res близько 0,30, composite близько 0,50)</td>
+</tr>
+<tr>
+<td>SNS: перші 1000 листів на місяць</td>
+<td>безкоштовно</td>
+</tr>
+<tr>
+<td>Дашборди</td>
+<td>3 безкоштовно (до 50 метрик кожен)</td>
+</tr>
+<tr>
+<td>Логи</td>
+<td>5 ГБ на місяць безкоштовно на збір, зберігання і скановані Logs Insights дані разом; далі збір 0,50 USD за ГБ</td>
+</tr>
+<tr>
+<td>Власні метрики</td>
+<td>перші 10 безкоштовно</td>
+</tr>
+<tr>
+<td>Lambda</td>
+<td>1 млн запитів і 400 000 ГБ·с безкоштовно; 0,20 USD за 1 млн; тарифікований час включає ініціалізацію поза handler</td>
+</tr>
+</tbody>
+</table>
+<p>Як не потрапити:</p>
+<ol>
+<li>Тримайте alarm у межах 10 на акаунт.</li>
+<li>Не вмикайте платне без потреби (Lambda Insights, Application Signals, X-Ray на всіх викликах, provisioned concurrency).</li>
+<li>Не кладіть змінні значення в dimensions власних метрик.</li>
+<li>Не лишайте <code>DEBUG</code>-логування постійно.</li>
+<li>Завжди задавайте retention для нових лог-груп.</li>
+<li>Стежте за Billing → Free Tier і бюджетами.</li>
+</ol>
+<h2>Крок 9. Перевірка ланцюга alarm → пошта</h2>
+<p><code>aws cloudwatch set-alarm-state --alarm-name ... --state-value ALARM --state-reason test</code> примусово переводить alarm у <code>ALARM</code>, не чіпаючи реальну метрику; стан за кілька хвилин повертається сам, бо CloudWatch перераховує метрику.</p>
+<h2>Крок 10. Для іспиту DVA</h2>
+<ul>
+<li><strong>Метрики за замовчуванням:</strong> EC2 раз на 5 хв (detailed monitoring раз на хвилину, платно); пам'ять і диск EC2 лише через CloudWatch Agent; Lambda пам'ять не публікує.</li>
+<li><strong>Власні метрики з Lambda:</strong> EMF (без викликів API) або <code>PutMetricData</code>.</li>
+<li><strong>CloudWatch проти CloudTrail:</strong> продуктивність і стан проти «хто викликав API» (аудит).</li>
+<li><strong>CloudWatch проти X-Ray:</strong> метрики й логи проти розподіленого трасування.</li>
+<li>Пастки: «alarm не листує» означає непідтверджена підписка SNS чи нема <code>AlarmActions</code>; «метрики пропали, alarm в <code>INSUFFICIENT_DATA</code>» означає <code>TreatMissingData</code>; «логи не пишуться» означає нема <code>logs:*</code> у ролі виконання; «логи вічні й дорожчають» означає не задано retention.</li>
+</ul>
+<h2>Крок 11. CloudTrail</h2>
+<p><strong>CloudTrail</strong> це журнал аудиту: кожен виклик API акаунта (хто, коли, з якого принципала, чи вдалося).</p>
+<table>
+<thead>
+<tr>
+<th>Що</th>
+<th>Ціна</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Event history</strong> (90 днів management-подій, вкладка в консолі)</td>
+<td>безкоштовно, увімкнено за замовчуванням</td>
+</tr>
+<tr>
+<td>Trail (потік подій у S3), перша копія management-подій регіону</td>
+<td>безкоштовно (платите лише за S3)</td>
+</tr>
+<tr>
+<td>Додаткові копії management-подій</td>
+<td>близько 2 USD за 100 000 подій</td>
+</tr>
+<tr>
+<td><strong>Data events</strong> (читання об'єктів S3, виклики Lambda)</td>
+<td>близько 0,10 USD за 100 000 подій</td>
+</tr>
+<tr>
+<td>Insights (близько 0,35 USD за 100 000 management-подій), CloudTrail Lake</td>
+<td>платно</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Management-події</strong> це керування ресурсами (<code>CreateFunction</code>, <code>PutRolePolicy</code>, <code>AssumeRoleWithWebIdentity</code>) і пишуться завжди.</li>
+<li><strong>Data events</strong> це операції над вмістом; <strong>вимкнені за замовчуванням</strong>, бо їх дуже багато.</li>
+<li>Окремий trail потрібен, коли треба зберігати аудит <strong>довше 90 днів</strong>, є вимоги безпеки, або алерти на небезпечні дії (вхід root, зміна IAM) через EventBridge. Дешевий варіант: multi-region trail з management-подіями в приватний S3-бакет.</li>
+<li>У невдалій події <code>AssumeRoleWithWebIdentity</code> нема <code>Resource name</code>: це ознака відхиленого виклику. Причину читають у JSON події: <code>errorCode</code>, <code>errorMessage</code>. Тимчасові ключі STS мають <code>AccessKey</code> з <code>ASIA...</code>.</li>
+<li>Для запитів над журналом: Athena або CloudTrail Lake.</li>
+</ul>
+<h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>Alarm стежить за <strong>однією</strong> метрикою; платять за кількість alarm, не за спрацювання; 10 безкоштовні.</li>
+<li>Щоб alarm був корисним, потрібні <code>AlarmActions</code> і підтверджена підписка SNS.</li>
+<li><code>TreatMissingData: notBreaching</code> для рідкісних подій.</li>
+<li>Lambda не публікує метрики пам'яті: дивіться <code>REPORT</code>.</li>
+<li><code>Errors</code> не включає <code>Throttles</code>.</li>
+<li>Власні метрики з Lambda: EMF. High-resolution: 1 с.</li>
+<li>Retention задавайте завжди: автоматичні лог-групи вічні.</li>
+<li>CloudTrail: Event history 90 днів безкоштовно, data events вимкнені за замовчуванням.</li>
+<li>Alarm не може писати в SNS-топік з <code>alias/aws/sns</code>.</li>
+</ol>
+<h2>Перевірте себе</h2>
+<ol>
+<li>Чим <code>INSUFFICIENT_DATA</code> відрізняється від <code>ALARM</code>?</li>
+<li>Що робить <code>TreatMissingData: notBreaching</code> і чому підходить для рідкісних викликів?</li>
+<li>Чому alarm не надсилає лист, хоча він у <code>ALARM</code>? Назвіть дві причини.</li>
+<li>Що рахується за плату: alarm чи їх спрацювання?</li>
+<li>Чому в метриках Lambda нема пам'яті і де її побачити?</li>
+<li>Як опублікувати власну метрику з Lambda без виклику API?</li>
+<li>Чим Logs Insights, metric filter і subscription filter відрізняються?</li>
+<li>Чим відрізняються CloudWatch, CloudTrail і X-Ray?</li>
+<li>Як перевірити ланцюг alarm → SNS → пошта, не ламаючи метрику?</li>
+<li>Чому лог-група Lambda, створена AWS автоматично, дорожча в довгостроці?</li>
+<li>Які події CloudTrail безкоштовні, а які платні? Чому data events вимкнені?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li><code>INSUFFICIENT_DATA</code> означає даних замало (метрика не публікується), <code>ALARM</code> означає умова порушена. Перший виникає, наприклад, коли функцію не викликають.</li>
+<li>Відсутність даних вважається «не поломкою». Без викликів метрика <code>Errors</code> не публікується.</li>
+<li>Підписка SNS не підтверджена (<code>PendingConfirmation</code>) або нема <code>AlarmActions</code>. Також топік може бути під <code>alias/aws/sns</code>.</li>
+<li>Кількість alarm (10 перших безкоштовні).</li>
+<li>Lambda їх не публікує. Дивіться <code>Max Memory Used</code> у рядку <code>REPORT</code>.</li>
+<li>EMF: структурований JSON у лог (Powertools Metrics).</li>
+<li>Insights це запити над логами, metric filter робить метрику з патерну, subscription filter пересилає логи в Kinesis, Firehose чи Lambda.</li>
+<li>CloudWatch: стан і продуктивність. CloudTrail: хто викликав API. X-Ray: шлях запиту.</li>
+<li><code>aws cloudwatch set-alarm-state ... --state-value ALARM</code>.</li>
+<li>Retention «Never expire» за замовчуванням, лог-групу створює AWS без вашого ресурсу.</li>
+<li>Безкоштовні: Event history (90 днів) і перша копія management-подій у trail. Платні: додаткові копії, data events, Insights. Data events дуже багато, тому вимкнені.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 9-cloudwatch.md.</p>
+
+<nav class="pager"><a href="8-ci-secrets-oidc-simple.html">← Лекція 8</a><a href="10-sqs-sns-simple.html">Лекція 10 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

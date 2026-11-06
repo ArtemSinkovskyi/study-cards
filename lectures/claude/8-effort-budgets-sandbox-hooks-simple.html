@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 8 (просто): effort, бюджет завдання, збережені роздуми, sandbox і hooks</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; }
+  th { background:#fff; }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; word-break:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 8 (просто): effort, бюджет завдання, збережені роздуми, sandbox і hooks</h1>
+<blockquote>
+<p>Спрощена версія. Повна: ../8-effort-task-budgets-preserved-thinking-sandbox-hooks.md. Рідкісні події hooks і довгі списки моделей лишились лише там.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>Це лекція про керування витратами (effort, бюджет), про те, що не можна ламати в розмові (збережені роздуми), і про межі безпеки (sandbox, hooks).</strong></p>
+<h2>Частина 1. Effort</h2>
+<p><strong>Effort</strong> це параметр <code>output_config.effort</code>: скільки зусиль вкладає модель. Він діє на <strong>всі токени</strong>: текст, виклики інструментів і роздуми.</p>
+<table>
+<thead>
+<tr>
+<th>Рівень</th>
+<th>Коли</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>low</code></td>
+<td>Прості завдання, швидкість, субагенти</td>
+</tr>
+<tr>
+<td><code>medium</code></td>
+<td>Баланс швидкості й якості</td>
+</tr>
+<tr>
+<td><code>high</code></td>
+<td>Складні завдання</td>
+</tr>
+<tr>
+<td><code>xhigh</code></td>
+<td>Довгі агентні й кодові завдання</td>
+</tr>
+<tr>
+<td><code>max</code></td>
+<td>Найглибше мислення без обмежень</td>
+</tr>
+</tbody>
+</table>
+<p>Що знати:</p>
+<ul>
+<li>За замовчуванням <code>high</code>, а на <strong>Opus 5.5 і Haiku 5.5 <code>medium</code></strong>.</li>
+<li>Effort це <strong>сигнал, а не жорсткий бюджет</strong>. Жорстка стеля це <code>max_tokens</code>.</li>
+<li><strong><code>adaptive</code> не є рівнем effort</strong>: це режим thinking.</li>
+<li>Нижчий effort означає менше й коротші виклики інструментів.</li>
+<li>Щоб думати менше, спершу <strong>знижуйте effort</strong>, а не просіть у промпті.</li>
+</ul>
+<h3>Зміна effort у розмові</h3>
+<table>
+<thead>
+<tr>
+<th>Спосіб</th>
+<th>Що з кешем</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Нове верхнє значення <code>effort</code> у наступному запиті</td>
+<td><strong>Скидає кеш</strong></td>
+</tr>
+<tr>
+<td><strong>Per-message effort</strong> (повідомлення <code>role: &quot;system&quot;</code> з <code>output_config.effort</code>, beta)</td>
+<td><strong>Зберігає кеш</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Тому в розмові з кешем тримайте верхній effort сталим або використовуйте per-message effort.</p>
+<h2>Частина 2. Task budget (бюджет завдання)</h2>
+<p><strong>Task budget</strong> це дорадчий бюджет токенів на <strong>весь цикл</strong> агента (багато запитів). Модель бачить зворотний відлік і сама планує роботу, щоб закінчити акуратно.</p>
+<p>Правила:</p>
+<ul>
+<li>налаштування <code>output_config.task_budget</code> з <code>type: &quot;tokens&quot;</code> і <code>total</code>; потрібен beta-заголовок;</li>
+<li><strong>мінімум 20 000 токенів</strong>, менше дає 400;</li>
+<li>він <strong>дорадчий</strong>: модель може трохи перевищити. Жорстка стеля лишається <code>max_tokens</code>;</li>
+<li>рахується те, що модель <strong>бачить</strong> (роздуми, виклики, результати, текст), а не те, що ви повторно надсилаєте в історії;</li>
+<li><strong>не підтримується в Claude Code</strong>;</li>
+<li>занадто малий бюджет може призвести до поведінки, схожої на відмову: модель рано зупиняється.</li>
+</ul>
+<p>Поле <code>remaining</code> потрібне лише коли ваш код сам ущільнює історію. Не зменшуйте його на кожному запиті: це скидає кеш.</p>
+<h2>Частина 3. Збережені роздуми (Claude 5.1+)</h2>
+<p>Коли ви повертаєте блок <code>thinking</code>, API перевіряє його підпис: <strong>чи може модель його прочитати і чи все перед ним лишилось незмінним</strong>.</p>
+<p>Правило: працюйте <strong>append-only</strong>, тобто лише додавайте повідомлення в кінець.</p>
+<table>
+<thead>
+<tr>
+<th>Дозволено</th>
+<th>Ламає блоки</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Додати повідомлення в кінець</td>
+<td>Змінити <code>system</code></td>
+</tr>
+<tr>
+<td>Змінити <code>effort</code>, <code>max_tokens</code>, <code>tool_choice</code></td>
+<td>Додати, прибрати чи змінити інструмент</td>
+</tr>
+<tr>
+<td>Додати чи прибрати <code>cache_control</code></td>
+<td>Змінити чи видалити раніші повідомлення</td>
+</tr>
+<tr>
+<td>Серверне ущільнення чи context editing</td>
+<td>Скоротити раніший <code>tool_result</code></td>
+</tr>
+</tbody>
+</table>
+<p>Що робити замість правок: зміни <code>system</code> через повідомлення <code>role: &quot;system&quot;</code> в кінці, зміни інструментів через блоки <code>tool_addition</code> і <code>tool_removal</code>, зміну effort через per-message effort.</p>
+<p>Режим невідповідності (<code>thinking.block_binding.prefix_mismatch_behavior</code>):</p>
+<ul>
+<li><code>&quot;error&quot;</code>: 400. Для тестів.</li>
+<li><code>&quot;drop_block&quot;</code>: відкидає невдалий і всі наступні блоки. Лише заплата, бо може змінити якість.</li>
+</ul>
+<p>У відповіді є масив <strong><code>input_transformations</code></strong> зі списком відкинутих блоків. <strong>Логуйте його на кожному ході.</strong></p>
+<h2>Частина 4. Ущільнення: два додатки</h2>
+<ul>
+<li><strong>Keep-tail:</strong> останні ходи лишаються дослівно після підсумку. Розріз має бути там, де <strong>жоден виклик інструмента не лишився відкритим</strong>, інакше API відхилить запит.</li>
+<li><strong>Фонове ущільнення:</strong> запит підсумку йде, поки розмова триває. Коли блок прийшов, <strong>відкиньте рівно ті повідомлення, що надсилали</strong>, а пізніші ходи лишіть після блока.</li>
+</ul>
+<p>Умова для обох: <code>system</code> і <code>tools</code> не змінюються, інакше роздуми в залишених ходах стають недійсними.</p>
+<h2>Частина 5. Sandbox у Claude Code</h2>
+<p><strong>Sandbox</strong> це межа рівня операційної системи навколо shell-команд (<strong>Bash, PowerShell, Monitor</strong>) і їхніх дочірніх процесів.</p>
+<p>Що знати:</p>
+<ul>
+<li><strong>Вимкнений за замовчуванням.</strong> Вмикається <code>/sandbox</code> чи <code>sandbox.enabled: true</code>.</li>
+<li>Працює на macOS, Linux і WSL2. На звичайному Windows команди йдуть без sandbox.</li>
+<li><strong>Поза ним:</strong> файлові інструменти Claude (Read, Edit, Write), MCP-сервери й hooks. Їх захищають правила дозволів.</li>
+<li>За замовчуванням <strong>читання відкрите майже всюди</strong>, зокрема <code>~/.ssh</code> і <code>~/.aws/credentials</code>. Додайте <code>denyRead</code>, якщо це проблема.</li>
+<li>Мережа йде через проксі зі списком дозволених доменів. Проксі <strong>не розшифровує TLS</strong>, тому можливий обхід (domain fronting): широкі домени на кшталт <code>github.com</code> ризиковані.</li>
+<li>Змінні середовища (з секретами) успадковуються.</li>
+</ul>
+<p>Два режими sandbox:</p>
+<table>
+<thead>
+<tr>
+<th>Режим</th>
+<th>Що</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Auto-allow</td>
+<td>Sandbox-команди без запиту (не плутайте з auto mode)</td>
+</tr>
+<tr>
+<td>Regular</td>
+<td>Кожна команда за звичайним потоком дозволів</td>
+</tr>
+</tbody>
+</table>
+<p>Як вимкнути команду з sandbox: <code>excludedCommands</code> (виконується <strong>без обмежень</strong>, ризиковано) і повторна спроба <code>dangerouslyDisableSandbox</code> (вимикається <code>allowUnsandboxedCommands: false</code>).</p>
+<p>Для організацій: у managed settings <code>sandbox.enabled</code>, <code>failIfUnavailable: true</code>, <code>allowUnsandboxedCommands: false</code>.</p>
+<p><strong>Sandbox і дозволи доповнюють одне одного.</strong> Правила перевіряють виклик до виконання, а sandbox тримається навіть тоді, коли дозволена команда робить більше, ніж натякає ім'я.</p>
+<h2>Частина 6. Hooks: що ще треба знати</h2>
+<ul>
+<li><strong><code>PreToolUse</code> не спрацьовує на <code>@file</code></strong> у промпті. Блокуйте шляхи через <code>Read</code> deny.</li>
+<li><strong><code>updatedInput</code></strong> замінює <strong>весь</strong> вхід інструмента.</li>
+<li><strong><code>PostToolUse</code></strong> не може скасувати дію: інструмент уже виконано.</li>
+<li><strong><code>PermissionRequest</code>:</strong> забороняти можна лише <strong>command hook</strong> із <code>decision.behavior: &quot;deny&quot;</code>. Prompt hook із <code>ok: false</code> тут <strong>не діє</strong>.</li>
+<li><strong><code>PreCompact</code>:</strong> exit 2 чи <code>decision: &quot;block&quot;</code> блокує ущільнення.</li>
+<li><strong><code>Stop</code> hook:</strong> до <strong>8 продовжень поспіль</strong>, перевіряйте <code>stop_hook_active</code>. Є також нейтральніший <code>additionalContext</code>.</li>
+<li><strong>Async hook</strong> (<code>&quot;async&quot;: true</code>, лише <code>command</code>) <strong>нічого не блокує</strong>, результат приходить на наступному ході.</li>
+<li><strong>Prompt hook</strong> повертає <code>{&quot;ok&quot;: true|false, &quot;reason&quot;}</code>; для <code>Stop</code> <code>ok: false</code> змушує Claude працювати далі, для <code>PreToolUse</code> забороняє виклик.</li>
+<li><strong>Безпека:</strong> command hooks виконуються <strong>з усіма правами вашого користувача</strong>. У режимі <code>-p</code> (без діалогу довіри) hooks із <code>.claude/settings.json</code> репозиторію <strong>запускаються без перевірки довіри</strong>. Перед скриптуванням <code>claude -p</code> над чужим репозиторієм перегляньте його <code>.claude/</code>.</li>
+</ul>
+<h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>Effort за замовчуванням <code>high</code>, на Opus 5.5 і Haiku 5.5 <code>medium</code>. Це сигнал, жорстка стеля <code>max_tokens</code>.</li>
+<li>Зміна верхнього effort скидає кеш, per-message effort ні.</li>
+<li>Task budget: дорадчий, мінімум 20 000, не в Claude Code.</li>
+<li>Збережені роздуми: лише append-only. Зміна <code>system</code> чи <code>tools</code> ламає блоки.</li>
+<li><code>input_transformations</code> логуйте щоходу.</li>
+<li>Sandbox вимкнений за замовчуванням, охоплює лише shell-команди, читання відкрите.</li>
+<li><code>PreToolUse</code> не бачить <code>@file</code>. <code>PostToolUse</code> нічого не скасує.</li>
+<li>Async hook не блокує. Prompt hook на <code>PermissionRequest</code> не діє.</li>
+<li>У режимі <code>-p</code> hooks із репозиторію запускаються без діалогу довіри.</li>
+</ol>
+<h2>Перевірте себе</h2>
+<ol>
+<li>Яке значення effort за замовчуванням на Opus 5.5?</li>
+<li>Який мінімум <code>task_budget.total</code>?</li>
+<li>Що ламає збережені блоки thinking?</li>
+<li>Що охоплює sandbox і що ні?</li>
+<li>Чи може async hook заблокувати дію?</li>
+<li>Чим per-message effort кращий за зміну верхнього?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li><code>medium</code>.</li>
+<li>20 000 токенів.</li>
+<li>Зміна <code>system</code>, інструментів чи раніших повідомлень.</li>
+<li>Охоплює Bash, PowerShell і Monitor. Не охоплює Read, Edit, Write, MCP і hooks.</li>
+<li>Ні.</li>
+<li>Зберігає кеш.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 8-effort-task-budgets-preserved-thinking-sandbox-hooks.md.</p>
+
+<nav class="pager"><a href="7-compaction-thinking-memory-simple.html">← Лекція 7</a><span></span></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

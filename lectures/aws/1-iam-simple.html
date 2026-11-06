@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 1 (просто): IAM, користувачі, ролі, політики, STS</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; }
+  th { background:#fff; }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; word-break:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 1 (просто): IAM, користувачі, ролі, політики, STS</h1>
+<blockquote>
+<p>Середній рівень: усі правила й числа з повної лекції, але простими словами й без розповіді про наш проєкт. Повна: ../1-iam-users-roles-policies.md. Автор повної лекції зазначив, що числа й правила для іспиту дані з пам'яті, тож їх варто звірити з документацією AWS.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>IAM відповідає на два питання про кожен виклик AWS API: хто ти (автентифікація) і що тобі дозволено (авторизація).</strong> Security це 26% іспиту, і IAM тут основа основ.</p>
+<p>Три слова для рішення «так чи ні»: <strong>усе заборонено за замовчуванням, явний Deny сильніший за Allow, Allow потрібен.</strong></p>
+<h2>Крок 1. Хто може діяти (ідентичності)</h2>
+<table>
+<thead>
+<tr>
+<th>Ідентичність</th>
+<th>Облікові дані</th>
+<th>Коли застосовувати</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Root</td>
+<td>пароль і MFA</td>
+<td>лише разові дії (закрити акаунт, змінити план)</td>
+</tr>
+<tr>
+<td>IAM user</td>
+<td>пароль, access key</td>
+<td>людина чи програма без кращого варіанту</td>
+</tr>
+<tr>
+<td>IAM role</td>
+<td>тимчасові ключі через STS</td>
+<td>сервіси AWS, CI, інший акаунт, федерація</td>
+</tr>
+<tr>
+<td>IAM Identity Center</td>
+<td>SSO, тимчасові ключі</td>
+<td>люди в багатьох акаунтах (рекомендовано AWS)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Правило іспиту:</strong> програмі всередині AWS (Lambda, EC2, ECS) дають <strong>роль</strong>, а не access key. Людям у кількох акаунтах дають <strong>Identity Center</strong>. CI (GitHub, HCP Terraform) дають роль через <strong>OIDC</strong>. Програмі поза AWS лишається IAM user із ключем як компроміс. Access key у коді чи змінних середовища це антипатерн, якщо є альтернатива.</p>
+<h2>Крок 2. З чого складається політика</h2>
+<p>Політика це JSON-документ зі списком правил (<code>Statement</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Елемент</th>
+<th>Що означає</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Version</code></td>
+<td>завжди <code>2012-10-17</code>: це версія мови політик, а не дата вашої політики. Без неї діє старіша мова, де не працюють змінні на кшталт <code>${aws:username}</code> <em>(не звірено)</em></td>
+</tr>
+<tr>
+<td><code>Statement</code></td>
+<td>список правил</td>
+</tr>
+<tr>
+<td><code>Sid</code></td>
+<td>довільне ім'я правила</td>
+</tr>
+<tr>
+<td><code>Effect</code></td>
+<td><code>Allow</code> або <code>Deny</code></td>
+</tr>
+<tr>
+<td><code>Action</code></td>
+<td>операції <code>service:Operation</code>, дозволені <code>*</code></td>
+</tr>
+<tr>
+<td><code>NotAction</code></td>
+<td>«усе, окрім цього» (обережно)</td>
+</tr>
+<tr>
+<td><code>Resource</code></td>
+<td>на що поширюється: ARN або шаблон</td>
+</tr>
+<tr>
+<td><code>Principal</code></td>
+<td><strong>лише в resource-based політиках</strong>: кому</td>
+</tr>
+<tr>
+<td><code>Condition</code></td>
+<td>додаткова умова: префікс, IP, MFA, тег, час</td>
+</tr>
+</tbody>
+</table>
+<p>Як читати: <strong>хто</strong> (Principal) <strong>може чи не може</strong> (Effect) <strong>що робити</strong> (Action) <strong>з чим</strong> (Resource) <strong>за якої умови</strong> (Condition).</p>
+<p><strong>Класика іспиту.</strong> Дії над <strong>бакетом</strong> (<code>s3:ListBucket</code>) вказують на ARN бакета, а дії над <strong>об'єктами</strong> (<code>s3:PutObject</code>, <code>s3:GetObject</code>) на ARN із <code>/*</code>. Тому в одній політиці можуть бути два statements з різними <code>Resource</code>. Помилка «<code>ListBucket</code> на <code>bucket/*</code>» дає <code>AccessDenied</code>, бо такого ресурсу для цієї дії нема.</p>
+<h3>Типи політик</h3>
+<table>
+<thead>
+<tr>
+<th>Тип</th>
+<th>Де прикріплена</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AWS managed</td>
+<td>до чого завгодно, підтримує AWS (<code>AdministratorAccess</code>)</td>
+</tr>
+<tr>
+<td>Customer managed</td>
+<td>до чого завгодно, пишете ви, багаторазова</td>
+</tr>
+<tr>
+<td>Inline</td>
+<td>вбудована в одну ідентичність, живе й помирає з нею</td>
+</tr>
+<tr>
+<td>Resource-based</td>
+<td>на ресурсі (bucket policy, resource policy Lambda)</td>
+</tr>
+<tr>
+<td>Trust policy</td>
+<td>на ролі (різновид resource-based): хто може її прийняти</td>
+</tr>
+<tr>
+<td>Permissions boundary</td>
+<td>на користувача чи роль: стеля прав</td>
+</tr>
+<tr>
+<td>SCP</td>
+<td>на організацію чи OU: стеля для акаунта</td>
+</tr>
+<tr>
+<td>Session policy</td>
+<td>під час <code>AssumeRole</code>: звужує сеанс</td>
+</tr>
+</tbody>
+</table>
+<p>Дві з них <strong>дають</strong> права (identity-based і resource-based), а boundary, SCP і session policy лише <strong>обмежують</strong>.</p>
+<h2>Крок 3. Identity-based чи resource-based</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Identity-based</th>
+<th>Resource-based</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Прикріплена до</td>
+<td>користувача, групи, ролі</td>
+<td>ресурсу</td>
+</tr>
+<tr>
+<td><code>Principal</code></td>
+<td><strong>нема</strong> (суб'єкт відомий)</td>
+<td><strong>обов'язковий</strong></td>
+</tr>
+<tr>
+<td>Між акаунтами</td>
+<td>потрібна і у вихідному, і в цільовому акаунті</td>
+<td><strong>достатньо однієї</strong> політики на ресурсі</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Правило про один акаунт:</strong> якщо суб'єкт і ресурс в одному акаунті, достатньо <strong>будь-якого</strong> Allow (identity-based <strong>або</strong> resource-based). Для <strong>різних акаунтів</strong> Allow потрібен з <strong>обох</strong> боків.</p>
+<h2>Крок 4. Ролі: дві політики</h2>
+<p>У ролі завжди дві частини:</p>
+<ol>
+<li><strong>Trust policy</strong>: хто може її прийняти (<code>Principal</code>, <code>sts:AssumeRole</code> чи <code>AssumeRoleWithWebIdentity</code>).</li>
+<li><strong>Permissions policy</strong>: що можна робити після прийняття ролі.</li>
+</ol>
+<p>Схема: суб'єкт кличе <code>AssumeRole</code> у STS, STS перевіряє trust policy, видає тимчасові ключі й <strong>session token</strong>, далі суб'єкт робить запити, а сервіс перевіряє permissions policy ролі.</p>
+<p>Типові довірені суб'єкти в trust policy:</p>
+<table>
+<thead>
+<tr>
+<th>Хто приймає</th>
+<th><code>Principal</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lambda, EC2, ECS</td>
+<td><code>Service: lambda.amazonaws.com</code></td>
+</tr>
+<tr>
+<td>Користувач з іншого акаунта</td>
+<td><code>AWS: arn:aws:iam::&lt;акаунт&gt;:root</code></td>
+</tr>
+<tr>
+<td>Зовнішній OIDC-провайдер</td>
+<td><code>Federated: ...:oidc-provider/&lt;провайдер&gt;</code></td>
+</tr>
+<tr>
+<td>SAML-провайдер</td>
+<td><code>Federated: ...:saml-provider/...</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Тимчасові дані.</strong> <code>AssumeRole</code> повертає access key, secret і <strong>session token</strong> на термін <strong>від 15 хв до 12 год</strong> (за замовчуванням 1 год). Потім роль приймають знову, SDK робить це сам.</p>
+<p><strong>Три виклики STS:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Виклик</th>
+<th>Для кого</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AssumeRole</code></td>
+<td>користувачі й сервіси в AWS</td>
+</tr>
+<tr>
+<td><code>AssumeRoleWithWebIdentity</code></td>
+<td>OIDC (Google, GitHub, HCP Terraform)</td>
+</tr>
+<tr>
+<td><code>AssumeRoleWithSAML</code></td>
+<td>SAML</td>
+</tr>
+</tbody>
+</table>
+<p>Для мобільних і веб-застосунків із соціальним входом рекомендують <strong>Cognito</strong>, а не прямий <code>AssumeRoleWithWebIdentity</code>.</p>
+<h2>Крок 5. Як SDK шукає облікові дані</h2>
+<p>SDK (і CLI) шукає в певному <strong>порядку</strong> й бере перші знайдені:</p>
+<ol>
+<li>параметри, передані явно в коді;</li>
+<li>змінні середовища (<code>AWS_ACCESS_KEY_ID</code>, <code>AWS_SECRET_ACCESS_KEY</code>, <code>AWS_SESSION_TOKEN</code>);</li>
+<li>файли <code>~/.aws/credentials</code> і <code>~/.aws/config</code> (профілі, SSO);</li>
+<li>контейнерні облікові дані (ECS task role);</li>
+<li>роль екземпляра EC2 (instance profile, через IMDS).</li>
+</ol>
+<p>Lambda бере облікові дані своєї execution role зі змінних середовища, які сама ж і встановлює.</p>
+<h2>Крок 6. Додаткові теми для іспиту</h2>
+<table>
+<thead>
+<tr>
+<th>Тема</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ABAC</td>
+<td>права за тегами (<code>aws:PrincipalTag</code>, <code>aws:ResourceTag</code>), масштабується краще за ролі на кожен проєкт</td>
+</tr>
+<tr>
+<td>Permission boundary</td>
+<td>стеля: ефективні права це перетин identity policy і boundary. Дають змогу делегувати створення ролей без ризику ескалації</td>
+</tr>
+<tr>
+<td>SCP</td>
+<td>політика AWS Organizations; <strong>не надає прав</strong>, лише обмежує</td>
+</tr>
+<tr>
+<td>Policy variables</td>
+<td><code>${aws:username}</code> у <code>Resource</code>: «кожен користувач лише у своїй теці»</td>
+</tr>
+<tr>
+<td><code>iam:PassRole</code></td>
+<td>право «передати» роль сервісу (наприклад, Lambda чи CloudFormation). Без нього не створити функцію з роллю</td>
+</tr>
+<tr>
+<td>External ID</td>
+<td>захист від «confused deputy» при доступі стороннього сервісу до вашого акаунта</td>
+</tr>
+<tr>
+<td>MFA у політиці</td>
+<td>умова <code>aws:MultiFactorAuthPresent</code></td>
+</tr>
+<tr>
+<td>Access Analyzer</td>
+<td>знаходить ресурси, доступні ззовні, і невикористані права</td>
+</tr>
+<tr>
+<td>Credential report, Access Advisor</td>
+<td>аудит ключів і того, які сервіси реально використовуються</td>
+</tr>
+<tr>
+<td>Ротація access keys</td>
+<td><strong>максимум два ключі</strong> на користувача: створити новий, перемкнути, видалити старий</td>
+</tr>
+<tr>
+<td>Cognito</td>
+<td>User Pools (автентифікація, JWT) проти Identity Pools (AWS-креди)</td>
+</tr>
+</tbody>
+</table>
+<p><code>iam:PassRole</code> важливий для CI: щоб розгорнути SAM-стек, у його ролі має бути <code>iam:PassRole</code> на execution role функції та на роль CodeDeploy.</p>
+<h2>Крок 7. SCP детально</h2>
+<p><strong>SCP (Service Control Policy)</strong> це політика сервісу <strong>AWS Organizations</strong>: стеля прав для цілого акаунта чи групи акаунтів. Діє незалежно від того, що кому написано в IAM.</p>
+<p>Як це працює:</p>
+<ul>
+<li>Організація це дерево: корінь, організаційні одиниці (OU), акаунти. SCP прикріплюють до кореня, OU чи конкретного акаунта.</li>
+<li>SCP <strong>нічого не дозволяє</strong>, лише задає межу. Ефективні права це <strong>перетин</strong>: дія має бути дозволена і в IAM-політиці, і в SCP на кожному рівні шляху до акаунта, і не заборонена явним <code>Deny</code>.</li>
+<li>За замовчуванням до кореня прикріплена <strong><code>FullAWSAccess</code></strong> (дозволити все). Якщо її зняти й нічого не поставити натомість, у акаунтах не працюватиме нічого.</li>
+<li>Дві стратегії: <strong>deny-list</strong> (лишити <code>FullAWSAccess</code>, додати <code>Deny</code> на небажане; простіше й типове) і <strong>allow-list</strong> (прибрати <code>FullAWSAccess</code>, явно дозволити потрібне).</li>
+</ul>
+<p>Приклад: заборонити всі регіони, крім <code>eu-north-1</code>. Це <code>Deny</code> з умовою <code>aws:RequestedRegion</code> і <code>NotAction</code>, який виключає глобальні сервіси (<code>iam:*</code>, <code>organizations:*</code>, <code>sts:*</code>, <code>support:*</code>), бо вони не прив'язані до регіону.</p>
+<table>
+<thead>
+<tr>
+<th>Питання</th>
+<th>Відповідь</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Чи дає SCP права?</td>
+<td><strong>Ні</strong>, лише обмежує</td>
+</tr>
+<tr>
+<td>На кого діє?</td>
+<td>на користувачів і ролі в <strong>member-акаунтах</strong>, включно з root-користувачем такого акаунта</td>
+</tr>
+<tr>
+<td>На кого не діє?</td>
+<td>на <strong>management-акаунт</strong> організації; на service-linked ролі</td>
+</tr>
+<tr>
+<td>SCP проти permission boundary</td>
+<td>SCP обмежує акаунт чи OU, boundary окремого користувача чи роль у межах акаунта</td>
+</tr>
+<tr>
+<td>Де живе?</td>
+<td>AWS Organizations; SCP доступні лише з увімкненими <strong>all features</strong>, а не лише consolidated billing</td>
+</tr>
+<tr>
+<td>Споріднене</td>
+<td><strong>RCP</strong> (resource control policy): стеля для ресурсів в акаунтах, наприклад S3-бакетів</td>
+</tr>
+<tr>
+<td>Типове застосування</td>
+<td>заборонити регіони, заборонити вимикати CloudTrail чи GuardDuty, заборонити вихід з організації, змусити шифрування</td>
+</tr>
+</tbody>
+</table>
+<h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>За замовчуванням усе заборонено. Явний <code>Deny</code> завжди сильніший за <code>Allow</code>.</li>
+<li>Програмі в AWS роль, людям у багатьох акаунтах Identity Center, CI роль через OIDC.</li>
+<li>Роль це trust policy (хто) і permissions policy (що).</li>
+<li>Один акаунт: достатньо одного Allow. Різні акаунти: Allow з обох боків.</li>
+<li><code>ListBucket</code> на ARN бакета, <code>GetObject</code> і <code>PutObject</code> на ARN із <code>/*</code>.</li>
+<li>Порядок пошуку облікових даних SDK: код, env, <code>~/.aws</code>, ECS, EC2.</li>
+<li>SCP і boundary лише обмежують, права не дають. SCP не діє на management-акаунт.</li>
+<li><code>iam:PassRole</code> потрібен, щоб передати роль сервісу. Максимум два access key на користувача.</li>
+</ol>
+<h2>Перевірте себе</h2>
+<ol>
+<li>Чому не можна працювати під root?</li>
+<li>Чим trust policy відрізняється від permissions policy?</li>
+<li>Для чого <code>Principal</code> в resource-based політиці і чому його нема в identity-based?</li>
+<li>Одна політика дозволяє, інша забороняє. Який результат?</li>
+<li>Які облікові дані використає SDK, якщо задані і змінні середовища, і профіль у файлі?</li>
+<li>Чим <code>AssumeRoleWithWebIdentity</code> відрізняється від <code>AssumeRole</code>?</li>
+<li>Для чого потрібен <code>iam:PassRole</code>?</li>
+<li>Чим permission boundary відрізняється від SCP? Чи дає SCP права?</li>
+<li>Як без простою провести ротацію ключа IAM-користувача?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>Root має повні права й не обмежується політиками. Для щоденної роботи створюють користувача чи Identity Center.</li>
+<li>Trust policy каже, хто може прийняти роль. Permissions policy каже, що можна робити після цього.</li>
+<li>Resource-based політика має знати, кому дозволяє. В identity-based суб'єкт відомий (до кого прикріплена).</li>
+<li>Deny.</li>
+<li>Змінні середовища (вони вище за файл).</li>
+<li><code>AssumeRoleWithWebIdentity</code> для OIDC-токена (Google, GitHub), <code>AssumeRole</code> для користувачів і сервісів AWS.</li>
+<li>Щоб передати роль сервісу (Lambda, CloudFormation). Без нього не створити функцію з роллю.</li>
+<li>Boundary обмежує окремого користувача чи роль, SCP акаунт чи OU. SCP прав не дає.</li>
+<li>Створити другий ключ (максимум два), перемкнути застосунок, видалити старий.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 1-iam-users-roles-policies.md.</p>
+
+<nav class="pager"><span></span><a href="2-s3-access-encryption-simple.html">Лекція 2 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

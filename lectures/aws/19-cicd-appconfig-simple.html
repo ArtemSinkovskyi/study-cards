@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 19 (просто): CI/CD в AWS і AppConfig</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; }
+  th { background:#fff; }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; word-break:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 19 (просто): CI/CD в AWS і AppConfig</h1>
+<blockquote>
+<p>Середній рівень: усі правила з повної лекції, але простими словами й без розповіді про наш проєкт. Повна: ../19-cicd-appconfig.md. Факти, які в повній лекції «з пам'яті», тут із позначкою <em>(не звірено)</em>. Exam Guide каже, що <strong>проєктувати конвеєри не треба</strong>, але використовувати треба (навички 3.3.3-3.3.9, 3.1.3-3.1.4, 3.2.1).</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>CodePipeline оркеструє, CodeBuild збирає, CodeDeploy деплоїть.</strong> AppConfig змінює поведінку застосунку без деплою коду.</p>
+<p>Схема: репозиторій → CodePipeline → CodeBuild (тести, збірка) → артефакти в S3 → деплой у staging → manual approval → CodeDeploy canary в prod → rollback за alarm.</p>
+<h2>Крок 1. Зіставлення з тим, що ви знаєте</h2>
+<table>
+<thead>
+<tr>
+<th>Звичне</th>
+<th>В AWS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GitHub</td>
+<td>GitHub чи інший репозиторій (CodeCommit поза фокусом C03)</td>
+</tr>
+<tr>
+<td>GitHub Actions workflow</td>
+<td><strong>CodePipeline</strong></td>
+</tr>
+<tr>
+<td>кроки <code>run:</code></td>
+<td><strong>CodeBuild</strong> і <code>buildspec.yml</code></td>
+</tr>
+<tr>
+<td><code>DeploymentPreference</code> у SAM</td>
+<td><strong>CodeDeploy</strong></td>
+</tr>
+<tr>
+<td>GitHub Secrets</td>
+<td>Secrets Manager, Parameter Store</td>
+</tr>
+<tr>
+<td>приватні пакети (npm, Maven)</td>
+<td><strong>CodeArtifact</strong></td>
+</tr>
+<tr>
+<td>environment variables сервісів</td>
+<td><strong>AppConfig</strong>, Parameter Store</td>
+</tr>
+</tbody>
+</table>
+<h2>Крок 2. Словник</h2>
+<table>
+<thead>
+<tr>
+<th>Термін</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pipeline</td>
+<td>весь процес</td>
+</tr>
+<tr>
+<td>stage</td>
+<td>етап: Source, Build, Deploy</td>
+</tr>
+<tr>
+<td>action</td>
+<td>дія в етапі</td>
+</tr>
+<tr>
+<td>artifact</td>
+<td>файл, що передається між діями</td>
+</tr>
+<tr>
+<td>transition</td>
+<td>перехід між етапами, його можна вимкнути</td>
+</tr>
+<tr>
+<td>buildspec</td>
+<td>рецепт збірки</td>
+</tr>
+<tr>
+<td>appspec</td>
+<td>рецепт деплою</td>
+</tr>
+<tr>
+<td>deployment group</td>
+<td>куди деплоїти</td>
+</tr>
+<tr>
+<td>feature flag</td>
+<td>вмикач функції без деплою</td>
+</tr>
+</tbody>
+</table>
+<h2>Крок 3. CodePipeline</h2>
+<ul>
+<li>складається з <strong>stages</strong>, у кожному <strong>actions</strong>, послідовно чи паралельно; мінімум <strong>два stages</strong>;</li>
+<li><strong>artifacts</strong> передаються між діями (зберігаються в S3 <em>(не звірено)</em>);</li>
+<li>зміна в джерелі запускає прогін; кнопка <strong>Release change</strong> перезапускає останню ревізію;</li>
+<li>вимкнений <strong>transition</strong> зупиняє просування далі;</li>
+<li><strong>manual approval</strong> додається дією;</li>
+<li>ланцюг dev → staging → prod (навичка 3.3.5);</li>
+<li>помилка дії зупиняє pipeline <em>(не звірено)</em>; це також подія для EventBridge → SNS (навичка 4.2.3).</li>
+</ul>
+<h2>Крок 4. CodeBuild</h2>
+<p>Файл <strong><code>buildspec.yml</code> у корені</strong> репозиторію (можна інший шлях). Складається з <code>version: 0.2</code>, <code>env</code>, <code>phases</code>, <code>artifacts</code>, <code>cache</code>, <code>reports</code>.</p>
+<p><strong>Фази по порядку:</strong> <code>install</code> → <code>pre_build</code> → <code>build</code> → <code>post_build</code>. Приклад з документації: вхід в ECR у <code>pre_build</code>, пуш образу в <code>post_build</code>.</p>
+<p>В <code>env</code>:</p>
+<ul>
+<li><code>parameter-store</code>: значення з SSM;</li>
+<li><code>secrets-manager</code>: значення з Secrets Manager (формат <code>secret-id:json-key</code>);</li>
+<li><code>variables</code>: відкриті значення, <strong>для секретів заборонено</strong>.</li>
+</ul>
+<p>Факти:</p>
+<ul>
+<li>секрети з <code>parameter-store</code> і <code>secrets-manager</code> <strong>маскуються</strong> в логах, але тільки точне значення: Base64 від секрету вже видно;</li>
+<li>роль CodeBuild потребує <code>ssm:GetParameters</code>;</li>
+<li>пріоритет змінних: запуск &gt; проєкт &gt; buildspec;</li>
+<li><code>finally</code> виконується, навіть якщо команда впала;</li>
+<li><code>on-failure</code>: <code>ABORT</code>, <code>CONTINUE</code>, <code>RETRY</code>;</li>
+<li>логи йдуть у CloudWatch Logs чи S3 <em>(не звірено)</em>;</li>
+<li>кеш прискорює збірку; <code>reports</code> дають звіти тестів.</li>
+</ul>
+<h2>Крок 5. CodeDeploy</h2>
+<p>Працює з <strong>EC2/on-premises, Lambda, ECS</strong>. Файл <strong><code>appspec.yml</code></strong>: для EC2 лежить у корені ревізії, з hooks і скриптами. Для Lambda визначає версію й функції-перевірки, для ECS task definition і load balancer.</p>
+<p><strong>Hooks для Lambda:</strong> <code>BeforeAllowTraffic</code>, <code>AfterAllowTraffic</code> <em>(не звірено)</em>. У SAM це <code>DeploymentPreference.Hooks</code> (<code>PreTraffic</code>, <code>PostTraffic</code>).</p>
+<p><strong>Порядок для EC2</strong> <em>(не звірено)</em>: <code>ApplicationStop</code> → <code>DownloadBundle</code> → <code>BeforeInstall</code> → <code>Install</code> → <code>AfterInstall</code> → <code>ApplicationStart</code> → <code>ValidateService</code>. На EC2 потрібен <strong>CodeDeploy agent</strong>.</p>
+<h2>Крок 6. Стратегії деплою</h2>
+<table>
+<thead>
+<tr>
+<th>Стратегія</th>
+<th>Як</th>
+<th>Простій</th>
+<th>Відкат</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>All at once</strong></td>
+<td>усе одразу</td>
+<td>можливий</td>
+<td>новий деплой</td>
+</tr>
+<tr>
+<td><strong>Rolling</strong></td>
+<td>частинами</td>
+<td>ні, зменшена потужність</td>
+<td>новий деплой</td>
+</tr>
+<tr>
+<td><strong>Rolling with extra batch</strong></td>
+<td>спершу додатковий набір</td>
+<td>ні</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Immutable</strong></td>
+<td>нові інстанси, потім заміна</td>
+<td>ні</td>
+<td>швидкий</td>
+</tr>
+<tr>
+<td><strong>Blue/Green</strong></td>
+<td>дві копії, перемикання трафіку</td>
+<td>ні</td>
+<td>миттєвий</td>
+</tr>
+<tr>
+<td><strong>Canary</strong></td>
+<td>малий відсоток, потім решта</td>
+<td>ні</td>
+<td>автоматичний</td>
+</tr>
+<tr>
+<td><strong>Linear</strong></td>
+<td>рівними частками через інтервали</td>
+<td>ні</td>
+<td>автоматичний</td>
+</tr>
+</tbody>
+</table>
+<p>Canary (наприклад <code>Canary10Percent5Minutes</code> на alias) плюс CloudWatch alarm: якщо alarm спрацював під час деплою, <strong>CodeDeploy автоматично відкочує</strong> (навичка 3.3.7).</p>
+<p><strong>CloudFormation</strong> теж відкочує стек при помилці; <code>describe-stack-events</code> показує, що зламалось.</p>
+<h2>Крок 7. Гілки, версії, середовища</h2>
+<ul>
+<li>Навичка 3.3.8: теги git для релізів, гілки для середовищ.</li>
+<li>Навичка 3.2.4: середовища через Lambda aliases, теги образів, Amplify branches, Copilot environments, stages API Gateway.</li>
+</ul>
+<h2>Крок 8. IaC: CloudFormation, SAM, CDK</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CloudFormation</strong></td>
+<td>YAML/JSON, стеки, основа всього</td>
+</tr>
+<tr>
+<td><strong>SAM</strong></td>
+<td>скорочення над CloudFormation для serverless (<code>Transform</code>)</td>
+</tr>
+<tr>
+<td><strong>CDK</strong></td>
+<td>інфраструктура кодом (наприклад TypeScript), синтезується в CloudFormation</td>
+</tr>
+<tr>
+<td><strong>Terraform</strong></td>
+<td>не AWS-сервіс</td>
+</tr>
+</tbody>
+</table>
+<p>CDK <em>(не звірено)</em>: <code>cdk synth</code>, <code>cdk diff</code>, <code>cdk deploy</code>; <code>cdk bootstrap</code> готує акаунт; тести через <code>aws-cdk-lib/assertions</code> (навичка 3.2.1).</p>
+<p>CloudFormation: <strong>change sets</strong> (подивитись зміни перед застосуванням), <strong>drift detection</strong>, <code>DeletionPolicy</code>, intrinsic-функції <code>!Ref</code>, <code>!GetAtt</code>, <code>!Sub</code>.</p>
+<h2>Крок 9. AppConfig</h2>
+<p><strong>AWS AppConfig</strong> змінює поведінку застосунку <strong>без деплою коду</strong>: feature flags і динамічна конфігурація. Розгортання миттєве або поступове зі спостереженням: якщо CloudWatch alarm спрацював, <strong>автоматичний відкат</strong>. Приклад: новий формат вмикається прапорцем для 10% завантажень.</p>
+<p><strong>Вибір сервісу конфігурації</strong> (навичка 3.1.4):</p>
+<table>
+<thead>
+<tr>
+<th>Потрібно</th>
+<th>Сервіс</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>секрет із ротацією</td>
+<td>Secrets Manager</td>
+</tr>
+<tr>
+<td>просте значення, параметр</td>
+<td>Parameter Store</td>
+</tr>
+<tr>
+<td>feature flag, поступове розгортання, відкат</td>
+<td><strong>AppConfig</strong></td>
+</tr>
+<tr>
+<td>значення на стадії API</td>
+<td>Stage variables</td>
+</tr>
+<tr>
+<td>значення функції</td>
+<td>змінні середовища Lambda</td>
+</tr>
+</tbody>
+</table>
+<p>Lambda читає AppConfig через <strong>розширення</strong> (локальний HTTP-порт) <em>(не звірено)</em>.</p>
+<h2>Крок 10. Інші інструменти</h2>
+<ul>
+<li><strong>CodeArtifact:</strong> приватний репозиторій пакетів npm, Maven, PyPI <em>(не звірено)</em>.</li>
+<li><strong>Amplify:</strong> хостинг фронтенду, гілка дає середовище.</li>
+<li><strong>CloudShell:</strong> термінал у браузері.</li>
+<li><strong>AI для CI/CD</strong> (навичка 3.3.9): автоматичні перевірки, Kiro.</li>
+</ul>
+<h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>CodePipeline оркеструє (мінімум 2 stages), CodeBuild збирає, CodeDeploy деплоїть.</li>
+<li><code>buildspec.yml</code>: <code>install</code> → <code>pre_build</code> → <code>build</code> → <code>post_build</code>.</li>
+<li><code>appspec.yml</code> для CodeDeploy; для EC2 потрібен агент.</li>
+<li>Секрети в buildspec: <code>parameter-store</code> і <code>secrets-manager</code>, не <code>variables</code>.</li>
+<li>Canary плюс alarm: автоматичний відкат.</li>
+<li>Конфіг без деплою, поступово, з відкатом: AppConfig.</li>
+<li>Ручне підтвердження перед продом: manual approval у CodePipeline.</li>
+</ol>
+<h2>Перевірте себе</h2>
+<ol>
+<li>Як додати ручне підтвердження перед продом?</li>
+<li>Де лежить <code>buildspec.yml</code> і який порядок фаз?</li>
+<li>Як передати секрет у збірку безпечно?</li>
+<li>Який файл керує CodeDeploy і де він лежить для EC2?</li>
+<li>Чим canary відрізняється від linear?</li>
+<li>Як автоматично відкотити Lambda при помилках?</li>
+<li>Як вимкнути функцію в проді без деплою?</li>
+<li>Який сервіс зберігає приватні npm-пакети?</li>
+<li>Чим CDK відрізняється від SAM?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>Дія manual approval у CodePipeline.</li>
+<li>У корені репозиторію. <code>install</code>, <code>pre_build</code>, <code>build</code>, <code>post_build</code>.</li>
+<li>Через <code>env.parameter-store</code> чи <code>env.secrets-manager</code> (маскуються в логах), не через <code>variables</code>.</li>
+<li><code>appspec.yml</code>, у корені ревізії.</li>
+<li>Canary: малий відсоток, потім решта. Linear: рівними частками через інтервали.</li>
+<li>Canary чи linear у CodeDeploy плюс CloudWatch alarm.</li>
+<li>AppConfig feature flag.</li>
+<li>CodeArtifact.</li>
+<li>CDK це інфраструктура кодом, що синтезується в CloudFormation. SAM це скорочений синтаксис шаблонів CloudFormation для serverless.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 19-cicd-appconfig.md.</p>
+
+<nav class="pager"><a href="18-containers-simple.html">← Лекція 18</a><a href="20-streaming-step-functions-simple.html">Лекція 20 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

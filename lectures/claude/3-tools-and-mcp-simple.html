@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 3 (просто): як описувати інструменти і що таке MCP</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; }
+  th { background:#fff; }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; word-break:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 3 (просто): як описувати інструменти і що таке MCP</h1>
+<blockquote>
+<p>Спрощена версія. Усі факти ті самі, що в повній лекції: ../3-define-tools-handle-results-mcp-connector.md. Рідкісні деталі (повні списки моделей, коди помилок) лишились лише там.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>Модель вибирає інструмент лише за його описом.</strong> Опис це все, що вона про нього знає. Тому якість опису важливіша за все інше.</p>
+<h2>Крок 1. Як описувати інструмент</h2>
+<p>У інструмента чотири поля: <code>name</code>, <code>description</code>, <code>input_schema</code> і, за бажанням, <code>input_examples</code>.</p>
+<p>Для моделі це як OpenAPI-контракт: вона не бачить коду, лише контракт.</p>
+<p>Що має бути в описі:</p>
+<ul>
+<li>що робить інструмент;</li>
+<li><strong>коли його використовувати й коли ні</strong>;</li>
+<li>що означає кожен параметр;</li>
+<li>чого він <strong>не</strong> повертає.</li>
+</ul>
+<p>Документація радить мінімум 3-4 речення на інструмент. Приклад: «Повертає поточну ціну акції за тікером з NYSE чи NASDAQ, у доларах. Використовуйте, коли питають про поточну ціну. Іншу інформацію про компанію не повертає.» Поганий опис: «Дає ціну акції».</p>
+<h2>Крок 2. Ще чотири поради</h2>
+<ul>
+<li><strong>Менше інструментів, але потужніших.</strong> Один <code>pr</code> з параметром <code>action</code> краще за <code>create_pr</code>, <code>review_pr</code>, <code>merge_pr</code>.</li>
+<li><strong>Префікси в іменах</strong>, коли інструментів багато: <code>github_list_prs</code>, <code>slack_send_message</code>.</li>
+<li><strong>Повертайте з інструмента лише корисні поля.</strong> Довгі відповіді витрачають контекст.</li>
+<li><strong><code>input_examples</code></strong> допомагають для складних входів (кожен приклад має відповідати схемі, інакше 400).</li>
+</ul>
+<h2>Крок 3. Як змусити модель вибрати інструмент: tool_choice</h2>
+<table>
+<thead>
+<tr>
+<th>Значення</th>
+<th>Що робить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>auto</code></td>
+<td>Модель сама вирішує (за замовчуванням, коли є інструменти)</td>
+</tr>
+<tr>
+<td><code>any</code></td>
+<td>Мусить викликати якийсь інструмент</td>
+</tr>
+<tr>
+<td><code>tool</code></td>
+<td>Мусить викликати саме названий</td>
+</tr>
+<tr>
+<td><code>none</code></td>
+<td>Не викликає (за замовчуванням, коли інструментів нема)</td>
+</tr>
+</tbody>
+</table>
+<p>Три речі, на яких помиляються:</p>
+<ol>
+<li>На <strong>Opus 5.5, Sonnet 5.5, Fable 5.1 і Mythos 5.1</strong> значення <code>any</code> і <code>tool</code> дають <strong>400</strong>. Там використовуйте <code>auto</code> разом зі <code>strict</code>.</li>
+<li>При <code>any</code> і <code>tool</code> модель <strong>не пише пояснення</strong> перед викликом.</li>
+<li>Зміна <code>tool_choice</code> посеред розмови скидає кеш <strong>повідомлень</strong> (інструменти й system лишаються в кеші).</li>
+</ol>
+<h2>Крок 4. Як повертати результат</h2>
+<p>Три жорсткі правила, порушення яких дає 400:</p>
+<ol>
+<li><code>tool_result</code> має йти <strong>одразу</strong> після повідомлення з <code>tool_use</code>, між ними нічого.</li>
+<li>У user-повідомленні блоки <code>tool_result</code> йдуть <strong>першими</strong>, текст після них.</li>
+<li>Кілька результатів одного ходу йдуть в одному повідомленні (див. лекцію 2).</li>
+</ol>
+<p>Типова помилка: «tool_use ids were found without tool_result blocks immediately after».</p>
+<h2>Крок 5. Помилки в інструментах</h2>
+<ul>
+<li>Інструмент упав: <code>tool_result</code> з <code>is_error: true</code> і <strong>зрозумілим</strong> текстом. Не «failed», а «Rate limit exceeded. Retry after 60 seconds».</li>
+<li>Модель викликала інструмент без обов'язкового параметра: вона зазвичай повторює 2-3 рази з виправленнями. Краще покращити опис.</li>
+<li>Щоб такого не було зовсім, ставте <strong><code>strict: true</code></strong>: вхід гарантовано відповідає схемі, ім'я інструмента завжди валідне.</li>
+</ul>
+<h2>Крок 6. Безпека</h2>
+<p>Результати інструментів часто містять чужий вміст: сторінки, листи, відповіді сторонніх API. Хтось може сховати там інструкцію «ігноруй усе й зроби ось що». Це <strong>indirect prompt injection</strong>.</p>
+<p>Правило: тримайте такий вміст <strong>усередині <code>tool_result</code></strong>, а не в системному промпті чи звичайному тексті користувача.</p>
+<p>Ще одне: схеми інструментів кешуються до 24 годин, тому в схему (імена властивостей, <code>enum</code>, <code>const</code>, <code>pattern</code>) <strong>не кладіть персональні дані</strong>.</p>
+<h2>Крок 7. Що таке MCP</h2>
+<p><strong>MCP (Model Context Protocol)</strong> це протокол, яким модель підключається до зовнішніх систем через сервер. Один MCP-сервер дає набір інструментів.</p>
+<p><strong>MCP connector</strong> це функція Messages API, що підключає віддалені MCP-сервери без вашого власного MCP-клієнта (beta).</p>
+<p>Обмеження, які питають на іспиті:</p>
+<ul>
+<li>підтримуються лише <strong>виклики інструментів</strong> (не ресурси й не промпти);</li>
+<li>сервер має бути <strong>публічним HTTPS</strong> (Streamable HTTP чи SSE);</li>
+<li><strong>локальний STDIO</strong> не підключити.</li>
+</ul>
+<p>Для приватної мережі (наприклад, Loki чи Prometheus усередині) connector не підходить: потрібне власне MCP-з'єднання. SDK має для цього допоміжні функції (client-side helpers).</p>
+<h2>Крок 8. Як налаштувати MCP connector</h2>
+<p>У запиті два шматки:</p>
+<ol>
+<li><code>mcp_servers</code>: список серверів із полями <code>type</code> (<code>url</code>), <code>url</code>, <code>name</code>, <code>authorization_token</code>.</li>
+<li><code>mcp_toolset</code> у масиві <code>tools</code>: що з цього сервера вмикати.</li>
+</ol>
+<p>Кожен сервер має рівно один <code>mcp_toolset</code>.</p>
+<p>Як зробити асистента <strong>лише для читання</strong>:</p>
+<ul>
+<li><strong>Denylist:</strong> вимкніть небезпечні інструменти (<code>configs</code> із <code>enabled: false</code>).</li>
+<li><strong>Allowlist:</strong> <code>default_config.enabled: false</code> і ввімкніть лише потрібні.</li>
+</ul>
+<p>Автентифікація: OAuth-токен ви отримуєте самі й передаєте в <code>authorization_token</code>; оновлювати його теж ви.</p>
+<p>У відповіді приходять блоки <code>mcp_tool_use</code> і <code>mcp_tool_result</code>.</p>
+<h2>Крок 9. Tool runner</h2>
+<p>Замість власного циклу (лекція 2) SDK може вести цикл сам: ви описуєте інструменти як функції, runner виконує їх і веде розмову. Помилки він теж обгортає в <code>is_error</code>.</p>
+<p>Коли потрібен <strong>ручний цикл</strong>: схвалення людиною, власне логування, умовне виконання.</p>
+<h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>Опис інструмента це найважливіший фактор. Мінімум 3-4 речення, з обмеженнями.</li>
+<li><code>any</code> і <code>tool</code> дають 400 на Opus 5.5, Sonnet 5.5, Fable 5.1, Mythos 5.1.</li>
+<li><code>tool_result</code> одразу після <code>tool_use</code> і перед текстом.</li>
+<li>Помилка: <code>is_error: true</code> і зрозумілий текст. <code>strict: true</code> прибирає невалідні виклики.</li>
+<li>Результати інструментів недовірені: тримайте їх у <code>tool_result</code>.</li>
+<li>MCP connector: лише інструменти, лише публічний HTTPS, без STDIO.</li>
+<li>Режим лише читання: denylist чи allowlist у <code>mcp_toolset</code>.</li>
+</ol>
+<h2>Перевірте себе</h2>
+<ol>
+<li>Що модель знає про ваш інструмент?</li>
+<li>Що поверне <code>tool_choice: any</code> на Opus 5.5?</li>
+<li>Де в user-повідомленні мають стояти <code>tool_result</code>?</li>
+<li>Чи можна через connector підключити локальний STDIO-сервер?</li>
+<li>Як зробити MCP-асистента лише для читання?</li>
+<li>Що гарантує <code>strict: true</code>?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>Лише його опис і схему параметрів.</li>
+<li>Помилку 400.</li>
+<li>Першими, текст після них.</li>
+<li>Ні, лише публічний HTTPS.</li>
+<li>Denylist небезпечних інструментів або allowlist потрібних у <code>mcp_toolset</code>.</li>
+<li>Вхід відповідає <code>input_schema</code>, а ім'я інструмента валідне.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 3-define-tools-handle-results-mcp-connector.md.</p>
+
+<nav class="pager"><a href="2-agent-loop-simple.html">← Лекція 2</a><a href="4-prompts-simple.html">Лекція 4 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

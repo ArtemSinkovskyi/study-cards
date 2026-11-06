@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 21 (просто): AI-сервіси AWS і безпека</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; }
+  th { background:#fff; }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; word-break:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 21 (просто): AI-сервіси AWS і безпека</h1>
+<blockquote>
+<p>Середній рівень: усі правила з повної лекції, але простими словами. Повна: ../21-ai-services-security.md. Факти, які в повній лекції позначено «з пам'яті», тут із позначкою <em>(не звірено)</em>.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>Цей розділ нове в C03 (навичка 2.3 «AI security»). Іспит перевіряє не «як побудувати AI», а «як підключити й захистити».</strong></p>
+<p><strong>Поза межами іспиту</strong> (за Exam Guide): вибір моделей, prompt engineering, проєктування RAG, проєктування guardrails та AI-governance. Також поза межами: Amazon Rekognition, Polly, SageMaker AI, Strands Agents, Quick Sight. Правильна відповідь на питання про AI майже завжди стосується <strong>Bedrock</strong>.</p>
+<p>Увага: <strong>Quick Sight поза іспитом, а Amazon Quick у списку in-scope</strong>. Це різні позиції.</p>
+<h2>Крок 1. Виклик Bedrock</h2>
+<p>Два API:</p>
+<table>
+<thead>
+<tr>
+<th>API</th>
+<th>Для чого</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Converse</strong></td>
+<td>єдиний формат для різних моделей</td>
+</tr>
+<tr>
+<td><strong>InvokeModel</strong></td>
+<td>формат конкретної моделі</td>
+</tr>
+</tbody>
+</table>
+<p>Обидва мають варіанти зі стрімінгом <em>(не звірено)</em>.</p>
+<ul>
+<li>Lambda потребує <code>bedrock:InvokeModel</code> на ресурс моделі <em>(не звірено)</em>.</li>
+<li>Тротлінг дає <code>ThrottlingException</code>: повторювати з backoff.</li>
+<li>Довгі виклики не вкладаються в timeout Lambda за замовчуванням 3 с: підвищте timeout.</li>
+<li>У <code>ConverseCommand</code> можна задати <code>inferenceConfig</code> (наприклад, <code>maxTokens</code>) і <code>guardrailConfig</code>.</li>
+</ul>
+<h2>Крок 2. Доступ</h2>
+<ul>
+<li>доступ до Bedrock дається через <strong>IAM</strong>: хто може викликати яку модель;</li>
+<li>обмежуйте <code>Resource</code> конкретними моделями;</li>
+<li>окремі ролі для застосунку й для розробників;</li>
+<li>використання відстежується в <strong>CloudTrail</strong>.</li>
+</ul>
+<h2>Крок 3. Приватність</h2>
+<p>Зі сторінки Bedrock: вміст «не використовується для покращення базових моделей і не передається провайдерам моделей». Вхідні й вихідні дані не використовуються для тренування моделей Amazon чи сторонніх. Це головна відповідь на питання «чи вчиться модель на наших даних».</p>
+<p><strong>Приватне з'єднання:</strong> <strong>AWS PrivateLink</strong> (interface VPC endpoint) дає доступ до Bedrock без публічного інтернету. Питання «дані не мають іти через інтернет» означає interface VPC endpoint.</p>
+<p>Шифрування: дані в спокої й у передачі, можна свій ключ KMS <em>(не звірено)</em>.</p>
+<h2>Крок 4. Guardrails</h2>
+<table>
+<thead>
+<tr>
+<th>Фільтр</th>
+<th>Що робить</th>
+<th>Приклад</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Content filters</strong></td>
+<td>шкідливий зміст: Hate, Insults, Sexual, Violence, Misconduct, <strong>Prompt Attack</strong></td>
+<td>блокувати образи</td>
+</tr>
+<tr>
+<td><strong>Denied topics</strong></td>
+<td>заборонені теми</td>
+<td>інвестпоради в банку</td>
+</tr>
+<tr>
+<td><strong>Word filters</strong></td>
+<td>слова, фрази</td>
+<td>назви конкурентів</td>
+</tr>
+<tr>
+<td><strong>Sensitive information filters</strong></td>
+<td><strong>блокує чи маскує</strong> PII, свої regex</td>
+<td>маскувати SSN</td>
+</tr>
+<tr>
+<td><strong>Contextual grounding</strong></td>
+<td>відповідь не спирається на джерело</td>
+<td>галюцинації в RAG</td>
+</tr>
+<tr>
+<td><strong>Automated Reasoning</strong></td>
+<td>перевірка логічними правилами</td>
+<td>правила полісу</td>
+</tr>
+</tbody>
+</table>
+<p>Як працюють:</p>
+<ul>
+<li>фільтрують <strong>і вхід, і вихід</strong>;</li>
+<li>підключаються <strong>до виклику моделі</strong> (ID і версія) або окремо через <strong><code>ApplyGuardrail</code></strong>, навіть для сторонніх моделей;</li>
+<li>спершу робоча чернетка, далі <strong>версія</strong>;</li>
+<li>тегами можна перевіряти лише частину запиту: тільки ввід користувача, не системні інструкції.</li>
+</ul>
+<p>Мапа питань іспиту:</p>
+<table>
+<thead>
+<tr>
+<th>Потреба</th>
+<th>Фільтр</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>прибрати номери карток</td>
+<td>sensitive information (mask)</td>
+</tr>
+<tr>
+<td>не обговорювати конкурентів</td>
+<td>word filter чи denied topic</td>
+</tr>
+<tr>
+<td>захист від «ігноруй інструкції»</td>
+<td>content filter: Prompt Attack</td>
+</tr>
+<tr>
+<td>модель вигадує</td>
+<td>contextual grounding</td>
+</tr>
+</tbody>
+</table>
+<p>Важливо: <strong>guardrail не замінює авторизацію.</strong> Модель не має мати прав більше, ніж потрібно.</p>
+<h2>Крок 5. Безпека агентів</h2>
+<p>Агент сам викликає інструменти. Ризики й рішення:</p>
+<table>
+<thead>
+<tr>
+<th>Ризик</th>
+<th>Рішення</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>агент робить зайве</td>
+<td><strong>tool-use authorization</strong>: лише дозволені інструменти, мінімальні права</td>
+</tr>
+<tr>
+<td>дані одного користувача в сесії іншого</td>
+<td><strong>session isolation</strong></td>
+</tr>
+<tr>
+<td>небезпечна дія (видалити, оплатити)</td>
+<td><strong>human-in-the-loop</strong> схвалення</td>
+</tr>
+<tr>
+<td>непряме впорскування через документ чи сайт</td>
+<td>вміст інструмента це дані, а не команди; фільтри</td>
+</tr>
+</tbody>
+</table>
+<p><strong>AgentCore:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Компонент</th>
+<th>Що робить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Runtime</td>
+<td>безсерверний запуск агентів, справжня ізоляція сесій</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>коротка й довга пам'ять</td>
+</tr>
+<tr>
+<td>Gateway</td>
+<td>перетворює API й Lambda на MCP-інструменти</td>
+</tr>
+<tr>
+<td>Identity</td>
+<td>ідентичність агента, сумісна з Cognito, Okta, Auth0</td>
+</tr>
+<tr>
+<td>Policy</td>
+<td>детерміновані правила на кожен виклик інструмента</td>
+</tr>
+<tr>
+<td>Observability</td>
+<td>трасування кроків через OpenTelemetry</td>
+</tr>
+<tr>
+<td>Code Interpreter, Browser</td>
+<td>ізольовані пісочниці</td>
+</tr>
+<tr>
+<td>Evaluations, Registry, Harness</td>
+<td>оцінка, каталог, готовий цикл агента</td>
+</tr>
+</tbody>
+</table>
+<p>Зв'язок із навичками: <strong>Policy</strong> означає tool-use authorization, <strong>Runtime</strong> означає session isolation, <strong>Identity</strong> означає хто діє.</p>
+<p><strong>Bedrock Agents</strong> це простіший керований варіант. AWS радить AgentCore, якщо потрібен будь-який фреймворк чи більше контролю.</p>
+<h2>Крок 6. Логи</h2>
+<p>Логи часто містять промпти з PII. Заходи:</p>
+<ul>
+<li><strong>Model invocation logging</strong> Bedrock у CloudWatch чи S3 вмикається окремо, вміст логуйте свідомо <em>(не звірено)</em>;</li>
+<li>маскування: CloudWatch Logs data protection <em>(не звірено)</em>;</li>
+<li>мінімальні права на групи логів, шифрування KMS, короткий retention;</li>
+<li>Guardrails логують порушення в CloudWatch або S3;</li>
+<li>метрики токенів є в CloudWatch.</li>
+</ul>
+<p>Логуйте <strong>метадані</strong> (модель, токени, вартість), а не повний промпт.</p>
+<h2>Крок 7. AI-інструменти розробника</h2>
+<p><strong>Kiro</strong> це AI-середовище зі спільним агентом для IDE, CLI, Web і Mobile:</p>
+<ul>
+<li><strong>Specs</strong>: requirements, design, tasks; окремий bugfix spec;</li>
+<li><strong>Steering</strong>: правила проєкту для агента;</li>
+<li><strong>Hooks</strong>: автоматичні дії при зміні файла чи завершенні задачі;</li>
+<li><strong>MCP</strong>: підключення зовнішніх інструментів;</li>
+<li>є міграція з Amazon Q Developer і Q CLI.</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Навичка</th>
+<th>Де застосувати</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.1.9 код, огляд, сканування</td>
+<td>spec-driven генерація, автоматичний code review</td>
+</tr>
+<tr>
+<td>3.2.5 тести</td>
+<td>генерація тестів, аналіз результатів</td>
+</tr>
+<tr>
+<td>3.3.9 CI/CD</td>
+<td>затвердження деплою, перевірка після нього</td>
+</tr>
+<tr>
+<td>4.1.5 відлагодження</td>
+<td>аналіз помилок, пропозиції виправлень</td>
+</tr>
+<tr>
+<td>4.3.6 оптимізація</td>
+<td>пошук вузьких місць</td>
+</tr>
+</tbody>
+</table>
+<p>Пастка: згенерований AI код перевіряють як звичайний: тести, огляд, сканування.</p>
+<p><strong>Amazon Quick</strong> це інструмент для бізнес-користувачів, не для розробки (з вторинних джерел, офіційно не підтверджено).</p>
+<h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>Bedrock: Converse це єдиний формат, дані не тренують моделі.</li>
+<li>Приватність: PrivateLink. Доступ: IAM. Аудит: CloudTrail.</li>
+<li>Guardrails фільтрують вхід і вихід. PII це sensitive information. Prompt injection це Prompt Attack. Галюцинації це grounding.</li>
+<li><code>ApplyGuardrail</code> працює без виклику моделі, навіть для сторонніх моделей.</li>
+<li>Агенти: мінімум прав, ізоляція сесій, людина для небезпечних дій.</li>
+<li>Логи не мають містити PII.</li>
+<li>Вибір моделей і prompt engineering на іспиті не перевіряють.</li>
+</ol>
+<h2>Перевірте себе</h2>
+<ol>
+<li>Як не пускати дані до Bedrock через інтернет?</li>
+<li>Клієнт питає, чи вчиться модель на його даних. Що відповісти?</li>
+<li>Який фільтр замаскує PII у відповіді?</li>
+<li>Який фільтр захищає від prompt injection?</li>
+<li>Як застосувати guardrail до моделі поза Bedrock?</li>
+<li>Модель у RAG вигадує факти. Який фільтр?</li>
+<li>Агент хоче видалити базу. Що має зупинити дію?</li>
+<li>Де логувати виклики моделі, щоб не злити PII?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>Interface VPC endpoint (AWS PrivateLink).</li>
+<li>Ні: вміст не використовується для покращення базових моделей і не передається провайдерам.</li>
+<li>Sensitive information filter (mask).</li>
+<li>Content filter «Prompt Attack».</li>
+<li><code>ApplyGuardrail</code>.</li>
+<li>Contextual grounding.</li>
+<li>Human-in-the-loop схвалення й tool-use authorization (мінімальні права).</li>
+<li>Логувати метадані (модель, токени, вартість), маскувати чутливі дані, обмежити доступ до логів.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 21-ai-services-security.md.</p>
+
+<nav class="pager"><a href="20-streaming-step-functions-simple.html">← Лекція 20</a><a href="22-gaps-simple.html">Лекція 22 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

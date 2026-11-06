@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 3 (просто): S3 детально</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; }
+  th { background:#fff; }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; word-break:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 3 (просто): S3 детально</h1>
+<blockquote>
+<p>Середній рівень: усі правила й числа з повної лекції, але простими словами й без розповіді про наш проєкт. Повна: ../3-s3-in-depth.md. Числа й ціни в повній лекції дані з пам'яті, позначка <em>(не звірено)</em> означає те саме тут.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>S3 це об'єктне сховище.</strong> Для іспиту треба знати модель даних, класи зберігання, lifecycle, версіонування, події, завантаження великих файлів, CORS і ціни. Доступ і шифрування окремо в <a href="2-s3-access-encryption-simple.html">лекції 2</a>.</p>
+<h2>Крок 1. Модель даних</h2>
+<table>
+<thead>
+<tr>
+<th>Термін</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Bucket</strong></td>
+<td>контейнер верхнього рівня; ім'я <strong>глобально унікальне</strong>, бакет живе в <strong>одному регіоні</strong>; вкладених бакетів нема; типово 100 на акаунт (можна збільшити)</td>
+</tr>
+<tr>
+<td><strong>Object</strong></td>
+<td>файл плюс метадані; від 0 байт до <strong>48,8 ТіБ</strong>; одним PUT до <strong>5 ГБ</strong></td>
+</tr>
+<tr>
+<td><strong>Key</strong></td>
+<td>повне ім'я об'єкта, до 1024 байт; S3 плоский, <code>/</code> лише символ у ключі, а «теки» в консолі це <strong>prefix</strong></td>
+</tr>
+<tr>
+<td>Метадані</td>
+<td>системні (<code>Content-Type</code>, <code>Content-Length</code>, <code>ETag</code>, <code>Last-Modified</code>) і користувацькі <code>x-amz-meta-*</code></td>
+</tr>
+<tr>
+<td><strong>Теги</strong></td>
+<td>до <strong>10</strong> пар; можна змінювати, годяться для прав і lifecycle</td>
+</tr>
+<tr>
+<td><code>versionId</code></td>
+<td>ідентифікатор версії</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Об'єкти <strong>незмінні</strong>: оновлення це запис нового об'єкта з тим самим ключем.</li>
+<li><strong>Метадані</strong> задаються під час завантаження й не змінюються, <strong>теги</strong> можна змінювати.</li>
+<li>З грудня 2020 S3 дає <strong>сильну read-after-write консистентність</strong> для всіх операцій (PUT, DELETE, LIST). Старі матеріали про «eventual consistency» застаріли.</li>
+<li>Адреса: <code>https://&lt;bucket&gt;.s3.&lt;region&gt;.amazonaws.com/&lt;key&gt;</code> (virtual-hosted, сучасний) або <code>https://s3.&lt;region&gt;.amazonaws.com/&lt;bucket&gt;/&lt;key&gt;</code> (path style, застарілий).</li>
+<li>Префікси слугують межами прав і подій. Для LocalStack у тестах потрібен path style.</li>
+</ul>
+<h2>Крок 2. Класи зберігання</h2>
+<table>
+<thead>
+<tr>
+<th>Клас</th>
+<th>Для чого</th>
+<th>Доступ</th>
+<th>Мін. зберігання</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Standard</strong></td>
+<td>часто потрібні дані</td>
+<td>миттєво</td>
+<td>нема</td>
+</tr>
+<tr>
+<td><strong>Express One Zone</strong></td>
+<td>дуже низька затримка (одиниці мс), одна AZ</td>
+<td>миттєво</td>
+<td>нема</td>
+</tr>
+<tr>
+<td><strong>Intelligent-Tiering</strong></td>
+<td>невідомий патерн доступу</td>
+<td>миттєво, автоматично переміщає (30 днів без доступу: Infrequent, 90: Archive Instant Access; архівні рівні опційні; об'єкти менше 128 КБ не моніторяться)</td>
+<td>нема (є плата за моніторинг)</td>
+</tr>
+<tr>
+<td><strong>Standard-IA</strong></td>
+<td>рідко, але швидко</td>
+<td>миттєво</td>
+<td>30 днів</td>
+</tr>
+<tr>
+<td><strong>One Zone-IA</strong></td>
+<td>рідко, відтворювані дані</td>
+<td>миттєво, одна AZ</td>
+<td>30 днів</td>
+</tr>
+<tr>
+<td><strong>Glacier Instant Retrieval</strong></td>
+<td>архів з миттєвим доступом</td>
+<td>мілісекунди</td>
+<td>90 днів</td>
+</tr>
+<tr>
+<td><strong>Glacier Flexible Retrieval</strong></td>
+<td>архів</td>
+<td>хвилини-години</td>
+<td>90 днів</td>
+</tr>
+<tr>
+<td><strong>Glacier Deep Archive</strong></td>
+<td>найдешевший архів</td>
+<td>до 12-48 год</td>
+<td>180 днів</td>
+</tr>
+</tbody>
+</table>
+<p>Standard і Standard-IA розкладають дані щонайменше на 3 зони (11 дев'яток довговічності), One Zone-IA лише на одну.</p>
+<h3>Ціни й умови <em>(не звірено)</em></h3>
+<p>Орієнтовно (us-east-1, за ГБ на місяць). Важливе співвідношення, а не цифри.</p>
+<table>
+<thead>
+<tr>
+<th>Клас</th>
+<th>Зберігання</th>
+<th>Читання</th>
+<th>Мін. термін</th>
+<th>Мін. розмір рахунку</th>
+<th>Як отримати</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Standard</td>
+<td>~0,023</td>
+<td>безкоштовно (лише запити)</td>
+<td>нема</td>
+<td>нема</td>
+<td><code>GetObject</code></td>
+</tr>
+<tr>
+<td>Standard-IA</td>
+<td>~0,0125</td>
+<td>плата за ГБ</td>
+<td>30 днів</td>
+<td>128 КБ</td>
+<td><code>GetObject</code></td>
+</tr>
+<tr>
+<td>One Zone-IA</td>
+<td>~0,01</td>
+<td>плата за ГБ</td>
+<td>30 днів</td>
+<td>128 КБ</td>
+<td><code>GetObject</code></td>
+</tr>
+<tr>
+<td>Glacier Instant</td>
+<td>~0,004</td>
+<td>висока плата за ГБ</td>
+<td>90 днів</td>
+<td>128 КБ</td>
+<td><code>GetObject</code> (мс)</td>
+</tr>
+<tr>
+<td>Glacier Flexible</td>
+<td>~0,0036</td>
+<td>залежить від швидкості</td>
+<td>90 днів</td>
+<td>нема</td>
+<td>спершу <strong>restore</strong>, потім <code>GetObject</code></td>
+</tr>
+<tr>
+<td>Deep Archive</td>
+<td>~0,001</td>
+<td>залежить від швидкості</td>
+<td>180 днів</td>
+<td>нема</td>
+<td>спершу <strong>restore</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Правило ціни:</strong> чим дешевше зберігання, тим дорожче читання, довший мінімальний термін і повільніший доступ.</p>
+<p><strong>Мінімальний термін.</strong> Якщо видалити чи перенести об'єкт раніше, платите за залишок днів (early deletion charge). Об'єкт на 7 днів у Glacier Instant коштує як 90.</p>
+<p><strong>Restore для Flexible і Deep Archive.</strong> <code>GetObject</code> повертає <code>InvalidObjectState</code>. Треба <code>RestoreObject</code> (<code>s3:RestoreObject</code>): S3 створює <strong>тимчасову копію</strong> в Standard на N днів, оригінал лишається в архіві. Швидкості для Flexible: Expedited (хвилини), Standard (години), Bulk (найдешевше, години). Для Deep Archive: Standard (до 12 год), Bulk (до 48 год).</p>
+<p><strong>Як об'єкт потрапляє в клас:</strong> клієнт указує <code>StorageClass</code> у <code>PutObject</code>; lifecycle Transition; Intelligent-Tiering сам. Lifecycle рухає лише «вниз» (Standard → IA → Glacier → Deep Archive), назад не повертає, перехід в IA можливий не раніше ніж через 30 днів після створення.</p>
+<p><strong>Політики:</strong> заборонити писати в дорогий клас: <code>Deny</code> на <code>s3:PutObject</code> з умовою <code>StringEquals</code> на <code>s3:x-amz-storage-class</code>. Дозволити restore: <code>s3:RestoreObject</code>. Керувати lifecycle: <code>s3:PutLifecycleConfiguration</code>.</p>
+<h3>Як вибрати</h3>
+<table>
+<thead>
+<tr>
+<th>Умова в задачі</th>
+<th>Клас</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>часто читають</td>
+<td>Standard</td>
+</tr>
+<tr>
+<td>невідомо, як читатимуть</td>
+<td>Intelligent-Tiering</td>
+</tr>
+<tr>
+<td>рідко, але потрібно відразу</td>
+<td>Standard-IA (відтворювані: One Zone-IA)</td>
+</tr>
+<tr>
+<td>архів, але потрібні мілісекунди</td>
+<td>Glacier Instant</td>
+</tr>
+<tr>
+<td>архів, години чекати можна</td>
+<td>Glacier Flexible</td>
+</tr>
+<tr>
+<td>архів на роки, найдешевше</td>
+<td>Deep Archive</td>
+</tr>
+</tbody>
+</table>
+<p>Малі файли (менше 128 КБ) у IA і Glacier Instant коштують як 128 КБ, тож економії нема. Сервіс, який робить <code>GetObject</code> і не вміє чекати restore, впаде на архівному об'єкті.</p>
+<h2>Крок 3. Lifecycle</h2>
+<p>Правила на префікс, тег чи розмір:</p>
+<table>
+<thead>
+<tr>
+<th>Правило</th>
+<th>Що робить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Transition</strong></td>
+<td>перенести в інший клас через N днів; об'єкти менше 128 КБ за замовчуванням не переходять (з вересня 2024), дозволити можна фільтром за розміром</td>
+</tr>
+<tr>
+<td><strong>Expiration</strong></td>
+<td>видалити через N днів (у версійованому бакеті створює delete marker)</td>
+</tr>
+<tr>
+<td><strong>NoncurrentVersionExpiration</strong></td>
+<td>видалити старі версії</td>
+</tr>
+<tr>
+<td><strong>AbortIncompleteMultipartUpload</strong></td>
+<td>прибрати недозавантажені частини (вони коштують грошей, поки лежать)</td>
+</tr>
+</tbody>
+</table>
+<p>Класична пара: <strong>теги плюс lifecycle</strong> (файл із тегом <code>status=temp</code> видаляється через 7 днів, після підтвердження тег знімають). Тому в політиці сервісу потрібні <code>PutObjectTagging</code> і <code>GetObjectTagging</code>.</p>
+<h2>Крок 4. Версіонування</h2>
+<ul>
+<li>Вмикається на бакеті, потім його можна лише <strong>призупинити</strong>, не вимкнути.</li>
+<li>Видалення без <code>versionId</code> лише ставить <strong>delete marker</strong>; об'єкт відновлюється видаленням маркера.</li>
+<li>Видалення з <code>versionId</code> стирає назавжди (за потреби потрібен MFA Delete).</li>
+<li>Платите за всі версії.</li>
+</ul>
+<h2>Крок 5. Події</h2>
+<table>
+<thead>
+<tr>
+<th>Куди</th>
+<th>Конфіг</th>
+<th>Коли обирати</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lambda, SQS, SNS</td>
+<td><code>NotificationConfiguration</code> на бакеті</td>
+<td>простий випадок, один споживач, фільтри префікс і суфікс</td>
+</tr>
+<tr>
+<td><strong>EventBridge</strong></td>
+<td>вмикається прапорцем на бакеті</td>
+<td>багато споживачів, фільтр за будь-якими полями, архів і replay, кілька цілей</td>
+</tr>
+</tbody>
+</table>
+<p>Особливості:</p>
+<ul>
+<li>Події S3 доставляються <strong>принаймні один раз</strong> (можливі дублікати).</li>
+<li>Для Lambda, SQS, SNS не можна кілька <strong>перетинних префіксів</strong> на одну подію; в EventBridge цього обмеження нема.</li>
+<li><strong>Рекурсія:</strong> якщо Lambda пише в той самий бакет, що її запускає, можна зациклитися. Захист: різні префікси (<code>images/</code> → <code>thumbs/</code>) і правило, що слухає лише <code>images/</code>.</li>
+<li>З Terraform: <code>aws_s3_bucket_notification</code> із <code>eventbridge = true</code> лише вмикає надсилання подій на default-шину; саме правило створює SAM разом із функцією.</li>
+</ul>
+<h2>Крок 6. Завантаження й швидкість</h2>
+<table>
+<thead>
+<tr>
+<th>Механізм</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Single PUT</td>
+<td>до 5 ГБ за запит</td>
+</tr>
+<tr>
+<td><strong>Multipart upload</strong></td>
+<td>рекомендовано від 100 МБ, <strong>обов'язково понад 5 ГБ</strong>; частини 5 МБ - 5 ГБ, до <strong>10 000</strong> частин; паралельно, повтор лише невдалих частин</td>
+</tr>
+<tr>
+<td><strong>Transfer Acceleration</strong></td>
+<td>вхід через найближчий edge-вузол CloudFront (додаткова плата)</td>
+</tr>
+<tr>
+<td><strong>Byte-range fetch</strong></td>
+<td>читання частини об'єкта (<code>Range</code>), паралельне завантаження</td>
+</tr>
+<tr>
+<td><strong>S3 Select / Glacier Select</strong></td>
+<td>вибірка рядків з CSV, JSON, Parquet на боці S3 (нові клієнти не підключаються)</td>
+</tr>
+</tbody>
+</table>
+<p>Швидкість на префікс: щонайменше <strong>3500</strong> запитів на запис і <strong>5500</strong> на читання в секунду <strong>на префікс</strong>; префіксів може бути скільки завгодно.</p>
+<h2>Крок 7. CORS</h2>
+<p>Потрібен, коли <strong>браузер</strong> ходить у S3 з іншого домену (наприклад, JS завантажує на presigned PUT). Налаштовується на бакеті: <code>AllowedOrigins</code>, <code>AllowedMethods</code>, <code>AllowedHeaders</code>. Якщо запис робить бекенд, CORS не потрібен.</p>
+<h2>Крок 8. Інше для іспиту</h2>
+<table>
+<thead>
+<tr>
+<th>Тема</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Replication (CRR, SRR)</td>
+<td>асинхронне копіювання нових об'єктів в інший бакет між регіонами чи в межах регіону; потрібне версіонування</td>
+</tr>
+<tr>
+<td>Requester Pays</td>
+<td>платить той, хто читає (спільні дані)</td>
+</tr>
+<tr>
+<td>Inventory, Storage Lens</td>
+<td>звіти про вміст і метрики</td>
+</tr>
+<tr>
+<td>Static website hosting</td>
+<td>сайт із бакета (HTTP; для HTTPS потрібен CloudFront)</td>
+</tr>
+<tr>
+<td>Batch Operations</td>
+<td>масові дії над мільйонами об'єктів</td>
+</tr>
+<tr>
+<td>Outposts, Object Lambda, Multi-Region Access Points</td>
+<td>рідкісні, лише теорія</td>
+</tr>
+</tbody>
+</table>
+<h2>Крок 9. Ціни</h2>
+<p>Тарифікується: зберігання (ГБ-місяць), запити (PUT і GET окремо), вихідний трафік в інтернет, опційні функції. <strong>Вхідний трафік у S3 безкоштовний; передавання між S3 і сервісами AWS у тому самому регіоні безкоштовне.</strong></p>
+<h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>S3 плоский: ключ плюс префікси. Префікси задають межі прав, подій і lifecycle.</li>
+<li>Сильна консистентність з 2020 року.</li>
+<li>Клас обирають за патерном доступу: часто Standard, невідомо Intelligent-Tiering, рідко IA, архів Glacier.</li>
+<li>Мінімальні терміни 30 / 90 / 180 днів, мінімальний розмір 128 КБ для IA і Glacier Instant.</li>
+<li>Flexible і Deep Archive потребують restore перед читанням.</li>
+<li>Lifecycle рухає лише вниз; не забувайте <code>AbortIncompleteMultipartUpload</code>.</li>
+<li>Версіонування можна лише призупинити; delete без <code>versionId</code> ставить delete marker.</li>
+<li>EventBridge не має обмеження про перетинні префікси. Рекурсія лікується різними префіксами.</li>
+<li>Multipart обов'язковий понад 5 ГБ, до 10 000 частин.</li>
+<li>3500 записів і 5500 читань на секунду на префікс.</li>
+</ol>
+<h2>Перевірте себе</h2>
+<ol>
+<li>Чому S3 називають плоским, хоча в консолі є «теки»?</li>
+<li>Який клас для даних, що читаються раз на квартал, але мають віддаватися миттєво?</li>
+<li>Навіщо <code>AbortIncompleteMultipartUpload</code>?</li>
+<li>Що станеться з версійованим об'єктом після звичайного <code>DELETE</code>?</li>
+<li>Чому Lambda не зациклюється, хоч пише в той самий бакет?</li>
+<li>Чим EventBridge кращий за пряме сповіщення S3 у Lambda?</li>
+<li>З якого розміру потрібен multipart?</li>
+<li>Для чого CORS?</li>
+<li>Чому <code>GetObject</code> повертає <code>InvalidObjectState</code>?</li>
+<li>Що потрібно для реплікації?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>Ключ це один рядок, <code>/</code> лише символ, консоль показує «теки» за префіксом.</li>
+<li>Standard-IA.</li>
+<li>Недозавантажені частини коштують грошей, поки лежать.</li>
+<li>Ставиться delete marker, об'єкт відновлюється видаленням маркера.</li>
+<li>Правило слухає лише <code>images/</code>, а Lambda пише в <code>thumbs/</code>.</li>
+<li>Багато споживачів, фільтр за будь-якими полями, архів, replay, нема обмеження про перетинні префікси.</li>
+<li>Обов'язково понад 5 ГБ, рекомендовано від 100 МБ.</li>
+<li>Коли браузер ходить у S3 з іншого домену.</li>
+<li>Об'єкт у Flexible чи Deep Archive: спершу <code>RestoreObject</code>.</li>
+<li>Увімкнене версіонування.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 3-s3-in-depth.md.</p>
+
+<nav class="pager"><a href="2-s3-access-encryption-simple.html">← Лекція 2</a><a href="4-eventbridge-simple.html">Лекція 4 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

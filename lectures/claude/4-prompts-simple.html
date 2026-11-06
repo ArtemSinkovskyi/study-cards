@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 4 (просто): як писати промпти й перевіряти їх</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; }
+  th { background:#fff; }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; word-break:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 4 (просто): як писати промпти й перевіряти їх</h1>
+<blockquote>
+<p>Спрощена версія. Повна: ../4-prompting-and-evaluations.md.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>Спершу вирішіть, як перевірите, що промпт добрий. Потім пишіть.</strong> Інакше ви не дізнаєтесь, чи покращали його.</p>
+<h2>Крок 1. Перед промптом</h2>
+<p>Документація вимагає три речі:</p>
+<ol>
+<li>Чітко визначені <strong>критерії успіху</strong>.</li>
+<li>Спосіб <strong>перевірити</strong> їх на прикладах.</li>
+<li>Перша чернетка промпта.</li>
+</ol>
+<p>Гарні критерії: <strong>конкретні, вимірні, досяжні, доречні</strong>. Приклад: «F1 не нижче 0,85 на 10 000 твітів». Поганий: «має працювати добре».</p>
+<p>Не кожна проблема лікується промптом. Інколи простіше змінити модель.</p>
+<h2>Крок 2. Основні принципи</h2>
+<ul>
+<li><strong>Будьте чіткими.</strong> Модель як «новий розумний працівник без контексту». Покажіть промпт колезі: якщо він не зрозуміє, модель теж ні.</li>
+<li><strong>Давайте мотивацію.</strong> Не «ніколи не пиши три крапки», а «текст читатиме синтезатор мовлення, який не вміє їх вимовляти». Модель узагальнює з пояснення.</li>
+<li><strong>Дайте приклади.</strong> Найкраще <strong>3-5</strong>, релевантних і <strong>різноманітних</strong>, у тегах <code>&lt;example&gt;</code>.</li>
+<li><strong>Розділяйте частини тегами</strong>: <code>&lt;instructions&gt;</code>, <code>&lt;context&gt;</code>, <code>&lt;input&gt;</code>.</li>
+</ul>
+<h2>Крок 3. Довгі документи</h2>
+<p>Якщо в промпті понад ~20 тисяч токенів документів:</p>
+<ul>
+<li>довгі дані <strong>нагору</strong>;</li>
+<li>запит <strong>у кінець</strong> (до 30% кращий результат).</li>
+</ul>
+<p>Кілька документів: <code>&lt;documents&gt;</code>, у кожному <code>&lt;document index=&quot;n&quot;&gt;</code> із <code>&lt;source&gt;</code> і <code>&lt;document_content&gt;</code>.</p>
+<h2>Крок 4. Формат відповіді</h2>
+<p>Кажіть, що <strong>робити</strong>, а не чого не робити.</p>
+<table>
+<thead>
+<tr>
+<th>Замість</th>
+<th>Пишіть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>«Не використовуй markdown»</td>
+<td>«Відповідь складається з плавних абзаців прози»</td>
+</tr>
+</tbody>
+</table>
+<p>Також стиль самого промпта впливає на відповідь: приберіть markdown із промпта, і в відповіді його стане менше.</p>
+<h2>Крок 5. Prefill більше не працює</h2>
+<p><strong>Prefill</strong> це коли ви самі пишете початок відповіді асистента, щоб модель продовжила. Починаючи з <strong>Claude 4.6</strong>, це дає <strong>400</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>Для чого був prefill</th>
+<th>Чим замінити</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Примусовий формат (JSON)</td>
+<td>structured outputs; для класифікації інструмент з <code>enum</code></td>
+</tr>
+<tr>
+<td>Прибрати вступ «Here is...»</td>
+<td>Пряма інструкція «Відповідай без вступу»</td>
+</tr>
+<tr>
+<td>Продовжити обірвану відповідь</td>
+<td>Перенести у user: «Твоя відповідь обірвалась на …, продовж»</td>
+</tr>
+</tbody>
+</table>
+<h2>Крок 6. Промпти для інструментів</h2>
+<ul>
+<li>Нові моделі виконують інструкції буквально. «Чи можеш запропонувати зміни» дасть лише пропозиції. Для дії пишіть: «Зміни цю функцію».</li>
+<li><strong>Агресивні «MUST use this tool» на Opus 4.5 і 4.6 можуть перетригерити.</strong> Пишіть спокійніше: «Use this tool when...».</li>
+<li>Для паралельних викликів є готовий блок <code>&lt;use_parallel_tool_calls&gt;</code>. Додайте: якщо виклики залежать один від одного, не паралельте й <strong>ніколи не вгадуйте параметри</strong>.</li>
+</ul>
+<h2>Крок 7. Роздуми (дуже коротко)</h2>
+<ul>
+<li>Нові моделі мають <strong>adaptive thinking</strong>: модель сама вирішує, думати й скільки.</li>
+<li>Старий <code>budget_tokens</code> на <strong>Claude 4.7 і новіших</strong> дає <strong>400</strong>. Замість нього <code>effort</code> чи <code>max_tokens</code>.</li>
+</ul>
+<h2>Крок 8. Складні завдання</h2>
+<ul>
+<li>Субагенти: модель делегує сама. Інколи занадто, тоді додайте правило, коли їх використовувати.</li>
+<li><strong>Ланцюжок промптів</strong> (кілька викликів) потрібен, коли треба перевіряти проміжні результати. Типова схема: чернетка, перевірка за критеріями, доопрацювання.</li>
+</ul>
+<h2>Крок 9. Як перевіряти</h2>
+<p>Принципи оцінок:</p>
+<ol>
+<li><strong>Під задачу:</strong> розподіл як у реальності, з крайніми випадками.</li>
+<li><strong>Автоматизуйте</strong> де можна.</li>
+<li><strong>Обсяг важливіший за якість:</strong> багато автоматично оцінених питань краще за мало ручних.</li>
+</ol>
+<p>Два види оцінювання:</p>
+<table>
+<thead>
+<tr>
+<th>Вид</th>
+<th>Для чого</th>
+<th>Приклади</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Кодом</td>
+<td>Категорії, детерміновані відповіді</td>
+<td>Exact match, ROUGE-L</td>
+</tr>
+<tr>
+<td>Моделлю</td>
+<td>Нюанси (тон, емпатія)</td>
+<td>Шкала 1-5, так/ні</td>
+</tr>
+</tbody>
+</table>
+<p>Правило: оцінюйте <strong>іншою моделлю</strong>, ніж та, що генерувала відповідь.</p>
+<h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>Спершу критерії успіху й спосіб перевірки.</li>
+<li>3-5 різноманітних прикладів у тегах.</li>
+<li>Довгі документи нагорі, запит у кінці.</li>
+<li>Кажіть, що робити, а не чого не робити.</li>
+<li>Prefill на 4.6+ дає 400. <code>budget_tokens</code> на 4.7+ дає 400.</li>
+<li>Агресивне «MUST» може перетригерити інструмент.</li>
+<li>Оцінюйте іншою моделлю.</li>
+</ol>
+<h2>Перевірте себе</h2>
+<ol>
+<li>Що треба мати до написання промпта?</li>
+<li>Скільки прикладів і які вони мають бути?</li>
+<li>Де ставити довгі документи й запит?</li>
+<li>Що буде з prefill на Claude 4.6+?</li>
+<li>Чим замінити prefill для JSON?</li>
+<li>Яку модель обирати для оцінювання?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>Критерії успіху, спосіб перевірки, першу чернетку.</li>
+<li>3-5, релевантні, різноманітні, у <code>&lt;example&gt;</code>.</li>
+<li>Документи нагорі, запит у кінці.</li>
+<li>Помилка 400.</li>
+<li>Structured outputs або інструментом з <code>enum</code> для міток.</li>
+<li>Іншу, ніж та, що генерувала.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 4-prompting-and-evaluations.md.</p>
+
+<nav class="pager"><a href="3-tools-and-mcp-simple.html">← Лекція 3</a><a href="5-claude-code-simple.html">Лекція 5 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

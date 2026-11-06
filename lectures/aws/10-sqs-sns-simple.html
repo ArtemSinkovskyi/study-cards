@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 10 (просто): SQS і SNS</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; }
+  th { background:#fff; }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; word-break:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 10 (просто): SQS і SNS</h1>
+<blockquote>
+<p>Середній рівень: усі правила й числа з повної лекції, але простими словами й без розповіді про наш проєкт та експерименти. Повна: ../10-sqs-sns.md. Усе, що в повній лекції звірене з документацією, тут без позначки; що не підтверджено, позначено <em>(не звірено)</em>.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>SQS це черга: повідомлення лежить, поки його не заберуть і не видалять. SNS це розсилка: одне повідомлення йде всім підписникам.</strong> Разом вони дають fan-out: топік SNS розкладає подію по кількох чергах SQS, і кожен споживач обробляє її сам.</p>
+<p>На іспиті це навички: sync чи async, event-driven патерни, оптимізація повідомлень (fan-out), обробка помилок (DLQ).</p>
+<h2>Крок 1. Словник</h2>
+<table>
+<thead>
+<tr>
+<th>Термін</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SQS</strong></td>
+<td>керована черга: продюсери кладуть, споживачі забирають і видаляють</td>
+</tr>
+<tr>
+<td><strong>SNS</strong></td>
+<td>publish/subscribe: повідомлення в <strong>топік</strong>, далі всім підписникам (email, SQS, Lambda, HTTP, SMS)</td>
+</tr>
+<tr>
+<td><strong>DLQ</strong></td>
+<td>куди класти те, що не вдалося обробити; сама DLQ це звичайна черга</td>
+</tr>
+<tr>
+<td><strong>Visibility timeout</strong></td>
+<td>час після <code>ReceiveMessage</code>, коли повідомлення невидиме іншим; не видалили, повернеться в чергу</td>
+</tr>
+<tr>
+<td><strong>Fan-out</strong></td>
+<td>один топік розсилає в кілька черг</td>
+</tr>
+<tr>
+<td><strong>Event source mapping</strong></td>
+<td>Lambda сама опитує джерело й викликає функцію пачками</td>
+</tr>
+</tbody>
+</table>
+<h2>Крок 2. Параметри черги SQS</h2>
+<table>
+<thead>
+<tr>
+<th>Параметр</th>
+<th>Значення</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Retention</td>
+<td>мінімум 60 с, <strong>типово 4 дні, максимум 14 днів</strong></td>
+</tr>
+<tr>
+<td>Visibility timeout</td>
+<td>типово 30 с, діапазон 0 - <strong>12 год</strong></td>
+</tr>
+<tr>
+<td>Short polling</td>
+<td><code>ReceiveMessageWaitTimeSeconds = 0</code>: відповідь одразу, може бути порожньою навіть коли повідомлення є</td>
+</tr>
+<tr>
+<td><strong>Long polling</strong></td>
+<td>чекає <strong>до 20 с</strong>, опитує всі сервери; дешевше загалом</td>
+</tr>
+<tr>
+<td><code>DelaySeconds</code></td>
+<td>затримка доставки нового повідомлення, до <strong>15 хв</strong></td>
+</tr>
+<tr>
+<td>Максимальний розмір</td>
+<td><strong>1 МіБ</strong> (більше: Extended Client Library кладе тіло в S3, до 2 ГБ)</td>
+</tr>
+<tr>
+<td>Шифрування</td>
+<td>SSE-SQS (ключем керує SQS) або SSE-KMS</td>
+</tr>
+</tbody>
+</table>
+<p>Повідомлення SQS записується в кілька зон доступності регіону ще до того, як <code>SendMessage</code> підтвердить відправку. Черга існує в одному регіоні, між регіонами не реплікується.</p>
+<h2>Крок 3. Standard чи FIFO</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Standard</th>
+<th>FIFO</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Доставка</td>
+<td>at-least-once, можливі дублікати</td>
+<td>дедуплікація в межах <strong>5 хв</strong></td>
+</tr>
+<tr>
+<td>Порядок</td>
+<td>best-effort</td>
+<td>суворий у межах <code>MessageGroupId</code></td>
+</tr>
+<tr>
+<td>Ім'я</td>
+<td>будь-яке</td>
+<td>закінчується на <strong><code>.fifo</code></strong></td>
+</tr>
+<tr>
+<td>Пропускна здатність</td>
+<td>майже необмежена</td>
+<td>300 TPS на дію без батчингу, 3000 повідомлень/с з батчингом (по 10); high throughput підіймає ліміти залежно від регіону <em>(для eu-north-1 типові 2 400 / 24 000)</em></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong><code>MessageGroupId</code></strong> лінія порядку: повідомлення однієї групи йдуть по одному, різні групи паралельно. Обов'язковий для кожної відправки у FIFO. Схожий на <strong>ключ</strong> повідомлення Kafka, а не на <code>group.id</code> консьюмера.</li>
+<li><strong><code>MessageDeduplicationId</code></strong> токен унікальності: те саме значення за 5 хв приймається, але вдруге не доставляється. Альтернатива: <code>ContentBasedDeduplication</code> (SHA-256 від тіла) <em>(не звірено)</em>.</li>
+<li>Після обробки повідомлення в SQS видаляється (у Kafka лишається в журналі).</li>
+</ul>
+<p>At-least-once означає, що споживач має бути <strong>ідемпотентним</strong>.</p>
+<h2>Крок 4. Шифрування й вартість</h2>
+<p><strong>Шифрування:</strong></p>
+<ul>
+<li><strong>SSE-SQS</strong> (<code>SqsManagedSseEnabled</code>): ключем керує SQS, окремої плати документація не називає <em>(не звірено)</em>.</li>
+<li><strong>SSE-KMS</strong>: свій ключ або <code>alias/aws/sqs</code>, плата за виклики KMS, <code>data key reuse period</code> 60 с - 24 год, типово 300 с.</li>
+<li>Шифрується <strong>лише тіло</strong>. Атрибути, ID, час, метрики ні.</li>
+<li>Шифрується те, що надіслано <strong>після</strong> вмикання.</li>
+<li>Черга з ключем <code>alias/aws/sqs</code> не може викликати Lambda в <strong>іншому акаунті</strong>.</li>
+<li>Запити до зашифрованої черги: лише HTTPS і Signature V4.</li>
+</ul>
+<p><strong>Вартість:</strong></p>
+<ul>
+<li>платять за <strong>запити</strong>, не за час зберігання і не за retention;</li>
+<li><strong>кожні 64 КБ</strong> повідомлення це окремий запит (1 МіБ = 16 запитів);</li>
+<li><strong>1 мільйон запитів на місяць безкоштовно</strong>;</li>
+<li>у межах регіону трафік безкоштовний;</li>
+<li>порожні <code>ReceiveMessage</code> теж запити, тому long polling дешевше (тарифікується так само, але порожніх відповідей менше);</li>
+<li>базові ціни приблизно 0,40 USD (Standard) і 0,50 USD (FIFO) за мільйон запитів <em>(не звірено)</em>.</li>
+</ul>
+<h2>Крок 5. Де які DLQ</h2>
+<table>
+<thead>
+<tr>
+<th>Де</th>
+<th>Як налаштовується</th>
+<th>Хто повторює</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SQS як джерело</strong></td>
+<td><code>RedrivePolicy</code> на <strong>джерельній</strong> черзі (<code>deadLetterTargetArn</code>, <code>maxReceiveCount</code>); <code>RedriveAllowPolicy</code> на DLQ</td>
+<td>споживач: SQS повертає повідомлення після visibility timeout</td>
+</tr>
+<tr>
+<td><strong>Lambda async</strong> (EventBridge, S3, SNS)</td>
+<td><code>DeadLetterConfig</code> на <strong>функції</strong></td>
+<td>Lambda: <code>MaximumRetryAttempts</code></td>
+</tr>
+<tr>
+<td><strong>SNS підписка</strong></td>
+<td><code>RedrivePolicy</code> на <strong>підписці</strong>; DLQ лише SQS того ж акаунта й регіону</td>
+<td>SNS: помилка клієнта без повторів, помилка сервера до 100 015 повторів за 23 дні</td>
+</tr>
+<tr>
+<td><strong>EventBridge ціль</strong></td>
+<td>окреме налаштування DLQ на цілі</td>
+<td>EventBridge: 24 год і до 185 спроб</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ключове правило:</strong> для Lambda з тригером SQS DLQ ставлять <strong>на самій черзі</strong>, а не на функції.</p>
+<p>Додатково:</p>
+<ul>
+<li>Lambda DLQ: лише Standard-черга або Standard-топік SNS. <strong>FIFO не підтримується.</strong></li>
+<li>Що лежить у повідомленні DLQ лямбди: тіло це сама подія; атрибути <code>RequestID</code>, <code>ErrorCode</code>, <code>ErrorMessage</code> (перші 1 КБ). <code>ErrorCode: 200</code> означає, що впав код функції (function error), а не сам виклик (invocation error, як 429).</li>
+<li>Якщо Lambda не може записати в DLQ, вона видаляє подію й публікує <code>DeadLetterErrors</code>.</li>
+<li><strong>OnFailure destination</strong> сучасніша: більше цілей (SQS, SNS, S3, Lambda, EventBridge), запис містить і <strong>відповідь функції</strong> (<code>responsePayload</code>, <code>functionError</code>).</li>
+<li><strong>Kill switch:</strong> reserved concurrency <code>0</code> для async-функції спрямовує нові події в DLQ чи OnFailure без повторів.</li>
+<li><strong>Retention DLQ</strong> має бути довшим за retention джерельної черги, бо в Standard відлік іде від початкового часу потрапляння в чергу. У FIFO відлік скидається.</li>
+<li><strong>Redrive</strong> (повернення з DLQ у робочу чергу, <code>StartMessageMoveTask</code>) працює <strong>лише для DLQ, джерело якої SQS-черга</strong>. Для DLQ від Lambda чи SNS не працює: подію беруть із Body і перевикликають <code>aws lambda invoke --invocation-type Event</code>. Швидкість redrive до 500 повідомлень/с, одне активне завдання на чергу.</li>
+<li>Рекомендований alarm на DLQ: <code>ApproximateNumberOfMessagesVisible</code> з порогом 1. <code>NumberOfMessagesSent</code> не підходить (не враховує переміщені автоматично). Retention DLQ 14 днів. Метрики SQS надходять щохвилини, а в порожньої черги даних нема (<code>INSUFFICIENT_DATA</code>), тож потрібен <code>TreatMissingData: notBreaching</code>.</li>
+</ul>
+<h2>Крок 6. Lambda ↔ SQS</h2>
+<p>Lambda опитує чергу через <strong>event source mapping</strong> і викликає функцію <strong>синхронно</strong>, пачкою. Лямбда й черга в одному регіоні, але можуть бути в різних акаунтах.</p>
+<table>
+<thead>
+<tr>
+<th>Параметр</th>
+<th>Значення</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Розмір пачки</td>
+<td>Standard до <strong>10 000</strong> записів (понад 10 потрібне вікно не менше 1 с), FIFO до <strong>10</strong></td>
+</tr>
+<tr>
+<td>Типова пачка</td>
+<td>до 10</td>
+</tr>
+<tr>
+<td>Вікно пачки (<code>MaximumBatchingWindowInSeconds</code>)</td>
+<td>лише Standard, до <strong>5 хв</strong></td>
+</tr>
+<tr>
+<td>Обмеження</td>
+<td>поки не перевищено 6 МБ payload</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Помилки.</strong> Функція кинула помилку: <strong>вся пачка</strong> знову видима після visibility timeout, навіть успішні записи. Тому код ідемпотентний. Щоб повертати лише невдалі, вмикають <strong>partial batch response</strong>: <code>FunctionResponseTypes = ReportBatchItemFailures</code>, і функція повертає <code>{ &quot;batchItemFailures&quot;: [ { &quot;itemIdentifier&quot;: &quot;id2&quot; } ] }</code>.</p>
+<ul>
+<li>Порожній чи null список означає повний успіх.</li>
+<li>Недійсний JSON, порожній <code>itemIdentifier</code>, неправильна назва ключа, неіснуючий ID, виняток з функції означають провал усієї пачки.</li>
+<li>Для FIFO функція зупиняється після першої помилки й повертає всі невдалі та необроблені повідомлення, щоб зберегти порядок. Powertools Batch Processor робить це сам.</li>
+<li>Симптоми неправильної відповіді: <code>NumberOfMessagesDeleted</code> падає до 0 і росте <code>ApproximateAgeOfOldestMessage</code>.</li>
+</ul>
+<p><strong>Правила таймаутів:</strong></p>
+<ul>
+<li><strong>Visibility timeout черги не менше 6 × timeout функції</strong> (з вікном пачки: 6 × timeout плюс <code>MaximumBatchingWindowInSeconds</code>).</li>
+<li>Timeout функції не більше за visibility timeout, інакше Lambda відхилить налаштування.</li>
+<li><code>maxReceiveCount</code> у redrive policy не менше <strong>5</strong>.</li>
+</ul>
+<p><strong>Тротлінг.</strong> Помилка коду чи тротлінг: Lambda зменшує паралелізм mapping, повідомлення повертається після visibility timeout. З <code>ReportBatchItemFailures</code> паралелізм при збоях не зменшується.</p>
+<p><strong>Масштабування.</strong> Типовий режим: старт з 5 паралельних викликів, далі до 300 на хвилину, максимум 1250. <strong>Provisioned mode</strong> (платний): мінімум і максимум pollers, швидше (до 1000 викликів на хвилину), до 100 000 паралельних. З ним не можна <code>Maximum concurrency</code>. Якщо є reserved concurrency, ставити не менше 5.</p>
+<p>Повідомлення Standard, отримане 3 і більше разів без видалення, SQS переносить у кінець черги.</p>
+<h2>Крок 7. SNS: топіки</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Standard</th>
+<th>FIFO</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Порядок</td>
+<td>best-effort</td>
+<td>суворий у межах <code>MessageGroupId</code></td>
+</tr>
+<tr>
+<td>Доставка</td>
+<td>at-least-once</td>
+<td>дедуплікація 5 хв; exactly-once лише з SQS FIFO і <strong>без</strong> filter policy</td>
+</tr>
+<tr>
+<td>Ім'я</td>
+<td>будь-яке</td>
+<td>закінчується на <code>.fifo</code></td>
+</tr>
+<tr>
+<td>Підписники</td>
+<td>усі протоколи</td>
+<td><strong>лише SQS</strong> (FIFO і Standard черги)</td>
+</tr>
+<tr>
+<td>Lambda</td>
+<td>напряму</td>
+<td>лише через чергу з тригером на лямбду</td>
+</tr>
+</tbody>
+</table>
+<p>FIFO-топік не доставляє на email, SMS, mobile, HTTP(S). З filter policy FIFO дає at-most-once. Дедуплікація: кожна публікація має deduplication ID або на топіку content-based (хеш лише <strong>тіла</strong>). <code>FifoThroughputScope</code>: <code>Topic</code> чи <code>MessageGroup</code>.</p>
+<p><strong>Протоколи Standard:</strong> HTTP/HTTPS, Email/Email-JSON, Firehose, SQS, Lambda, Platform application endpoint (mobile push), SMS.</p>
+<p><strong>Підтвердження</strong> потрібне для HTTP(S), email і ресурсів в іншому акаунті. Email-підписка спершу в <code>PendingConfirmation</code> і не працює, доки не натиснути посилання. Якщо власник SQS-черги сам створює підписку, вона підтверджується автоматично.</p>
+<p><strong>Розмір повідомлення SNS:</strong> 256 КіБ, до 1 МіБ через <code>MaximumMessageSize</code>; кожні 64 КБ це окремий запит.</p>
+<p><strong>Повтори доставки SNS:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Помилка</th>
+<th>Що робить SNS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>клієнта (endpoint видалено)</td>
+<td>без повторів, в DLQ підписки</td>
+</tr>
+<tr>
+<td>сервера, endpoint SQS чи Lambda</td>
+<td>до 100 015 повторів за 23 дні</td>
+</tr>
+<tr>
+<td>HTTP</td>
+<td>політика користувача</td>
+</tr>
+<tr>
+<td>email, SMS, mobile push</td>
+<td>50 повторів за 6 год</td>
+</tr>
+</tbody>
+</table>
+<p>Alarm CloudWatch не може публікувати в топік, зашифрований ключем <code>alias/aws/sns</code>.</p>
+<p><strong>Ціни SNS</strong> <em>(не звірено)</em>: перші 1000 email безкоштовно, email 2 USD за 100 000, запити 0,50 USD за мільйон.</p>
+<h3>Raw message delivery</h3>
+<p>Вмикається на підписці (<code>RawMessageDelivery = true</code>), лише для <strong>SQS, HTTP/S, Firehose</strong>. Без нього SQS отримує JSON-конверт SNS (поля <code>Type</code>, <code>MessageId</code>, <code>TopicArn</code>, <code>Message</code>, <code>Timestamp</code>, <code>Signature</code>...). З ним лише текст повідомлення.</p>
+<ul>
+<li>Для SQS з raw delivery максимум <strong>10 атрибутів</strong>, більше SNS відкидає.</li>
+<li>HTTP/S отримує заголовок <code>x-amz-sns-rawdelivery: true</code>.</li>
+<li>Подвійний <code>JSON.parse</code> у споживачі (конверт, потім <code>Message</code>) ознака вимкненого raw delivery.</li>
+</ul>
+<h2>Крок 8. Filter policies</h2>
+<p>Без політики підписка отримує <strong>все</strong>. Filter policy це JSON на <strong>підписці</strong> (не на топіку): SNS сам відкидає зайве.</p>
+<p><strong>Scope</strong> (<code>FilterPolicyScope</code>):</p>
+<ul>
+<li><code>MessageAttributes</code> <strong>за замовчуванням</strong>: за атрибутами; вкладені політики не підтримуються; порівнюються <code>String</code>, <code>String.Array</code>, <code>Number</code>; <code>Binary</code> ігнорується.</li>
+<li><code>MessageBody</code>: за тілом; тіло має бути коректним JSON; вкладені політики дозволені.</li>
+</ul>
+<p><strong>Логіка:</strong> між ключами <strong>AND</strong>, між значеннями в масиві <strong>OR</strong>. Атрибути, яких нема в політиці, ігноруються.</p>
+<p>Приклад: <code>{&quot;eventType&quot;: [&quot;image.uploaded&quot;], &quot;sizeBytes&quot;: [{&quot;numeric&quot;: [&quot;&gt;&quot;, 1048576]}], &quot;path&quot;: [{&quot;anything-but&quot;: {&quot;prefix&quot;: &quot;_test/&quot;}}]}</code>.</p>
+<p><strong>Оператори:</strong> точний збіг, <code>anything-but</code>, <code>prefix</code>, <code>suffix</code>, <code>equals-ignore-case</code>, діапазони чисел, IP (CIDR), <code>exists</code>, <code>$or</code>, wildcard.</p>
+<p><strong>Ліміти:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Що</th>
+<th>Ліміт</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ключів у політиці</td>
+<td><strong>5</strong> (для вкладених рахуються лише листові)</td>
+</tr>
+<tr>
+<td>комбінацій значень (добуток довжин масивів)</td>
+<td><strong>150</strong></td>
+</tr>
+<tr>
+<td>розмір політики</td>
+<td>256 КБ</td>
+</tr>
+<tr>
+<td>політик на топік / акаунт</td>
+<td>200 / 10 000</td>
+</tr>
+<tr>
+<td>числа</td>
+<td>від −10⁹ до 10⁹, 5 знаків після коми</td>
+</tr>
+<tr>
+<td>рядки</td>
+<td>чутливі до регістру</td>
+</tr>
+<tr>
+<td>зміна набуває чинності</td>
+<td><strong>до 15 хв</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Рахунок комбінацій: масиви з 3, 1 і 2 значень дають 3 × 1 × 2 = 6.</p>
+<p>SNS проти EventBridge <em>(не звірено)</em>: синтаксис шаблонів схожий; EventBridge фільтрує в правилі, SNS у кожній підписці; EventBridge має більше цілей, архів і replay, SNS більшу пропускну здатність і push на мобільні та SMS.</p>
+<h2>Крок 9. Права для SNS → SQS</h2>
+<p>На <strong>черзі</strong> має бути resource-based policy: <code>sqs:SendMessage</code> для принципала <code>sns.amazonaws.com</code> з умовою <strong><code>aws:SourceArn</code></strong> (або <code>aws:SourceAccount</code>). Це захист від <strong>confused deputy</strong>: інакше будь-який топік будь-якого акаунта міг би писати в цю чергу.</p>
+<ul>
+<li>Черга на кілька топіків: по <code>Statement</code> на кожен або <code>aws:SourceAccount</code>.</li>
+<li>Черга під SSE-KMS: у key policy дозволити SNS <code>kms:GenerateDataKey</code> і <code>kms:Decrypt</code>. З <code>alias/aws/sqs</code> SNS писати не зможе (його політику не змінити), потрібен customer managed key. Те саме для S3 і EventBridge.</li>
+<li>Черга в іншому акаунті: підписку треба підтвердити.</li>
+<li>Публікувати: <code>sns:Publish</code> на топіку. Читати: <code>sqs:ReceiveMessage</code> і <code>sqs:DeleteMessage</code> на черзі.</li>
+</ul>
+<h2>Крок 10. Fan-out SNS → SQS</h2>
+<p><strong>Проблема:</strong> одна подія потрібна кільком споживачам (білінг, пошта, аналітика). Якщо продюсер шле в кожну чергу сам, він знає всіх споживачів.</p>
+<p><strong>Рішення:</strong> продюсер публікує один раз у топік, у кожного споживача своя SQS-черга, підписана на топік (за потреби з filter policy). Черга дає буфер, повтори й DLQ кожному окремо: повільна аналітика не гальмує білінг.</p>
+<p>Чек-лист:</p>
+<ol>
+<li>queue policy з <code>aws:SourceArn</code> на кожній черзі;</li>
+<li>підписка з протоколом <code>sqs</code>;</li>
+<li>raw delivery, якщо споживач не хоче конверта;</li>
+<li>filter policy, якщо потрібна лише частина подій;</li>
+<li>DLQ на <strong>черзі</strong> для помилок обробки і DLQ на <strong>підписці</strong> для помилок доставки SNS → SQS.</li>
+</ol>
+<p><strong>Типове питання:</strong> «S3 подія має запускати дві різні обробки». S3 event notification не дозволяє правила з перекриттям префіксів чи суфіксів для того самого типу події, тому: S3 → SNS → дві SQS (fan-out) або S3 → EventBridge → два правила.</p>
+<h2>Крок 11. Async Lambda і SQS: корисні факти</h2>
+<ul>
+<li>Async Lambda: 3 спроби, паузи приблизно 1 і 2 хв, той самий <code>RequestId</code> при повторах (тому handler ідемпотентний).</li>
+<li>Тротлінг (429) і системні помилки (5xx) Lambda повторює до 6 год, інтервал від 1 с до 5 хв.</li>
+<li>Функція може отримати ту саму подію двічі навіть без помилок.</li>
+<li>Фаза Init тарифікується.</li>
+<li>Alarm CloudWatch оцінює більше точок, ніж <code>EvaluationPeriods</code>: реальна breaching-точка тримає <code>ALARM</code>, доки не випаде з діапазону.</li>
+</ul>
+<h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>SQS платить за запити (64 КБ = 1 запит), не за зберігання. Retention до 14 днів, visibility до 12 год, long polling до 20 с.</li>
+<li>Standard: at-least-once і best-effort порядок. FIFO: <code>.fifo</code>, <code>MessageGroupId</code>, дедуплікація 5 хв.</li>
+<li>DLQ для SQS-тригера на <strong>чергу</strong>. DLQ для Lambda async на <strong>функцію</strong>. DLQ для SNS на <strong>підписку</strong>.</li>
+<li>Visibility timeout не менше 6 × timeout функції. <code>maxReceiveCount</code> не менше 5.</li>
+<li><code>ReportBatchItemFailures</code> повертає лише невдалі повідомлення.</li>
+<li>SNS FIFO доставляє лише в SQS. Lambda з FIFO-топіка лише через чергу.</li>
+<li>Filter policy на підписці: AND між ключами, OR між значеннями, 5 ключів, 150 комбінацій.</li>
+<li>Fan-out: топік плюс чергa на споживача, queue policy з <code>aws:SourceArn</code>, raw delivery прибирає конверт.</li>
+<li>Redrive працює лише для DLQ з SQS-джерелом.</li>
+</ol>
+<h2>Перевірте себе</h2>
+<ol>
+<li>За що платять у SQS? Скільки запитів коштує повідомлення 1 МіБ?</li>
+<li>Що буде, якщо не видалити повідомлення після обробки?</li>
+<li>Чому в Standard-черзі можливі дублікати і що з цим робити?</li>
+<li>Де ставити DLQ для Lambda з SQS-тригером, а де для Lambda від EventBridge?</li>
+<li>Чому Lambda DLQ не може бути FIFO?</li>
+<li>Чим DLQ відрізняється від OnFailure destination?</li>
+<li>Яким має бути visibility timeout відносно timeout функції?</li>
+<li>Що робить <code>ReportBatchItemFailures</code>?</li>
+<li>Чому <code>receive-message</code> може повернути порожньо, коли в черзі є повідомлення?</li>
+<li>Чи можна зробити redrive з DLQ лямбди кнопкою SQS?</li>
+<li>Які протоколи не може мати SNS FIFO-топік?</li>
+<li>Де живе filter policy і яка логіка між ключами та значеннями?</li>
+<li>Що робить raw message delivery?</li>
+<li>Яка політика потрібна черзі, щоб SNS міг писати, і навіщо <code>aws:SourceArn</code>?</li>
+<li>У fan-out де DLQ для помилок споживача, а де для помилок доставки?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>За запити, а не за зберігання. 1 МіБ = 16 запитів (по 64 КБ).</li>
+<li>Після visibility timeout воно знову стане видимим і обробиться ще раз.</li>
+<li>SQS зберігає копії на кількох серверах і інколи видалення не доходить. Споживач має бути ідемпотентним.</li>
+<li>SQS-тригер: на чергу (redrive policy). EventBridge → Lambda: <code>DeadLetterConfig</code> на функції.</li>
+<li>Документація підтримує лише Standard-чергу чи Standard-топік; причину не пояснює.</li>
+<li>Destination має більше цілей (SQS, SNS, S3, Lambda, EventBridge) і зберігає відповідь функції та контекст.</li>
+<li>Не менше 6 × timeout функції.</li>
+<li>Повертає в чергу лише невдалі повідомлення, а не всю пачку.</li>
+<li>Short polling опитує лише частину серверів. Допомагає long polling (<code>--wait-time-seconds 20</code>).</li>
+<li>Ні: redrive працює лише для DLQ, джерело якої SQS-черга. Подію беруть із Body й викликають функцію знову.</li>
+<li>Email, SMS, mobile push, HTTP(S). Lambda лише через SQS-чергу.</li>
+<li>На підписці. AND між ключами, OR між значеннями масиву.</li>
+<li>Прибирає JSON-конверт SNS, споживач отримує лише текст повідомлення.</li>
+<li><code>sqs:SendMessage</code> для <code>sns.amazonaws.com</code> з <code>aws:SourceArn</code> проти confused deputy.</li>
+<li>Помилки обробки: DLQ на черзі. Помилки доставки SNS → SQS: DLQ на підписці.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 10-sqs-sns.md.</p>
+
+<nav class="pager"><a href="9-cloudwatch-simple.html">← Лекція 9</a><a href="11-dynamodb-simple.html">Лекція 11 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

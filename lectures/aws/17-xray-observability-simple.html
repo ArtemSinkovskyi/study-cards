@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 17 (просто): X-Ray і спостережуваність</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; }
+  th { background:#fff; }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; word-break:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 17 (просто): X-Ray і спостережуваність</h1>
+<blockquote>
+<p>Середній рівень: усі правила з повної лекції, але простими словами й без розповіді про наш проєкт. Повна: ../17-xray-observability.md. Факти, які в повній лекції «з пам'яті», тут із позначкою <em>(не звірено)</em>. Доповнює <a href="9-cloudwatch-simple.html">лекцію 9 (CloudWatch)</a>. Навички 4.1.2, 4.2.1-4.2.5.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>X-Ray показує шлях одного запиту через усі сервіси і скільки часу зайняв кожен.</strong> Метрики кажуть «скільки», логи «що», X-Ray «де саме застряг». Образ: багажна бирка, що йде з валізою через усі пункти.</p>
+<p>Це AWS-варіант розподіленого трейсингу, ідея така сама, як в OpenTelemetry.</p>
+<h2>Крок 1. Словник</h2>
+<table>
+<thead>
+<tr>
+<th>Термін</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>trace</td>
+<td>усі дані одного запиту, має trace ID</td>
+</tr>
+<tr>
+<td>segment</td>
+<td>робота одного сервісу</td>
+</tr>
+<tr>
+<td>subsegment</td>
+<td>деталь: виклик DynamoDB, функція</td>
+</tr>
+<tr>
+<td>service map / graph</td>
+<td>карта сервісів</td>
+</tr>
+<tr>
+<td>annotation</td>
+<td><strong>індексована</strong> мітка для пошуку</td>
+</tr>
+<tr>
+<td>metadata</td>
+<td><strong>неіндексовані</strong> дані</td>
+</tr>
+<tr>
+<td>sampling</td>
+<td>яку частку запитів трейсити</td>
+</tr>
+<tr>
+<td>inferred segment</td>
+<td>вузол сервісу, що сам не шле дані</td>
+</tr>
+<tr>
+<td>filter expression</td>
+<td>запит по трейсах</td>
+</tr>
+<tr>
+<td>group</td>
+<td>збережений фільтр</td>
+</tr>
+</tbody>
+</table>
+<h2>Крок 2. Основи</h2>
+<ul>
+<li>Сервіс надсилає <strong>segments</strong>; X-Ray збирає їх у <strong>traces</strong>; з них будує <strong>service graph</strong>.</li>
+<li><strong>Subsegments</strong> дають деталі: виклик AWS, HTTP, SQL. Сервіси, що не шлють даних (DynamoDB), з'являються як <strong>inferred segments</strong>.</li>
+<li>Заголовок <strong><code>X-Amzn-Trace-Id: Root=1-...;Parent=...;Sampled=1</code></strong> передає trace ID між сервісами. Перший сервіс його додає.</li>
+<li>Дані зберігаються <strong>30 днів</strong>. Документ сегмента до <strong>64 КБ</strong>.</li>
+<li><strong>Sampling за замовчуванням:</strong> <strong>перший запит кожної секунди плюс 5% решти</strong>. Правила можна змінити: усі записи про гроші, мало для health checks.</li>
+</ul>
+<h2>Крок 3. Annotations проти metadata</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Annotations</strong></th>
+<th><strong>Metadata</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Індексуються</td>
+<td>так</td>
+<td>ні</td>
+</tr>
+<tr>
+<td>Пошук фільтром</td>
+<td>так</td>
+<td>ні</td>
+</tr>
+<tr>
+<td>Типи</td>
+<td>прості значення</td>
+<td>будь-які, об'єкти</td>
+</tr>
+<tr>
+<td>Для чого</td>
+<td><code>userId</code>, <code>orderId</code></td>
+<td>повний вхід, відлагодження</td>
+</tr>
+<tr>
+<td>Ліміт</td>
+<td>50 на трейс (індексованих)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>«Знайти всі трейси користувача 42» означає <strong>annotation</strong>, бо лише вона індексується.</p>
+<p>Помилки в X-Ray: <strong>Error</strong> це 4xx, <strong>Fault</strong> це 5xx, <strong>Throttle</strong> це 429.</p>
+<h2>Крок 4. Як увімкнути</h2>
+<ul>
+<li><strong>Lambda:</strong> <code>Tracing: Active</code> у SAM. У ролі виконання потрібні <code>xray:PutTraceSegments</code> і <code>xray:PutTelemetryRecords</code> (є в політиці <code>AWSXRayDaemonWriteAccess</code>).</li>
+<li>Для деталей у коді: Powertools Tracer, що обгортає SDK-клієнти (<code>captureAWSv3Client</code>), плюс <code>putAnnotation</code>.</li>
+<li><strong>API Gateway:</strong> увімкнути X-Ray на stage (<strong>лише REST API</strong>, не HTTP API).</li>
+<li><strong>EC2 і контейнери:</strong> потрібен <strong>X-Ray daemon</strong>: приймає дані по <strong>UDP 2000</strong> і шле в X-Ray <em>(не звірено)</em>. В ECS це sidecar-контейнер.</li>
+<li>Сучасний шлях: <strong>AWS Distro for OpenTelemetry (ADOT)</strong> і <strong>CloudWatch Application Signals</strong> <em>(не звірено)</em>.</li>
+</ul>
+<h2>Крок 5. Як це виглядає</h2>
+<p>Уявний трейс повільного запиту: API Gateway 2980 мс, у ньому Lambda 2940 мс, в ній Init 390 мс (холодний старт), DynamoDB 18 мс, <strong>S3 Get 2400 мс</strong>. Висновок: повільний S3 для великого файлу, а не база. Без трейсу оптимізували б не те.</p>
+<h2>Крок 6. Власні метрики (навичка 4.2.2)</h2>
+<table>
+<thead>
+<tr>
+<th>Спосіб</th>
+<th>Як</th>
+<th>Коли</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PutMetricData</code></td>
+<td>виклик API</td>
+<td>простий випадок, але це мережа й гроші на виклик</td>
+</tr>
+<tr>
+<td><strong>Metric filter</strong></td>
+<td>лог перетворюється на метрику</td>
+<td>не хочете змінювати код</td>
+</tr>
+<tr>
+<td><strong>EMF</strong></td>
+<td>структурований JSON у лог</td>
+<td><strong>Lambda</strong>: без додаткового виклику</td>
+</tr>
+</tbody>
+</table>
+<p>EMF робить Powertools Metrics автоматично.</p>
+<ul>
+<li><strong>Роздільна здатність:</strong> стандартна 1 хв; <strong>high-resolution</strong> до 1 с (<code>StorageResolution: 1</code>), зберігається 3 години.</li>
+<li><strong>Dimensions</strong> множать метрики: не кладіть <code>userId</code> у вимір, це тисячі метрик і великий рахунок.</li>
+</ul>
+<h2>Крок 7. Логи (навичка 4.2.1)</h2>
+<p>Структурований JSON замість рядків, з <code>requestId</code> і <code>correlationId</code> (Powertools Logger). Запити: Logs Insights.</p>
+<h2>Крок 8. Здоров'я застосунку (навичка 4.2.5)</h2>
+<ul>
+<li><strong>Liveness:</strong> процес живий? Ні: перезапустити.</li>
+<li><strong>Readiness:</strong> готовий приймати трафік? Ні: не слати трафік, але не вбивати.</li>
+<li>ALB health checks виводять поганий target; ECS замінює task; Route 53 health check перемикає DNS.</li>
+<li>Lambda сама не має health check; дивіться <code>Errors</code>, <code>Duration</code>, <code>Throttles</code>.</li>
+</ul>
+<p><strong>Сповіщення про квоти й завершення деплою</strong> (навичка 4.2.3): EventBridge ловить подію CodeDeploy чи CodePipeline і шле в SNS; у <strong>Service Quotas</strong> є alarm-и на використання <em>(не звірено)</em>.</p>
+<h2>Крок 9. Куди дивитись при проблемі</h2>
+<table>
+<thead>
+<tr>
+<th>Симптом</th>
+<th>Інструмент</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>що впало</td>
+<td>CloudWatch Logs, Logs Insights</td>
+</tr>
+<tr>
+<td>скільки і як часто</td>
+<td>CloudWatch Metrics</td>
+</tr>
+<tr>
+<td>де затримка в ланцюгу</td>
+<td><strong>X-Ray</strong></td>
+</tr>
+<tr>
+<td>хто зробив виклик API</td>
+<td><strong>CloudTrail</strong></td>
+</tr>
+<tr>
+<td>деплой не пройшов</td>
+<td>CloudFormation events, CodeDeploy logs</td>
+</tr>
+</tbody>
+</table>
+<h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>X-Ray показує шлях запиту; метрики скільки; логи що.</li>
+<li>Annotations індексуються (пошук), metadata ні.</li>
+<li>Sampling: перший запит кожної секунди плюс 5%. Дані зберігаються 30 днів.</li>
+<li>Lambda: <code>Tracing: Active</code> і права <code>xray:PutTraceSegments</code>, <code>xray:PutTelemetryRecords</code>.</li>
+<li>Заголовок <code>X-Amzn-Trace-Id</code> передає контекст.</li>
+<li>На EC2 і в контейнерах потрібен daemon (UDP 2000) чи ADOT.</li>
+<li>X-Ray на API Gateway лише для REST API.</li>
+<li>Власні метрики в Lambda: EMF.</li>
+<li>Error це 4xx, Fault це 5xx, Throttle це 429.</li>
+</ol>
+<h2>Перевірте себе</h2>
+<ol>
+<li>Знайти трейси конкретного замовлення: annotation чи metadata?</li>
+<li>Чому в трейсі менше запитів, ніж насправді?</li>
+<li>Як змінити sampling для важливих запитів?</li>
+<li>Чому DynamoDB видно на карті, хоча вона не шле сегменти?</li>
+<li>Що потрібно в ролі Lambda для X-Ray?</li>
+<li>Чим Fault відрізняється від Error у X-Ray?</li>
+<li>Як надіслати метрику з Lambda без виклику API?</li>
+<li>Чим liveness відрізняється від readiness?</li>
+<li>Який інструмент покаже, хто видалив бакет?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>Annotation (лише вона індексується).</li>
+<li>Працює sampling: перший запит секунди плюс 5% решти.</li>
+<li>Створити власні sampling rules.</li>
+<li>Це inferred segment: X-Ray виводить вузол з викликів клієнта.</li>
+<li><code>xray:PutTraceSegments</code> і <code>xray:PutTelemetryRecords</code> (політика <code>AWSXRayDaemonWriteAccess</code>).</li>
+<li>Error це 4xx, Fault це 5xx.</li>
+<li>EMF: JSON у лог (Powertools Metrics).</li>
+<li>Liveness: жити чи перезапустити. Readiness: слати трафік чи ні.</li>
+<li>CloudTrail.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 17-xray-observability.md.</p>
+
+<nav class="pager"><a href="16-cognito-simple.html">← Лекція 16</a><a href="18-containers-simple.html">Лекція 18 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

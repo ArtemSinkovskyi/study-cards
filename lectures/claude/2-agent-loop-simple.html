@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 2 (просто): як агент працює з інструментами</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; }
+  th { background:#fff; }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; word-break:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 2 (просто): як агент працює з інструментами</h1>
+<blockquote>
+<p>Спрощена версія. Усі факти ті самі, що в повній лекції: ../2-agentic-loop-and-tool-use.md.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>Модель нічого не виконує. Вона повертає запит, а ваш код його виконує.</strong></p>
+<p>Звичайно клієнт кличе ваш контролер. Тут навпаки: <strong>модель це клієнт</strong>, який надсилає вам запит «виклич такий метод», а ваш код виконує його й повертає результат. Сама модель до вашої бази чи API не дотягнеться.</p>
+<h2>Крок 1. Що таке інструмент</h2>
+<p>Інструмент це ваша функція, яку ви описали для моделі: назва, що робить і які параметри приймає.</p>
+<p>Приклад: <code>get_weather</code>, «дає поточну погоду», параметр <code>city</code>.</p>
+<p>Модель не бачить вашого коду, лише цей опис. Тому <strong>чим краще описано, тим точніше вона викликає</strong>. Це як OpenAPI-контракт: клієнт знає лише його.</p>
+<h2>Крок 2. Один круг розмови</h2>
+<p>Питання користувача: «Яка погода в Києві?»</p>
+<table>
+<thead>
+<tr>
+<th>Хто</th>
+<th>Що відбувається</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ви</td>
+<td>Надсилаєте питання й описи інструментів</td>
+</tr>
+<tr>
+<td>Модель</td>
+<td>Відповідає блоком <strong>tool_use</strong>: «виклич get_weather, місто Київ»</td>
+</tr>
+<tr>
+<td>Ваш код</td>
+<td>Реально викликає погодний сервіс: +15, хмарно</td>
+</tr>
+<tr>
+<td>Ви</td>
+<td>Надсилаєте блок <strong>tool_result</strong> із цим результатом</td>
+</tr>
+<tr>
+<td>Модель</td>
+<td>Пише користувачу: «У Києві +15, хмарно»</td>
+</tr>
+</tbody>
+</table>
+<p>Модель сказала, що хоче, <strong>але не виконала</strong>. Виконали ви.</p>
+<p>У <code>tool_use</code> є <code>id</code>, а в <code>tool_result</code> ви вказуєте той самий <code>tool_use_id</code>, щоб модель знала, на який запит це відповідь.</p>
+<h2>Крок 3. Як знати, що робити далі: stop_reason</h2>
+<p>Кожна відповідь моделі має поле <code>stop_reason</code>, схоже на статус результату.</p>
+<table>
+<thead>
+<tr>
+<th>Значення</th>
+<th>Що це означає</th>
+<th>Що робите</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tool_use</code></td>
+<td>Модель просить виклик</td>
+<td>Виконуєте інструмент, надсилаєте результат</td>
+</tr>
+<tr>
+<td><code>end_turn</code></td>
+<td>Модель закінчила</td>
+<td>Показуєте відповідь, <strong>вихід</strong></td>
+</tr>
+<tr>
+<td><code>max_tokens</code></td>
+<td>Відповідь обрізана через ліміт</td>
+<td>Збільшіть ліміт</td>
+</tr>
+<tr>
+<td><code>refusal</code></td>
+<td>Модель відмовилась</td>
+<td>Дивіться <code>stop_details</code></td>
+</tr>
+</tbody>
+</table>
+<p>Цикл у вигляді Java:</p>
+<pre><code class="language-java">Response response = client.send(messages);
+while (&quot;tool_use&quot;.equals(response.stopReason())) {
+    List&lt;ToolResult&gt; results = executeAll(response.toolUses());
+    messages.add(response.asAssistantMessage());
+    messages.add(userMessageOf(results));
+    response = client.send(messages);
+}
+show(response);
+</code></pre>
+<p>Читається так: <strong>поки модель просить виклик, виконуємо й питаємо знову</strong>.</p>
+<h2>Крок 4. Три правила, на яких помиляються</h2>
+<p><strong>Правило 1. Кілька інструментів за раз.</strong> Модель може повернути три <code>tool_use</code> в одній відповіді. Ви виконуєте всі й повертаєте <strong>всі результати одним повідомленням</strong>. Якщо надсилати окремими, модель «відучується» просити кілька за раз.</p>
+<p><strong>Правило 2. Інструмент упав.</strong> Не мовчіть і не падайте. Поверніть <code>tool_result</code> з <code>is_error: true</code> і зрозумілим текстом, наприклад: «Сервіс недоступний, повтори за 60 секунд». Тоді модель може спробувати інакше.</p>
+<p><strong>Правило 3. Ліміт кругів.</strong> Документація не обмежує кількість кругів. Якщо модель постійно просить інструменти, ваш <code>while</code> крутитиметься вічно. Поставте <strong>свій ліміт</strong>, наприклад 10. Це те саме, що <code>maxAttempts</code> у retry.</p>
+<h2>Крок 5. Хто виконує інструмент</h2>
+<table>
+<thead>
+<tr>
+<th>Вид</th>
+<th>Хто виконує</th>
+<th>Приклади</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ваші власні</td>
+<td><strong>Ви</strong></td>
+<td><code>get_weather</code>, запит у вашу базу</td>
+</tr>
+<tr>
+<td>Готові від Anthropic</td>
+<td><strong>Ви</strong></td>
+<td><code>bash</code>, <code>text_editor</code>, <code>memory</code></td>
+</tr>
+<tr>
+<td>Серверні</td>
+<td><strong>Anthropic</strong></td>
+<td><code>web_search</code>, <code>web_fetch</code>, <code>code_execution</code></td>
+</tr>
+</tbody>
+</table>
+<p>Для серверних ви лише вмикаєте інструмент, а результат приходить уже в готовій відповіді.</p>
+<h2>Крок 6. Дві рідкісні речі</h2>
+<ul>
+<li><strong>pause_turn.</strong> Серверні інструменти мають свій внутрішній цикл, обмежений 10 кругами. Коли він упирається в ліміт, приходить <code>pause_turn</code>: «ще не закінчено». Просто надішліть розмову знову.</li>
+<li><strong>disable_parallel_tool_use.</strong> Вимикає паралельні виклики. Параметр лежить <strong>всередині <code>tool_choice</code></strong>, а не окремо.</li>
+</ul>
+<h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>Модель просить, ваш код виконує.</li>
+<li>Цикл іде, поки <code>stop_reason</code> дорівнює <code>tool_use</code>.</li>
+<li>Усі результати одного ходу одним повідомленням.</li>
+<li>Помилка інструмента: <code>is_error: true</code> і зрозумілий текст.</li>
+<li>Ліміт кругів ставите самі.</li>
+<li><code>pause_turn</code> означає «надішли знову».</li>
+</ol>
+<h2>Перевірте себе</h2>
+<ol>
+<li>Хто насправді виконує <code>get_weather</code>?</li>
+<li>Що робити, коли <code>stop_reason</code> дорівнює <code>end_turn</code>?</li>
+<li>Модель попросила три інструменти. Скільки повідомлень із результатами?</li>
+<li>Інструмент упав. Що повертаєте моделі?</li>
+<li>Навіщо власний ліміт кругів?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>Ваш код. Модель лише просить.</li>
+<li>Показати відповідь і вийти з циклу.</li>
+<li>Одне, з трьома результатами.</li>
+<li><code>tool_result</code> з <code>is_error: true</code> і зрозумілим текстом.</li>
+<li>Бо документація ліміту не дає, а модель може просити інструменти без кінця.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 2-agentic-loop-and-tool-use.md.</p>
+
+<nav class="pager"><a href="1-start-simple.html">← Лекція 1</a><a href="3-tools-and-mcp-simple.html">Лекція 3 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

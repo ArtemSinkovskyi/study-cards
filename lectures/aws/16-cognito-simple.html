@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 16 (просто): Cognito і федерація</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; }
+  th { background:#fff; }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; word-break:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 16 (просто): Cognito і федерація</h1>
+<blockquote>
+<p>Середній рівень: усі правила з повної лекції, але простими словами. Повна: ../16-cognito-federation.md. Факти, які в повній лекції позначено «з пам'яті», тут із позначкою <em>(не звірено)</em>.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>На іспиті головне: не сплутати user pool й identity pool.</strong></p>
+<ul>
+<li><strong>User pool</strong> відповідає на «хто ти?» й видає <strong>JWT</strong>.</li>
+<li><strong>Identity pool</strong> відповідає на «що можна в AWS?» й видає <strong>тимчасові ключі AWS</strong> (STS).</li>
+</ul>
+<p>C03 прямо не називає Cognito в навичках (лише «identity federation»), але сервіс є у списку.</p>
+<h2>Крок 1. User pool проти identity pool</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>User pool</strong></th>
+<th><strong>Identity pool</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Питання</td>
+<td>Хто ти? (автентифікація)</td>
+<td>Що можна в AWS? (авторизація)</td>
+</tr>
+<tr>
+<td>Зберігає користувачів</td>
+<td>так</td>
+<td>ні</td>
+</tr>
+<tr>
+<td>Видає</td>
+<td>JWT</td>
+<td>тимчасові ключі AWS</td>
+</tr>
+<tr>
+<td>Вхід через Google, SAML, OIDC</td>
+<td>так</td>
+<td>так</td>
+</tr>
+<tr>
+<td>Гості</td>
+<td>ні</td>
+<td><strong>так</strong>, окрема обмежена роль</td>
+</tr>
+<tr>
+<td>Типове застосування</td>
+<td>захист свого API</td>
+<td>прямий доступ до S3 чи DynamoDB з клієнта</td>
+</tr>
+</tbody>
+</table>
+<p>Логіка вибору:</p>
+<ul>
+<li><strong>API Gateway + JWT</strong> означає лише user pool.</li>
+<li><strong>Клієнт сам викликає сервіс AWS</strong> означає identity pool (часто разом із user pool).</li>
+</ul>
+<h2>Крок 2. Токени</h2>
+<table>
+<thead>
+<tr>
+<th>Токен</th>
+<th>Для чого</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ID token</strong></td>
+<td>інформація про користувача (<code>claims</code>); для Cognito authorizer у REST API</td>
+</tr>
+<tr>
+<td><strong>Access token</strong></td>
+<td>права, <code>scopes</code></td>
+</tr>
+<tr>
+<td><strong>Refresh token</strong></td>
+<td>оновлення перших двох</td>
+</tr>
+</tbody>
+</table>
+<p>Перевірка JWT: підпис за публічними ключами <strong>JWKS</strong> пулу, потім <code>iss</code>, <code>aud</code>, <code>exp</code>.</p>
+<h2>Крок 3. Що вміє user pool</h2>
+<ul>
+<li>перший фактор: пароль, email OTP, SMS OTP, passkeys (WebAuthn);</li>
+<li><strong>MFA</strong>: email OTP, SMS OTP, TOTP;</li>
+<li><strong>Lambda triggers</strong>: pre sign-up, post confirmation, pre authentication, post authentication, кастомізація повідомлень. Приклад: post confirmation створює запис користувача в DynamoDB;</li>
+<li>федерація з соцмережами, SAML, OIDC;</li>
+<li><strong>managed login / hosted UI</strong>: готова сторінка входу <em>(не звірено)</em>.</li>
+</ul>
+<h2>Крок 4. Identity pool і «лише своє»</h2>
+<p>Identity pool роздає роль. Щоб кожен бачив лише своє, у політиці ролі використовують <strong>змінну</strong> <code>${cognito-identity.amazonaws.com:sub}</code> у ARN, наприклад <code>arn:aws:s3:::user-files/${cognito-identity.amazonaws.com:sub}/*</code>.</p>
+<p>Те саме для DynamoDB: умова <code>dynamodb:LeadingKeys</code> дозволяє лише рядки зі своїм partition key <em>(не звірено)</em>. Це <strong>fine-grained access</strong> (навичка 2.1.2).</p>
+<p><strong>Гості</strong> отримують окрему роль, і вона має бути дуже обмеженою.</p>
+<h2>Крок 5. Федерація без Cognito</h2>
+<table>
+<thead>
+<tr>
+<th>Сценарій</th>
+<th>Механізм</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GitHub Actions у AWS</td>
+<td><strong>OIDC</strong> і <code>AssumeRoleWithWebIdentity</code></td>
+</tr>
+<tr>
+<td>Корпоративний логін співробітників</td>
+<td><strong>SAML</strong> і <code>AssumeRoleWithSAML</code>, IAM Identity Center</td>
+</tr>
+<tr>
+<td>Застосунок із Google</td>
+<td>Cognito</td>
+</tr>
+<tr>
+<td>Сервіс у чужому акаунті</td>
+<td><code>AssumeRole</code> між акаунтами</td>
+</tr>
+</tbody>
+</table>
+<p>Спільне: ніяких довгих ключів, лише тимчасові облікові дані STS.</p>
+<h2>Крок 6. Авторизація в API</h2>
+<table>
+<thead>
+<tr>
+<th>Спосіб</th>
+<th>Що</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cognito authorizer</td>
+<td>перевіряє токен user pool, без коду</td>
+</tr>
+<tr>
+<td>Lambda authorizer</td>
+<td>своя логіка, сторонній токен</td>
+</tr>
+<tr>
+<td>IAM (SigV4)</td>
+<td>клієнт має AWS-ключі (з identity pool)</td>
+</tr>
+</tbody>
+</table>
+<p>API Gateway із Cognito authorizer передає <code>claims</code> у <code>event.requestContext.authorizer.claims</code>, тож функція бачить, хто викликає.</p>
+<h2>Крок 7. Програмний доступ</h2>
+<ul>
+<li>Порядок пошуку облікових даних SDK: параметри коду, env, <code>~/.aws</code>, роль контейнера, роль EC2 <em>(не звірено)</em>.</li>
+<li><strong>SigV4</strong> підписує запити до AWS.</li>
+<li>Роль завжди краща за ключі.</li>
+<li><code>AssumeRole</code> у коді повертає тимчасові ключі на 15 хв - 12 год.</li>
+</ul>
+<h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>User pool це «хто ти» й JWT. Identity pool це «що можна в AWS» й ключі STS.</li>
+<li>API з логіном потребує user pool. Прямий доступ до S3 потребує identity pool.</li>
+<li>Гість можливий лише через identity pool, з обмеженою роллю.</li>
+<li><code>${cognito-identity.amazonaws.com:sub}</code> у політиці дає доступ «лише своє».</li>
+<li>Lambda triggers розширюють реєстрацію й вхід.</li>
+<li>Для GitHub Actions використовують OIDC, а не Cognito.</li>
+</ol>
+<h2>Перевірте себе</h2>
+<ol>
+<li>Застосунку потрібен логін і захист власного API. Який пул?</li>
+<li>Мобільний клієнт має сам завантажувати в S3. Який пул?</li>
+<li>Що видає user pool, а що identity pool?</li>
+<li>Як дати доступ гостям?</li>
+<li>Як обмежити кожного користувача його папкою в S3?</li>
+<li>Як при реєстрації створити запис у DynamoDB?</li>
+<li>Який механізм використовує GitHub Actions для входу в AWS?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>User pool.</li>
+<li>Identity pool (разом із user pool).</li>
+<li>User pool видає JWT, identity pool тимчасові ключі AWS.</li>
+<li>Через identity pool з окремою обмеженою роллю для гостей.</li>
+<li>Змінна <code>${cognito-identity.amazonaws.com:sub}</code> у ресурсі політики ролі.</li>
+<li>Lambda trigger «post confirmation» у user pool.</li>
+<li>OIDC і <code>AssumeRoleWithWebIdentity</code>.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 16-cognito-federation.md.</p>
+
+<nav class="pager"><a href="15-caching-simple.html">← Лекція 15</a><a href="17-xray-observability-simple.html">Лекція 17 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

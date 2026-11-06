@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 6 (просто): контекст, кеш і токени</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; }
+  th { background:#fff; }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; word-break:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 6 (просто): контекст, кеш і токени</h1>
+<blockquote>
+<p>Спрощена версія. Повна: ../6-context-caching-and-token-counting.md. Повні списки моделей і рідкісні параметри лишились лише там.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>Вікно контексту це «робоча пам'ять» моделі. Воно обмежене, і що більше в ньому, то гірше модель пам'ятає. Кеш дозволяє не платити за повторюваний початок промпта.</strong></p>
+<h2>Крок 1. Що займає вікно</h2>
+<p>Усе в запиті:</p>
+<ul>
+<li>системний промпт;</li>
+<li>усі повідомлення (з результатами інструментів, зображеннями, документами);</li>
+<li><strong>описи інструментів</strong>;</li>
+<li>відповідь моделі, включно з роздумами.</li>
+</ul>
+<p>Розмір: <strong>1 мільйон токенів</strong> на більшості нових моделей, відповідь до <strong>128 тисяч</strong>. Старіші моделі мають 200 тисяч.</p>
+<h2>Крок 2. Чому більше не краще</h2>
+<p>Є явище <strong>context rot</strong>: чим довший контекст, тим гірші точність і згадування. Тому добирати, що класти в контекст, так само важливо, як мати для нього місце.</p>
+<h2>Крок 3. Коли вікно переповнене</h2>
+<ul>
+<li>Якщо <strong>лише вхід</strong> уже більший за вікно: помилка <strong>400</strong> («prompt is too long»).</li>
+<li>Якщо вхід плюс <code>max_tokens</code> більші за вікно, на Claude 4.5+ запит <strong>приймається</strong>, а коли генерація впирається в межу, приходить <code>stop_reason: model_context_window_exceeded</code>. Відповідь обрізана, але валідна.</li>
+</ul>
+<h2>Крок 4. Як працює кеш</h2>
+<p>Кеш запам'ятовує вже оброблений <strong>початок</strong> промпта (префікс). Наступний запит із тим самим початком не оплачується повністю.</p>
+<p>Префікс кешується в такому порядку: <strong>tools, потім system, потім messages</strong>. Змінили щось на одному рівні, скинулось усе від нього й далі.</p>
+<p>Як увімкнути: додати <code>cache_control: {&quot;type&quot;: &quot;ephemeral&quot;}</code>. Можна один автоматичний верхній маркер або до <strong>4 явних точок</strong>.</p>
+<h2>Крок 5. Скільки це коштує</h2>
+<table>
+<thead>
+<tr>
+<th>Що</th>
+<th>Множник ціни входу</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Запис кешу на 5 хвилин</td>
+<td><strong>1,25x</strong></td>
+</tr>
+<tr>
+<td>Запис кешу на 1 годину</td>
+<td><strong>2x</strong></td>
+</tr>
+<tr>
+<td>Читання з кешу</td>
+<td><strong>0,1x</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Виняток для читання: 0,025x на Fable 5.1 і Mythos 5.1, 0,05x на Opus 5.5 і Sonnet 5.5.</p>
+<p>Час життя: <strong>5 хвилин</strong> за замовчуванням (кожне використання продовжує), <strong>1 година</strong> з <code>&quot;ttl&quot;: &quot;1h&quot;</code>.</p>
+<p>Мінімальна довжина префікса: 512 токенів на найновіших моделях, до 4 096 на старіших. Коротший префікс просто не кешується, <strong>без помилки</strong>.</p>
+<h2>Крок 6. Рахуємо вартість (3 кроки)</h2>
+<p><strong>Рецепт:</strong></p>
+<ol>
+<li>Порахуйте вартість <strong>без кешу</strong>: кількість запитів × токени префікса × ціна.</li>
+<li>Порахуйте <strong>з кешем</strong>: один запис + (запитів мінус один) читань.</li>
+<li>Порівняйте.</li>
+</ol>
+<p>Ціни з документації для <strong>Opus 5</strong>: база <strong>$5</strong> за мільйон токенів, запис на 5 хвилин <strong>$6,25</strong>, читання <strong>$0,50</strong>.</p>
+<p><strong>Приклад 1.</strong> Префікс 10 000 токенів, 5 запитів.</p>
+<ol>
+<li>Без кешу: 5 × 10 000 = 50 000 токенів × $5 / 1 000 000 = <strong>$0,25</strong>.</li>
+<li>З кешем: запис 10 000 × $6,25 / 1 000 000 = $0,0625; читань 4 × 10 000 × $0,50 / 1 000 000 = $0,02. Разом <strong>$0,0825</strong>.</li>
+<li>Економія приблизно 67%.</li>
+</ol>
+<p><strong>Приклад 2.</strong> Префікс 20 000 токенів, 4 запити.</p>
+<ol>
+<li>Без кешу: 4 × 20 000 = 80 000 × $5 / 1 000 000 = <strong>$0,40</strong>.</li>
+<li>З кешем: запис 20 000 × $6,25 / 1 000 000 = $0,125; читань 3 × 20 000 × $0,50 / 1 000 000 = $0,03. Разом <strong>$0,155</strong>.</li>
+<li>Економія приблизно 61%.</li>
+</ol>
+<p>Висновок: кеш виграє вже <strong>з другого запиту</strong>, бо 1,25 + 0,1 = 1,35 менше за 2.</p>
+<p><strong>Задача для вас.</strong> Префікс 30 000 токенів, 6 запитів, ті самі ціни. Скільки з кешем і без?</p>
+<details>
+<summary>Відповідь</summary>
+<p>Без кешу: 6 × 30 000 = 180 000 × $5 / 1 000 000 = $0,90. З кешем: запис 30 000 × $6,25 / 1 000 000 = $0,1875; читань 5 × 30 000 × $0,50 / 1 000 000 = $0,075. Разом $0,2625.</p>
+</details>
+<h2>Крок 7. Що скидає кеш</h2>
+<table>
+<thead>
+<tr>
+<th>Зміна</th>
+<th>Що скидається</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Визначення інструментів</td>
+<td>tools, system, messages</td>
+</tr>
+<tr>
+<td><code>tool_choice</code></td>
+<td>лише messages</td>
+</tr>
+<tr>
+<td>Зображення (додані чи прибрані)</td>
+<td>messages</td>
+</tr>
+<tr>
+<td>Параметри thinking і <code>effort</code></td>
+<td>messages</td>
+</tr>
+<tr>
+<td>Перемикач <code>speed</code></td>
+<td>system, messages</td>
+</tr>
+</tbody>
+</table>
+<p>Типова помилка: <strong>поставити точку кешу на блок із міткою часу</strong>, що змінюється щоразу. Хеш ніколи не збігається, тож кожен запит платить за запис і ніколи не читає. Ставте точку на <strong>останньому незмінному блоці</strong>.</p>
+<h2>Крок 8. Як читати usage</h2>
+<table>
+<thead>
+<tr>
+<th>Поле</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cache_creation_input_tokens</code></td>
+<td>записано в кеш</td>
+</tr>
+<tr>
+<td><code>cache_read_input_tokens</code></td>
+<td>прочитано з кешу</td>
+</tr>
+<tr>
+<td><code>input_tokens</code></td>
+<td>токени <strong>після</strong> останньої точки кешу</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Загальний вхід = сума цих трьох.</strong> Якщо обидва кешові лічильники нульові, промпт не кешувався.</p>
+<h2>Крок 9. Підрахунок токенів</h2>
+<p>Ендпоінт <code>count_tokens</code> оцінює токени до відправки. Він <strong>безкоштовний</strong>, але це лише оцінка, і він <strong>не знає про кеш</strong>.</p>
+<p>Він <strong>не приймає</strong> серверні інструменти й MCP connector (дає помилку). У цих випадках дивіться <code>usage</code> у відповіді.</p>
+<p>Claude 4.7+ мають новий токенізатор: той самий текст дає приблизно на <strong>30% більше</strong> токенів. Перераховуйте промпти для моделі, яку плануєте.</p>
+<h2>Крок 10. Як зменшити контекст</h2>
+<ul>
+<li><strong>Context editing:</strong> стратегія <code>clear_tool_uses</code> прибирає старі результати інструментів (параметри: <code>trigger</code> 100 000, <code>keep</code> 3, <code>clear_at_least</code>, <code>exclude_tools</code>). Стратегія <code>clear_thinking</code> чистить старі роздуми й у списку <code>edits</code> має стояти <strong>першою</strong>.</li>
+<li><strong>Compaction:</strong> сервер підсумовує старе (докладно в лекції 7).</li>
+</ul>
+<h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>У вікні все, включно з описами інструментів і відповіддю.</li>
+<li>Префікс кешується в порядку tools, system, messages.</li>
+<li>Запис 1,25x (5 хв) чи 2x (1 год), читання 0,1x.</li>
+<li>До 4 точок кешу.</li>
+<li><code>tool_choice</code> скидає лише messages.</li>
+<li>Точка на змінному блоці дає лише записи без читань.</li>
+<li>Загальний вхід = <code>cache_read</code> + <code>cache_creation</code> + <code>input_tokens</code>.</li>
+<li><code>count_tokens</code> безкоштовний, оцінковий, не приймає MCP connector.</li>
+</ol>
+<h2>Перевірте себе</h2>
+<ol>
+<li>Що займає вікно контексту?</li>
+<li>У якому порядку кешується префікс?</li>
+<li>Який множник має читання кешу?</li>
+<li>Що скидає зміна <code>tool_choice</code>?</li>
+<li>Чому точка кешу на мітці часу не працює?</li>
+<li>Чи рахує <code>count_tokens</code> кеш?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>Системний промпт, повідомлення, описи інструментів і відповідь моделі.</li>
+<li>tools, system, messages.</li>
+<li>0,1x (з винятками 0,025x і 0,05x).</li>
+<li>Лише кеш messages.</li>
+<li>Хеш префікса щоразу інший.</li>
+<li>Ні, він не використовує кешування.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 6-context-caching-and-token-counting.md.</p>
+
+<nav class="pager"><a href="5-claude-code-simple.html">← Лекція 5</a><a href="7-compaction-thinking-memory-simple.html">Лекція 7 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

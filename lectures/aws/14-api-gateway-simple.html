@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 14 (просто): API Gateway і завантаження файлів у S3</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
+  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; }
+  th { background:#fff; }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; word-break:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 14 (просто): API Gateway і завантаження файлів у S3</h1>
+<blockquote>
+<p>Середній рівень: усі правила й числа з повної лекції, але простими словами. Повна: ../14-api-gateway.md. Факти, які в повній лекції позначено «з пам'яті», тут із позначкою <em>(не звірено)</em>.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>API Gateway це керований «вхідний двір» для API: приймає HTTP-запити, перевіряє, обмежує й передає бекенду.</strong> Не треба тримати свій сервер для двох методів.</p>
+<h2>Крок 1. Який тип API обрати</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>REST API</strong></th>
+<th><strong>HTTP API</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ціна</td>
+<td>дорожчий</td>
+<td>дешевший</td>
+</tr>
+<tr>
+<td>Endpoint</td>
+<td>edge, regional, private</td>
+<td>лише regional</td>
+</tr>
+<tr>
+<td>API keys і usage plans</td>
+<td>є</td>
+<td>нема</td>
+</tr>
+<tr>
+<td>Кеш, валідація, трансформація тіла, mock</td>
+<td>є</td>
+<td>нема</td>
+</tr>
+<tr>
+<td>WAF, X-Ray, canary, resource policy</td>
+<td>є</td>
+<td>нема</td>
+</tr>
+<tr>
+<td>Lambda-авторизатор, IAM, Cognito</td>
+<td>є</td>
+<td>є</td>
+</tr>
+<tr>
+<td>JWT-авторизатор</td>
+<td>через Lambda</td>
+<td>вбудований</td>
+</tr>
+<tr>
+<td>Автодеплой</td>
+<td>нема</td>
+<td>є</td>
+</tr>
+</tbody>
+</table>
+<p>Запам'ятайте: <strong>усе «просунуте» лише в REST API</strong>. HTTP API обирають, коли потрібен дешевий проксі до Lambda. <strong>WebSocket API</strong> для двостороннього зв'язку (чат, сповіщення).</p>
+<p>Типи endpoint: <strong>Edge-optimized</strong> (через CloudFront), <strong>Regional</strong>, <strong>Private</strong> (лише з VPC, через interface endpoint).</p>
+<h2>Крок 2. Інтеграції</h2>
+<table>
+<thead>
+<tr>
+<th>Тип</th>
+<th>Що робить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lambda proxy (<code>AWS_PROXY</code>)</td>
+<td>весь запит у <code>event</code>, відповідь від функції як є</td>
+</tr>
+<tr>
+<td>Lambda non-proxy (<code>AWS</code>)</td>
+<td>перетворення через mapping templates</td>
+</tr>
+<tr>
+<td>HTTP / HTTP_PROXY</td>
+<td>на зовнішній HTTP</td>
+</tr>
+<tr>
+<td>AWS service</td>
+<td>напряму в SQS, DynamoDB, без Lambda</td>
+</tr>
+<tr>
+<td>Mock</td>
+<td>відповідь без бекенду</td>
+</tr>
+</tbody>
+</table>
+<h3>Головна пастка: Lambda proxy</h3>
+<p>Функція мусить повернути об'єкт із <code>statusCode</code>, <code>headers</code>, <code>body</code> і <code>isBase64Encoded</code>. <code>body</code> це <strong>рядок</strong>, а не об'єкт. Якщо формат інший, клієнт отримує <strong>502 Bad Gateway</strong>. Запам'ятайте: 502 з API Gateway і Lambda означає, що функція повернула неправильний формат.</p>
+<p>CORS у proxy-режимі робить <strong>сама функція</strong>: <code>Access-Control-Allow-Origin</code> у <code>headers</code> відповіді.</p>
+<h3>Коди помилок</h3>
+<table>
+<thead>
+<tr>
+<th>Код</th>
+<th>Причина</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>400</td>
+<td>помилка запиту, валідація</td>
+</tr>
+<tr>
+<td>401</td>
+<td>нема чи поганий токен</td>
+</tr>
+<tr>
+<td>403</td>
+<td>заборонено (політика, WAF, авторизатор повернув Deny)</td>
+</tr>
+<tr>
+<td>429</td>
+<td>перевищено ліміт</td>
+</tr>
+<tr>
+<td>500</td>
+<td>внутрішня помилка</td>
+</tr>
+<tr>
+<td>502</td>
+<td>неправильна відповідь Lambda</td>
+</tr>
+<tr>
+<td>503</td>
+<td>бекенд недоступний <em>(не звірено)</em></td>
+</tr>
+<tr>
+<td>504</td>
+<td>timeout інтеграції <em>(не звірено)</em></td>
+</tr>
+</tbody>
+</table>
+<h2>Крок 3. Stages і deployment</h2>
+<p>Зміни в REST API не діють, доки ви не зробите <strong>deployment на stage</strong>. Часте питання: «змінив метод, клієнти не бачать» означає, що немає deployment.</p>
+<p>Stage це частина URL: <code>.../prod/thumbnails</code>.</p>
+<p><strong>Stage variables</strong> це як змінні середовища для стадії. Класичний зв'язок із Lambda aliases: в інтеграції <code>function:api:${stageVariables.alias}</code>, stage <code>dev</code> має <code>alias=dev</code>, stage <code>prod</code> має <code>alias=live</code>.</p>
+<p>Пастка: для кожної функції чи alias, заданої через stage variable, дозвіл треба дати <strong>вручну</strong>: <code>aws lambda add-permission</code> з принципалом <code>apigateway.amazonaws.com</code>. Stage variables не для секретів.</p>
+<p><strong>Canary на stage</strong> (REST): частина трафіку йде на нову версію, усе логується окремо, потім Promote.</p>
+<h2>Крок 4. Трансформації, валідація, mock</h2>
+<ul>
+<li><strong>Request validator</strong> перевіряє тіло за <strong>Model</strong> (JSON Schema) і обов'язкові параметри <strong>до</strong> виклику Lambda. Невалідне дає 400, а Lambda не коштувала ні копійки.</li>
+<li><strong>Mapping templates</strong> (VTL) змінюють запит і відповідь. Лише non-proxy.</li>
+<li><strong>Gateway responses</strong> налаштовують помилки, які повертає сам Gateway.</li>
+<li><strong>Mock-інтеграція:</strong> фронтенд може працювати, поки бекенду ще нема. Відповідь береться з шаблону, Lambda не викликається.</li>
+</ul>
+<h2>Крок 5. Захист і обмеження</h2>
+<table>
+<thead>
+<tr>
+<th>Спосіб</th>
+<th>Коли</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IAM (SigV4)</td>
+<td>сервіси AWS, внутрішнє</td>
+</tr>
+<tr>
+<td>Cognito authorizer</td>
+<td>користувачі в user pool</td>
+</tr>
+<tr>
+<td>Lambda authorizer</td>
+<td>свій токен, сторонні IdP</td>
+</tr>
+<tr>
+<td>JWT authorizer</td>
+<td>HTTP API з OIDC</td>
+</tr>
+<tr>
+<td>Resource policy</td>
+<td>обмежити IP, акаунти, VPC (REST)</td>
+</tr>
+<tr>
+<td>API key + usage plan</td>
+<td><strong>ідентифікація клієнтів і квоти</strong>, а не авторизація</td>
+</tr>
+<tr>
+<td>mTLS, WAF</td>
+<td>взаємний TLS; захист від атак (WAF лише REST)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Lambda authorizer:</strong> на вхід токен, на вихід IAM-політика й <code>principalId</code>. Типи: <code>TOKEN</code> (один заголовок) і <code>REQUEST</code> (заголовки, query, stage variables; AWS радить саме його). Результат кешується: за замовчуванням 300 с, максимум 3 600 с <em>(не звірено)</em>.</p>
+<p>Пастка кешу авторизатора: політика кешується <strong>на токен</strong>, тож вона має покривати всі ресурси API, інакше користувач отримає випадковий 403 на іншому методі.</p>
+<p><strong>Ліміти:</strong> 10 000 RPS і burst 5 000 на акаунт і регіон для всіх API разом. Для Lambda ліміт concurrency 1 000, тож API може захлинутись нижче. Ліміт можна задати на stage, метод і клієнта (usage plan). Перевищення дає <strong>429</strong>.</p>
+<p>Інтеграція має timeout до 29 с, тіло запиту до 10 МБ <em>(не звірено)</em>. Тому файли <strong>не</strong> ганяють через API Gateway.</p>
+<h2>Крок 6. Завантаження файлів: presigned PUT</h2>
+<p>Ліміти 10 МБ і 6 МБ у Lambda означають, що файл на 200 МБ не пройде. Рішення: API лише видає посилання, а файл іде прямо в S3.</p>
+<p>Факти про presigned URL:</p>
+<ul>
+<li>посилання має <strong>права того, хто його створив</strong>; прав нема дає 403;</li>
+<li>час життя: консоль 1 хв - 12 год; CLI і SDK до <strong>7 днів</strong>;</li>
+<li>створене <strong>тимчасовими</strong> обліковими даними помирає разом з ними, навіть якщо вказано більше: роль EC2 приблизно 6 год, роль сесії 1 год за замовчуванням;</li>
+<li>перевіряється <strong>на старті</strong> запиту; завантаження, що вже йде, не обірветься;</li>
+<li><code>SignatureDoesNotMatch</code>: годинник, проксі, інший метод чи заголовки.</li>
+</ul>
+<p><strong>Великі файли: multipart.</strong> Від 100 МБ варто, понад 5 ГБ обов'язково. Частини від 5 МіБ до 5 ГіБ, до 10 000 частин, об'єкт до 48,8 ТіБ. Кожну частину можна підписати окремо (<code>UploadPart</code>). Незавершені multipart займають місце: lifecycle-правило <code>AbortIncompleteMultipartUpload</code> (лекція 3).</p>
+<p><strong>CORS бакета</strong> потрібен, якщо браузер завантажує напряму (<code>PUT</code>, дозволені заголовки). Інакше браузер блокує запит, хоч посилання правильне.</p>
+<h2>Крок 7. Тестові події й метрики</h2>
+<ul>
+<li>Тестову подію генерує <code>sam local generate-event apigateway aws-proxy</code>, локально API піднімає <code>sam local start-api</code> <em>(не звірено)</em>.</li>
+<li><strong>Custom domain</strong> потребує ACM-сертифіката (лекція 13).</li>
+<li><strong>Access logs</strong> і <strong>execution logs</strong> у CloudWatch (execution лише REST).</li>
+<li>Метрики: <code>Count</code>, <code>4XXError</code>, <code>5XXError</code>, <code>Latency</code> (весь шлях), <code>IntegrationLatency</code> (лише бекенд). Різниця двох це час у самому Gateway.</li>
+<li><strong>ALB проти API Gateway:</strong> ALB це балансувальник без авторизації й usage plans, а API Gateway керує API.</li>
+</ul>
+<h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>Просунуті функції лише в REST API, HTTP API дешевший.</li>
+<li>Lambda proxy: <code>statusCode</code> і рядок <code>body</code>, інакше 502.</li>
+<li>Зміна REST API діє лише після deployment на stage.</li>
+<li>Stage variables і aliases дають середовища, дозвіл дається вручну.</li>
+<li>API key ідентифікує, а не авторизує. 429 це ліміт.</li>
+<li>Файли йдуть через presigned URL, а не через API.</li>
+<li>Presigned живе не довше за облікові дані, що його створили.</li>
+</ol>
+<h2>Перевірте себе</h2>
+<ol>
+<li>Потрібні кеш, API keys і валідація. Який тип API?</li>
+<li>Клієнт отримує 502. Що не так із Lambda?</li>
+<li>Змінили інтеграцію, поведінка та сама. Чого не зробили?</li>
+<li>Чим <code>TOKEN</code> authorizer відрізняється від <code>REQUEST</code>?</li>
+<li>Чому з кешем авторизатора випадковий 403?</li>
+<li>Чи захищає API key від доступу сторонніх?</li>
+<li>Фронтенду потрібен API, якого ще нема. Що зробити?</li>
+<li>Presigned URL на 7 днів створила роль Lambda, а він помер за годину. Чому?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>REST API.</li>
+<li>Функція повернула неправильний формат (нема <code>statusCode</code> чи <code>body</code> не рядок).</li>
+<li>Deployment на stage.</li>
+<li><code>TOKEN</code> бере один заголовок, <code>REQUEST</code> заголовки, query й stage variables.</li>
+<li>Політика кешується на токен і має покривати всі ресурси API.</li>
+<li>Ні, він лише ідентифікує клієнта й дає квоти.</li>
+<li>Mock-інтеграція.</li>
+<li>Посилання помирає разом з тимчасовими обліковими даними ролі.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 14-api-gateway.md.</p>
+
+<nav class="pager"><a href="13-kms-secrets-simple.html">← Лекція 13</a><a href="15-caching-simple.html">Лекція 15 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>
