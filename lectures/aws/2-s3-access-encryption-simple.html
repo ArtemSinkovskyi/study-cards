@@ -13,23 +13,20 @@
   h3 { font-size:1.02rem; }
   blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
   blockquote p { margin:0; }
-  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
-  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
-  td code, th code { white-space:nowrap; }
-  th { background:#fff; }
-  @media (max-width: 640px) {
-    table, thead, tbody, tr, td { display:block; min-width:0; }
-    table { overflow:visible; }
-    thead { display:none; }
-    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
-    td { border:none; padding:.25rem 0; }
-    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
-    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
-    td code, th code { white-space:normal; }
-    table.two td:not(:first-child)::before { display:none; }
-    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
-    table.two tr { margin:.5rem 0; }
-  }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -62,7 +59,7 @@
 <h2>Навіщо це так задумано</h2>
 <p>Дані в S3 легко випадково зробити публічними, тому доступ закрито кількома шарами (політики плюс Block Public Access), і один шар може виправити помилку іншого. Ключі шифрування винесено окремо, щоб ви самі вирішували, кому їх довіряти.</p>
 <h2>Крок 1. Способи надати доступ</h2>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Спосіб</th>
@@ -111,9 +108,9 @@
 <td data-label="Суть">перетворення даних, глобальна точка (лише теорія)</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3>Bucket policy проти IAM-політики</h3>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th></th>
@@ -138,7 +135,7 @@
 <td data-label="Bucket policy">публічний доступ, cross-account, умови на кшталт <code>aws:SourceIp</code>, <code>aws:SecureTransport</code></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Bucket policy має ліміт <strong>20 КБ</strong>. Для іншого акаунта потрібні обидві сторони.</p>
 <p>Типові умови в bucket policy:</p>
 <ul>
@@ -149,7 +146,7 @@
 </ul>
 <h3>Block Public Access</h3>
 <p>Чотири вимикачі, кожен окремо:</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Вимикач</th>
@@ -174,13 +171,13 @@
 <td data-label="Що робить">обмежує доступ до бакета з публічною політикою лише власниками й сервісами AWS</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>BPA <strong>сильніший за політику</strong>: навіть правильна публічна bucket policy не діє, доки BPA її блокує. Може діяти на рівні акаунта й бакета.</p>
 <p>Публічне читання роблять вузько: лише <code>GetObject</code> на потрібний префікс, без <code>ListBucket</code> для всіх.</p>
 <p><strong>Типова задача:</strong> публічна bucket policy є, а об'єкт не відкривається. Перевірте BPA (<code>block_public_policy</code>, <code>restrict_public_buckets</code>).</p>
 <h3>Presigned URL</h3>
 <p>Сервіс, у якого є права, підписує URL своїми ключами. Той, хто має посилання, діє <strong>від імені підписанта</strong>, поки діє термін.</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Властивість</th>
@@ -205,7 +202,7 @@
 <td data-label="Значення">GET (скачати), PUT (завантажити), інші</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h3>Інше, що треба знати</h3>
 <ul>
 <li><strong>Access Points:</strong> коли одним бакетом користуються десятки команд, кожній дають точку входу з власною політикою замість однієї гігантської bucket policy.</li>
@@ -216,7 +213,7 @@
 <h2>Крок 2. Шифрування</h2>
 <p>Два напрямки: <strong>у спокої</strong> (at rest) і <strong>під час передавання</strong> (in transit).</p>
 <h3>У спокої: варіанти</h3>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Варіант</th>
@@ -251,7 +248,7 @@
 <td data-label="Коротко">AWS бачить лише шифротекст</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Хто тримає ключ: AWS мовчки це SSE-S3, AWS із журналом це SSE-KMS, ви щоразу це SSE-C, лише ви до відправки це client-side.</p>
 <p><strong>SSE-S3</strong> захищає від фізичного доступу до дисків, але <strong>не</strong> від того, хто має право <code>GetObject</code>: S3 розшифрує прозоро.</p>
 <p><strong>SSE-KMS</strong> додає ще один шар авторизації: для читання потрібен не лише <code>s3:GetObject</code>, а й <strong><code>kms:Decrypt</code></strong> на ключ. Класичне питання: «<code>AccessDenied</code> на читання, хоча <code>GetObject</code> дозволено» (бракує <code>kms:Decrypt</code>; для запису <code>kms:GenerateDataKey</code>). Мінуси:</p>
@@ -266,7 +263,7 @@
 <h3>Під час передавання</h3>
 <p>Це HTTPS (TLS). Вимагати його можна політикою: <code>Deny</code> на <code>s3:*</code> для бакета й об'єктів з умовою <code>aws:SecureTransport</code> рівним <code>false</code>.</p>
 <h3>Захист від видалення й зміни</h3>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Механізм</th>
@@ -291,7 +288,7 @@
 <td data-label="Що робить">автоматичне видалення чи перехід</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>Доступ у S3 це IAM, bucket policy і BPA. В одному акаунті достатньо одного Allow, Deny сильніший за все.</li>

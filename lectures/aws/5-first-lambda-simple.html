@@ -13,23 +13,20 @@
   h3 { font-size:1.02rem; }
   blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
   blockquote p { margin:0; }
-  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
-  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
-  td code, th code { white-space:nowrap; }
-  th { background:#fff; }
-  @media (max-width: 640px) {
-    table, thead, tbody, tr, td { display:block; min-width:0; }
-    table { overflow:visible; }
-    thead { display:none; }
-    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
-    td { border:none; padding:.25rem 0; }
-    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
-    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
-    td code, th code { white-space:normal; }
-    table.two td:not(:first-child)::before { display:none; }
-    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
-    table.two tr { margin:.5rem 0; }
-  }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -56,7 +53,7 @@
 <h2>Навіщо це так задумано</h2>
 <p>Lambda придумали, щоб не тримати сервер заради малої роботи, яка буває рідко. Ви платите лише за час виконання, а масштабування бере на себе AWS.</p>
 <h2>Крок 1. Словник</h2>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Термін</th>
@@ -109,9 +106,9 @@
 <td data-label="Суть">шаблон <code>template.yaml</code> (скорочений CloudFormation) плюс CLI (<code>sam build</code>, <code>sam deploy</code>, <code>sam local invoke</code>)</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h2>Крок 2. Що в handler стандарт Lambda, а що вибір</h2>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Що</th>
@@ -148,7 +145,7 @@
 <td data-label="Чиє">рекомендація AWS</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Тому в async-функції помилку кидають (<code>throw</code>), а не тихо виходять: Lambda тоді повторить виклик.</p>
 <h2>Крок 3. Змінні середовища й конфігурація</h2>
 <ul>
@@ -162,7 +159,7 @@
 </ul>
 <h2>Крок 4. Powertools for AWS Lambda</h2>
 <p>Набір утиліт від AWS, фактичний стандарт для Lambda. Модулі ставляться окремо:</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Модуль</th>
@@ -191,7 +188,7 @@
 <td data-label="Що робить">трейси X-Ray</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li><code>cold_start</code> Logger визначає сам (<code>true</code> лише в першому виклику середовища); у Logs Insights можна порахувати частку холодних викликів.</li>
 <li>Налаштовується змінними середовища без коду: <code>POWERTOOLS_SERVICE_NAME</code>, <code>POWERTOOLS_LOG_LEVEL</code>.</li>
@@ -206,7 +203,7 @@
 </ul>
 <h2>Крок 6. Пакування</h2>
 <p>Lambda не бере код з git, їй завантажують готовий пакет.</p>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Спосіб</th>
@@ -231,7 +228,7 @@
 <td data-label="Коли">великі залежності: ML-модель, ffmpeg, Chromium</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li><strong>Бандл:</strong> esbuild склеює наш код і код бібліотек в один файл, прибирає типи TypeScript, викидає невикористане (tree shaking). Без бандла в zip довелося б класти весь <code>node_modules</code>: сотні файлів, повільний cold start.</li>
 <li><strong>Нативні залежності</strong> (наприклад sharp, що містить libvips) esbuild не збирає: їх позначають external і кладуть поруч з бандлом, <strong>зібраними під платформу Lambda</strong> (Linux, потрібна архітектура <code>arm64</code> чи <code>x86_64</code>). Бінарники, зібрані на Windows, дадуть <code>invalid ELF header</code>.</li>
@@ -253,7 +250,7 @@
 </ul>
 <h2>Крок 8. Вибір runtime</h2>
 <p>Приблизний cold start <em>(не звірено)</em>:</p>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Runtime</th>
@@ -283,7 +280,7 @@
 <td data-label="Примітка"></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Для асинхронної обробки cold start не головне: різниця між 30 і 300 мс губиться на фоні самої обробки. Для Go і Rust кодування webp потребує нативних бібліотек. У прикладах до іспиту найчастіше Node і Python.</p>
 <h2>Крок 9. Provisioned concurrency</h2>
 <p>Тримає N середовищ уже ініціалізованими, тож перші N одночасних викликів ідуть без cold start. Платно за кожну секунду, поки увімкнено, навіть без викликів; free tier не покриває. Приклад: 1 ГБ × 2 592 000 с у місяці × приблизно 0,0000041667 USD за ГБ·с дає близько 10,80 USD <em>(не звірено)</em>.</p>
@@ -296,7 +293,7 @@
 <li><strong>SnapStart</strong> (Java, Python, .NET): AWS відновлює середовище зі знімка вже ініціалізованого. Для Java безкоштовний. Типова відповідь на «Java Lambda повільно стартує, як дешево виправити».</li>
 </ul>
 <h2>Крок 10. CloudFront чи інший CDN</h2>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th></th>
@@ -336,7 +333,7 @@
 <td data-label="Зовнішній CDN (наприклад Cloudflare)">Workers</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Типова відповідь іспиту: <strong>«приватний S3 за CDN, доступ лише від CDN» означає CloudFront плюс OAC.</strong></p>
 <h2>Крок 11. Пам'ять, таймаут, вартість</h2>
 <ul>

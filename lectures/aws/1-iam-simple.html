@@ -13,23 +13,20 @@
   h3 { font-size:1.02rem; }
   blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
   blockquote p { margin:0; }
-  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
-  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
-  td code, th code { white-space:nowrap; }
-  th { background:#fff; }
-  @media (max-width: 640px) {
-    table, thead, tbody, tr, td { display:block; min-width:0; }
-    table { overflow:visible; }
-    thead { display:none; }
-    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
-    td { border:none; padding:.25rem 0; }
-    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
-    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
-    td code, th code { white-space:normal; }
-    table.two td:not(:first-child)::before { display:none; }
-    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
-    table.two tr { margin:.5rem 0; }
-  }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -56,7 +53,7 @@
 <h2>Навіщо це так задумано</h2>
 <p>AWS не знає, кому довіряти, тому за замовчуванням забороняє все й вимагає явних дозволів. Роль замість ключа зроблено тому, що довгий ключ рано чи пізно витікає, а тимчасові ключі самі закінчуються.</p>
 <h2>Крок 1. Хто може діяти (ідентичності)</h2>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Ідентичність</th>
@@ -86,11 +83,11 @@
 <td data-label="Коли застосовувати">люди в багатьох акаунтах (рекомендовано AWS)</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>Правило іспиту:</strong> програмі всередині AWS (Lambda, EC2, ECS) дають <strong>роль</strong>, а не access key. Людям у кількох акаунтах дають <strong>Identity Center</strong>. CI (GitHub, HCP Terraform) дають роль через <strong>OIDC</strong>. Програмі поза AWS лишається IAM user із ключем як компроміс. Access key у коді чи змінних середовища це антипатерн, якщо є альтернатива.</p>
 <h2>Крок 2. З чого складається політика</h2>
 <p>Політика це JSON-документ зі списком правил (<code>Statement</code>):</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Елемент</th>
@@ -135,11 +132,11 @@
 <td data-label="Що означає">додаткова умова: префікс, IP, MFA, тег, час</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Як читати: <strong>хто</strong> (Principal) <strong>може чи не може</strong> (Effect) <strong>що робити</strong> (Action) <strong>з чим</strong> (Resource) <strong>за якої умови</strong> (Condition).</p>
 <p><strong>Класика іспиту.</strong> Дії над <strong>бакетом</strong> (<code>s3:ListBucket</code>) вказують на ARN бакета, а дії над <strong>об'єктами</strong> (<code>s3:PutObject</code>, <code>s3:GetObject</code>) на ARN із <code>/*</code>. Тому в одній політиці можуть бути два statements з різними <code>Resource</code>. Помилка «<code>ListBucket</code> на <code>bucket/*</code>» дає <code>AccessDenied</code>, бо такого ресурсу для цієї дії нема.</p>
 <h3>Типи політик</h3>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Тип</th>
@@ -180,10 +177,10 @@
 <td data-label="Де прикріплена">під час <code>AssumeRole</code>: звужує сеанс</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Дві з них <strong>дають</strong> права (identity-based і resource-based), а boundary, SCP і session policy лише <strong>обмежують</strong>.</p>
 <h2>Крок 3. Identity-based чи resource-based</h2>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th></th>
@@ -208,7 +205,7 @@
 <td data-label="Resource-based"><strong>достатньо однієї</strong> політики на ресурсі</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>Правило про один акаунт:</strong> якщо суб'єкт і ресурс в одному акаунті, достатньо <strong>будь-якого</strong> Allow (identity-based <strong>або</strong> resource-based). Для <strong>різних акаунтів</strong> Allow потрібен з <strong>обох</strong> боків.</p>
 <h2>Крок 4. Ролі: дві політики</h2>
 <p>У ролі завжди дві частини:</p>
@@ -218,7 +215,7 @@
 </ol>
 <p>Схема: суб'єкт кличе <code>AssumeRole</code> у STS, STS перевіряє trust policy, видає тимчасові ключі й <strong>session token</strong>, далі суб'єкт робить запити, а сервіс перевіряє permissions policy ролі.</p>
 <p>Типові довірені суб'єкти в trust policy:</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Хто приймає</th>
@@ -243,10 +240,10 @@
 <td data-label="Principal"><code>Federated: ...:saml-provider/...</code></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>Тимчасові дані.</strong> <code>AssumeRole</code> повертає access key, secret і <strong>session token</strong> на термін <strong>від 15 хв до 12 год</strong> (за замовчуванням 1 год). Потім роль приймають знову, SDK робить це сам.</p>
 <p><strong>Три виклики STS:</strong></p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Виклик</th>
@@ -267,7 +264,7 @@
 <td data-label="Для кого">SAML</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Для мобільних і веб-застосунків із соціальним входом рекомендують <strong>Cognito</strong>, а не прямий <code>AssumeRoleWithWebIdentity</code>.</p>
 <h2>Крок 5. Як SDK шукає облікові дані</h2>
 <p>SDK (і CLI) шукає в певному <strong>порядку</strong> й бере перші знайдені:</p>
@@ -280,7 +277,7 @@
 </ol>
 <p>Lambda бере облікові дані своєї execution role зі змінних середовища, які сама ж і встановлює.</p>
 <h2>Крок 6. Додаткові теми для іспиту</h2>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Тема</th>
@@ -333,7 +330,7 @@
 <td data-label="Суть">User Pools (автентифікація, JWT) проти Identity Pools (AWS-креди)</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><code>iam:PassRole</code> важливий для CI: щоб розгорнути SAM-стек, у його ролі має бути <code>iam:PassRole</code> на execution role функції та на роль CodeDeploy.</p>
 <h2>Крок 7. SCP детально</h2>
 <p><strong>SCP (Service Control Policy)</strong> це політика сервісу <strong>AWS Organizations</strong>: стеля прав для цілого акаунта чи групи акаунтів. Діє незалежно від того, що кому написано в IAM.</p>
@@ -345,7 +342,7 @@
 <li>Дві стратегії: <strong>deny-list</strong> (лишити <code>FullAWSAccess</code>, додати <code>Deny</code> на небажане; простіше й типове) і <strong>allow-list</strong> (прибрати <code>FullAWSAccess</code>, явно дозволити потрібне).</li>
 </ul>
 <p>Приклад: заборонити всі регіони, крім <code>eu-north-1</code>. Це <code>Deny</code> з умовою <code>aws:RequestedRegion</code> і <code>NotAction</code>, який виключає глобальні сервіси (<code>iam:*</code>, <code>organizations:*</code>, <code>sts:*</code>, <code>support:*</code>), бо вони не прив'язані до регіону.</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Питання</th>
@@ -382,7 +379,7 @@
 <td data-label="Відповідь">заборонити регіони, заборонити вимикати CloudTrail чи GuardDuty, заборонити вихід з організації, змусити шифрування</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>За замовчуванням усе заборонено. Явний <code>Deny</code> завжди сильніший за <code>Allow</code>.</li>

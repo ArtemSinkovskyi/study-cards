@@ -13,23 +13,20 @@
   h3 { font-size:1.02rem; }
   blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
   blockquote p { margin:0; }
-  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
-  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
-  td code, th code { white-space:nowrap; }
-  th { background:#fff; }
-  @media (max-width: 640px) {
-    table, thead, tbody, tr, td { display:block; min-width:0; }
-    table { overflow:visible; }
-    thead { display:none; }
-    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
-    td { border:none; padding:.25rem 0; }
-    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
-    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
-    td code, th code { white-space:normal; }
-    table.two td:not(:first-child)::before { display:none; }
-    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
-    table.two tr { margin:.5rem 0; }
-  }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -60,7 +57,7 @@
 <h2>Навіщо це так задумано</h2>
 <p>Щоб не писати самому реєстрацію, паролі й MFA, це віддають сервісу. Пулів два, бо «хто ти» і «що можна в AWS» це різні питання.</p>
 <h2>Крок 1. User pool проти identity pool</h2>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th></th>
@@ -100,14 +97,14 @@
 <td data-label="Identity pool">прямий доступ до S3 чи DynamoDB з клієнта</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Логіка вибору:</p>
 <ul>
 <li><strong>API Gateway + JWT</strong> означає лише user pool.</li>
 <li><strong>Клієнт сам викликає сервіс AWS</strong> означає identity pool (часто разом із user pool).</li>
 </ul>
 <h2>Крок 2. Токени</h2>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Токен</th>
@@ -128,7 +125,7 @@
 <td data-label="Для чого">оновлення перших двох</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Перевірка JWT: підпис за публічними ключами <strong>JWKS</strong> пулу, потім <code>iss</code>, <code>aud</code>, <code>exp</code>.</p>
 <h2>Крок 3. Що вміє user pool</h2>
 <ul>
@@ -143,7 +140,7 @@
 <p>Те саме для DynamoDB: умова <code>dynamodb:LeadingKeys</code> дозволяє лише рядки зі своїм partition key. Це <strong>fine-grained access</strong> (навичка 2.1.2).</p>
 <p><strong>Гості</strong> отримують окрему роль, і вона має бути дуже обмеженою.</p>
 <h2>Крок 5. Федерація без Cognito</h2>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Сценарій</th>
@@ -168,10 +165,10 @@
 <td data-label="Механізм"><code>AssumeRole</code> між акаунтами</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Спільне: ніяких довгих ключів, лише тимчасові облікові дані STS.</p>
 <h2>Крок 6. Авторизація в API</h2>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Спосіб</th>
@@ -192,7 +189,7 @@
 <td data-label="Що">клієнт має AWS-ключі (з identity pool)</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>API Gateway із Cognito authorizer передає <code>claims</code> у <code>event.requestContext.authorizer.claims</code>, тож функція бачить, хто викликає.</p>
 <h2>Крок 7. Програмний доступ</h2>
 <ul>

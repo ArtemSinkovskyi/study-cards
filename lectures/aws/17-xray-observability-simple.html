@@ -13,23 +13,20 @@
   h3 { font-size:1.02rem; }
   blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
   blockquote p { margin:0; }
-  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
-  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
-  td code, th code { white-space:nowrap; }
-  th { background:#fff; }
-  @media (max-width: 640px) {
-    table, thead, tbody, tr, td { display:block; min-width:0; }
-    table { overflow:visible; }
-    thead { display:none; }
-    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
-    td { border:none; padding:.25rem 0; }
-    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
-    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
-    td code, th code { white-space:normal; }
-    table.two td:not(:first-child)::before { display:none; }
-    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
-    table.two tr { margin:.5rem 0; }
-  }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -56,7 +53,7 @@
 <h2>Навіщо це так задумано</h2>
 <p>У розподіленій системі один запит проходить через багато сервісів, і логи кожного окремо не показують шлях. X-Ray зшиває їх в один трейс, щоб було видно, де затримка.</p>
 <h2>Крок 1. Словник</h2>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Термін</th>
@@ -105,7 +102,7 @@
 <td data-label="Суть">збережений фільтр</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h2>Крок 2. Основи</h2>
 <ul>
 <li>Сервіс надсилає <strong>segments</strong>; X-Ray збирає їх у <strong>traces</strong>; з них будує <strong>service graph</strong>.</li>
@@ -115,7 +112,7 @@
 <li><strong>Sampling за замовчуванням:</strong> <strong>перший запит кожної секунди плюс 5% решти</strong>. Правила можна змінити: усі записи про гроші, мало для health checks.</li>
 </ul>
 <h2>Крок 3. Annotations проти metadata</h2>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th></th>
@@ -150,7 +147,7 @@
 <td data-label="Metadata"></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>«Знайти всі трейси користувача 42» означає <strong>annotation</strong>, бо лише вона індексується.</p>
 <p>Помилки в X-Ray: <strong>Error</strong> це 4xx, <strong>Fault</strong> це 5xx, <strong>Throttle</strong> це 429.</p>
 <h2>Крок 4. Як увімкнути</h2>
@@ -164,7 +161,7 @@
 <h2>Крок 5. Як це виглядає</h2>
 <p>Уявний трейс повільного запиту: API Gateway 2980 мс, у ньому Lambda 2940 мс, в ній Init 390 мс (холодний старт), DynamoDB 18 мс, <strong>S3 Get 2400 мс</strong>. Висновок: повільний S3 для великого файлу, а не база. Без трейсу оптимізували б не те.</p>
 <h2>Крок 6. Власні метрики (навичка 4.2.2)</h2>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Спосіб</th>
@@ -189,7 +186,7 @@
 <td data-label="Коли"><strong>Lambda</strong>: без додаткового виклику</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>EMF робить Powertools Metrics автоматично.</p>
 <ul>
 <li><strong>Роздільна здатність:</strong> стандартна 1 хв; <strong>high-resolution</strong> до 1 с (<code>StorageResolution: 1</code>), зберігається 3 години.</li>
@@ -206,7 +203,7 @@
 </ul>
 <p><strong>Сповіщення про квоти й завершення деплою</strong> (навичка 4.2.3): EventBridge ловить подію CodeDeploy чи CodePipeline і шле в SNS; про alarm-и в <strong>Service Quotas</strong> на використання квот не звірено <em>(не звірено)</em>.</p>
 <h2>Крок 9. Куди дивитись при проблемі</h2>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Симптом</th>
@@ -235,7 +232,7 @@
 <td data-label="Інструмент">CloudFormation events, CodeDeploy logs</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>X-Ray показує шлях запиту; метрики скільки; логи що.</li>

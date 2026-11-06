@@ -13,23 +13,20 @@
   h3 { font-size:1.02rem; }
   blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
   blockquote p { margin:0; }
-  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
-  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
-  td code, th code { white-space:nowrap; }
-  th { background:#fff; }
-  @media (max-width: 640px) {
-    table, thead, tbody, tr, td { display:block; min-width:0; }
-    table { overflow:visible; }
-    thead { display:none; }
-    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
-    td { border:none; padding:.25rem 0; }
-    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
-    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
-    td code, th code { white-space:normal; }
-    table.two td:not(:first-child)::before { display:none; }
-    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
-    table.two tr { margin:.5rem 0; }
-  }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -55,7 +52,7 @@
 <h2>Навіщо це так задумано</h2>
 <p>У хмарі нема сервера, на який можна зайти й подивитись, тому метрики, логи й alarm збираються окремо й дивляться на систему ззовні. CloudTrail окремо, бо «хто це зробив» не те саме, що «як це працює».</p>
 <h2>Крок 1. Словник</h2>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Термін</th>
@@ -124,10 +121,10 @@
 <td data-label="Суть">потік логів у реальному часі</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h2>Крок 2. Метрики Lambda без налаштування</h2>
 <p>Функція публікує в <code>AWS/Lambda</code>:</p>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Метрика</th>
@@ -182,7 +179,7 @@
 <td data-label="Нюанс">лише Kinesis і DynamoDB Streams</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>Пастка іспиту: Lambda не публікує метрики пам'яті.</strong> Пам'ять видно лише в рядку <code>REPORT</code> (<code>Max Memory Used</code>). Метрик EC2 «пам'ять» і «диск» теж нема без CloudWatch Agent.</p>
 <h2>Крок 3. Логи</h2>
 <p>Функція пише stdout у log group <code>/aws/lambda/&lt;назва&gt;</code>. Для запису потрібна роль виконання (<code>logs:CreateLogStream</code>, <code>logs:PutLogEvents</code>, політика <code>AWSLambdaBasicExecutionRole</code>).</p>
@@ -190,7 +187,7 @@
 <p><strong>Retention.</strong> Допустимі значення: 1, 3, 5, 7, 14, 30, 60, 90 днів тощо, або «ніколи». <strong>Лог-групи, які AWS створює сам, мають «Never expire»</strong>, тому групу описують у шаблоні й вказують у <code>LoggingConfig.LogGroup</code>. Видалення після retention не миттєве: до <strong>72 годин</strong> після закінчення строку.</p>
 <h2>Крок 4. Alarm</h2>
 <p>Три стани: <code>OK</code>, <code>ALARM</code>, <code>INSUFFICIENT_DATA</code>.</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Параметр</th>
@@ -227,7 +224,7 @@
 <td data-label="Зміст">що робити в <code>ALARM</code> (SNS, Auto Scaling, EC2 stop/terminate/recover, Systems Manager)</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li>Дії можна задати окремо для <code>ALARM</code>, <code>OK</code> і <code>INSUFFICIENT_DATA</code>. Якщо задано лише <code>AlarmActions</code>, листа про повернення в <code>OK</code> не буде.</li>
 <li><strong><code>TreatMissingData: notBreaching</code></strong> для рідкісних подій: без викликів метрика <code>Errors</code> не публікується, і без цього alarm пішов би в <code>INSUFFICIENT_DATA</code>.</li>
@@ -256,7 +253,7 @@
 </ul>
 <p><strong>Роздільна здатність:</strong> стандартна 1 хв, <strong>high-resolution</strong> до 1 с (<code>StorageResolution=1</code>, власні метрики через <code>PutMetricData</code>); high-res alarm з періодом 10 або 30 с. <code>PutMetricData</code> потребує <code>cloudwatch:PutMetricData</code>.</p>
 <h2>Крок 8. Ціни й як не потрапити на гроші</h2>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Що</th>
@@ -293,7 +290,7 @@
 <td data-label="Ціна">1 млн запитів і 400 000 ГБ·с безкоштовно; 0,20 USD за 1 млн; тарифікований час включає ініціалізацію поза handler</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Як не потрапити:</p>
 <ol>
 <li>Тримайте alarm у межах 10 на акаунт.</li>
@@ -315,7 +312,7 @@
 </ul>
 <h2>Крок 11. CloudTrail</h2>
 <p><strong>CloudTrail</strong> це журнал аудиту: кожен виклик API акаунта (хто, коли, з якого принципала, чи вдалося).</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Що</th>
@@ -344,7 +341,7 @@
 <td data-label="Ціна">платно</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li><strong>Management-події</strong> це керування ресурсами (<code>CreateFunction</code>, <code>PutRolePolicy</code>, <code>AssumeRoleWithWebIdentity</code>) і пишуться завжди.</li>
 <li><strong>Data events</strong> це операції над вмістом; <strong>вимкнені за замовчуванням</strong>, бо їх дуже багато.</li>

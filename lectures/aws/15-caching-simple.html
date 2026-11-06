@@ -13,23 +13,20 @@
   h3 { font-size:1.02rem; }
   blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
   blockquote p { margin:0; }
-  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
-  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
-  td code, th code { white-space:nowrap; }
-  th { background:#fff; }
-  @media (max-width: 640px) {
-    table, thead, tbody, tr, td { display:block; min-width:0; }
-    table { overflow:visible; }
-    thead { display:none; }
-    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
-    td { border:none; padding:.25rem 0; }
-    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
-    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
-    td code, th code { white-space:normal; }
-    table.two td:not(:first-child)::before { display:none; }
-    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
-    table.two tr { margin:.5rem 0; }
-  }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -56,7 +53,7 @@
 <h2>Навіщо це так задумано</h2>
 <p>Кеш потрібен, бо база повільна й дорога, а більшість запитів повторюється. Чим ближче кеш до користувача, тим швидше й дешевше, але тим важче його скинути.</p>
 <h2>Крок 1. Словник</h2>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Термін</th>
@@ -93,9 +90,9 @@
 <td data-label="Суть">точка присутності CloudFront</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h2>Крок 2. Стратегії кешування</h2>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Стратегія</th>
@@ -130,10 +127,10 @@
 <td data-label="Мінус"></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Найчастіша комбінація: <strong>lazy loading плюс TTL</strong>. Питання «кеш містить застарілі дані» означає write-through або коротший TTL. «Кеш забитий непотрібним» означає lazy loading.</p>
 <h2>Крок 3. Який кеш обрати</h2>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Сценарій</th>
@@ -162,7 +159,7 @@
 <td data-label="Вибір">змінні поза handler, <code>/tmp</code></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h2>Крок 4. DAX</h2>
 <p>Кеш в пам'яті, сумісний з API DynamoDB:</p>
 <ul>
@@ -176,7 +173,7 @@
 <p><strong>DAX чи ElastiCache:</strong> DAX лише для DynamoDB, без коду кешування. ElastiCache для всього іншого, але логіку кешу пишете самі.</p>
 <h2>Крок 5. ElastiCache</h2>
 <p>Рушії: <strong>Valkey</strong>, <strong>Redis OSS</strong>, <strong>Memcached</strong>.</p>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th></th>
@@ -206,7 +203,7 @@
 <td data-label="Memcached">так</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Запам'ятайте: <strong>відмовостійкість чи рейтинг (sorted set) означає Redis/Valkey; простий розподілений кеш означає Memcached.</strong></p>
 <p>Режими: <strong>Serverless</strong> (без вузлів, оплата за ГБ і ECPU, завжди Multi-AZ) і <strong>node-based</strong> (свої вузли, оплата за годину). Працює у VPC, тож Lambda треба підключити до VPC. Типове застосування: сесії застосунку, щоб сервери були stateless.</p>
 <p>Сесії: і DynamoDB, і ElastiCache підходять. DynamoDB простіше й без VPC, ElastiCache швидше.</p>
@@ -220,7 +217,7 @@
 </ul>
 <p><strong>Скинути кеш:</strong> <strong>invalidation</strong> (<code>/images/*</code>), перші 1000 шляхів на місяць безкоштовно, далі платно; краще <strong>версіоновані імена</strong> файлів. Файли з <code>Cache-Control: public, max-age=31536000, immutable</code> потребують нового імені при зміні.</p>
 <p><strong>Захист origin:</strong> приватний S3 плюс <strong>OAC</strong>.</p>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th></th>
@@ -255,7 +252,7 @@
 <td data-label="S3 presigned">IAM-сутність</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Приклади: одне платне відео: signed URL. Весь розділ сайту для передплатників: signed cookies. Завантаження в S3: presigned.</p>
 <p><strong>Lambda@Edge і CloudFront Functions</strong> змінюють запит на краю.</p>
 <h2>Крок 7. API Gateway cache</h2>
@@ -279,7 +276,7 @@
 <li>Parameter Store і Secrets Manager кешують через <strong>Lambda-розширення Parameters and Secrets</strong>: воно піднімає локальний HTTP-сервер на порту 2773 і тримає значення в пам'яті, тож функція не ходить в API на кожен виклик.</li>
 </ul>
 <h2>Крок 9. Як обрати сховище</h2>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Потрібно</th>
@@ -328,7 +325,7 @@
 <td data-label="Вибір"><strong>S3 Glacier</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>RDS і Lambda:</strong> Lambda масштабується швидко, а RDS має обмежені з'єднання. Рішення <strong>RDS Proxy</strong> (пул з'єднань, навичка 4.3.1) <em>(не звірено)</em>. Для читань <strong>read replicas</strong>.</p>
 <h2>Що запам'ятати на іспит</h2>
 <ol>

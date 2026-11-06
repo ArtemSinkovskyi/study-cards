@@ -13,23 +13,20 @@
   h3 { font-size:1.02rem; }
   blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
   blockquote p { margin:0; }
-  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
-  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
-  td code, th code { white-space:nowrap; }
-  th { background:#fff; }
-  @media (max-width: 640px) {
-    table, thead, tbody, tr, td { display:block; min-width:0; }
-    table { overflow:visible; }
-    thead { display:none; }
-    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
-    td { border:none; padding:.25rem 0; }
-    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
-    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
-    td code, th code { white-space:normal; }
-    table.two td:not(:first-child)::before { display:none; }
-    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
-    table.two tr { margin:.5rem 0; }
-  }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -62,7 +59,7 @@
 <p>Lambda масштабується запуском нових копій функції, тому вона без стану. Повтори, DLQ та ідемпотентність потрібні, бо в розподіленій системі подія може прийти двічі або зникнути.</p>
 <h2>Крок 1. Життєвий цикл і cold start</h2>
 <p>Lambda не тримає код «увімкненим». На виклик вона бере <strong>execution environment</strong> (ізольована мікро-ВМ) і проходить фази:</p>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Фаза</th>
@@ -87,7 +84,7 @@
 <td data-label="Нюанси"></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>Cold start</strong> це Init плюс завантаження коду: перший виклик, ріст навантаження, нова версія чи зміна конфігурації. <strong>Warm start</strong> пропускає Init.</p>
 <p>Що живе між викликами в теплому середовищі: глобальні змінні, клієнти SDK, з'єднання з БД, файли в <code>/tmp</code>. Але розраховувати на це як на кеш не можна. Дані конкретного запиту <strong>не можна</strong> класти в глобальні змінні (наступний запит побачить чужі).</p>
 <p>Пастки:</p>
@@ -100,7 +97,7 @@
 </ul>
 <h2>Крок 2. Ресурси й ліміти</h2>
 <p>Ці числа питають прямо.</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Що</th>
@@ -153,7 +150,7 @@
 <td data-label="Значення"><strong>10 с</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>Тарифікація:</strong> кількість викликів плюс <strong>GB-секунди</strong> (пам'ять × тривалість). Free tier назавжди: 1 млн викликів і 400 000 GB-с на місяць. <strong>arm64</strong> дешевший приблизно на 20%.</p>
 <p>Більше пам'яті дає більше CPU і коротший виклик, тож 128 МБ не завжди найдешевше. Для підбору є <strong>AWS Lambda Power Tuning</strong>.</p>
 <p>Пастки:</p>
@@ -163,7 +160,7 @@
 </ul>
 <h2>Крок 3. Три моделі виклику</h2>
 <p>Від способу виклику залежить усе інше.</p>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th></th>
@@ -216,7 +213,7 @@
 <td data-label="Event source mapping">батч записів (<code>Records</code>)</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Є ще <code>DryRun</code>: перевірка прав без виконання.</p>
 <p>Пастки:</p>
 <ul>
@@ -234,7 +231,7 @@
 <li>подія, яку не вдалося обробити або яка застаріла, йде в <strong>DLQ</strong> чи <strong>on-failure destination</strong>. Без них подія <strong>зникає</strong>.</li>
 </ul>
 <h3>DLQ проти destinations</h3>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th></th>
@@ -264,7 +261,7 @@
 <td data-label="Destinations"><strong>рекомендований</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Execution role має мати право писати в ціль (<code>sqs:SendMessage</code>, <code>sns:Publish</code>), інакше невдалі події втрачаються.</p>
 <h3>SQS як джерело</h3>
 <ul>
@@ -295,7 +292,7 @@
 </ul>
 <h2>Крок 5. Concurrency і throttling</h2>
 <p><strong>Concurrency</strong> це кількість викликів, що виконуються одночасно, приблизно <code>запитів за секунду × тривалість у секундах</code>.</p>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Тип</th>
@@ -324,7 +321,7 @@
 <td data-label="Нюанс">лише на <strong>версію чи alias</strong>, не на <code>$LATEST</code></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>Throttling:</strong></p>
 <ul>
 <li>sync: клієнт отримує <strong>429 <code>TooManyRequestsException</code></strong> і повторює сам;</li>
@@ -336,7 +333,7 @@
 <p><strong>Правило нерезервованого залишку:</strong> не можна зарезервувати стільки, щоб нерезервованих лишилось менше <strong>100</strong> (у старих матеріалах трапляється 10, це застаріло). Тому в акаунті з квотою 10 резервувати можна 0, а <code>ReservedConcurrentExecutions</code> відхилять під час деплою.</p>
 <p>Пастки: одна функція з'їла весь ліміт, а інші отримують 429: reserved concurrency для критичних. Захистити БД від Lambda: reserved concurrency або max concurrency на SQS mapping.</p>
 <h2>Крок 6. Права: два напрямки</h2>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th></th>
@@ -371,10 +368,10 @@
 <td data-label="Resource-based policy">головний спосіб дати <strong>чужому акаунту</strong> викликати функцію</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Базові політики: <code>AWSLambdaBasicExecutionRole</code> (логи), <code>AWSLambdaVPCAccessExecutionRole</code> (VPC), <code>AWSXRayDaemonWriteAccess</code> (X-Ray).</p>
 <p><strong>Push чи poll:</strong></p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Тип джерела</th>
@@ -391,7 +388,7 @@
 <td data-label="Що потрібно"><strong>execution role</strong> з правами читання (<code>sqs:ReceiveMessage</code>, <code>DeleteMessage</code>, <code>GetQueueAttributes</code>)</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>«Чому Lambda не отримує повідомлення з SQS» відповідь: у ролі немає прав.</p>
 <p>Пастки:</p>
 <ul>
@@ -400,7 +397,7 @@
 <li><code>AccessDenied</code> на <code>GetObject</code>: перевірте роль, політику бакета і KMS-ключ.</li>
 </ul>
 <h2>Крок 7. Версії, aliases, traffic shifting</h2>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Поняття</th>
@@ -425,7 +422,7 @@
 <td data-label="Змінне?">вказівник можна переставити</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li>Кожна версія й alias мають власний ARN.</li>
 <li><strong>Alias може вказувати на дві версії з вагами</strong> (90% і 10%): canary.</li>
@@ -444,7 +441,7 @@
 <li><strong>входять у ліміт 250 МБ</strong>;</li>
 <li><strong>не підтримуються</strong> для функцій як container image.</li>
 </ul>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Ситуація</th>
@@ -473,10 +470,10 @@
 <td data-label="Рішення">збірка під Linux і архітектуру Lambda</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>Container images:</strong> образи AWS або власні з <strong>Runtime Interface Client</strong>; локально запускаються через <strong>Runtime Interface Emulator</strong>. Образ береться лише з ECR того ж регіону.</p>
 <h2>Крок 9. Конфігурація й секрети</h2>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Спосіб</th>
@@ -501,14 +498,14 @@
 <td data-label="Нюанс">платний за секрет, ротація через Lambda</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Читайте секрети <strong>в Init</strong> і кешуйте (Lambda extension «Parameters and Secrets» чи Powertools Parameters), інакше кожен виклик ходить в API.</p>
 <p><strong>Encryption helpers</strong> шифрують змінні на стороні клієнта, тоді в ролі потрібен <code>kms:Decrypt</code>.</p>
 <p>Пастки: «паролі в змінних середовища, як безпечніше?» Secrets Manager чи <code>SecureString</code>. «Пароль треба автоматично міняти» Secrets Manager.</p>
 <h2>Крок 10. Спостережуваність</h2>
 <p><strong>Логи.</strong> Log group <code>/aws/lambda/&lt;назва&gt;</code>. Retention за замовчуванням «ніколи не видаляти». У кожному виклику рядки <code>START</code>, <code>END</code>, <code>REPORT</code> (<code>Duration</code>, <code>Billed Duration</code>, <code>Memory Size</code>, <code>Max Memory Used</code>, <code>Init Duration</code> лише при cold start). <strong>Logs Insights</strong> запитує структуровані JSON-логи. <strong>Metric filter</strong> перетворює шаблон у логах на метрику.</p>
 <p><strong>Метрики:</strong></p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Метрика</th>
@@ -545,7 +542,7 @@
 <td data-label="Означає">здоров'я async-черги</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>Custom metrics</strong> без викликів API: <strong>Embedded Metric Format (EMF)</strong>, спеціальний JSON у лог (Powertools Metrics). <code>PutMetricData</code> платний і повільніший.</p>
 <p><strong>X-Ray:</strong> увімкнути <strong>Active tracing</strong> і роль <code>AWSXRayDaemonWriteAccess</code>. Segment це функція, subsegment це виклики всередині. <strong>Annotations</strong> індексовані (по них шукають), <strong>Metadata</strong> ні. Заголовок <code>X-Amzn-Trace-Id</code> передає трейс далі. Sampling за замовчуванням 1 запит на секунду плюс 5%.</p>
 <p>Пастки: вузьке місце між сервісами: X-Ray. Алярм на помилки: alarm на <code>Errors</code>. Throttling не видно в <code>Errors</code>: дивіться <code>Throttles</code>.</p>
@@ -559,7 +556,7 @@
 <p>Пастка: «Lambda у VPC не бачить S3, DynamoDB чи інтернет» відповідь: NAT або VPC endpoint.</p>
 <h2>Крок 12. API Gateway, Function URL, ALB</h2>
 <p>Це синхронні джерела.</p>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th></th>
@@ -584,9 +581,9 @@
 <td data-label="Нюанси">коли ALB уже є</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Відповідь для proxy: <code>{ &quot;statusCode&quot;: 200, &quot;headers&quot;: {...}, &quot;body&quot;: &quot;...&quot;, &quot;isBase64Encoded&quot;: false }</code>. <code>body</code> це <strong>рядок</strong>, а не об'єкт. Неправильний формат дає <strong>502</strong>.</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Код</th>
@@ -615,10 +612,10 @@
 <td data-label="Причина">payload більший за ліміт</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h2>Крок 13. SAM і CodeDeploy</h2>
 <p><strong>SAM</strong> це шаблон плюс CLI. Шаблон це CloudFormation з <code>Transform: AWS::Serverless-2016-10-31</code>.</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Тип</th>
@@ -651,9 +648,9 @@
 <td data-label="Створює">вкладений застосунок</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><code>Globals</code> це спільні налаштування для всіх функцій.</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Команда</th>
@@ -698,9 +695,9 @@
 <td data-label="Що робить">генерує CI/CD</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>CodeDeploy і <code>DeploymentPreference</code>.</strong> З <code>AutoPublishAlias</code> SAM публікує версію і веде alias, а CodeDeploy змінює вагу трафіку:</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Тип</th>
@@ -721,13 +718,13 @@
 <td data-label="Як зміщується трафік">усе одразу</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li><strong><code>Hooks</code>:</strong> <code>PreTraffic</code> і <code>PostTraffic</code> це Lambda-функції для перевірки до і після зміщення трафіку.</li>
 <li><strong><code>Alarms</code>:</strong> якщо alarm спрацював під час розгортання, CodeDeploy <strong>автоматично відкочує</strong>.</li>
 </ul>
 <h2>Шпаргалка: симптом і відповідь</h2>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Симптом</th>
@@ -828,7 +825,7 @@
 <td data-label="Відповідь"><strong>Step Functions</strong>, а не Lambda з Lambda (платите за очікування)</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>Timeout 3 с за замовчуванням, максимум 15 хв. Пам'ять 128 МБ - 10 ГБ, CPU росте з пам'яттю.</li>

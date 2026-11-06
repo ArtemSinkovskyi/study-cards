@@ -13,23 +13,20 @@
   h3 { font-size:1.02rem; }
   blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
   blockquote p { margin:0; }
-  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
-  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
-  td code, th code { white-space:nowrap; }
-  th { background:#fff; }
-  @media (max-width: 640px) {
-    table, thead, tbody, tr, td { display:block; min-width:0; }
-    table { overflow:visible; }
-    thead { display:none; }
-    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
-    td { border:none; padding:.25rem 0; }
-    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
-    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
-    td code, th code { white-space:normal; }
-    table.two td:not(:first-child)::before { display:none; }
-    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
-    table.two tr { margin:.5rem 0; }
-  }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -56,7 +53,7 @@
 <h2>Навіщо це так задумано</h2>
 <p>DynamoDB задумана для стабільної швидкості за будь-якого навантаження, тому шукає лише за ключем і розкладає дані по розділах. Запити проєктують наперед, а не вигадують потім, як в SQL.</p>
 <h2>Крок 1. Основні слова</h2>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Термін</th>
@@ -93,11 +90,11 @@
 <td data-label="Що це">«гарячий» розділ: на нього йде забагато запитів</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>У DynamoDB нема <code>JOIN</code> і довільних <code>WHERE</code>.</p>
 <h2>Крок 2. Ключ: найважливіше рішення</h2>
 <p>Первинний ключ буває двох видів:</p>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Вид</th>
@@ -120,14 +117,14 @@
 <td data-label="Коли">потрібні «всі записи користувача за період»</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>Правило для PK: багато різних значень.</strong> DynamoDB розкладає записи по розділах за значенням PK. Якщо значень мало, усе піде в кілька розділів.</p>
 <ul>
 <li>Добре: <code>PK = userId</code> (мільйони значень, навантаження рівномірне).</li>
 <li>Погано: <code>PK = status</code> («active»/«blocked»): усе в два розділи, виникає hot partition.</li>
 </ul>
 <h2>Крок 3. DynamoDB проти Postgres</h2>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th></th>
@@ -157,9 +154,9 @@
 <td data-label="DynamoDB">за запити або за зарезервовану потужність</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h2>Крок 4. Три способи читати</h2>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Операція</th>
@@ -180,7 +177,7 @@
 <td data-label="Що робить"><strong>усю</strong> таблицю</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Приклад <code>Query</code> для таблиці замовлень (PK <code>userId</code>, SK <code>orderDate</code>): <code>userId = &quot;u42&quot;</code> (обов'язково, лише <code>=</code>) і за бажанням <code>orderDate BETWEEN ...</code>.</p>
 <p><code>Scan</code> доречний лише для разових експортів і маленьких таблиць.</p>
 <h3>Пастка 1: фільтр не економить</h3>
@@ -190,7 +187,7 @@
 <p>З фільтром сторінка може бути навіть порожньою, але з <code>LastEvaluatedKey</code>, бо ліміт 1 МБ рахується <strong>до</strong> фільтра. AWS CLI гортає сторінки сам, а в своєму коді (SDK) про це треба пам'ятати.</p>
 <h2>Крок 5. Консистентність: два режими читання</h2>
 <p>Коли запис отримав відповідь <code>200</code>, він уже надійно збережений. Але копій кілька, і читання може потрапити на копію, яка ще не оновилась.</p>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Режим</th>
@@ -210,7 +207,7 @@
 <td data-label="Ціна">2x</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Обмеження: strongly consistent читання є лише в <strong>таблиці та LSI</strong>. <strong>GSI і DynamoDB Streams завжди eventually consistent.</strong></p>
 <p>Чому не можна «прочитати, потім записати» для ідемпотентності: два повтори майже одночасно можуть обидва прочитати «ще не було» й обидва виконати роботу. Правильно використати <strong>умовний запис</strong> (лекція 12).</p>
 <h2>Крок 6. Рахуємо RCU і WCU (рецепт)</h2>

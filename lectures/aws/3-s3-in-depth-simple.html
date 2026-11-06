@@ -13,23 +13,20 @@
   h3 { font-size:1.02rem; }
   blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
   blockquote p { margin:0; }
-  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
-  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
-  td code, th code { white-space:nowrap; }
-  th { background:#fff; }
-  @media (max-width: 640px) {
-    table, thead, tbody, tr, td { display:block; min-width:0; }
-    table { overflow:visible; }
-    thead { display:none; }
-    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
-    td { border:none; padding:.25rem 0; }
-    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
-    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
-    td code, th code { white-space:normal; }
-    table.two td:not(:first-child)::before { display:none; }
-    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
-    table.two tr { margin:.5rem 0; }
-  }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -55,7 +52,7 @@
 <h2>Навіщо це так задумано</h2>
 <p>S3 задумано як дешеве майже безмежне сховище. Тому є класи зберігання (компроміс між ціною й швидкістю) і lifecycle, що прибирає старе автоматично, щоб ви не платили за забуті файли.</p>
 <h2>Крок 1. Модель даних</h2>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Термін</th>
@@ -88,7 +85,7 @@
 <td data-label="Суть">ідентифікатор версії</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li>Об'єкти <strong>незмінні</strong>: оновлення це запис нового об'єкта з тим самим ключем.</li>
 <li><strong>Метадані</strong> задаються під час завантаження й не змінюються, <strong>теги</strong> можна змінювати.</li>
@@ -97,7 +94,7 @@
 <li>Префікси слугують межами прав і подій. Для LocalStack у тестах потрібен path style.</li>
 </ul>
 <h2>Крок 2. Класи зберігання</h2>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Клас</th>
@@ -156,11 +153,11 @@
 <td data-label="Мін. зберігання">180 днів</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Standard і Standard-IA розкладають дані щонайменше на 3 зони (11 дев'яток довговічності), One Zone-IA лише на одну.</p>
 <h3>Ціни й умови (за сторонніми джерелами, us-east-1)</h3>
 <p>Орієнтовно (us-east-1, за ГБ на місяць). Важливе співвідношення, а не цифри.</p>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Клас</th>
@@ -221,14 +218,14 @@
 <td data-label="Як отримати">спершу <strong>restore</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>Правило ціни:</strong> чим дешевше зберігання, тим дорожче читання, довший мінімальний термін і повільніший доступ.</p>
 <p><strong>Мінімальний термін.</strong> Якщо видалити чи перенести об'єкт раніше, платите за залишок днів (early deletion charge). Об'єкт на 7 днів у Glacier Instant коштує як 90.</p>
 <p><strong>Restore для Flexible і Deep Archive.</strong> <code>GetObject</code> повертає <code>InvalidObjectState</code>. Треба <code>RestoreObject</code> (<code>s3:RestoreObject</code>): S3 створює <strong>тимчасову копію</strong> в Standard на N днів, оригінал лишається в архіві. Швидкості для Flexible: Expedited (хвилини), Standard (години), Bulk (найдешевше, години). Для Deep Archive: Standard (до 12 год), Bulk (до 48 год).</p>
 <p><strong>Як об'єкт потрапляє в клас:</strong> клієнт указує <code>StorageClass</code> у <code>PutObject</code>; lifecycle Transition; Intelligent-Tiering сам. Lifecycle рухає лише «вниз» (Standard → IA → Glacier → Deep Archive), назад не повертає, перехід в IA можливий не раніше ніж через 30 днів після створення.</p>
 <p><strong>Політики:</strong> заборонити писати в дорогий клас: <code>Deny</code> на <code>s3:PutObject</code> з умовою <code>StringEquals</code> на <code>s3:x-amz-storage-class</code>. Дозволити restore: <code>s3:RestoreObject</code>. Керувати lifecycle: <code>s3:PutLifecycleConfiguration</code>.</p>
 <h3>Як вибрати</h3>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Умова в задачі</th>
@@ -261,11 +258,11 @@
 <td data-label="Клас">Deep Archive</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Малі файли (менше 128 КБ) у IA і Glacier Instant коштують як 128 КБ, тож економії нема. Сервіс, який робить <code>GetObject</code> і не вміє чекати restore, впаде на архівному об'єкті.</p>
 <h2>Крок 3. Lifecycle</h2>
 <p>Правила на префікс, тег чи розмір:</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Правило</th>
@@ -290,7 +287,7 @@
 <td data-label="Що робить">прибрати недозавантажені частини (вони коштують грошей, поки лежать)</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Класична пара: <strong>теги плюс lifecycle</strong> (файл із тегом <code>status=temp</code> видаляється через 7 днів, після підтвердження тег знімають). Тому в політиці сервісу потрібні <code>PutObjectTagging</code> і <code>GetObjectTagging</code>.</p>
 <h2>Крок 4. Версіонування</h2>
 <ul>
@@ -300,7 +297,7 @@
 <li>Платите за всі версії.</li>
 </ul>
 <h2>Крок 5. Події</h2>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Куди</th>
@@ -320,7 +317,7 @@
 <td data-label="Коли обирати">багато споживачів, фільтр за будь-якими полями, архів і replay, кілька цілей</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Особливості:</p>
 <ul>
 <li>Події S3 доставляються <strong>принаймні один раз</strong> (можливі дублікати).</li>
@@ -329,7 +326,7 @@
 <li>З Terraform: <code>aws_s3_bucket_notification</code> із <code>eventbridge = true</code> лише вмикає надсилання подій на default-шину; саме правило створює SAM разом із функцією.</li>
 </ul>
 <h2>Крок 6. Завантаження й швидкість</h2>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Механізм</th>
@@ -358,12 +355,12 @@
 <td data-label="Суть">вибірка рядків з CSV, JSON, Parquet на боці S3 (нові клієнти не підключаються)</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Швидкість на префікс: щонайменше <strong>3500</strong> запитів на запис і <strong>5500</strong> на читання в секунду <strong>на префікс</strong>; префіксів може бути скільки завгодно.</p>
 <h2>Крок 7. CORS</h2>
 <p>Потрібен, коли <strong>браузер</strong> ходить у S3 з іншого домену (наприклад, JS завантажує на presigned PUT). Налаштовується на бакеті: <code>AllowedOrigins</code>, <code>AllowedMethods</code>, <code>AllowedHeaders</code>. Якщо запис робить бекенд, CORS не потрібен.</p>
 <h2>Крок 8. Інше для іспиту</h2>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Тема</th>
@@ -396,7 +393,7 @@
 <td data-label="Суть">рідкісні, лише теорія</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h2>Крок 9. Ціни</h2>
 <p>Тарифікується: зберігання (ГБ-місяць), запити (PUT і GET окремо), вихідний трафік в інтернет, опційні функції. <strong>Вхідний трафік у S3 безкоштовний; передавання між S3 і сервісами AWS у тому самому регіоні безкоштовне.</strong></p>
 <h2>Що запам'ятати на іспит</h2>

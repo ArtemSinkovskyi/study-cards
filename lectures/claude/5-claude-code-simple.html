@@ -13,23 +13,20 @@
   h3 { font-size:1.02rem; }
   blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
   blockquote p { margin:0; }
-  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
-  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
-  td code, th code { white-space:nowrap; }
-  th { background:#fff; }
-  @media (max-width: 640px) {
-    table, thead, tbody, tr, td { display:block; min-width:0; }
-    table { overflow:visible; }
-    thead { display:none; }
-    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
-    td { border:none; padding:.25rem 0; }
-    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
-    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
-    td code, th code { white-space:normal; }
-    table.two td:not(:first-child)::before { display:none; }
-    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
-    table.two tr { margin:.5rem 0; }
-  }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -52,7 +49,7 @@
 </blockquote>
 <h2>Головна ідея</h2>
 <p><strong>Одні речі лише радять моделі, інші примусово забороняють.</strong> Іспит постійно питає саме про цю різницю.</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Лише радить</th>
@@ -65,7 +62,7 @@
 <td data-label="Примусово діє">Правила дозволів (deny), hooks з exit 2, managed settings, sandbox</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Для Spring-розробника: CLAUDE.md це як README чи Javadoc (читають, але ніхто не змушений), а <code>deny</code> і hooks як Spring Security чи фільтр (порушити не можна).</p>
 <p>Тому на питання «як <strong>гарантувати</strong> X» відповідь ніколи не «напишіть у CLAUDE.md».</p>
 <h2>Навіщо це так задумано</h2>
@@ -82,7 +79,7 @@
 <p>Усі знайдені файли <strong>додаються разом</strong>, а не перекривають один одного. Файли в підкаталогах вантажаться, коли Claude торкається файлів там.</p>
 <h2>Крок 2. AGENTS.md</h2>
 <p>Загальний формат інструкцій для різних агентів. Правило читання:</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>У репозиторії</th>
@@ -103,7 +100,7 @@
 <td data-label="Claude читає">обидва</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Тому в ai-ops <code>CLAUDE.md</code> просто містить <code>@AGENTS.md</code>.</p>
 <h2>Крок 3. Rules і auto memory</h2>
 <ul>
@@ -115,7 +112,7 @@
 <p>Звідси головне: <strong>allow не може зробити виняток із deny</strong>. Якщо в deny <code>Bash(aws *)</code>, то <code>Bash(aws s3 ls)</code> у allow не допоможе.</p>
 <p>Правила виконує сам Claude Code, а не модель. Промпт чи CLAUDE.md їх не змінюють.</p>
 <h3>Режими</h3>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Режим</th>
@@ -148,7 +145,7 @@
 <td data-label="Що робить">Без запитів, лише для ізольованих середовищ</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>У <code>bypassPermissions</code> правила <strong>deny діють</strong>, а <strong>allow ні</strong>.</p>
 <h3>Правила Bash</h3>
 <ul>
@@ -164,7 +161,7 @@
 </ul>
 <h2>Крок 5. Hooks</h2>
 <p><strong>Hook</strong> це скрипт (чи запит), який Claude Code запускає на певну подію. Найважливіше:</p>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Подія</th>
@@ -199,10 +196,10 @@
 <td data-label="Що можна">Додати контекст</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Для Spring-розробника <code>PreToolUse</code> схожий на <code>HandlerInterceptor.preHandle</code>: може не пропустити виклик далі.</p>
 <h3>Коди виходу</h3>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Код</th>
@@ -223,7 +220,7 @@
 <td data-label="Що відбувається">Не блокує, дія триває</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>2 блокує, 1 ні.</strong></p>
 <h3>Що ще знати</h3>
 <ul>

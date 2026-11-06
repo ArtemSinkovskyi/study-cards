@@ -13,23 +13,20 @@
   h3 { font-size:1.02rem; }
   blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
   blockquote p { margin:0; }
-  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
-  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
-  td code, th code { white-space:nowrap; }
-  th { background:#fff; }
-  @media (max-width: 640px) {
-    table, thead, tbody, tr, td { display:block; min-width:0; }
-    table { overflow:visible; }
-    thead { display:none; }
-    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
-    td { border:none; padding:.25rem 0; }
-    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
-    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
-    td code, th code { white-space:normal; }
-    table.two td:not(:first-child)::before { display:none; }
-    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
-    table.two tr { margin:.5rem 0; }
-  }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -55,7 +52,7 @@
 <h2>Навіщо це так задумано</h2>
 <p>SAM скорочує довгі шаблони CloudFormation: одним блоком описуєте функцію, права й тригер замість десятка ресурсів. Поступовий деплой (canary) потрібен, щоб помилка зачепила 10% користувачів, а не всіх.</p>
 <h2>Крок 1. Словник</h2>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Термін</th>
@@ -112,7 +109,7 @@
 <td data-label="Суть">сервіс поступового перемикання трафіку між версіями Lambda</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h2>Крок 2. Як працює SAM</h2>
 <ul>
 <li><strong>Шаблон</strong> з рядком <code>Transform: AWS::Serverless-2016-10-31</code>. CloudFormation розгортає короткі типи <code>AWS::Serverless::*</code> у звичайні ресурси (<code>AWS::Lambda::Function</code>, <code>AWS::IAM::Role</code>, <code>AWS::Events::Rule</code>, <code>AWS::Lambda::Permission</code>).</li>
@@ -129,7 +126,7 @@
 <li><code>Parameters</code> значення, що передаються під час деплою (<code>--parameter-overrides</code>).</li>
 </ul>
 <h3>Функція</h3>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Поле</th>
@@ -166,7 +163,7 @@
 <td data-label="Зміст">явне ім'я; мінус: CloudFormation не замінить ресурс із фіксованим іменем без зміни імені</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Стандартний <code>sam build</code> не ставить бінарники (як sharp) під іншу архітектуру; <code>sam build --use-container</code> збирає в образі Lambda (для іншої архітектури це емуляція).</p>
 <h3>Змінні середовища</h3>
 <p>Блок <code>Environment.Variables</code>. Значення лапкують, щоб YAML не перетворив їх на числа. Сума обмежена <strong>4 КБ</strong>, секрети сюди не кладуть.</p>
@@ -206,7 +203,7 @@ DeadLetterQueue:
 <p><strong>1. Edge-optimized API Gateway.</strong> REST API (<code>AWS::Serverless::Api</code>) за замовчуванням має тип кінцевої точки <strong>EDGE</strong>: запити йдуть на найближчу точку CloudFront, керовану сервісом (її нема в вашій консолі CloudFront). Значення <code>EndpointConfiguration.Type</code>: <code>EDGE</code>, <code>REGIONAL</code>, <code>PRIVATE</code>. Для розкиданих клієнтів документація радить <code>REGIONAL</code> разом із <strong>власним</strong> CloudFront. Ознака EDGE: заголовки <code>Via ... CloudFront</code> і <code>X-Amz-Cf-Id</code>. HTTP API окремого edge-режиму не має, лише Regional.</p>
 <p><strong>2. Власний розподіл.</strong> <code>AWS::CloudFront::Distribution</code> пишуть поруч зі SAM-ресурсами. Origin це Regional API або S3 (приватний бакет з <strong>OAC</strong>). Сертифікат ACM для CloudFront мусить бути в <strong>us-east-1</strong>.</p>
 <p><strong>3. Lambda@Edge</strong> (функція на краю):</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th></th>
@@ -251,10 +248,10 @@ DeadLetterQueue:
 <td data-label="Lambda@Edge">1000 на регіон, спільна з усіма Lambda</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>У SAM з <code>AutoPublishAlias</code> доступний атрибут <code>!Ref MyFunction.Version</code> (ARN версії), його підставляють в асоціацію CloudFront. Роль функції має довіряти і <code>lambda.amazonaws.com</code>, і <code>edgelambda.amazonaws.com</code>. Через us-east-1 функцію зазвичай виносять в окремий стек.</p>
 <p><strong>4. CloudFront Functions:</strong></p>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th></th>
@@ -294,7 +291,7 @@ DeadLetterQueue:
 <td data-label="Lambda@Edge">дорожче</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Мнемоніка: <strong>легка, масова, дешева</strong> обробка на краю: CloudFront Functions. <strong>Важча або з мережею:</strong> Lambda@Edge.</p>
 <h2>Крок 5. Перевірка без деплою</h2>
 <ul>
@@ -314,7 +311,7 @@ DeadLetterQueue:
 <li>Порядок: спершу платформа (прапорець EventBridge на бакеті), потім стек.</li>
 </ul>
 <h2>Крок 7. CI/CD: GitHub Actions і OIDC</h2>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Файл</th>
@@ -337,7 +334,7 @@ DeadLetterQueue:
 <td data-label="Що робить">тести, <code>package</code>, <code>sam deploy</code></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Розділення навмисне: код із PR не торкається акаунта. <code>sam validate --lint</code> працює офлайн. Параметр <code>dry_run</code> додає <code>--no-execute-changeset</code>.</p>
 <p><strong>Як workflow потрапляє в AWS без ключів:</strong></p>
 <ol>
@@ -348,7 +345,7 @@ DeadLetterQueue:
 </ol>
 <p><strong>Trust policy</strong> пускає лише <code>aud = sts.amazonaws.com</code> і <code>sub = repo:&lt;організація&gt;/&lt;репозиторій&gt;:ref:refs/heads/main</code>. <strong>Без умови на <code>sub</code> будь-який репозиторій GitHub міг би отримати цю роль</strong> (класична помилка).</p>
 <p><strong>Права ролі CI</strong> (найменші привілеї; CloudFormation діє від імені користувача, тому потрібні права і на стек, і на кожен створюваний ресурс):</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Блок</th>
@@ -385,7 +382,7 @@ DeadLetterQueue:
 <td data-label="Чому потрібен">DLQ, лог-група, alarm, правило</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong><code>iam:PassRole</code>:</strong> щоб передати роль сервісу (Lambda, CodeDeploy), потрібен <code>iam:PassRole</code> на цю роль. Звужуйте до конкретних ролей: <code>Resource: &quot;*&quot;</code> дозволяє передати навіть адмінську роль, це шлях до ескалації привілеїв. Більшість дій CodeDeploy не підтримує зручне обмеження за ресурсом, тому там <code>&quot;Resource&quot;: &quot;*&quot;</code>.</p>
 <p><strong>Що створити в AWS перед першим запуском:</strong> IAM OIDC-провайдер <code>token.actions.githubusercontent.com</code> (audience <code>sts.amazonaws.com</code>), роль CI з trust і permission policy, бакет артефактів, змінні репозиторію (ARN ролі, бакет).</p>
 <p><strong>Що відбувається на сервері під час деплою:</strong></p>
@@ -404,7 +401,7 @@ DeadLetterQueue:
 <li><code>Destinations</code> порожній, якщо помилки ловить DLQ.</li>
 </ul>
 <h2>Крок 9. Execution role проти resource-based policy</h2>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th></th>
@@ -429,7 +426,7 @@ DeadLetterQueue:
 <td data-label="Resource-based policy"><code>Events:</code> (тип <code>EventBridgeRule</code>)</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Типова роль має три політики: <code>AWSLambdaBasicExecutionRole</code> (керована AWS, логи), вбудована з ваших <code>Policies:</code>, вбудована <code>DeadLetterQueuePolicy</code> (<code>sqs:SendMessage</code> на DLQ), яку SAM додав сам.</p>
 <h2>Що запам'ятати на іспит</h2>
 <ol>

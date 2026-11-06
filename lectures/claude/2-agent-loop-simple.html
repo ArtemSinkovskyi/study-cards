@@ -13,23 +13,20 @@
   h3 { font-size:1.02rem; }
   blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
   blockquote p { margin:0; }
-  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
-  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
-  td code, th code { white-space:nowrap; }
-  th { background:#fff; }
-  @media (max-width: 640px) {
-    table, thead, tbody, tr, td { display:block; min-width:0; }
-    table { overflow:visible; }
-    thead { display:none; }
-    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
-    td { border:none; padding:.25rem 0; }
-    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
-    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
-    td code, th code { white-space:normal; }
-    table.two td:not(:first-child)::before { display:none; }
-    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
-    table.two tr { margin:.5rem 0; }
-  }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -61,7 +58,7 @@
 <p>Модель не бачить вашого коду, лише цей опис. Тому <strong>чим краще описано, тим точніше вона викликає</strong>. Це як OpenAPI-контракт: клієнт знає лише його.</p>
 <h2>Крок 2. Один круг розмови</h2>
 <p>Питання користувача: «Яка погода в Києві?»</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Хто</th>
@@ -90,12 +87,12 @@
 <td data-label="Що відбувається">Пише користувачу: «У Києві +15, хмарно»</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Модель сказала, що хоче, <strong>але не виконала</strong>. Виконали ви.</p>
 <p>У <code>tool_use</code> є <code>id</code>, а в <code>tool_result</code> ви вказуєте той самий <code>tool_use_id</code>, щоб модель знала, на який запит це відповідь.</p>
 <h2>Крок 3. Як знати, що робити далі: stop_reason</h2>
 <p>Кожна відповідь моделі має поле <code>stop_reason</code>, схоже на статус результату.</p>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Значення</th>
@@ -125,7 +122,7 @@
 <td data-label="Що робите">Дивіться <code>stop_details</code></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Цикл у вигляді Java:</p>
 <pre><code class="language-java">Response response = client.send(messages);
 while (&quot;tool_use&quot;.equals(response.stopReason())) {
@@ -142,7 +139,7 @@ show(response);
 <p><strong>Правило 2. Інструмент упав.</strong> Не мовчіть і не падайте. Поверніть <code>tool_result</code> з <code>is_error: true</code> і зрозумілим текстом, наприклад: «Сервіс недоступний, повтори за 60 секунд». Тоді модель може спробувати інакше.</p>
 <p><strong>Правило 3. Ліміт кругів.</strong> Документація не обмежує кількість кругів. Якщо модель постійно просить інструменти, ваш <code>while</code> крутитиметься вічно. Поставте <strong>свій ліміт</strong>, наприклад 10. Це те саме, що <code>maxAttempts</code> у retry.</p>
 <h2>Крок 5. Хто виконує інструмент</h2>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Вид</th>
@@ -167,7 +164,7 @@ show(response);
 <td data-label="Приклади"><code>web_search</code>, <code>web_fetch</code>, <code>code_execution</code></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Для серверних ви лише вмикаєте інструмент, а результат приходить уже в готовій відповіді.</p>
 <h2>Крок 6. Дві рідкісні речі</h2>
 <ul>

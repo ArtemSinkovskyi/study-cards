@@ -13,23 +13,20 @@
   h3 { font-size:1.02rem; }
   blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
   blockquote p { margin:0; }
-  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
-  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
-  td code, th code { white-space:nowrap; }
-  th { background:#fff; }
-  @media (max-width: 640px) {
-    table, thead, tbody, tr, td { display:block; min-width:0; }
-    table { overflow:visible; }
-    thead { display:none; }
-    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
-    td { border:none; padding:.25rem 0; }
-    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
-    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
-    td code, th code { white-space:normal; }
-    table.two td:not(:first-child)::before { display:none; }
-    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
-    table.two tr { margin:.5rem 0; }
-  }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -56,7 +53,7 @@
 <p>Не кожне завдання потребує максимуму зусиль, тому effort і бюджети дають платити лише за потрібну глибину, а sandbox і hooks страхують від небезпечних дій.</p>
 <h2>Частина 1. Effort</h2>
 <p><strong>Effort</strong> це параметр <code>output_config.effort</code>: скільки зусиль вкладає модель. Він діє на <strong>всі токени</strong>: текст, виклики інструментів і роздуми.</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Рівень</th>
@@ -85,7 +82,7 @@
 <td data-label="Коли">Найглибше мислення без обмежень</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Що знати:</p>
 <ul>
 <li>За замовчуванням <code>high</code>, а на <strong>Opus 5.5 і Haiku 5.5 <code>medium</code></strong>.</li>
@@ -95,7 +92,7 @@
 <li>Щоб думати менше, спершу <strong>знижуйте effort</strong>, а не просіть у промпті.</li>
 </ul>
 <h3>Зміна effort у розмові</h3>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Спосіб</th>
@@ -112,7 +109,7 @@
 <td data-label="Що з кешем"><strong>Зберігає кеш</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Тому в розмові з кешем тримайте верхній effort сталим або використовуйте per-message effort.</p>
 <h2>Частина 2. Task budget (бюджет завдання)</h2>
 <p><strong>Task budget</strong> це дорадчий бюджет токенів на <strong>весь цикл</strong> агента (багато запитів). Модель бачить зворотний відлік і сама планує роботу, щоб закінчити акуратно.</p>
@@ -129,7 +126,7 @@
 <h2>Частина 3. Збережені роздуми (Claude 5.1+)</h2>
 <p>Коли ви повертаєте блок <code>thinking</code>, API перевіряє його підпис: <strong>чи може модель його прочитати і чи все перед ним лишилось незмінним</strong>.</p>
 <p>Правило: працюйте <strong>append-only</strong>, тобто лише додавайте повідомлення в кінець.</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Дозволено</th>
@@ -154,7 +151,7 @@
 <td data-label="Ламає блоки">Скоротити раніший <code>tool_result</code></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Що робити замість правок: зміни <code>system</code> через повідомлення <code>role: &quot;system&quot;</code> в кінці, зміни інструментів через блоки <code>tool_addition</code> і <code>tool_removal</code>, зміну effort через per-message effort.</p>
 <p>Режим невідповідності (<code>thinking.block_binding.prefix_mismatch_behavior</code>):</p>
 <ul>
@@ -180,7 +177,7 @@
 <li>Змінні середовища (з секретами) успадковуються.</li>
 </ul>
 <p>Два режими sandbox:</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Режим</th>
@@ -197,7 +194,7 @@
 <td data-label="Що">Кожна команда за звичайним потоком дозволів</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Як вимкнути команду з sandbox: <code>excludedCommands</code> (виконується <strong>без обмежень</strong>, ризиковано) і повторна спроба <code>dangerouslyDisableSandbox</code> (вимикається <code>allowUnsandboxedCommands: false</code>).</p>
 <p>Для організацій: у managed settings <code>sandbox.enabled</code>, <code>failIfUnavailable: true</code>, <code>allowUnsandboxedCommands: false</code>.</p>
 <p><strong>Sandbox і дозволи доповнюють одне одного.</strong> Правила перевіряють виклик до виконання, а sandbox тримається навіть тоді, коли дозволена команда робить більше, ніж натякає ім'я.</p>

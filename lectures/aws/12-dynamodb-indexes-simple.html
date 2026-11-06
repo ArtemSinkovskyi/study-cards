@@ -13,23 +13,20 @@
   h3 { font-size:1.02rem; }
   blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
   blockquote p { margin:0; }
-  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
-  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
-  td code, th code { white-space:nowrap; }
-  th { background:#fff; }
-  @media (max-width: 640px) {
-    table, thead, tbody, tr, td { display:block; min-width:0; }
-    table { overflow:visible; }
-    thead { display:none; }
-    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
-    td { border:none; padding:.25rem 0; }
-    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
-    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
-    td code, th code { white-space:normal; }
-    table.two td:not(:first-child)::before { display:none; }
-    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
-    table.two tr { margin:.5rem 0; }
-  }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -56,7 +53,7 @@
 <p>Індекси потрібні, щоб шукати не лише за основним ключем і не сканувати всю таблицю. Ідемпотентність потрібна, бо повтор запиту не має списати гроші двічі.</p>
 <h2>Крок 1. Індекси: шукати не за ключем</h2>
 <p>Нехай таблиця <code>Uploads</code> має PK <code>userId</code> і SK <code>uploadedAt</code>. Новий запит: «усі завантаження зі статусом FAILED». Статус не в ключі, лишається Scan. Рішення: індекс, тобто копія даних, яку DynamoDB сам тримає впорядкованою інакше.</p>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th></th>
@@ -96,10 +93,10 @@
 <td data-label="LSI (локальний)">колекція одного PK до 10 ГБ</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Як запам'ятати: GSI глобальний, бо шукає по всій таблиці за новим PK. LSI локальний, бо шукає всередині одного PK.</p>
 <h3>Проекція: що копіювати в індекс</h3>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Тип</th>
@@ -124,7 +121,7 @@
 <td data-label="Коли">потрібні майже всі поля, зберігання до подвоєння</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Запит до GSI <strong>не може</strong> дотягнутись до полів таблиці, яких нема в індексі.</p>
 <h3>Sparse index</h3>
 <p>GSI містить лише записи, де є його ключове поле. Якщо поле <code>failedAt</code> писати тільки в зламані записи, індекс за ним містить лише їх. Дешевий спосіб знаходити рідкісне.</p>
@@ -132,7 +129,7 @@
 <p>Якщо в GSI бракує write-потужності, <strong>тротлиться запис у саму таблицю</strong>, а не лише в індекс. Тому write capacity GSI має бути не меншою за таблицю. Питання «запис у таблицю тротлиться, хоча RCU/WCU таблиці вистачає» означає перевірити GSI.</p>
 <p>Ще факти про GSI: <code>GetItem</code> до нього не працює (лише <code>Query</code> і <code>Scan</code>), значення його ключів можуть повторюватись, нове: ключі з кількох атрибутів, до 4 у PK і до 4 у SK.</p>
 <h2>Крок 2. Як обрати ключ</h2>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Дані</th>
@@ -157,7 +154,7 @@
 <td data-label="Хороший PK"><code>userId</code>, GSI за <code>gameTitle</code> + <code>score</code></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Якщо значень замало, додають випадковий суфікс (<code>2026-11-02#7</code>), щоб розкидати записи по розділах. Це <strong>write sharding</strong>.</p>
 <h2>Крок 3. Умовний запис</h2>
 <p><code>PutItem</code> за замовчуванням <strong>перезаписує</strong> наявний запис. Щоб цього не було, додайте умову, наприклад <code>attribute_not_exists(id)</code>.</p>
@@ -167,7 +164,7 @@
 <h3>Атомарний лічильник</h3>
 <p><code>SET views = views + :one</code> не потребує читання.</p>
 <h2>Крок 6. Транзакції й пакети</h2>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Операція</th>
@@ -192,7 +189,7 @@
 <td data-label="Гарантія"><strong>все або нічого</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Транзакція коштує вдвічі більше одиниць, ніж звичайний запис чи читання: DynamoDB робить дві операції на кожен запис (підготовка й підтвердження). Переказ між двома рахунками це транзакція. Завантаження 10 000 рядків це batch.</p>
 <h2>Крок 7. TTL: дані зникають самі</h2>
 <p>TTL видаляє записи автоматично й безкоштовно. Правила:</p>
@@ -205,7 +202,7 @@
 </ul>
 <p>Пастка: час у мілісекундах (як <code>Date.now()</code>) дає дату в далекому майбутньому, і запис ніколи не видалиться. Правильно <code>Math.floor(Date.now() / 1000) + 86400</code>.</p>
 <h2>Крок 8. On-demand проти provisioned</h2>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th></th>
@@ -235,11 +232,11 @@
 <td data-label="Provisioned">при перевищенні</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Помилка тротлінгу: <code>ProvisionedThroughputExceededException</code>. SDK повторює сам з <strong>exponential backoff</strong>. Якщо тротлить лише один ключ при вільній потужності таблиці, це hot partition: змініть ключ або додайте DAX. На один розділ діє ліміт 3 000 RCU і 1 000 WCU <em>(не звірено)</em>.</p>
 <h2>Крок 9. Streams</h2>
 <p><strong>DynamoDB Streams</strong> це журнал змін таблиці, зберігається <strong>24 години</strong>. Lambda читає його через event source mapping.</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th><code>StreamViewType</code></th>
@@ -264,7 +261,7 @@
 <td data-label="Що в записі">обидва</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Для зберігання до <strong>365 днів</strong> є Kinesis Data Streams for DynamoDB, але там нема гарантій порядку й дедуплікації. Читання зі стріму завжди eventually consistent. Одночасно з одного шарда читають до двох процесів.</p>
 <h2>Крок 10. Інше коротко</h2>
 <ul>

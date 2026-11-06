@@ -13,23 +13,20 @@
   h3 { font-size:1.02rem; }
   blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
   blockquote p { margin:0; }
-  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
-  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
-  td code, th code { white-space:nowrap; }
-  th { background:#fff; }
-  @media (max-width: 640px) {
-    table, thead, tbody, tr, td { display:block; min-width:0; }
-    table { overflow:visible; }
-    thead { display:none; }
-    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
-    td { border:none; padding:.25rem 0; }
-    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
-    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
-    td code, th code { white-space:normal; }
-    table.two td:not(:first-child)::before { display:none; }
-    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
-    table.two tr { margin:.5rem 0; }
-  }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -56,7 +53,7 @@
 <h2>Навіщо це так задумано</h2>
 <p>Черга потрібна, щоб відправник і отримувач не залежали від швидкості одне одного: повідомлення лежить, поки його не заберуть. SNS розсилає одне повідомлення багатьом, щоб відправник не мусив знати всіх отримувачів.</p>
 <h2>Крок 1. Словник</h2>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Термін</th>
@@ -89,9 +86,9 @@
 <td data-label="Суть">Lambda сама опитує джерело й викликає функцію пачками</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h2>Крок 2. Параметри черги SQS</h2>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Параметр</th>
@@ -128,10 +125,10 @@
 <td data-label="Значення">SSE-SQS (ключем керує SQS) або SSE-KMS</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Повідомлення SQS записується в кілька зон доступності регіону ще до того, як <code>SendMessage</code> підтвердить відправку. Черга існує в одному регіоні, між регіонами не реплікується.</p>
 <h2>Крок 3. Standard чи FIFO</h2>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th></th>
@@ -161,7 +158,7 @@
 <td data-label="FIFO">300 TPS на дію без батчингу, 3000 повідомлень/с з батчингом (по 10); high throughput підіймає ліміти залежно від регіону <em>(для eu-north-1 типові 2 400 / 24 000)</em></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <ul>
 <li><strong><code>MessageGroupId</code></strong> лінія порядку: повідомлення однієї групи йдуть по одному, різні групи паралельно. Обов'язковий для кожної відправки у FIFO. Схожий на <strong>ключ</strong> повідомлення Kafka, а не на <code>group.id</code> консьюмера.</li>
 <li><strong><code>MessageDeduplicationId</code></strong> токен унікальності: те саме значення за 5 хв приймається, але вдруге не доставляється. Альтернатива: <code>ContentBasedDeduplication</code> (SHA-256 від тіла повідомлення, але не від атрибутів).</li>
@@ -188,7 +185,7 @@
 <li>базові ціни приблизно 0,40 USD (Standard) і 0,50 USD (FIFO) за мільйон запитів (за сторонніми джерелами; офіційна сторінка цін таблицю не віддала).</li>
 </ul>
 <h2>Крок 5. Де які DLQ</h2>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Де</th>
@@ -218,7 +215,7 @@
 <td data-label="Хто повторює">EventBridge: 24 год і до 185 спроб</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>Ключове правило:</strong> для Lambda з тригером SQS DLQ ставлять <strong>на самій черзі</strong>, а не на функції.</p>
 <p>Додатково:</p>
 <ul>
@@ -233,7 +230,7 @@
 </ul>
 <h2>Крок 6. Lambda ↔ SQS</h2>
 <p>Lambda опитує чергу через <strong>event source mapping</strong> і викликає функцію <strong>синхронно</strong>, пачкою. Лямбда й черга в одному регіоні, але можуть бути в різних акаунтах.</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Параметр</th>
@@ -258,7 +255,7 @@
 <td data-label="Значення">поки не перевищено 6 МБ payload</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>Помилки.</strong> Функція кинула помилку: <strong>вся пачка</strong> знову видима після visibility timeout, навіть успішні записи. Тому код ідемпотентний. Щоб повертати лише невдалі, вмикають <strong>partial batch response</strong>: <code>FunctionResponseTypes = ReportBatchItemFailures</code>, і функція повертає <code>{ &quot;batchItemFailures&quot;: [ { &quot;itemIdentifier&quot;: &quot;id2&quot; } ] }</code>.</p>
 <ul>
 <li>Порожній чи null список означає повний успіх.</li>
@@ -276,7 +273,7 @@
 <p><strong>Масштабування.</strong> Типовий режим: старт з 5 паралельних викликів, далі до 300 на хвилину, максимум 1250. <strong>Provisioned mode</strong> (платний): мінімум і максимум pollers, швидше (до 1000 викликів на хвилину), до 100 000 паралельних. З ним не можна <code>Maximum concurrency</code>. Якщо є reserved concurrency, ставити не менше 5.</p>
 <p>Повідомлення Standard, отримане 3 і більше разів без видалення, SQS переносить у кінець черги.</p>
 <h2>Крок 7. SNS: топіки</h2>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th></th>
@@ -311,13 +308,13 @@
 <td data-label="FIFO">лише через чергу з тригером на лямбду</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>FIFO-топік не доставляє на email, SMS, mobile, HTTP(S). З filter policy FIFO дає at-most-once. Дедуплікація: кожна публікація має deduplication ID або на топіку content-based (хеш лише <strong>тіла</strong>). <code>FifoThroughputScope</code>: <code>Topic</code> чи <code>MessageGroup</code>.</p>
 <p><strong>Протоколи Standard:</strong> HTTP/HTTPS, Email/Email-JSON, Firehose, SQS, Lambda, Platform application endpoint (mobile push), SMS.</p>
 <p><strong>Підтвердження</strong> потрібне для HTTP(S), email і ресурсів в іншому акаунті. Email-підписка спершу в <code>PendingConfirmation</code> і не працює, доки не натиснути посилання. Якщо власник SQS-черги сам створює підписку, вона підтверджується автоматично.</p>
 <p><strong>Розмір повідомлення SNS:</strong> 256 КіБ, до 1 МіБ через <code>MaximumMessageSize</code>; кожні 64 КБ це окремий запит.</p>
 <p><strong>Повтори доставки SNS:</strong></p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Помилка</th>
@@ -342,7 +339,7 @@
 <td data-label="Що робить SNS">50 повторів за 6 год</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Alarm CloudWatch не може публікувати в топік, зашифрований ключем <code>alias/aws/sns</code>.</p>
 <p><strong>Ціни SNS</strong> (за сторонніми джерелами): перші 1000 email безкоштовно, email 2 USD за 100 000, запити 0,50 USD за мільйон.</p>
 <h3>Raw message delivery</h3>
@@ -363,7 +360,7 @@
 <p>Приклад: <code>{&quot;eventType&quot;: [&quot;image.uploaded&quot;], &quot;sizeBytes&quot;: [{&quot;numeric&quot;: [&quot;&gt;&quot;, 1048576]}], &quot;path&quot;: [{&quot;anything-but&quot;: {&quot;prefix&quot;: &quot;_test/&quot;}}]}</code>.</p>
 <p><strong>Оператори:</strong> точний збіг, <code>anything-but</code>, <code>prefix</code>, <code>suffix</code>, <code>equals-ignore-case</code>, діапазони чисел, IP (CIDR), <code>exists</code>, <code>$or</code>, wildcard.</p>
 <p><strong>Ліміти:</strong></p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Що</th>
@@ -400,7 +397,7 @@
 <td data-label="Ліміт"><strong>до 15 хв</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Рахунок комбінацій: масиви з 3, 1 і 2 значень дають 3 × 1 × 2 = 6.</p>
 <p>SNS проти EventBridge <em>(не звірено)</em>: синтаксис шаблонів схожий; EventBridge фільтрує в правилі, SNS у кожній підписці; EventBridge має більше цілей, архів і replay, SNS більшу пропускну здатність і push на мобільні та SMS.</p>
 <h2>Крок 9. Права для SNS → SQS</h2>

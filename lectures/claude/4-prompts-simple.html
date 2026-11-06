@@ -13,23 +13,20 @@
   h3 { font-size:1.02rem; }
   blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
   blockquote p { margin:0; }
-  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
-  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
-  td code, th code { white-space:nowrap; }
-  th { background:#fff; }
-  @media (max-width: 640px) {
-    table, thead, tbody, tr, td { display:block; min-width:0; }
-    table { overflow:visible; }
-    thead { display:none; }
-    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
-    td { border:none; padding:.25rem 0; }
-    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
-    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
-    td code, th code { white-space:normal; }
-    table.two td:not(:first-child)::before { display:none; }
-    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
-    table.two tr { margin:.5rem 0; }
-  }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -79,7 +76,7 @@
 <p>Кілька документів: <code>&lt;documents&gt;</code>, у кожному <code>&lt;document index=&quot;n&quot;&gt;</code> із <code>&lt;source&gt;</code> і <code>&lt;document_content&gt;</code>.</p>
 <h2>Крок 4. Формат відповіді</h2>
 <p>Кажіть, що <strong>робити</strong>, а не чого не робити.</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Замість</th>
@@ -92,11 +89,11 @@
 <td data-label="Пишіть">«Відповідь складається з плавних абзаців прози»</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Також стиль самого промпта впливає на відповідь: приберіть markdown із промпта, і в відповіді його стане менше.</p>
 <h2>Крок 5. Prefill більше не працює</h2>
 <p><strong>Prefill</strong> це коли ви самі пишете початок відповіді асистента, щоб модель продовжила. Починаючи з <strong>Claude 4.6</strong>, це дає <strong>400</strong>.</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Для чого був prefill</th>
@@ -117,7 +114,7 @@
 <td data-label="Чим замінити">Перенести у user: «Твоя відповідь обірвалась на …, продовж»</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <h2>Крок 6. Промпти для інструментів</h2>
 <ul>
 <li>Нові моделі виконують інструкції буквально. «Чи можеш запропонувати зміни» дасть лише пропозиції. Для дії пишіть: «Зміни цю функцію».</li>
@@ -142,7 +139,7 @@
 <li><strong>Обсяг важливіший за якість:</strong> багато автоматично оцінених питань краще за мало ручних.</li>
 </ol>
 <p>Два види оцінювання:</p>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Вид</th>
@@ -162,7 +159,7 @@
 <td data-label="Приклади">Шкала 1-5, так/ні</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Правило: оцінюйте <strong>іншою моделлю</strong>, ніж та, що генерувала відповідь.</p>
 <h2>Що запам'ятати на іспит</h2>
 <ol>

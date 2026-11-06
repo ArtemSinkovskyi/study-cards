@@ -13,23 +13,20 @@
   h3 { font-size:1.02rem; }
   blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
   blockquote p { margin:0; }
-  table { display:block; overflow-x:auto; border-collapse:collapse; margin:1rem 0; font-size:.92rem; }
-  th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
-  td code, th code { white-space:nowrap; }
-  th { background:#fff; }
-  @media (max-width: 640px) {
-    table, thead, tbody, tr, td { display:block; min-width:0; }
-    table { overflow:visible; }
-    thead { display:none; }
-    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
-    td { border:none; padding:.25rem 0; }
-    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
-    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
-    td code, th code { white-space:normal; }
-    table.two td:not(:first-child)::before { display:none; }
-    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
-    table.two tr { margin:.5rem 0; }
-  }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -56,7 +53,7 @@
 <p>Це дрібниці, які на іспиті трапляються поруч: формати даних, способи деплою, мережа. Різні сервіси передають дані по-різному, тому їх варто знати.</p>
 <h2>Крок 1. Серіалізація (навичка 1.1.7)</h2>
 <p>Сервіси AWS обмінюються текстом і байтами, тому дані треба перетворювати при вході й виході.</p>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Де</th>
@@ -106,12 +103,12 @@
 <td data-label="Пастка"><code>transformToByteArray()</code> чи <code>transformToString()</code></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>DynamoDB у коді.</strong> Щоб не писати типи вручну, беруть <strong>Document Client</strong> (<code>DynamoDBDocumentClient</code>) або <code>marshall</code> / <code>unmarshall</code> <em>(не звірено)</em>.</p>
 <p>Бінарні дані в JSON передають через <strong>base64</strong> (+33% розміру), тому файли не ганяють через API.</p>
 <h2>Крок 2. Elastic Beanstalk</h2>
 <p><strong>PaaS:</strong> завантажили код і отримали балансувальник, Auto Scaling і моніторинг. Зараз два варіанти: Beanstalk Standard і Beanstalk Cluster (на EKS).</p>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Політика</th>
@@ -165,7 +162,7 @@
 <td data-label="Час">найдовше</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Як обирати за формулюванням:</p>
 <ul>
 <li>«Найшвидше, простій прийнятний»: All at once.</li>
@@ -177,7 +174,7 @@
 <p>Конфігурація в репозиторії: каталог <code>.ebextensions</code>.</p>
 <h2>Крок 3. EC2 і Auto Scaling (навичка 4.3.1)</h2>
 <p><strong>Auto Scaling group (ASG)</strong> це група інстансів, якою керують разом. Може охоплювати кілька AZ, але не регіони.</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Політика</th>
@@ -202,11 +199,11 @@
 <td data-label="Як">прогнозує навантаження заздалегідь</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>ASG замінює інстанс, що не пройшов EC2 чи ELB health check.</p>
 <p><strong>Instance metadata:</strong> застосунок на EC2 отримує роль через IMDSv2 (<code>169.254.169.254</code>, спершу PUT-запит за токеном). Роль EC2 завжди краща за ключі.</p>
 <h2>Крок 4. Конкурентність (навичка 4.3.1)</h2>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Поняття</th>
@@ -231,12 +228,12 @@
 <td data-label="Суть">HTTP-з'єднання перевикористовуються, менша затримка</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Головна ідея: кількість паралельних викликів має відповідати можливостям того, що позаду. 1000 Lambda × 1 з'єднання = 1000 з'єднань з RDS.</p>
 <h2>Крок 5. Бази даних</h2>
 <p><strong>RDS Proxy:</strong> керований проксі; <strong>пул з'єднань</strong>; Lambda входить через IAM-роль, облікові дані в Secrets Manager; перемикання до 66% швидше; код майже не змінюється, лише endpoint. Підтримує Aurora, RDS для PostgreSQL, MySQL, MariaDB, SQL Server.</p>
 <p><strong>RDS чи Aurora</strong> <em>(не звірено)</em>:</p>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th></th>
@@ -266,11 +263,11 @@
 <td data-label="Aurora">Aurora Serverless v2</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p>Розрізняйте: <strong>Multi-AZ</strong> це доступність (резерв для перемикання). <strong>Read replica</strong> це масштабування читань, асинхронна.</p>
 <p><strong>OpenSearch:</strong> пошук по сайту, логи, моніторинг у реальному часі; дані надходять через Firehose; zero-ETL із DynamoDB робить таблицю доступною для пошуку за секунди. «Повнотекстовий пошук по DynamoDB» означає OpenSearch.</p>
 <h2>Крок 6. Сховище: EBS, EFS, S3</h2>
-<table>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th></th>
@@ -299,11 +296,11 @@
 <td data-label="S3">файли застосунку</td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><em>(не звірено)</em></p>
 <h2>Крок 7. Мережа: мінімум для розробника</h2>
 <p>Проєктування мереж Exam Guide виключає, але використання лишається (1.2.1, 2.3.2).</p>
-<table class="two">
+<div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Потреба</th>
@@ -340,7 +337,7 @@
 <td data-label="Сервіс"><strong>WAF</strong></td>
 </tr>
 </tbody>
-</table>
+</table></div>
 <p><strong>WAF:</strong> на CloudFront, ALB, API Gateway, AppSync. Правила в <strong>web ACL</strong>. <strong>Rate-based rule</strong> обмежує запити з одного IP за 5 хв.</p>
 <p><strong>Shield</strong> офіційно <strong>поза межами</strong> іспиту.</p>
 <p>Lambda у VPC не має виходу в інтернет без NAT Gateway.</p>
