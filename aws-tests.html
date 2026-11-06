@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тести: AWS Developer Associate (DVA-C03)</title>
+<style>
+  :root { --bg:#f7f5f0; --card:#fff; --ink:#1d1d1f; --mut:#6b6b70; --line:#e3dfd6; --acc:#24466b; --ok:#1e7a46; --okbg:#e6f4ec; --bad:#b3261e; --badbg:#fbeae8; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui, Segoe UI, Roboto, sans-serif; }
+  header { position:sticky; top:0; z-index:5; background:var(--card); border-bottom:1px solid var(--line); padding:.75rem 1rem; }
+  .wrap { max-width:52rem; margin:0 auto; }
+  .tabs { display:flex; gap:.5rem; flex-wrap:wrap; }
+  .tab { border:1px solid var(--line); background:var(--bg); padding:.45rem .8rem; border-radius:.5rem; cursor:pointer; font:inherit; text-align:left; }
+  .tab.on { background:var(--acc); color:#fff; border-color:var(--acc); }
+  .tab small { display:block; opacity:.8; font-size:.78rem; }
+  .bar { height:.4rem; background:var(--line); border-radius:1rem; margin-top:.7rem; overflow:hidden; }
+  .bar i { display:block; height:100%; background:var(--acc); width:0; transition:width .2s; }
+  .status { display:flex; justify-content:space-between; gap:1rem; margin-top:.4rem; font-size:.85rem; color:var(--mut); flex-wrap:wrap; }
+  main { padding:1rem; }
+  .intro { color:var(--mut); font-size:.9rem; margin:.2rem 0 .6rem; }
+  .mode { display:flex; align-items:center; gap:.5rem; margin:0 0 1rem; font-size:.92rem; cursor:pointer; }
+  .q { background:var(--card); border:1px solid var(--line); border-radius:.7rem; padding:1rem; margin-bottom:.9rem; }
+  .q h3 { margin:0 0 .6rem; font-size:1rem; font-weight:600; }
+  .num { color:var(--acc); margin-right:.3rem; }
+  .opt { display:block; padding:.55rem .7rem; border:1px solid var(--line); border-radius:.5rem; margin-top:.4rem; cursor:pointer; }
+  .opt .row { display:flex; gap:.6rem; align-items:flex-start; }
+  .opt:hover { border-color:var(--acc); }
+  .opt input { margin-top:.28rem; }
+  .opt.sel { border-color:var(--acc); background:#eef3f9; }
+  .locked .opt { cursor:default; }
+  .opt.good { border-color:var(--ok); background:var(--okbg); }
+  .opt.wrong { border-color:var(--bad); background:var(--badbg); }
+  .opt .ex { margin:.35rem 0 0 1.6rem; font-size:.88rem; color:var(--mut); }
+  .opt .ex b { color:var(--ink); }
+  .opt.good .ex b { color:var(--ok); }
+  .opt.wrong .ex b { color:var(--bad); }
+  .why { margin-top:.7rem; font-size:.9rem; color:var(--mut); padding:.5rem .7rem; border-left:.25rem solid var(--line); }
+  .why b { color:var(--ink); }
+  .actions { display:flex; gap:.6rem; flex-wrap:wrap; margin:1rem 0 2rem; }
+  button.btn { border:0; background:var(--acc); color:#fff; padding:.65rem 1.1rem; border-radius:.5rem; font:inherit; cursor:pointer; }
+  button.btn.sec { background:#fff; color:var(--acc); border:1px solid var(--acc); }
+  .result { background:var(--card); border:1px solid var(--line); border-radius:.7rem; padding:1rem; margin-bottom:1rem; }
+  .result h2 { margin:.1rem 0 .4rem; }
+  .hist { font-size:.9rem; color:var(--mut); margin:.4rem 0 0; padding-left:1.1rem; }
+  .sec-title { margin:1.4rem 0 .5rem; font-size:.85rem; text-transform:uppercase; letter-spacing:.04em; color:var(--mut); }
+</style>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="tabs" id="tabs"></div>
+  <div class="bar"><i id="barfill"></i></div>
+  <div class="status"><span id="st-left"></span><span id="st-right"></span></div>
+</div></header>
+<main><div class="wrap" id="app"></div></main>
+
+<script>
+const TESTS = [
+{
+  id: "t1",
+  title: "Тест 1",
+  sub: "Безпека: IAM, S3, Cognito, KMS, API Gateway, AI, 20 питань",
+  intro: "Домен Security (26%) і суміжні теми. Відповіді зберігаються. Після перевірки з'являються пояснення до кожного варіанта.",
+  qs: [
+    { s:"IAM", q:"Користувач в тому ж акаунті має identity-based політику з Allow на s3:GetObject, а bucket policy нічого про нього не каже. Результат?", o:["Доступ заборонено, потрібен Allow і в bucket policy","Доступ дозволено: в одному акаунті достатньо будь-якого Allow","Доступ дозволено лише з MFA","Доступ залежить від ACL бакета"], a:1,
+      e:["Це правило для різних акаунтів, де потрібен Allow з обох боків.","Так: в одному акаунті достатньо одного Allow (за умови відсутності Deny).","MFA потрібне лише якщо його вимагає умова в політиці.","ACL застарілий механізм і не визначає це."], w:"(лекція 1)" },
+    { q:"Політика дає s3:ListBucket з Resource arn:aws:s3:::my-bucket/*. Що станеться при спробі показати вміст бакета?", o:["Спрацює, зірочка охоплює все","Спрацює лише для кореня бакета","Спрацює, якщо додати Principal","AccessDenied: ListBucket діє на ARN бакета без /*"], a:3,
+      e:["Зірочка охоплює об'єкти, а не сам бакет.","ListBucket не діє на об'єкти.","Principal нема в identity-based політиках і не допоможе.","Дії над бакетом потребують ARN бакета, а над об'єктами ARN із /*."], w:"(лекція 1)" },
+    { q:"GitHub Actions має розгортати стек в AWS без довгоживучих ключів. Який виклик STS і яка умова критична в trust policy?", o:["AssumeRoleWithWebIdentity, умова на sub","AssumeRole, умова на aws:username","GetSessionToken, умова на MFA","AssumeRoleWithSAML, умова на aud"], a:0,
+      e:["Так: OIDC-токен обмінюється через AssumeRoleWithWebIdentity, а sub обмежує репозиторій і гілку.","AssumeRole для користувачів і сервісів AWS, не для OIDC GitHub.","GetSessionToken для користувача з MFA, не для CI.","SAML для корпоративного входу, а не GitHub Actions."], w:"(лекції 1, 8)" },
+    { q:"Lambda не може створити функцію через CloudFormation з вказаною роллю: AccessDenied на iam:PassRole. Яке рішення найправильніше?", o:["Дати iam:PassRole з Resource *","Дати AdministratorAccess ролі CI","iam:PassRole на конкретну роль функції","Прибрати роль і використовувати root"], a:2,
+      e:["Resource * дозволяє передати будь-яку роль, зокрема адмінську.","Це порушує принцип найменших привілеїв.","Так: звужений iam:PassRole на потрібну роль.","Root не використовують для щоденних дій."], w:"(лекції 1, 7)" },
+    { q:"SCP на OU забороняє s3:DeleteBucket. Адміністратор акаунта в цій OU має IAM-політику з s3:*. Що буде?", o:["Видалить, IAM-політика сильніша","Видалить, якщо він root","Не видалить: SCP обмежує навіть s3:* в IAM","Видалить, якщо додати permission boundary"], a:2,
+      e:["Ефективні права це перетин, SCP сильніший за дозвіл в IAM.","SCP діє і на root-користувача member-акаунта.","Так: SCP задає стелю прав для акаунта.","Boundary лише обмежує ще більше, права не додає."], w:"(лекція 1)" },
+    { s:"S3", q:"Публічна bucket policy на GetObject є, але об'єкт не відкривається анонімно. Що перевірити першим?", o:["Block Public Access (block_public_policy, restrict_public_buckets)","Класи зберігання","Версіонування","Lifecycle правила"], a:0,
+      e:["Так: BPA сильніший за політику і блокує публічний доступ.","Клас не впливає на анонімний доступ.","Версіонування не блокує доступ.","Lifecycle видаляє об'єкти за терміном, а не блокує читання."], w:"(лекція 2)" },
+    { q:"У користувача є s3:GetObject, а читання об'єкта з SSE-KMS дає AccessDenied. Чого бракує?", o:["s3:ListBucket","kms:GenerateDataKey","s3:PutObject","kms:Decrypt на ключ"], a:3,
+      e:["ListBucket потрібен для списку, а не для читання об'єкта.","GenerateDataKey потрібен для запису.","PutObject для запису.","Для читання SSE-KMS потрібен kms:Decrypt."], w:"(лекції 2, 13)" },
+    { q:"Потрібно віддавати приватні файли з S3 лише через CDN, а прямий доступ до бакета закрити. Що обрати?", o:["Публічний бакет і довгі ключі","CloudFront з Origin Access Control","Presigned URL на 7 днів для всіх","VPC gateway endpoint"], a:1,
+      e:["Публічний бакет не закриває прямий доступ.","Так: приватний бакет, доступ лише для CloudFront (OAC).","Presigned URL не робить доступ лише через CDN.","Endpoint обмежує мережу, але не про CDN."], w:"(лекція 2)" },
+    { q:"Presigned URL створив IAM-користувач. Потім у нього забрали право s3:GetObject. Що з посиланням?", o:["Працюватиме до кінця терміну","Працює, бо підписане раніше","Перестане працювати: права не більші за права підписанта","Працює, але лише для PUT"], a:2,
+      e:["Термін не дає прав сам по собі.","Права перевіряються у момент запиту.","Так: посилання має права підписанта.","Метод не змінює правило."], w:"(лекція 2)" },
+    { q:"Яка політика змусить усіх завантажувати об'єкти лише з SSE-KMS?", o:["Allow на PutObject для всіх","Deny на PutObject, якщо x-amz-server-side-encryption не aws:kms","Block Public Access","Lifecycle для шифрування"], a:1,
+      e:["Allow нічого не примушує.","Так: Deny з умовою на заголовок шифрування.","BPA про публічність, а не шифрування.","Lifecycle не шифрує."], w:"(лекція 2)" },
+    { s:"Cognito", q:"Мобільний застосунок має сам вантажити файли в S3 у свою папку. Що потрібно?", o:["Лише user pool","Identity pool, а в політиці ролі ${cognito-identity.amazonaws.com:sub}","API key","Access key у застосунку"], a:1,
+      e:["User pool дає JWT, але не ключі AWS.","Так: identity pool видає тимчасові ключі, змінна обмежує папку.","API key ідентифікує клієнта API, а не дає доступ до S3.","Довгі ключі в застосунку небезпечні."], w:"(лекція 16)" },
+    { q:"API Gateway REST має пускати лише користувачів з Cognito user pool без власного коду. Що обрати?", o:["Lambda authorizer","IAM-авторизація","Cognito authorizer","API key"], a:2,
+      e:["Lambda authorizer це власний код.","IAM SigV4 для клієнтів з ключами AWS.","Так: Cognito authorizer перевіряє токен user pool.","API key не авторизує."], w:"(лекції 14, 16)" },
+    { s:"KMS і секрети", q:"Пароль до RDS має автоматично змінюватися. Що обрати?", o:["Змінна середовища Lambda","Parameter Store String","Файл у S3","Secrets Manager"], a:3,
+      e:["Змінна не ротується.","Parameter Store не має вбудованої ротації.","S3 не для секретів.","Secrets Manager має нативну ротацію для RDS."], w:"(лекції 8, 13)" },
+    { q:"Потрібно зашифрувати файл 1 ГБ ключем KMS. Як правильно?", o:["Encrypt напряму","Зберігати ключ у змінній","GenerateDataKey і envelope encryption","Лише TLS"], a:2,
+      e:["Encrypt напряму лише до 4 КБ.","Це не шифрування.","Так: data key шифрує дані, KMS шифрує data key.","TLS захищає передачу, а не зберігання."], w:"(лекція 13)" },
+    { q:"Для CloudFront потрібен публічний сертифікат ACM. В якому регіоні його створити?", o:["В регіоні дистрибуції","eu-central-1","Де розташований S3","us-east-1"], a:3,
+      e:["CloudFront глобальний, регіону дистрибуції нема.","Не обов'язково.","Не залежить від S3.","Так: для CloudFront лише us-east-1."], w:"(лекція 13)" },
+    { s:"API Gateway", q:"Lambda за proxy-інтеграцією повертає body як JavaScript-об'єкт. Що отримає клієнт?", o:["200 з JSON","502 Bad Gateway","403","429"], a:1,
+      e:["body має бути рядком.","Так: неправильний формат відповіді дає 502.","403 про заборону.","429 про ліміт."], w:"(лекція 14)" },
+    { q:"Яка функція доступна в REST API, але недоступна в HTTP API?", o:["Лише Lambda-інтеграція","Cognito","Lambda authorizer","Usage plans і API keys"], a:3,
+      e:["Є в обох.","Є в обох (HTTP API має JWT).","Є в обох.","Так: usage plans і API keys лише REST."], w:"(лекція 14)" },
+    { s:"AI", q:"Дані до Amazon Bedrock не повинні йти через публічний інтернет. Що налаштувати?", o:["Interface VPC endpoint (PrivateLink)","Gateway endpoint","NAT Gateway","Internet Gateway"], a:0,
+      e:["Так: PrivateLink для Bedrock.","Gateway endpoint лише для S3 і DynamoDB.","NAT виводить в інтернет.","Це вихід в інтернет."], w:"(лекція 21)" },
+    { q:"Потрібно маскувати номери карток у відповідях моделі Bedrock. Який фільтр Guardrails?", o:["Denied topics","Word filter","Sensitive information filter","Contextual grounding"], a:2,
+      e:["Denied topics про заборонені теми.","Word filter про слова й фрази.","Так: PII маскують або блокують.","Grounding про вигадки."], w:"(лекція 21)" },
+    { q:"Як застосувати Guardrails до відповіді моделі, яка не викликається через Bedrock?", o:["Неможливо","Через ApplyGuardrail","Через CloudTrail","Через Macie"], a:1,
+      e:["Можливо.","Так: ApplyGuardrail працює без виклику моделі.","CloudTrail це аудит.","Macie шукає PII в S3."], w:"(лекція 21)" }
+  ]
+},
+{
+  id: "t2",
+  title: "Тест 2",
+  sub: "Розробка, розгортання, діагностика: Lambda, SQS/SNS, DynamoDB, CI/CD, CloudWatch, 20 питань",
+  intro: "Домени Development, Deployment, Troubleshooting. Відповіді зберігаються. Після перевірки з'являються пояснення до кожного варіанта.",
+  qs: [
+    { s:"Lambda", q:"S3 запускає Lambda, функція кидає виняток. Скільки всього спроб і що з подією далі, якщо DLQ нема?", o:["1 спроба, подія зникає","2 спроби, подія в SQS","3 спроби, потім подія зникає","3 спроби, потім у S3"], a:2,
+      e:["Async-виклик повторюється.","Повторів два, але без DLQ подія не потрапляє в SQS.","Так: 1 основна й 2 повтори, без DLQ чи destination подія зникає.","Без налаштування нікуди не потрапляє."], w:"(лекція 6)" },
+    { q:"Lambda читає з SQS, але не отримує повідомлень, помилка доступу. Що виправити?", o:["Права в execution role","Resource-based policy на функції","Права користувача","Політику бакета"], a:0,
+      e:["Так: poll-джерело читає сама Lambda, потрібні sqs:ReceiveMessage, DeleteMessage, GetQueueAttributes в ролі.","Resource-based policy потрібна для push-джерел.","Не користувач читає.","Бакет не при чому."], w:"(лекція 6)" },
+    { q:"Яке співвідношення visibility timeout черги SQS і timeout функції рекомендується?", o:["Однакові","Менше за timeout функції","У 2 рази більше","Не менше 6 × timeout функції"], a:3,
+      e:["Тоді повторне доставлення може відбутися під час обробки.","Тоді повідомлення повернеться в чергу під час роботи функції.","Недостатньо для повторів.","Так: щонайменше шість разів."], w:"(лекції 6, 10)" },
+    { q:"Де налаштувати DLQ для Lambda, яку тригерить SQS?", o:["На функції","На самій черзі (redrive policy)","На alias","В CloudWatch"], a:1,
+      e:["DLQ на функції для SQS-тригера не працює.","Так: maxReceiveCount у redrive policy на черзі.","Alias не має DLQ.","CloudWatch не маршрутизує повідомлення."], w:"(лекція 10)" },
+    { q:"Потрібно прогріті середовища для синхронного API з мінімальним cold start. Що обрати?", o:["Reserved concurrency","Layer","Більший timeout","Provisioned concurrency на alias"], a:3,
+      e:["Reserved гарантує й обмежує, але не прогріває.","Layer про залежності.","Timeout не прискорює старт.","Так: provisioned concurrency на версії чи alias."], w:"(лекція 6)" },
+    { q:"Пакет Lambda 70 МБ. Як розгорнути?", o:["Zip напряму","Через S3","Лише container image","Неможливо"], a:1,
+      e:["Напряму до 50 МБ.","Так: через S3 (до 250 МБ розпакованого).","Image потрібен понад 250 МБ.","Можливо."], w:"(лекція 6)" },
+    { s:"SQS і SNS", q:"Функція отримує пачку з 10 повідомлень SQS, 1 невдале. Як повернути в чергу лише його?", o:["ReportBatchItemFailures","Збільшити batch size","FIFO","Зменшити timeout"], a:0,
+      e:["Так: функція повертає batchItemFailures з itemIdentifier.","Не вирішує.","FIFO не про часткові відповіді.","Не вирішує."], w:"(лекція 10)" },
+    { q:"Одне повідомлення SNS має піти в три незалежні черги SQS. Яка схема?", o:["Лямбда викликає SQS тричі","Три публікації в SNS","SNS топік і три підписані черги (fan-out)","EventBridge Scheduler"], a:2,
+      e:["Зайвий код і зв'язність.","Дублювання.","Так: fan-out, кожна черга має власні повтори й DLQ.","Scheduler про розклад."], w:"(лекція 10)" },
+    { q:"Яке обмеження filter policy SNS?", o:["10 ключів","Лише один ключ","Немає обмежень","5 ключів і 150 комбінацій значень"], a:3,
+      e:["Ліміт 5.","Можна кілька.","Обмеження є.","Так: 5 ключів і 150 комбінацій."], w:"(лекція 10)" },
+    { s:"DynamoDB", q:"Скільки RCU потрібно: запис 5 КБ, 20 читань/с, eventually consistent?", o:["10","20","40","80"], a:1,
+      e:["Забули округлити 5 КБ вгору до 2 одиниць.","Так: 5÷4 вгору = 2, ×20 = 40, eventually ÷2 = 20.","Це strongly consistent.","Забагато."], w:"(лекція 11)" },
+    { q:"Запит за атрибутом, який не є ключем. Додати можна будь-коли, значення лише eventually. Що це?", o:["LSI","Scan","GSI","Streams"], a:2,
+      e:["LSI лише при створенні таблиці.","Scan читає все.","Так: GSI.","Streams про зміни."], w:"(лекція 12)" },
+    { q:"Як вставити запис лише якщо його ще нема?", o:["Scan потім PutItem","BatchWriteItem","TTL","PutItem з умовою attribute_not_exists"], a:3,
+      e:["Не атомарно.","Batch не атомарний.","TTL про видалення.","Так: умовний запис."], w:"(лекція 12)" },
+    { q:"Який формат атрибута TTL у DynamoDB?", o:["String ISO-дата","Number, Unix epoch у секундах","Number, мілісекунди","Boolean"], a:1,
+      e:["Інший тип ігнорується.","Так: Number, epoch у секундах.","Мілісекунди не працюють.","Не підходить."], w:"(лекція 12)" },
+    { s:"Розгортання", q:"Під час canary-деплою Lambda спрацював CloudWatch alarm. Що зробить CodeDeploy?", o:["Нічого","Дочекається кінця","Зупинить функцію","Автоматично відкотить alias"], a:3,
+      e:["Alarm прив'язаний до деплою.","Не чекає.","Функція не зупиняється.","Так: автовідкат на попередню версію."], w:"(лекції 7, 19)" },
+    { q:"Яка фаза buildspec виконується останньою?", o:["install","build","post_build","pre_build"], a:2,
+      e:["Перша.","Третя.","Так: порядок install, pre_build, build, post_build.","Друга."], w:"(лекція 19)" },
+    { q:"Потрібно вимкнути функцію в проді без деплою коду, поступово й з відкатом за alarm. Що обрати?", o:["Змінна Lambda","Parameter Store","Secrets Manager","AppConfig feature flag"], a:3,
+      e:["Потрібен новий деплой.","Немає поступового розгортання.","Для секретів.","Так: AppConfig."], w:"(лекція 19)" },
+    { s:"Діагностика", q:"Alarm у стані ALARM, але листа нема. Назвіть правдоподібну причину.", o:["Метрика порожня","Підписка SNS не підтверджена","Лише Period замалий","Alarm стежить за двома метриками"], a:1,
+      e:["Тоді був би INSUFFICIENT_DATA.","Так: PendingConfirmation, листи не надходять.","Не причина.","Один alarm стежить за однією метрикою."], w:"(лекція 9)" },
+    { q:"Потрібно знайти всі трейси конкретного користувача в X-Ray. Що використати?", o:["Metadata","Annotation","Segment","Sampling"], a:1,
+      e:["Не індексується.","Так: лише annotations індексуються.","Segment не про пошук.","Sampling про частку запитів."], w:"(лекція 17)" },
+    { q:"Метрика Errors для Lambda дорівнює 0, але частина запитів відхилена. Що дивитися?", o:["Duration","Invocations","IteratorAge","Throttles"], a:3,
+      e:["Тривалість.","Не покаже відмови.","Для потоків.","Так: Throttles не входять в Errors."], w:"(лекції 6, 9)" },
+    { q:"Яким інструментом дізнатися, хто видалив S3-бакет?", o:["CloudTrail","CloudWatch Logs","X-Ray","AWS Config лише метрики"], a:0,
+      e:["Так: журнал викликів API.","Це логи застосунку.","Трасування запитів.","Не журнал API."], w:"(лекція 9)" }
+  ]
+},
+{
+  "id": "t3",
+  "title": "Test 3 (English)",
+  "sub": "Scenario questions in the style of the real DVA-C03 exam, 20 questions",
+  "intro": "Each question has one correct answer. Read the scenario, pick the best option, then check: every option comes with an explanation.",
+  "qs": [
+    {
+      "s": "Development",
+      "q": "A Lambda function is invoked asynchronously by Amazon S3 event notifications. Occasionally the function throws an unhandled exception, and the failed events are lost. A developer must retain the failed events for later analysis with the LEAST operational overhead. What should the developer do?",
+      "o": [
+        "Increase the function timeout to 15 minutes",
+        "Configure an on-failure destination that points to an Amazon SQS queue",
+        "Create a CloudWatch alarm on the Errors metric and re-invoke the function manually",
+        "Set the function reserved concurrency to 0"
+      ],
+      "a": 1,
+      "e": [
+        "A longer timeout does not help when the code throws an exception, and the event is still lost after the retries.",
+        "Correct. After the retries are exhausted, Lambda sends the event and the error details to the SQS queue, so nothing is lost and nothing has to be built.",
+        "An alarm only tells you that errors happened. The original events would still be gone.",
+        "Reserved concurrency of 0 stops the function from running at all, so every event would be throttled."
+      ],
+      "w": "(lecture 6)"
+    },
+    {
+      "q": "An application uses an AWS Lambda function with an Amazon SQS standard queue as the event source. The function timeout is 30 seconds, and the queue visibility timeout is 30 seconds. Some messages are processed twice even though the function does not fail. What is the MOST likely fix?",
+      "o": [
+        "Switch the queue to a FIFO queue",
+        "Enable long polling on the queue",
+        "Increase the queue visibility timeout to at least six times the function timeout",
+        "Decrease the function timeout to 10 seconds"
+      ],
+      "a": 2,
+      "e": [
+        "FIFO adds ordering and deduplication of sends, but the cause here is the timeout, not the queue type.",
+        "Long polling reduces empty receives and cost. It does not stop a message from reappearing while it is still being processed.",
+        "Correct. If the visibility timeout is too short, the message becomes visible again while the function is still working on it. AWS recommends at least six times the function timeout.",
+        "A shorter function timeout would make timeouts more likely and does not solve the early reappearance of messages."
+      ],
+      "w": "(lectures 6, 10)"
+    },
+    {
+      "q": "A REST API in Amazon API Gateway uses a Lambda proxy integration. Clients receive a 502 Bad Gateway response. The function returns the object {\"statusCode\": 200, \"body\": {\"ok\": true}}. What is the cause?",
+      "o": [
+        "The body must be a string, not an object",
+        "The function must also return an isBase64Encoded field set to true",
+        "The function timeout is longer than the API Gateway integration timeout",
+        "The API needs a CORS configuration"
+      ],
+      "a": 0,
+      "e": [
+        "Correct. With the proxy integration the body must be a JSON string. A malformed response from the function produces a 502.",
+        "isBase64Encoded is optional and should be true only for binary content.",
+        "A timeout would return 504 Gateway Timeout, not 502.",
+        "Missing CORS headers cause browser errors, not a 502 from API Gateway."
+      ],
+      "w": "(lecture 14)"
+    },
+    {
+      "q": "A DynamoDB table contains items of about 5 KB. An application performs 100 strongly consistent reads per second. How many read capacity units (RCUs) must be provisioned?",
+      "o": [
+        "100",
+        "400",
+        "500",
+        "200"
+      ],
+      "a": 3,
+      "e": [
+        "That would be correct only for items of 4 KB or less.",
+        "5 KB divided by 4 KB is 1.25, which rounds up to 2 units per read. 400 would be the result for transactional reads.",
+        "500 multiplies by the item size in KB and ignores the 4 KB unit.",
+        "Correct. One strongly consistent read of up to 4 KB uses 1 RCU. A 5 KB item needs 2 RCUs, so 2 x 100 = 200 RCUs."
+      ],
+      "w": "(lecture 11)"
+    },
+    {
+      "s": "Security",
+      "q": "A bucket policy allows s3:GetObject for all principals on a prefix, but anonymous requests to objects in that prefix are denied. Which setting should the developer check FIRST?",
+      "o": [
+        "The S3 Block Public Access settings",
+        "The object storage class",
+        "The bucket versioning status",
+        "The S3 lifecycle rules"
+      ],
+      "a": 0,
+      "e": [
+        "Correct. Block Public Access can override a public bucket policy at the bucket or account level.",
+        "The storage class does not affect anonymous access.",
+        "Versioning does not block reads of the current version.",
+        "Lifecycle rules move or delete objects. They do not deny reads."
+      ],
+      "w": "(lecture 2)"
+    },
+    {
+      "q": "A user has an IAM policy that allows s3:GetObject on a bucket. Reading an object encrypted with SSE-KMS (a customer managed key) fails with AccessDenied. What is missing?",
+      "o": [
+        "The s3:ListBucket permission",
+        "The kms:GenerateDataKey permission on the key",
+        "The s3:PutObject permission",
+        "The kms:Decrypt permission on the key"
+      ],
+      "a": 3,
+      "e": [
+        "ListBucket is needed to list keys. It is not needed to read a known object.",
+        "GenerateDataKey is needed when writing (uploading) an encrypted object, not for reading.",
+        "PutObject is a write permission.",
+        "Correct. To read an object encrypted with SSE-KMS, the caller must be allowed to use the key with kms:Decrypt, and the key policy must allow it."
+      ],
+      "w": "(lectures 2, 13)"
+    },
+    {
+      "q": "A team deploys to AWS from GitHub Actions and wants to avoid storing long-term AWS access keys in GitHub. Which solution meets this requirement?",
+      "o": [
+        "Store the access keys in GitHub Secrets and rotate them monthly",
+        "Create an IAM OIDC identity provider for GitHub and an IAM role whose trust policy restricts the sub claim to the repository and branch",
+        "Create an IAM user with MFA and share the credentials with the workflow",
+        "Attach an instance profile to the GitHub runner"
+      ],
+      "a": 1,
+      "e": [
+        "The keys would still be long-term credentials that can leak.",
+        "Correct. The workflow exchanges a short-lived OIDC token for temporary credentials with AssumeRoleWithWebIdentity. The sub condition limits which repository and branch can assume the role.",
+        "A shared IAM user is still a long-term credential, and MFA cannot be used non-interactively.",
+        "Instance profiles apply to EC2 instances. A GitHub-hosted runner is not an EC2 instance of yours."
+      ],
+      "w": "(lecture 8)"
+    },
+    {
+      "q": "An application needs to store a database password that must be rotated automatically every 30 days. Which service should the developer use?",
+      "o": [
+        "AWS Systems Manager Parameter Store standard parameter",
+        "A Lambda environment variable encrypted with KMS",
+        "AWS Secrets Manager",
+        "An encrypted Amazon S3 object"
+      ],
+      "a": 2,
+      "e": [
+        "Parameter Store does not rotate secrets by itself.",
+        "Environment variables are visible to anyone who can read the function configuration and cannot rotate themselves.",
+        "Correct. Secrets Manager has built-in rotation, with native support for RDS.",
+        "S3 has no rotation feature and is not meant for secrets."
+      ],
+      "w": "(lecture 13)"
+    },
+    {
+      "s": "Deployment",
+      "q": "A developer uses AWS SAM to deploy a Lambda function and wants to shift 10 percent of traffic to a new version first, with an automatic rollback if the error alarm fires. Which configuration should be used?",
+      "o": [
+        "Increase the provisioned concurrency",
+        "AutoPublishAlias with DeploymentPreference of type Canary10Percent5Minutes and the alarm listed under Alarms",
+        "A second function with a Route 53 weighted record",
+        "The sam sync command"
+      ],
+      "a": 1,
+      "e": [
+        "Provisioned concurrency keeps environments warm. It does not shift traffic.",
+        "Correct. SAM publishes a version and moves the alias gradually through CodeDeploy. If a listed CloudWatch alarm fires, CodeDeploy rolls the alias back.",
+        "This would add a second function and DNS complexity, and DNS weights are not tied to alarms.",
+        "sam sync is for fast development updates. It is not a deployment strategy for production."
+      ],
+      "w": "(lectures 7, 19)"
+    },
+    {
+      "q": "A Lambda function is attached to a VPC and must read objects from Amazon S3. It currently times out when calling S3. The company wants the LOWEST cost. What should be done?",
+      "o": [
+        "Create a gateway VPC endpoint for Amazon S3",
+        "Create a NAT gateway in a public subnet",
+        "Create an interface VPC endpoint for Amazon S3",
+        "Remove the function from the VPC and add an internet gateway"
+      ],
+      "a": 0,
+      "e": [
+        "Correct. A gateway endpoint for S3 is free and gives private access without internet access.",
+        "A NAT gateway would work but is charged per hour and per GB.",
+        "An interface endpoint is charged. For S3 the free gateway endpoint is the cheaper option.",
+        "An internet gateway alone does not give a Lambda function in a VPC internet access, and removing the VPC does not fit the stated requirement."
+      ],
+      "w": "(lecture 6)"
+    },
+    {
+      "q": "A mobile application must let each signed-in user upload files directly to Amazon S3, and each user may access only their own prefix. Which approach is MOST appropriate?",
+      "o": [
+        "Embed an IAM access key in the application",
+        "Use a Cognito user pool only and give the JWT directly to S3",
+        "Make the bucket public and name objects with random IDs",
+        "Use a Cognito identity pool and an IAM role policy that uses the ${cognito-identity.amazonaws.com:sub} policy variable in the resource ARN"
+      ],
+      "a": 3,
+      "e": [
+        "Keys inside an app can be extracted and are long-term credentials.",
+        "S3 does not accept a user pool JWT. An identity pool is needed to exchange it for temporary AWS credentials.",
+        "A public bucket gives everyone access to everything.",
+        "Correct. The identity pool issues temporary credentials. The policy variable restricts each user to a prefix named after their identity ID."
+      ],
+      "w": "(lecture 16)"
+    },
+    {
+      "s": "Development",
+      "q": "A developer must insert an item into a DynamoDB table only if an item with the same partition key does not already exist. Which approach should be used?",
+      "o": [
+        "Call GetItem and then PutItem",
+        "Use BatchWriteItem",
+        "Use PutItem with a ConditionExpression of attribute_not_exists on the key attribute",
+        "Use Scan with a filter, then PutItem"
+      ],
+      "a": 2,
+      "e": [
+        "Two calls leave a race condition: another writer can insert between them.",
+        "BatchWriteItem does not support conditions on individual put requests.",
+        "Correct. The condition is evaluated atomically on the server, and the write fails if the item exists.",
+        "A scan is expensive and has the same race condition."
+      ],
+      "w": "(lecture 12)"
+    },
+    {
+      "q": "One event must be delivered to three independent consumers. Consumer A needs only events where eventType is order.paid. Each consumer needs its own buffer and retry handling. Which design is BEST?",
+      "o": [
+        "Three separate PutEvents calls from the producer",
+        "One Amazon SNS topic with three SQS queues subscribed, and a filter policy on the subscription of consumer A",
+        "One SQS queue read by three consumers",
+        "One Lambda function that forwards the event to three queues"
+      ],
+      "a": 1,
+      "e": [
+        "The producer would have to know every consumer and would be coupled to them.",
+        "Correct. This is the fan-out pattern. Each queue buffers independently, has its own DLQ, and the filter policy removes events that consumer A does not want.",
+        "Consumers of one queue compete for messages. Each message is delivered to only one of them.",
+        "This adds code to maintain and still needs filtering logic."
+      ],
+      "w": "(lecture 10)"
+    },
+    {
+      "s": "Troubleshooting",
+      "q": "A developer wants to find all AWS X-Ray traces that belong to a specific customer ID across services. What should the developer add to the segments?",
+      "o": [
+        "Metadata with the customer ID",
+        "A CloudWatch metric with the customer ID as a dimension",
+        "A sampling rule per customer",
+        "An annotation with the customer ID"
+      ],
+      "a": 3,
+      "e": [
+        "Metadata is not indexed, so you cannot filter traces by it.",
+        "High-cardinality dimensions create many metrics, and this is not how traces are searched.",
+        "Sampling rules choose how many requests are traced. They do not make traces searchable by value.",
+        "Correct. Annotations are indexed key-value pairs that can be used in filter expressions."
+      ],
+      "w": "(lecture 17)"
+    },
+    {
+      "q": "A Lambda function reads from an Amazon Kinesis data stream. A single malformed record causes the function to fail repeatedly, and the shard stops making progress. Which configuration helps resolve this?",
+      "o": [
+        "Increase the shard count",
+        "Enable BisectBatchOnFunctionError, set a maximum retry attempts and maximum record age, and configure an on-failure destination",
+        "Switch to enhanced fan-out",
+        "Increase the function memory"
+      ],
+      "a": 1,
+      "e": [
+        "More shards do not remove a poisoned record from a shard.",
+        "Correct. Bisecting splits the batch to isolate the bad record. Limits on retries and record age stop endless retries, and the on-failure destination keeps the failed records.",
+        "Enhanced fan-out improves read throughput and does not handle failing records.",
+        "More memory does not fix an invalid record."
+      ],
+      "w": "(lectures 6, 20)"
+    },
+    {
+      "s": "Deployment",
+      "q": "A workflow orchestrates several steps, one of which requires a manager's approval that can take up to three months. Which AWS service and configuration should be used?",
+      "o": [
+        "Step Functions Express workflow with a Wait state",
+        "A Lambda function that sleeps until approval",
+        "Step Functions Standard workflow with a task using the waitForTaskToken integration pattern",
+        "An SQS queue with a visibility timeout of 12 hours"
+      ],
+      "a": 2,
+      "e": [
+        "Express workflows run for at most five minutes.",
+        "A Lambda function can run for at most 15 minutes, and you would pay while it waits.",
+        "Correct. Standard workflows can run for up to a year, and the task token pattern pauses the execution until an external system sends the token back.",
+        "The maximum visibility timeout is 12 hours, and a queue does not orchestrate steps."
+      ],
+      "w": "(lecture 20)"
+    },
+    {
+      "s": "Troubleshooting",
+      "q": "An Amazon ECS task on Fargate fails to start with the error CannotPullContainerError. The application code does not run yet. Which is the MOST likely cause?",
+      "o": [
+        "The task role does not allow the application to call Amazon S3",
+        "The security group blocks inbound traffic to the container",
+        "The task execution role does not have permission to pull the image from Amazon ECR",
+        "The service desired count is too low"
+      ],
+      "a": 2,
+      "e": [
+        "The task role is used by the application code after it starts, so it is not involved in pulling the image.",
+        "Inbound rules affect incoming traffic and not the image pull.",
+        "Correct. The execution role is used by the ECS agent to pull images and write logs. Network access to ECR must also be available.",
+        "The desired count changes how many tasks run, not whether an image can be pulled."
+      ],
+      "w": "(lecture 18)"
+    },
+    {
+      "q": "A Java Lambda function has slow cold starts. The team wants to improve startup latency at no additional cost for the feature itself. What should the team do?",
+      "o": [
+        "Enable Lambda SnapStart on the function",
+        "Configure provisioned concurrency",
+        "Increase the ephemeral storage",
+        "Move the function into a VPC"
+      ],
+      "a": 0,
+      "e": [
+        "Correct. SnapStart restores a snapshot of the initialized environment. For Java there is no additional charge for the feature.",
+        "Provisioned concurrency is billed for the time environments are kept warm.",
+        "Ephemeral storage does not speed up initialization.",
+        "A VPC does not reduce cold start time."
+      ],
+      "w": "(lecture 6)"
+    },
+    {
+      "s": "Security",
+      "q": "An application calls Amazon Bedrock and must mask credit card numbers in model responses. Which feature should be used?",
+      "o": [
+        "A denied topic in Guardrails",
+        "A word filter in Guardrails",
+        "A content filter for the Prompt Attack category",
+        "A sensitive information filter in Guardrails configured to mask the PII type"
+      ],
+      "a": 3,
+      "e": [
+        "Denied topics block subjects of conversation. They do not mask data inside a response.",
+        "Word filters block specific words or phrases and are not suited to card numbers.",
+        "The Prompt Attack filter detects jailbreak and prompt injection attempts.",
+        "Correct. Sensitive information filters detect PII, including card numbers, and can mask or block it in inputs and outputs."
+      ],
+      "w": "(lecture 21)"
+    },
+    {
+      "s": "Troubleshooting",
+      "q": "A CloudWatch alarm on a Lambda function is in the ALARM state, but no email notification arrives. The alarm action points to an SNS topic with an email subscription. What is the MOST likely cause?",
+      "o": [
+        "The subscription is still in PendingConfirmation",
+        "The alarm period is too short",
+        "The function has too much memory",
+        "The email subscription must use the HTTPS protocol"
+      ],
+      "a": 0,
+      "e": [
+        "Correct. An email subscription must be confirmed through the link in the message AWS sends. Until then, no notifications are delivered.",
+        "The period affects when the alarm changes state. The alarm has already changed state.",
+        "Memory does not influence notification delivery.",
+        "Email subscriptions use the email protocol. HTTPS is for endpoints."
+      ],
+      "w": "(lecture 9)"
+    },
+    {
+      "q": "A developer sees that the Errors metric of a Lambda function is zero, yet some invocations are not executed at all and clients receive 429 errors. Which metric should the developer check?",
+      "o": [
+        "Duration",
+        "Throttles",
+        "IteratorAge",
+        "Invocations"
+      ],
+      "a": 1,
+      "e": [
+        "Duration shows how long invocations ran and says nothing about rejected ones.",
+        "Correct. Throttled invocations are counted in Throttles and are not included in Errors.",
+        "IteratorAge applies to stream sources such as Kinesis.",
+        "Invocations does not count throttled requests."
+      ],
+      "w": "(lectures 6, 9)"
+    }
+  ]
+}
+];
+
+const KEY = "aws_tests_v1";
+let store = {};
+try { store = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { store = {}; }
+if (!store.settings) store.settings = { instant: false };
+let current = TESTS[0].id;
+
+function save() { localStorage.setItem(KEY, JSON.stringify(store)); }
+function state(id) { if (!store[id]) store[id] = { answers: {}, checked: false, history: [] }; return store[id]; }
+function score(t) { const s = state(t.id); let n = 0; t.qs.forEach((q, i) => { if (s.answers[i] === q.a) n++; }); return n; }
+function answered(t) { return Object.keys(state(t.id).answers).length; }
+
+function renderTabs() {
+  const el = document.getElementById("tabs");
+  el.innerHTML = "";
+  TESTS.forEach(t => {
+    const s = state(t.id);
+    const b = document.createElement("button");
+    b.className = "tab" + (t.id === current ? " on" : "");
+    const last = s.history.length ? " · остання спроба " + s.history[s.history.length - 1].score + "/" + t.qs.length : "";
+    b.innerHTML = "<b>" + t.title + "</b><small>" + t.sub + " · відмічено " + answered(t) + "/" + t.qs.length + last + "</small>";
+    b.onclick = () => { current = t.id; render(); window.scrollTo(0, 0); };
+    el.appendChild(b);
+  });
+}
+
+function renderBar() {
+  const t = TESTS.find(x => x.id === current);
+  const n = answered(t);
+  document.getElementById("barfill").style.width = (100 * n / t.qs.length) + "%";
+  document.getElementById("st-left").textContent = "Відмічено " + n + " з " + t.qs.length;
+  const s = state(t.id);
+  document.getElementById("st-right").textContent = s.checked ? "Результат: " + score(t) + " з " + t.qs.length : "Відповіді зберігаються автоматично";
+}
+
+function revealed(s, i) { return s.checked || (store.settings.instant && s.answers[i] !== undefined); }
+
+function render() {
+  const t = TESTS.find(x => x.id === current);
+  const s = state(t.id);
+  const app = document.getElementById("app");
+  let html = "<p class='intro'>" + t.intro + "</p>";
+  html += "<label class='mode'><input type='checkbox' id='instant'" + (store.settings.instant ? " checked" : "") + "> Показувати пояснення одразу після вибору відповіді (відповідь тоді блокується)</label>";
+
+  if (s.checked) {
+    const sc = score(t);
+    const pct = Math.round(100 * sc / t.qs.length);
+    html += "<div class='result'><h2>Результат: " + sc + " з " + t.qs.length + " (" + pct + "%)</h2>";
+    html += "<div>Зелений це правильний варіант, червоний ваш неправильний. Під кожним варіантом пояснення, чому так.</div>";
+    if (s.history.length) {
+      html += "<ul class='hist'>" + s.history.slice().reverse().map(h => "<li>" + h.date + ": " + h.score + " з " + t.qs.length + "</li>").join("") + "</ul>";
+    }
+    html += "</div>";
+  }
+
+  let lastSection = "";
+  t.qs.forEach((q, i) => {
+    if (q.s && q.s !== lastSection) { html += "<div class='sec-title'>" + q.s + "</div>"; lastSection = q.s; }
+    const chosen = s.answers[i];
+    const rev = revealed(s, i);
+    html += "<div class='q" + (rev ? " locked" : "") + "'><h3><span class='num'>" + (i + 1) + ".</span>" + q.q + "</h3>";
+    q.o.forEach((o, j) => {
+      let cls = "opt";
+      let ex = "";
+      if (rev) {
+        if (j === q.a) { cls += " good"; ex = "<div class='ex'><b>Правильно.</b> " + q.e[j] + "</div>"; }
+        else if (j === chosen) { cls += " wrong"; ex = "<div class='ex'><b>Ваш вибір, неправильно.</b> " + q.e[j] + "</div>"; }
+        else { ex = "<div class='ex'><b>Не те.</b> " + q.e[j] + "</div>"; }
+      } else if (j === chosen) cls += " sel";
+      html += "<label class='" + cls + "'><div class='row'><input type='radio' name='q" + i + "' value='" + j + "'" + (j === chosen ? " checked" : "") + (rev ? " disabled" : "") + "><span>" + o + "</span></div>" + ex + "</label>";
+    });
+    if (rev) {
+      const mark = chosen === undefined ? "Без відповіді." : (chosen === q.a ? "Ви відповіли правильно." : "Ви відповіли неправильно.");
+      html += "<div class='why'><b>" + mark + "</b> Джерело: " + q.w + "</div>";
+    }
+    html += "</div>";
+  });
+
+  html += "<div class='actions'>";
+  if (!s.checked) {
+    html += "<button class='btn' id='check'>Перевірити тест</button>";
+    html += "<button class='btn sec' id='clear'>Очистити відмітки</button>";
+  } else {
+    html += "<button class='btn' id='retry'>Пройти знову</button>";
+    html += "<button class='btn sec' id='back'>Повернутись до відміток</button>";
+  }
+  html += "</div>";
+  app.innerHTML = html;
+
+  app.querySelectorAll("input[type=radio]").forEach(r => {
+    r.addEventListener("change", e => {
+      const i = Number(e.target.name.slice(1));
+      state(t.id).answers[i] = Number(e.target.value);
+      save();
+      if (store.settings.instant) { const y = window.scrollY; render(); window.scrollTo(0, y); return; }
+      renderTabs(); renderBar();
+      e.target.closest(".q").querySelectorAll(".opt").forEach(o => o.classList.remove("sel"));
+      e.target.closest(".opt").classList.add("sel");
+    });
+  });
+
+  const byId = id => document.getElementById(id);
+  byId("instant").onchange = e => { store.settings.instant = e.target.checked; save(); const y = window.scrollY; render(); window.scrollTo(0, y); };
+  if (byId("check")) byId("check").onclick = () => {
+    const missing = t.qs.length - answered(t);
+    if (missing > 0 && !confirm("Без відповіді лишилось " + missing + ". Перевірити все одно?")) return;
+    s.checked = true;
+    s.history.push({ date: new Date().toLocaleString("uk-UA"), score: score(t) });
+    save(); render(); window.scrollTo(0, 0);
+  };
+  if (byId("clear")) byId("clear").onclick = () => {
+    if (!confirm("Очистити всі відмітки цього тесту?")) return;
+    s.answers = {}; save(); render();
+  };
+  if (byId("retry")) byId("retry").onclick = () => { s.answers = {}; s.checked = false; save(); render(); window.scrollTo(0, 0); };
+  if (byId("back")) byId("back").onclick = () => { s.checked = false; save(); render(); };
+
+  renderTabs(); renderBar();
+}
+
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.setHeaderColor("#ffffff");
+  tg.setBackgroundColor("#f7f5f0");
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+
+render();
+</script>
+</body>
+</html>

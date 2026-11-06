@@ -53,6 +53,8 @@
 <h2>Головна ідея</h2>
 <p><strong>X-Ray показує шлях одного запиту через усі сервіси і скільки часу зайняв кожен.</strong> Метрики кажуть «скільки», логи «що», X-Ray «де саме застряг». Образ: багажна бирка, що йде з валізою через усі пункти.</p>
 <p>Це AWS-варіант розподіленого трейсингу, ідея така сама, як в OpenTelemetry.</p>
+<h2>Навіщо це так задумано</h2>
+<p>У розподіленій системі один запит проходить через багато сервісів, і логи кожного окремо не показують шлях. X-Ray зшиває їх в один трейс, щоб було видно, де затримка.</p>
 <h2>Крок 1. Словник</h2>
 <table class="two">
 <thead>
@@ -156,7 +158,7 @@
 <li><strong>Lambda:</strong> <code>Tracing: Active</code> у SAM. У ролі виконання потрібні <code>xray:PutTraceSegments</code> і <code>xray:PutTelemetryRecords</code> (є в політиці <code>AWSXRayDaemonWriteAccess</code>).</li>
 <li>Для деталей у коді: Powertools Tracer, що обгортає SDK-клієнти (<code>captureAWSv3Client</code>), плюс <code>putAnnotation</code>.</li>
 <li><strong>API Gateway:</strong> увімкнути X-Ray на stage (<strong>лише REST API</strong>, не HTTP API).</li>
-<li><strong>EC2 і контейнери:</strong> потрібен <strong>X-Ray daemon</strong>: приймає дані по <strong>UDP 2000</strong> і шле в X-Ray <em>(не звірено)</em>. В ECS це sidecar-контейнер.</li>
+<li><strong>EC2 і контейнери:</strong> потрібен <strong>X-Ray daemon</strong>: приймає дані по <strong>UDP 2000</strong> і шле в X-Ray. В ECS це sidecar-контейнер.</li>
 <li>Сучасний шлях: <strong>AWS Distro for OpenTelemetry (ADOT)</strong> і <strong>CloudWatch Application Signals</strong> <em>(не звірено)</em>.</li>
 </ul>
 <h2>Крок 5. Як це виглядає</h2>

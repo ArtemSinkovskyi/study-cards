@@ -53,6 +53,8 @@
 <h2>Головна ідея</h2>
 <p><strong>ECR це склад образів, ECS це диспетчер, Fargate це «без серверів», EKS це Kubernetes.</strong> Навички: 3.1.2 (образи, теги, lifecycle), 3.3.2 (ECS task definitions, EKS manifests, Fargate, rolling updates), 3.3.1 (образ для Lambda).</p>
 <p>Схема: <code>docker push</code> в ECR → task definition → ECS service (desired count) → Fargate tasks, перед ними ALB.</p>
+<h2>Навіщо це так задумано</h2>
+<p>Контейнери потрібні там, де Lambda замала: довгі процеси, особливі бінарники. Fargate прибирає клопіт із серверами, а дві ролі (task і execution) розділяють права вашого коду й платформи.</p>
 <h2>Крок 1. Словник</h2>
 <table class="two">
 <thead>
@@ -114,8 +116,8 @@
 <li>приватний репозиторій вимагає IAM-автентифікації;</li>
 <li><strong>image scanning:</strong> на вразливості ОС автоматично чи за запитом; глибше Amazon Inspector;</li>
 <li>реплікація в інші регіони й акаунти;</li>
-<li><strong>lifecycle policy</strong> видаляє старі образи, наприклад «тримати 10 останніх» <em>(не звірено)</em>;</li>
-<li><strong>tag immutability:</strong> тег не можна перезаписати <em>(не звірено)</em>.</li>
+<li><strong>lifecycle policy</strong> видаляє старі образи, наприклад «тримати 10 останніх»;</li>
+<li><strong>tag immutability:</strong> тег не можна перезаписати.</li>
 </ul>
 <p><strong>Теги</strong> (навички 3.1.2, 3.2.4): <strong>не використовуйте <code>latest</code> у проді</strong>. Версія чи git SHA дають відтворюваність і відкат (<code>:1.4.0</code>, а не <code>:latest</code>). Multi-stage Dockerfile зменшує образ.</p>
 <h2>Крок 3. ECS: ієрархія</h2>
@@ -184,9 +186,9 @@
 <p><strong>Lambda чи контейнер:</strong> до 15 хв, події, сплески: Lambda. Довше, стан, спеціальні бінарники: ECS/Fargate. Є третій варіант: Lambda <strong>з контейнерним образом</strong> до 10 ГБ.</p>
 <h2>Крок 6. Деплой і масштабування</h2>
 <ul>
-<li><strong>Rolling update:</strong> scheduler стартує нові задачі, зупиняє старі, зливаючи з'єднання. Параметри <code>minimumHealthyPercent</code>, <code>maximumPercent</code> <em>(не звірено)</em>.</li>
+<li><strong>Rolling update:</strong> scheduler стартує нові задачі, зупиняє старі, зливаючи з'єднання. Параметри <code>minimumHealthyPercent</code>, <code>maximumPercent</code> (за замовчуванням 100% і 200%).</li>
 <li><strong>Blue/green через CodeDeploy:</strong> дві target groups, перемикання трафіку.</li>
-<li><strong>Circuit breaker</strong> відкочує, якщо новий деплой не стає здоровим <em>(не звірено)</em>.</li>
+<li><strong>Circuit breaker</strong> відкочує, якщо новий деплой не стає здоровим (працює лише з rolling update).</li>
 <li>ALB: ECS реєструє задачі сам, динамічні порти, path-based routing.</li>
 <li><code>awsvpc</code> дає кожній задачі свій ENI, тож security group працює на рівні задачі <em>(не звірено)</em>.</li>
 <li><strong>Автомасштабування:</strong> Target Tracking за CPU, пам'яттю чи <code>ALBRequestCountPerTarget</code> <em>(не звірено)</em>.</li>

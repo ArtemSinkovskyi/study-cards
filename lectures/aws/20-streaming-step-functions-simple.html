@@ -53,6 +53,8 @@
 <h2>Головна ідея</h2>
 <p><strong>Kinesis це річка, з якої п'ють багато хто і яка пам'ятає останні години чи дні. SQS це черга в касу: купив і пішов. Firehose це труба в басейн.</strong> Step Functions веде багатокроковий процес як машину станів.</p>
 <p>Навички: 1.1.1, 1.1.3, 1.1.6 (потоки), 1.1.8.</p>
+<h2>Навіщо це так задумано</h2>
+<p>Потік (Kinesis) для даних, що надходять постійно й які треба читати кільком програмам чи перечитувати. Step Functions для процесів із багатьма кроками, щоб повтори й помилки були описані, а не розкидані по коду.</p>
 <h2>Крок 1. Словник</h2>
 <table class="two">
 <thead>
@@ -225,8 +227,8 @@
 </tr>
 </tbody>
 </table>
-<p><strong>Lambda читає Kinesis</strong> через event source mapping: пачками, по шарду. Параметри <em>(не звірено)</em>: <code>BatchSize</code>, <code>BisectBatchOnFunctionError</code> (поділ пачки навпіл), <code>MaximumRetryAttempts</code>, <code>OnFailure</code> destination. Без них одна «отруєна» запис блокує шард, поки не мине retention.</p>
-<p><strong>KCL (Kinesis Client Library)</strong> керує шардами й чекпойнтами в DynamoDB <em>(не звірено)</em>.</p>
+<p><strong>Lambda читає Kinesis</strong> через event source mapping: пачками, по шарду. Параметри: <code>BatchSize</code>, <code>BisectBatchOnFunctionError</code> (поділ пачки навпіл), <code>MaximumRetryAttempts</code>, <code>OnFailure</code> destination. Без них одна «отруєна» запис блокує шард, поки не мине retention.</p>
+<p><strong>KCL (Kinesis Client Library)</strong> керує шардами й чекпойнтами в DynamoDB. Один застосунок KCL має власну таблицю в DynamoDB (оренди шардів і чекпойнти), її ділити з іншим не можна, і вона оплачується окремо.</p>
 <h2>Крок 4. Data Firehose</h2>
 <p><strong>Доставка без коду:</strong> приймає дані, буферизує, кладе в S3, Redshift, OpenSearch, Snowflake, Splunk, HTTP та інші.</p>
 <ul>
@@ -311,13 +313,13 @@
 <tbody>
 <tr>
 <td data-label="">Тривалість</td>
-<td data-label="Standard">до 1 року <em>(не звірено)</em></td>
-<td data-label="Express">до 5 хв <em>(не звірено)</em></td>
+<td data-label="Standard">до 1 року</td>
+<td data-label="Express">до 5 хв</td>
 </tr>
 <tr>
 <td data-label="">Виконання</td>
-<td data-label="Standard">exactly-once <em>(не звірено)</em></td>
-<td data-label="Express">at-least-once <em>(не звірено)</em></td>
+<td data-label="Standard">exactly-once</td>
+<td data-label="Express">at-least-once (асинхронний), at-most-once (синхронний)</td>
 </tr>
 <tr>
 <td data-label="">Використання</td>
@@ -343,7 +345,7 @@
 <li><strong>DLQ / destinations:</strong> куди падає нездійсненне;</li>
 <li><strong>Idempotency</strong>.</li>
 </ul>
-<p>SDK AWS має вбудовані повтори й режими <code>standard</code>, <code>adaptive</code> <em>(не звірено)</em>.</p>
+<p>SDK AWS має вбудовані повтори й режими <code>standard</code>, <code>adaptive</code> і <code>legacy</code> (AWS радить <code>standard</code>; <code>adaptive</code> додає клієнтське обмеження швидкості й може затримувати навіть перший запит).</p>
 <h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>Повторне читання, порядок, багато споживачів: Kinesis.</li>

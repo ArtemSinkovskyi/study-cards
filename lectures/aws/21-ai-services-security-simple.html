@@ -54,6 +54,8 @@
 <p><strong>Цей розділ нове в C03 (навичка 2.3 «AI security»). Іспит перевіряє не «як побудувати AI», а «як підключити й захистити».</strong></p>
 <p><strong>Поза межами іспиту</strong> (за Exam Guide): вибір моделей, prompt engineering, проєктування RAG, проєктування guardrails та AI-governance. Також поза межами: Amazon Rekognition, Polly, SageMaker AI, Strands Agents, Quick Sight. Правильна відповідь на питання про AI майже завжди стосується <strong>Bedrock</strong>.</p>
 <p>Увага: <strong>Quick Sight поза іспитом, а Amazon Quick у списку in-scope</strong>. Це різні позиції.</p>
+<h2>Навіщо це так задумано</h2>
+<p>Модель приймає довільний текст і сама вирішує, що робити, тому потрібні фільтри на вході й виході та мінімальні права: помилки моделі наперед не передбачити.</p>
 <h2>Крок 1. Виклик Bedrock</h2>
 <p>Два API:</p>
 <table class="two">
@@ -74,7 +76,7 @@
 </tr>
 </tbody>
 </table>
-<p>Обидва мають варіанти зі стрімінгом <em>(не звірено)</em>.</p>
+<p>Обидва мають варіанти зі стрімінгом (<code>ConverseStream</code>, <code>InvokeModelWithResponseStream</code>).</p>
 <ul>
 <li>Lambda потребує <code>bedrock:InvokeModel</code> на ресурс моделі <em>(не звірено)</em>.</li>
 <li>Тротлінг дає <code>ThrottlingException</code>: повторювати з backoff.</li>
@@ -245,7 +247,7 @@
 <h2>Крок 6. Логи</h2>
 <p>Логи часто містять промпти з PII. Заходи:</p>
 <ul>
-<li><strong>Model invocation logging</strong> Bedrock у CloudWatch чи S3 вмикається окремо, вміст логуйте свідомо <em>(не звірено)</em>;</li>
+<li><strong>Model invocation logging</strong> Bedrock (CloudWatch Logs чи S3 того ж акаунта й регіону) <strong>вимкнений за замовчуванням</strong>, вмикається окремо; вміст логуйте свідомо;</li>
 <li>маскування: CloudWatch Logs data protection <em>(не звірено)</em>;</li>
 <li>мінімальні права на групи логів, шифрування KMS, короткий retention;</li>
 <li>Guardrails логують порушення в CloudWatch або S3;</li>

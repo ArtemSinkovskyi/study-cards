@@ -57,6 +57,8 @@
 <li><strong>Identity pool</strong> відповідає на «що можна в AWS?» й видає <strong>тимчасові ключі AWS</strong> (STS).</li>
 </ul>
 <p>C03 прямо не називає Cognito в навичках (лише «identity federation»), але сервіс є у списку.</p>
+<h2>Навіщо це так задумано</h2>
+<p>Щоб не писати самому реєстрацію, паролі й MFA, це віддають сервісу. Пулів два, бо «хто ти» і «що можна в AWS» це різні питання.</p>
 <h2>Крок 1. User pool проти identity pool</h2>
 <table>
 <thead>
@@ -138,7 +140,7 @@
 </ul>
 <h2>Крок 4. Identity pool і «лише своє»</h2>
 <p>Identity pool роздає роль. Щоб кожен бачив лише своє, у політиці ролі використовують <strong>змінну</strong> <code>${cognito-identity.amazonaws.com:sub}</code> у ARN, наприклад <code>arn:aws:s3:::user-files/${cognito-identity.amazonaws.com:sub}/*</code>.</p>
-<p>Те саме для DynamoDB: умова <code>dynamodb:LeadingKeys</code> дозволяє лише рядки зі своїм partition key <em>(не звірено)</em>. Це <strong>fine-grained access</strong> (навичка 2.1.2).</p>
+<p>Те саме для DynamoDB: умова <code>dynamodb:LeadingKeys</code> дозволяє лише рядки зі своїм partition key. Це <strong>fine-grained access</strong> (навичка 2.1.2).</p>
 <p><strong>Гості</strong> отримують окрему роль, і вона має бути дуже обмеженою.</p>
 <h2>Крок 5. Федерація без Cognito</h2>
 <table class="two">

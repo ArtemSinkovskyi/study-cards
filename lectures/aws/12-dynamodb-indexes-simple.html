@@ -52,6 +52,8 @@
 </blockquote>
 <h2>Головна ідея</h2>
 <p><strong>Коли питання не лягає на ключ, не робіть Scan, а додайте індекс. Щоб повтор не зробив роботу двічі, використовуйте умовний запис.</strong></p>
+<h2>Навіщо це так задумано</h2>
+<p>Індекси потрібні, щоб шукати не лише за основним ключем і не сканувати всю таблицю. Ідемпотентність потрібна, бо повтор запиту не має списати гроші двічі.</p>
 <h2>Крок 1. Індекси: шукати не за ключем</h2>
 <p>Нехай таблиця <code>Uploads</code> має PK <code>userId</code> і SK <code>uploadedAt</code>. Новий запит: «усі завантаження зі статусом FAILED». Статус не в ключі, лишається Scan. Рішення: індекс, тобто копія даних, яку DynamoDB сам тримає впорядкованою інакше.</p>
 <table>
@@ -91,7 +93,7 @@
 <tr>
 <td data-label="">Обмеження</td>
 <td data-label="GSI (глобальний)">немає</td>
-<td data-label="LSI (локальний)">колекція одного PK до 10 ГБ <em>(не звірено)</em></td>
+<td data-label="LSI (локальний)">колекція одного PK до 10 ГБ</td>
 </tr>
 </tbody>
 </table>
@@ -176,22 +178,22 @@
 <tbody>
 <tr>
 <td data-label="Операція"><code>BatchWriteItem</code></td>
-<td data-label="Що робить">до 25 записів <em>(не звірено)</em></td>
+<td data-label="Що робить">до 25 записів (до 16 МБ)</td>
 <td data-label="Гарантія"><strong>не атомарна</strong>, дивіться <code>UnprocessedItems</code></td>
 </tr>
 <tr>
 <td data-label="Операція"><code>BatchGetItem</code></td>
-<td data-label="Що робить">до 100 читань <em>(не звірено)</em></td>
+<td data-label="Що робить">до 100 читань (до 16 МБ)</td>
 <td data-label="Гарантія">не атомарна, дивіться <code>UnprocessedKeys</code></td>
 </tr>
 <tr>
 <td data-label="Операція"><code>TransactWriteItems</code></td>
-<td data-label="Що робить">до 100 записів <em>(не звірено)</em></td>
+<td data-label="Що робить">до 100 записів (до 4 МБ)</td>
 <td data-label="Гарантія"><strong>все або нічого</strong></td>
 </tr>
 </tbody>
 </table>
-<p>Транзакція коштує вдвічі більше одиниць за звичайний запис <em>(не звірено)</em>. Переказ між двома рахунками це транзакція. Завантаження 10 000 рядків це batch.</p>
+<p>Транзакція коштує вдвічі більше одиниць, ніж звичайний запис чи читання: DynamoDB робить дві операції на кожен запис (підготовка й підтвердження). Переказ між двома рахунками це транзакція. Завантаження 10 000 рядків це batch.</p>
 <h2>Крок 7. TTL: дані зникають самі</h2>
 <p>TTL видаляє записи автоматично й безкоштовно. Правила:</p>
 <ul>
@@ -240,25 +242,25 @@
 <table class="two">
 <thead>
 <tr>
-<th><code>StreamViewType</code> <em>(назви не звірено)</em></th>
+<th><code>StreamViewType</code></th>
 <th>Що в записі</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td data-label="StreamViewType (назви не звірено)"><code>KEYS_ONLY</code></td>
+<td data-label="StreamViewType"><code>KEYS_ONLY</code></td>
 <td data-label="Що в записі">лише ключі</td>
 </tr>
 <tr>
-<td data-label="StreamViewType (назви не звірено)"><code>NEW_IMAGE</code></td>
+<td data-label="StreamViewType"><code>NEW_IMAGE</code></td>
 <td data-label="Що в записі">новий стан</td>
 </tr>
 <tr>
-<td data-label="StreamViewType (назви не звірено)"><code>OLD_IMAGE</code></td>
+<td data-label="StreamViewType"><code>OLD_IMAGE</code></td>
 <td data-label="Що в записі">старий стан</td>
 </tr>
 <tr>
-<td data-label="StreamViewType (назви не звірено)"><code>NEW_AND_OLD_IMAGES</code></td>
+<td data-label="StreamViewType"><code>NEW_AND_OLD_IMAGES</code></td>
 <td data-label="Що в записі">обидва</td>
 </tr>
 </tbody>
@@ -267,7 +269,7 @@
 <h2>Крок 10. Інше коротко</h2>
 <ul>
 <li><strong>DAX</strong> це кеш перед DynamoDB (лекція 15).</li>
-<li><strong>PITR</strong> це відновлення на будь-яку мить за 35 днів <em>(не звірено)</em>.</li>
+<li><strong>PITR</strong> це відновлення на будь-яку мить за останні 35 днів; період можна скоротити (<code>RecoveryPeriodInDays</code> від 1 до 35).</li>
 <li><strong>Global tables</strong> це мультирегіональна multi-active таблиця, 99,999% доступності. Режими <strong>MREC</strong> (eventual) і <strong>MRSC</strong> (strong).</li>
 <li><strong>PartiQL</strong> це SQL-подібний синтаксис, але без JOIN.</li>
 </ul>

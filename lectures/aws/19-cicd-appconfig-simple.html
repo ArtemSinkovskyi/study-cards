@@ -53,6 +53,8 @@
 <h2>Головна ідея</h2>
 <p><strong>CodePipeline оркеструє, CodeBuild збирає, CodeDeploy деплоїть.</strong> AppConfig змінює поведінку застосунку без деплою коду.</p>
 <p>Схема: репозиторій → CodePipeline → CodeBuild (тести, збірка) → артефакти в S3 → деплой у staging → manual approval → CodeDeploy canary в prod → rollback за alarm.</p>
+<h2>Навіщо це так задумано</h2>
+<p>Конвеєр потрібен, щоб викотка була однаковою щоразу й без ручних помилок. AppConfig відділяє зміну поведінки від деплою коду, тому прапорець можна вимкнути за секунди.</p>
 <h2>Крок 1. Зіставлення з тим, що ви знаєте</h2>
 <table class="two">
 <thead>
@@ -170,8 +172,8 @@
 </ul>
 <h2>Крок 5. CodeDeploy</h2>
 <p>Працює з <strong>EC2/on-premises, Lambda, ECS</strong>. Файл <strong><code>appspec.yml</code></strong>: для EC2 лежить у корені ревізії, з hooks і скриптами. Для Lambda визначає версію й функції-перевірки, для ECS task definition і load balancer.</p>
-<p><strong>Hooks для Lambda:</strong> <code>BeforeAllowTraffic</code>, <code>AfterAllowTraffic</code> <em>(не звірено)</em>. У SAM це <code>DeploymentPreference.Hooks</code> (<code>PreTraffic</code>, <code>PostTraffic</code>).</p>
-<p><strong>Порядок для EC2</strong> <em>(не звірено)</em>: <code>ApplicationStop</code> → <code>DownloadBundle</code> → <code>BeforeInstall</code> → <code>Install</code> → <code>AfterInstall</code> → <code>ApplicationStart</code> → <code>ValidateService</code>. На EC2 потрібен <strong>CodeDeploy agent</strong>.</p>
+<p><strong>Hooks для Lambda:</strong> <code>BeforeAllowTraffic</code>, <code>AfterAllowTraffic</code>: це Lambda-функції перевірки (одна може обслуговувати обидва хуки); якщо CodeDeploy не отримав відповіді від перевірки за годину, деплой вважається невдалим. У SAM це <code>DeploymentPreference.Hooks</code> (<code>PreTraffic</code>, <code>PostTraffic</code>).</p>
+<p><strong>Порядок для EC2</strong> <em>(за сторонніми описами, офіційну сторінку не відкривав)</em>: <code>ApplicationStop</code> → <code>DownloadBundle</code> → <code>BeforeInstall</code> → <code>Install</code> → <code>AfterInstall</code> → <code>ApplicationStart</code> → <code>ValidateService</code>. На EC2 потрібен <strong>CodeDeploy agent</strong>. Для події <code>DownloadBundle</code> власних скриптів не буває: її виконує сам агент.</p>
 <h2>Крок 6. Стратегії деплою</h2>
 <table>
 <thead>
@@ -296,7 +298,7 @@
 </tr>
 </tbody>
 </table>
-<p>Lambda читає AppConfig через <strong>розширення</strong> (локальний HTTP-порт) <em>(не звірено)</em>.</p>
+<p>Lambda читає AppConfig через <strong>розширення</strong>: воно піднімає локальний HTTP-сервер на порту <strong>2772</strong> (за замовчуванням), а функція звертається до нього, а не до API. Ролі потрібні <code>appconfig:StartConfigurationSession</code> і <code>appconfig:GetLatestConfiguration</code>.</p>
 <h2>Крок 10. Інші інструменти</h2>
 <ul>
 <li><strong>CodeArtifact:</strong> приватний репозиторій пакетів npm, Maven, PyPI <em>(не звірено)</em>.</li>
