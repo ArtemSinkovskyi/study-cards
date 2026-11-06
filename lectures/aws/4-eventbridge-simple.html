@@ -17,6 +17,16 @@
   th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
   td code, th code { white-space:nowrap; }
   th { background:#fff; }
+  @media (max-width: 640px) {
+    table, thead, tbody, tr, td { display:block; min-width:0; }
+    table { overflow:visible; }
+    thead { display:none; }
+    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
+    td { border:none; padding:.25rem 0; }
+    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
+    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
+    td code, th code { white-space:normal; }
+  }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -50,32 +60,32 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>Event</strong></td>
-<td>JSON «щось сталося» (факт, не команда)</td>
+<td data-label="Термін"><strong>Event</strong></td>
+<td data-label="Суть">JSON «щось сталося» (факт, не команда)</td>
 </tr>
 <tr>
-<td><strong>Event bus</strong></td>
-<td>шина: <strong>default</strong> (в кожному акаунті й регіоні, на неї пишуть сервіси AWS, зокрема S3), <strong>custom</strong> (ваші застосунки), <strong>partner</strong> (SaaS)</td>
+<td data-label="Термін"><strong>Event bus</strong></td>
+<td data-label="Суть">шина: <strong>default</strong> (в кожному акаунті й регіоні, на неї пишуть сервіси AWS, зокрема S3), <strong>custom</strong> (ваші застосунки), <strong>partner</strong> (SaaS)</td>
 </tr>
 <tr>
-<td><strong>Rule</strong></td>
-<td>«якщо подія відповідає патерну (або настав час за розкладом), надішли цілям»</td>
+<td data-label="Термін"><strong>Rule</strong></td>
+<td data-label="Суть">«якщо подія відповідає патерну (або настав час за розкладом), надішли цілям»</td>
 </tr>
 <tr>
-<td><strong>Event pattern</strong></td>
-<td>JSON-шаблон відбору</td>
+<td data-label="Термін"><strong>Event pattern</strong></td>
+<td data-label="Суть">JSON-шаблон відбору</td>
 </tr>
 <tr>
-<td><strong>Target</strong></td>
-<td>ціль: Lambda, SQS, SNS, Step Functions, Kinesis, інша шина, API destination. До одного правила можна додати кілька цілей</td>
+<td data-label="Термін"><strong>Target</strong></td>
+<td data-label="Суть">ціль: Lambda, SQS, SNS, Step Functions, Kinesis, інша шина, API destination. До одного правила можна додати кілька цілей</td>
 </tr>
 <tr>
-<td><strong>Scheduler</strong></td>
-<td>окремий сервіс розкладів (разово, cron, rate)</td>
+<td data-label="Термін"><strong>Scheduler</strong></td>
+<td data-label="Суть">окремий сервіс розкладів (разово, cron, rate)</td>
 </tr>
 <tr>
-<td><strong>Pipes</strong></td>
-<td>з'єднання «джерело → фільтр → збагачення → ціль» для SQS, Kinesis, DynamoDB Streams</td>
+<td data-label="Термін"><strong>Pipes</strong></td>
+<td data-label="Суть">з'єднання «джерело → фільтр → збагачення → ціль» для SQS, Kinesis, DynamoDB Streams</td>
 </tr>
 </tbody>
 </table>
@@ -90,14 +100,14 @@
 </thead>
 <tbody>
 <tr>
-<td>Джерело викликає ціль напряму (S3 notification → Lambda)</td>
-<td>просто</td>
-<td>підписки прописані в джерелі; для S3 перетинні префікси на одну подію заборонені; конфігурація бакета одна, друга підписка перезапише першу</td>
+<td data-label="Підхід">Джерело викликає ціль напряму (S3 notification → Lambda)</td>
+<td data-label="Плюси">просто</td>
+<td data-label="Мінуси">підписки прописані в джерелі; для S3 перетинні префікси на одну подію заборонені; конфігурація бакета одна, друга підписка перезапише першу</td>
 </tr>
 <tr>
-<td>Через шину (S3 → EventBridge → Lambda)</td>
-<td>багато незалежних правил, фільтр за будь-яким полем, кілька цілей, архів і повтор</td>
-<td>трохи більша затримка, ще один сервіс</td>
+<td data-label="Підхід">Через шину (S3 → EventBridge → Lambda)</td>
+<td data-label="Плюси">багато незалежних правил, фільтр за будь-яким полем, кілька цілей, архів і повтор</td>
+<td data-label="Мінуси">трохи більша затримка, ще один сервіс</td>
 </tr>
 </tbody>
 </table>
@@ -123,28 +133,28 @@
 </thead>
 <tbody>
 <tr>
-<td><code>prefix</code></td>
-<td>починається з</td>
+<td data-label="Оператор"><code>prefix</code></td>
+<td data-label="Значення">починається з</td>
 </tr>
 <tr>
-<td><code>suffix</code></td>
-<td>закінчується на</td>
+<td data-label="Оператор"><code>suffix</code></td>
+<td data-label="Значення">закінчується на</td>
 </tr>
 <tr>
-<td><code>anything-but</code></td>
-<td>усе, крім</td>
+<td data-label="Оператор"><code>anything-but</code></td>
+<td data-label="Значення">усе, крім</td>
 </tr>
 <tr>
-<td><code>numeric</code></td>
-<td>числове порівняння, наприклад <code>[&quot;&gt;&quot;, 1000]</code></td>
+<td data-label="Оператор"><code>numeric</code></td>
+<td data-label="Значення">числове порівняння, наприклад <code>[&quot;&gt;&quot;, 1000]</code></td>
 </tr>
 <tr>
-<td><code>exists</code></td>
-<td>поле є</td>
+<td data-label="Оператор"><code>exists</code></td>
+<td data-label="Значення">поле є</td>
 </tr>
 <tr>
-<td><code>equals-ignore-case</code></td>
-<td>без урахування регістру</td>
+<td data-label="Оператор"><code>equals-ignore-case</code></td>
+<td data-label="Значення">без урахування регістру</td>
 </tr>
 </tbody>
 </table>
@@ -161,12 +171,12 @@
 </thead>
 <tbody>
 <tr>
-<td>Lambda, SQS, SNS</td>
-<td><strong>resource-based policy</strong> на цілі (для <code>events.amazonaws.com</code> з <code>SourceArn</code> правила)</td>
+<td data-label="Ціль">Lambda, SQS, SNS</td>
+<td data-label="Хто дозволяє"><strong>resource-based policy</strong> на цілі (для <code>events.amazonaws.com</code> з <code>SourceArn</code> правила)</td>
 </tr>
 <tr>
-<td>Step Functions, Kinesis, ECS, інша шина</td>
-<td><strong>IAM-роль</strong>, яку правило приймає (assume)</td>
+<td data-label="Ціль">Step Functions, Kinesis, ECS, інша шина</td>
+<td data-label="Хто дозволяє"><strong>IAM-роль</strong>, яку правило приймає (assume)</td>
 </tr>
 </tbody>
 </table>
@@ -180,20 +190,20 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>Input transformer</strong></td>
-<td>виймає поля з події й складає свій JSON</td>
+<td data-label="Параметр"><strong>Input transformer</strong></td>
+<td data-label="Що дає">виймає поля з події й складає свій JSON</td>
 </tr>
 <tr>
-<td><strong>Input path / constant</strong></td>
-<td>передати частину події або фіксований JSON</td>
+<td data-label="Параметр"><strong>Input path / constant</strong></td>
+<td data-label="Що дає">передати частину події або фіксований JSON</td>
 </tr>
 <tr>
-<td><strong>Retry policy</strong></td>
-<td>скільки часу й спроб повторювати доставку</td>
+<td data-label="Параметр"><strong>Retry policy</strong></td>
+<td data-label="Що дає">скільки часу й спроб повторювати доставку</td>
 </tr>
 <tr>
-<td><strong>DLQ</strong> (SQS)</td>
-<td>куди скласти подію, яку не вдалося доставити</td>
+<td data-label="Параметр"><strong>DLQ</strong> (SQS)</td>
+<td data-label="Що дає">куди скласти подію, яку не вдалося доставити</td>
 </tr>
 </tbody>
 </table>
@@ -209,14 +219,14 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>Ціль правила EventBridge</strong></td>
-<td>EventBridge не зміг передати подію (нема прав, ціль не існує, throttling)</td>
-<td>за замовчуванням до <strong>24 год і до 185 спроб</strong> (налаштовується)</td>
+<td data-label="Рівень"><strong>Ціль правила EventBridge</strong></td>
+<td data-label="Що ловить">EventBridge не зміг передати подію (нема прав, ціль не існує, throttling)</td>
+<td data-label="Повтори">за замовчуванням до <strong>24 год і до 185 спроб</strong> (налаштовується)</td>
 </tr>
 <tr>
-<td><strong>Lambda (async)</strong></td>
-<td>подію прийнято, але код кидає помилку</td>
-<td>2 повтори, потім DLQ чи on-failure destination</td>
+<td data-label="Рівень"><strong>Lambda (async)</strong></td>
+<td data-label="Що ловить">подію прийнято, але код кидає помилку</td>
+<td data-label="Повтори">2 повтори, потім DLQ чи on-failure destination</td>
 </tr>
 </tbody>
 </table>
@@ -233,39 +243,39 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>Cross-account / cross-region</strong></td>
-<td>ціль = шина в іншому акаунті чи регіоні (потрібна політика на шині-приймачі)</td>
-<td>збирати події з багатьох акаунтів</td>
+<td data-label="Можливість"><strong>Cross-account / cross-region</strong></td>
+<td data-label="Суть">ціль = шина в іншому акаунті чи регіоні (потрібна політика на шині-приймачі)</td>
+<td data-label="Коли">збирати події з багатьох акаунтів</td>
 </tr>
 <tr>
-<td><strong>Archive &amp; Replay</strong></td>
-<td>архів подій шини, повторна відправка за період</td>
-<td>відтворити збій, протестувати нову ціль</td>
+<td data-label="Можливість"><strong>Archive &amp; Replay</strong></td>
+<td data-label="Суть">архів подій шини, повторна відправка за період</td>
+<td data-label="Коли">відтворити збій, протестувати нову ціль</td>
 </tr>
 <tr>
-<td><strong>Schema registry</strong></td>
-<td>виявляє форму подій, генерує типи для коду</td>
-<td>типізація в IDE</td>
+<td data-label="Можливість"><strong>Schema registry</strong></td>
+<td data-label="Суть">виявляє форму подій, генерує типи для коду</td>
+<td data-label="Коли">типізація в IDE</td>
 </tr>
 <tr>
-<td><strong>API destination</strong></td>
-<td>відправка на HTTP-ендпойнт поза AWS з авторизацією й rate limit</td>
-<td>SaaS-вебхуки</td>
+<td data-label="Можливість"><strong>API destination</strong></td>
+<td data-label="Суть">відправка на HTTP-ендпойнт поза AWS з авторизацією й rate limit</td>
+<td data-label="Коли">SaaS-вебхуки</td>
 </tr>
 <tr>
-<td><strong>Scheduler</strong></td>
-<td><code>rate(5 minutes)</code>, <code>cron(...)</code>, разовий <code>at(...)</code>, часові пояси</td>
-<td>замість cron-сервера</td>
+<td data-label="Можливість"><strong>Scheduler</strong></td>
+<td data-label="Суть"><code>rate(5 minutes)</code>, <code>cron(...)</code>, разовий <code>at(...)</code>, часові пояси</td>
+<td data-label="Коли">замість cron-сервера</td>
 </tr>
 <tr>
-<td><strong>Pipes</strong></td>
-<td>точка-точка з SQS/Kinesis/DynamoDB Streams, фільтр, збагачення</td>
-<td>потоки без коду-клею</td>
+<td data-label="Можливість"><strong>Pipes</strong></td>
+<td data-label="Суть">точка-точка з SQS/Kinesis/DynamoDB Streams, фільтр, збагачення</td>
+<td data-label="Коли">потоки без коду-клею</td>
 </tr>
 <tr>
-<td><strong>Custom events</strong></td>
-<td><code>PutEvents</code> із вашого коду на власну шину</td>
-<td>доменні події</td>
+<td data-label="Можливість"><strong>Custom events</strong></td>
+<td data-label="Суть"><code>PutEvents</code> із вашого коду на власну шину</td>
+<td data-label="Коли">доменні події</td>
 </tr>
 </tbody>
 </table>
@@ -283,34 +293,34 @@
 </thead>
 <tbody>
 <tr>
-<td>Модель</td>
-<td>шина з правилами</td>
-<td>pub/sub</td>
-<td>черга (споживач бере сам)</td>
+<td data-label="">Модель</td>
+<td data-label="EventBridge">шина з правилами</td>
+<td data-label="SNS">pub/sub</td>
+<td data-label="SQS">черга (споживач бере сам)</td>
 </tr>
 <tr>
-<td>Фільтр</td>
-<td>потужний за будь-яким полем</td>
-<td>за атрибутами повідомлення</td>
-<td>нема</td>
+<td data-label="">Фільтр</td>
+<td data-label="EventBridge">потужний за будь-яким полем</td>
+<td data-label="SNS">за атрибутами повідомлення</td>
+<td data-label="SQS">нема</td>
 </tr>
 <tr>
-<td>Споживачі</td>
-<td>багато цілей</td>
-<td>багато підписників</td>
-<td>зазвичай один</td>
+<td data-label="">Споживачі</td>
+<td data-label="EventBridge">багато цілей</td>
+<td data-label="SNS">багато підписників</td>
+<td data-label="SQS">зазвичай один</td>
 </tr>
 <tr>
-<td>Буфер і повтор</td>
-<td>ні (є Replay)</td>
-<td>ні</td>
-<td>так, зберігання до 14 днів</td>
+<td data-label="">Буфер і повтор</td>
+<td data-label="EventBridge">ні (є Replay)</td>
+<td data-label="SNS">ні</td>
+<td data-label="SQS">так, зберігання до 14 днів</td>
 </tr>
 <tr>
-<td>Типово</td>
-<td>події сервісів AWS, інтеграції</td>
-<td>розсилка, fan-out</td>
-<td>згладжування піків, пачки</td>
+<td data-label="">Типово</td>
+<td data-label="EventBridge">події сервісів AWS, інтеграції</td>
+<td data-label="SNS">розсилка, fan-out</td>
+<td data-label="SQS">згладжування піків, пачки</td>
 </tr>
 </tbody>
 </table>
@@ -332,24 +342,24 @@
 </thead>
 <tbody>
 <tr>
-<td>Події сервісів AWS на default bus (S3)</td>
-<td>безкоштовно</td>
+<td data-label="Що">Події сервісів AWS на default bus (S3)</td>
+<td data-label="Орієнтир">безкоштовно</td>
 </tr>
 <tr>
-<td>Власні події (<code>PutEvents</code>)</td>
-<td>приблизно 1 USD за мільйон</td>
+<td data-label="Що">Власні події (<code>PutEvents</code>)</td>
+<td data-label="Орієнтир">приблизно 1 USD за мільйон</td>
 </tr>
 <tr>
-<td>Archive &amp; Replay</td>
-<td>плата за оброблені ГБ і зберігання</td>
+<td data-label="Що">Archive &amp; Replay</td>
+<td data-label="Орієнтир">плата за оброблені ГБ і зберігання</td>
 </tr>
 <tr>
-<td>Scheduler</td>
-<td>приблизно 1 USD за мільйон викликів понад безкоштовні</td>
+<td data-label="Що">Scheduler</td>
+<td data-label="Орієнтир">приблизно 1 USD за мільйон викликів понад безкоштовні</td>
 </tr>
 <tr>
-<td>Pipes</td>
-<td>приблизно 0,40 USD за мільйон запитів</td>
+<td data-label="Що">Pipes</td>
+<td data-label="Орієнтир">приблизно 0,40 USD за мільйон запитів</td>
 </tr>
 </tbody>
 </table>

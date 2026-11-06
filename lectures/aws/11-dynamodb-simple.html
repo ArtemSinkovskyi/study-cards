@@ -17,6 +17,16 @@
   th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
   td code, th code { white-space:nowrap; }
   th { background:#fff; }
+  @media (max-width: 640px) {
+    table, thead, tbody, tr, td { display:block; min-width:0; }
+    table { overflow:visible; }
+    thead { display:none; }
+    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
+    td { border:none; padding:.25rem 0; }
+    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
+    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
+    td code, th code { white-space:normal; }
+  }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -50,32 +60,32 @@
 </thead>
 <tbody>
 <tr>
-<td>table</td>
-<td>таблиця</td>
+<td data-label="Термін">table</td>
+<td data-label="Що це">таблиця</td>
 </tr>
 <tr>
-<td>item</td>
-<td>запис (як рядок у Postgres), до <strong>400 КБ</strong></td>
+<td data-label="Термін">item</td>
+<td data-label="Що це">запис (як рядок у Postgres), до <strong>400 КБ</strong></td>
 </tr>
 <tr>
-<td>attribute</td>
-<td>поле запису; в різних записів можуть бути різні поля, обов'язковий лише ключ</td>
+<td data-label="Термін">attribute</td>
+<td data-label="Що це">поле запису; в різних записів можуть бути різні поля, обов'язковий лише ключ</td>
 </tr>
 <tr>
-<td>partition key (PK)</td>
-<td>ключ, за яким запис потрапляє в певний розділ (ще звуть hash key)</td>
+<td data-label="Термін">partition key (PK)</td>
+<td data-label="Що це">ключ, за яким запис потрапляє в певний розділ (ще звуть hash key)</td>
 </tr>
 <tr>
-<td>sort key (SK)</td>
-<td>другий ключ, що впорядковує записи з однаковим PK (range key)</td>
+<td data-label="Термін">sort key (SK)</td>
+<td data-label="Що це">другий ключ, що впорядковує записи з однаковим PK (range key)</td>
 </tr>
 <tr>
-<td>partition</td>
-<td>фізичний розділ таблиці</td>
+<td data-label="Термін">partition</td>
+<td data-label="Що це">фізичний розділ таблиці</td>
 </tr>
 <tr>
-<td>hot partition</td>
-<td>«гарячий» розділ: на нього йде забагато запитів</td>
+<td data-label="Термін">hot partition</td>
+<td data-label="Що це">«гарячий» розділ: на нього йде забагато запитів</td>
 </tr>
 </tbody>
 </table>
@@ -93,16 +103,16 @@
 </thead>
 <tbody>
 <tr>
-<td>Простий</td>
-<td>лише PK</td>
-<td><code>eventId</code></td>
-<td>шукаємо один запис за точним id</td>
+<td data-label="Вид">Простий</td>
+<td data-label="З чого складається">лише PK</td>
+<td data-label="Приклад"><code>eventId</code></td>
+<td data-label="Коли">шукаємо один запис за точним id</td>
 </tr>
 <tr>
-<td>Складений</td>
-<td>PK + SK</td>
-<td><code>userId</code> + <code>orderDate</code></td>
-<td>потрібні «всі записи користувача за період»</td>
+<td data-label="Вид">Складений</td>
+<td data-label="З чого складається">PK + SK</td>
+<td data-label="Приклад"><code>userId</code> + <code>orderDate</code></td>
+<td data-label="Коли">потрібні «всі записи користувача за період»</td>
 </tr>
 </tbody>
 </table>
@@ -122,24 +132,24 @@
 </thead>
 <tbody>
 <tr>
-<td>Запити</td>
-<td>SQL: будь-які <code>WHERE</code>, <code>JOIN</code></td>
-<td>лише за ключем або індексом</td>
+<td data-label="">Запити</td>
+<td data-label="Postgres">SQL: будь-які <code>WHERE</code>, <code>JOIN</code></td>
+<td data-label="DynamoDB">лише за ключем або індексом</td>
 </tr>
 <tr>
-<td>Як проєктують</td>
-<td>спершу дані, потім запити</td>
-<td><strong>спершу запити</strong>, потім під них ключі</td>
+<td data-label="">Як проєктують</td>
+<td data-label="Postgres">спершу дані, потім запити</td>
+<td data-label="DynamoDB"><strong>спершу запити</strong>, потім під них ключі</td>
 </tr>
 <tr>
-<td>Масштаб</td>
-<td>більший сервер</td>
-<td>більше розділів, майже без меж</td>
+<td data-label="">Масштаб</td>
+<td data-label="Postgres">більший сервер</td>
+<td data-label="DynamoDB">більше розділів, майже без меж</td>
 </tr>
 <tr>
-<td>Оплата</td>
-<td>за сервер</td>
-<td>за запити або за зарезервовану потужність</td>
+<td data-label="">Оплата</td>
+<td data-label="Postgres">за сервер</td>
+<td data-label="DynamoDB">за запити або за зарезервовану потужність</td>
 </tr>
 </tbody>
 </table>
@@ -153,16 +163,16 @@
 </thead>
 <tbody>
 <tr>
-<td><code>GetItem</code></td>
-<td>один запис за <strong>повним</strong> ключем</td>
+<td data-label="Операція"><code>GetItem</code></td>
+<td data-label="Що робить">один запис за <strong>повним</strong> ключем</td>
 </tr>
 <tr>
-<td><code>Query</code></td>
-<td>записи з <strong>одним</strong> partition key (можна з умовою на sort key)</td>
+<td data-label="Операція"><code>Query</code></td>
+<td data-label="Що робить">записи з <strong>одним</strong> partition key (можна з умовою на sort key)</td>
 </tr>
 <tr>
-<td><code>Scan</code></td>
-<td><strong>усю</strong> таблицю</td>
+<td data-label="Операція"><code>Scan</code></td>
+<td data-label="Що робить"><strong>усю</strong> таблицю</td>
 </tr>
 </tbody>
 </table>
@@ -185,14 +195,14 @@
 </thead>
 <tbody>
 <tr>
-<td>Eventually consistent (за замовчуванням)</td>
-<td>можна отримати трохи застаріле, за мить буде свіже</td>
-<td>1x</td>
+<td data-label="Режим">Eventually consistent (за замовчуванням)</td>
+<td data-label="Що гарантує">можна отримати трохи застаріле, за мить буде свіже</td>
+<td data-label="Ціна">1x</td>
 </tr>
 <tr>
-<td>Strongly consistent (<code>ConsistentRead: true</code>)</td>
-<td>завжди останній успішний запис</td>
-<td>2x</td>
+<td data-label="Режим">Strongly consistent (<code>ConsistentRead: true</code>)</td>
+<td data-label="Що гарантує">завжди останній успішний запис</td>
+<td data-label="Ціна">2x</td>
 </tr>
 </tbody>
 </table>

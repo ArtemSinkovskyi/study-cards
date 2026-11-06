@@ -17,6 +17,16 @@
   th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
   td code, th code { white-space:nowrap; }
   th { background:#fff; }
+  @media (max-width: 640px) {
+    table, thead, tbody, tr, td { display:block; min-width:0; }
+    table { overflow:visible; }
+    thead { display:none; }
+    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
+    td { border:none; padding:.25rem 0; }
+    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
+    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
+    td code, th code { white-space:normal; }
+  }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -73,8 +83,8 @@
 </thead>
 <tbody>
 <tr>
-<td>«Не використовуй markdown»</td>
-<td>«Відповідь складається з плавних абзаців прози»</td>
+<td data-label="Замість">«Не використовуй markdown»</td>
+<td data-label="Пишіть">«Відповідь складається з плавних абзаців прози»</td>
 </tr>
 </tbody>
 </table>
@@ -90,16 +100,16 @@
 </thead>
 <tbody>
 <tr>
-<td>Примусовий формат (JSON)</td>
-<td>structured outputs; для класифікації інструмент з <code>enum</code></td>
+<td data-label="Для чого був prefill">Примусовий формат (JSON)</td>
+<td data-label="Чим замінити">structured outputs; для класифікації інструмент з <code>enum</code></td>
 </tr>
 <tr>
-<td>Прибрати вступ «Here is...»</td>
-<td>Пряма інструкція «Відповідай без вступу»</td>
+<td data-label="Для чого був prefill">Прибрати вступ «Here is...»</td>
+<td data-label="Чим замінити">Пряма інструкція «Відповідай без вступу»</td>
 </tr>
 <tr>
-<td>Продовжити обірвану відповідь</td>
-<td>Перенести у user: «Твоя відповідь обірвалась на …, продовж»</td>
+<td data-label="Для чого був prefill">Продовжити обірвану відповідь</td>
+<td data-label="Чим замінити">Перенести у user: «Твоя відповідь обірвалась на …, продовж»</td>
 </tr>
 </tbody>
 </table>
@@ -137,14 +147,14 @@
 </thead>
 <tbody>
 <tr>
-<td>Кодом</td>
-<td>Категорії, детерміновані відповіді</td>
-<td>Exact match, ROUGE-L</td>
+<td data-label="Вид">Кодом</td>
+<td data-label="Для чого">Категорії, детерміновані відповіді</td>
+<td data-label="Приклади">Exact match, ROUGE-L</td>
 </tr>
 <tr>
-<td>Моделлю</td>
-<td>Нюанси (тон, емпатія)</td>
-<td>Шкала 1-5, так/ні</td>
+<td data-label="Вид">Моделлю</td>
+<td data-label="Для чого">Нюанси (тон, емпатія)</td>
+<td data-label="Приклади">Шкала 1-5, так/ні</td>
 </tr>
 </tbody>
 </table>

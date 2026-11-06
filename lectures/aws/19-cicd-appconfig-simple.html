@@ -17,6 +17,16 @@
   th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
   td code, th code { white-space:nowrap; }
   th { background:#fff; }
+  @media (max-width: 640px) {
+    table, thead, tbody, tr, td { display:block; min-width:0; }
+    table { overflow:visible; }
+    thead { display:none; }
+    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
+    td { border:none; padding:.25rem 0; }
+    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
+    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
+    td code, th code { white-space:normal; }
+  }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -50,32 +60,32 @@
 </thead>
 <tbody>
 <tr>
-<td>GitHub</td>
-<td>GitHub чи інший репозиторій (CodeCommit поза фокусом C03)</td>
+<td data-label="Звичне">GitHub</td>
+<td data-label="В AWS">GitHub чи інший репозиторій (CodeCommit поза фокусом C03)</td>
 </tr>
 <tr>
-<td>GitHub Actions workflow</td>
-<td><strong>CodePipeline</strong></td>
+<td data-label="Звичне">GitHub Actions workflow</td>
+<td data-label="В AWS"><strong>CodePipeline</strong></td>
 </tr>
 <tr>
-<td>кроки <code>run:</code></td>
-<td><strong>CodeBuild</strong> і <code>buildspec.yml</code></td>
+<td data-label="Звичне">кроки <code>run:</code></td>
+<td data-label="В AWS"><strong>CodeBuild</strong> і <code>buildspec.yml</code></td>
 </tr>
 <tr>
-<td><code>DeploymentPreference</code> у SAM</td>
-<td><strong>CodeDeploy</strong></td>
+<td data-label="Звичне"><code>DeploymentPreference</code> у SAM</td>
+<td data-label="В AWS"><strong>CodeDeploy</strong></td>
 </tr>
 <tr>
-<td>GitHub Secrets</td>
-<td>Secrets Manager, Parameter Store</td>
+<td data-label="Звичне">GitHub Secrets</td>
+<td data-label="В AWS">Secrets Manager, Parameter Store</td>
 </tr>
 <tr>
-<td>приватні пакети (npm, Maven)</td>
-<td><strong>CodeArtifact</strong></td>
+<td data-label="Звичне">приватні пакети (npm, Maven)</td>
+<td data-label="В AWS"><strong>CodeArtifact</strong></td>
 </tr>
 <tr>
-<td>environment variables сервісів</td>
-<td><strong>AppConfig</strong>, Parameter Store</td>
+<td data-label="Звичне">environment variables сервісів</td>
+<td data-label="В AWS"><strong>AppConfig</strong>, Parameter Store</td>
 </tr>
 </tbody>
 </table>
@@ -89,40 +99,40 @@
 </thead>
 <tbody>
 <tr>
-<td>pipeline</td>
-<td>весь процес</td>
+<td data-label="Термін">pipeline</td>
+<td data-label="Суть">весь процес</td>
 </tr>
 <tr>
-<td>stage</td>
-<td>етап: Source, Build, Deploy</td>
+<td data-label="Термін">stage</td>
+<td data-label="Суть">етап: Source, Build, Deploy</td>
 </tr>
 <tr>
-<td>action</td>
-<td>дія в етапі</td>
+<td data-label="Термін">action</td>
+<td data-label="Суть">дія в етапі</td>
 </tr>
 <tr>
-<td>artifact</td>
-<td>файл, що передається між діями</td>
+<td data-label="Термін">artifact</td>
+<td data-label="Суть">файл, що передається між діями</td>
 </tr>
 <tr>
-<td>transition</td>
-<td>перехід між етапами, його можна вимкнути</td>
+<td data-label="Термін">transition</td>
+<td data-label="Суть">перехід між етапами, його можна вимкнути</td>
 </tr>
 <tr>
-<td>buildspec</td>
-<td>рецепт збірки</td>
+<td data-label="Термін">buildspec</td>
+<td data-label="Суть">рецепт збірки</td>
 </tr>
 <tr>
-<td>appspec</td>
-<td>рецепт деплою</td>
+<td data-label="Термін">appspec</td>
+<td data-label="Суть">рецепт деплою</td>
 </tr>
 <tr>
-<td>deployment group</td>
-<td>куди деплоїти</td>
+<td data-label="Термін">deployment group</td>
+<td data-label="Суть">куди деплоїти</td>
 </tr>
 <tr>
-<td>feature flag</td>
-<td>вмикач функції без деплою</td>
+<td data-label="Термін">feature flag</td>
+<td data-label="Суть">вмикач функції без деплою</td>
 </tr>
 </tbody>
 </table>
@@ -171,46 +181,46 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>All at once</strong></td>
-<td>усе одразу</td>
-<td>можливий</td>
-<td>новий деплой</td>
+<td data-label="Стратегія"><strong>All at once</strong></td>
+<td data-label="Як">усе одразу</td>
+<td data-label="Простій">можливий</td>
+<td data-label="Відкат">новий деплой</td>
 </tr>
 <tr>
-<td><strong>Rolling</strong></td>
-<td>частинами</td>
-<td>ні, зменшена потужність</td>
-<td>новий деплой</td>
+<td data-label="Стратегія"><strong>Rolling</strong></td>
+<td data-label="Як">частинами</td>
+<td data-label="Простій">ні, зменшена потужність</td>
+<td data-label="Відкат">новий деплой</td>
 </tr>
 <tr>
-<td><strong>Rolling with extra batch</strong></td>
-<td>спершу додатковий набір</td>
-<td>ні</td>
-<td></td>
+<td data-label="Стратегія"><strong>Rolling with extra batch</strong></td>
+<td data-label="Як">спершу додатковий набір</td>
+<td data-label="Простій">ні</td>
+<td data-label="Відкат"></td>
 </tr>
 <tr>
-<td><strong>Immutable</strong></td>
-<td>нові інстанси, потім заміна</td>
-<td>ні</td>
-<td>швидкий</td>
+<td data-label="Стратегія"><strong>Immutable</strong></td>
+<td data-label="Як">нові інстанси, потім заміна</td>
+<td data-label="Простій">ні</td>
+<td data-label="Відкат">швидкий</td>
 </tr>
 <tr>
-<td><strong>Blue/Green</strong></td>
-<td>дві копії, перемикання трафіку</td>
-<td>ні</td>
-<td>миттєвий</td>
+<td data-label="Стратегія"><strong>Blue/Green</strong></td>
+<td data-label="Як">дві копії, перемикання трафіку</td>
+<td data-label="Простій">ні</td>
+<td data-label="Відкат">миттєвий</td>
 </tr>
 <tr>
-<td><strong>Canary</strong></td>
-<td>малий відсоток, потім решта</td>
-<td>ні</td>
-<td>автоматичний</td>
+<td data-label="Стратегія"><strong>Canary</strong></td>
+<td data-label="Як">малий відсоток, потім решта</td>
+<td data-label="Простій">ні</td>
+<td data-label="Відкат">автоматичний</td>
 </tr>
 <tr>
-<td><strong>Linear</strong></td>
-<td>рівними частками через інтервали</td>
-<td>ні</td>
-<td>автоматичний</td>
+<td data-label="Стратегія"><strong>Linear</strong></td>
+<td data-label="Як">рівними частками через інтервали</td>
+<td data-label="Простій">ні</td>
+<td data-label="Відкат">автоматичний</td>
 </tr>
 </tbody>
 </table>
@@ -231,20 +241,20 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>CloudFormation</strong></td>
-<td>YAML/JSON, стеки, основа всього</td>
+<td data-label=""><strong>CloudFormation</strong></td>
+<td data-label="Суть">YAML/JSON, стеки, основа всього</td>
 </tr>
 <tr>
-<td><strong>SAM</strong></td>
-<td>скорочення над CloudFormation для serverless (<code>Transform</code>)</td>
+<td data-label=""><strong>SAM</strong></td>
+<td data-label="Суть">скорочення над CloudFormation для serverless (<code>Transform</code>)</td>
 </tr>
 <tr>
-<td><strong>CDK</strong></td>
-<td>інфраструктура кодом (наприклад TypeScript), синтезується в CloudFormation</td>
+<td data-label=""><strong>CDK</strong></td>
+<td data-label="Суть">інфраструктура кодом (наприклад TypeScript), синтезується в CloudFormation</td>
 </tr>
 <tr>
-<td><strong>Terraform</strong></td>
-<td>не AWS-сервіс</td>
+<td data-label=""><strong>Terraform</strong></td>
+<td data-label="Суть">не AWS-сервіс</td>
 </tr>
 </tbody>
 </table>
@@ -262,24 +272,24 @@
 </thead>
 <tbody>
 <tr>
-<td>секрет із ротацією</td>
-<td>Secrets Manager</td>
+<td data-label="Потрібно">секрет із ротацією</td>
+<td data-label="Сервіс">Secrets Manager</td>
 </tr>
 <tr>
-<td>просте значення, параметр</td>
-<td>Parameter Store</td>
+<td data-label="Потрібно">просте значення, параметр</td>
+<td data-label="Сервіс">Parameter Store</td>
 </tr>
 <tr>
-<td>feature flag, поступове розгортання, відкат</td>
-<td><strong>AppConfig</strong></td>
+<td data-label="Потрібно">feature flag, поступове розгортання, відкат</td>
+<td data-label="Сервіс"><strong>AppConfig</strong></td>
 </tr>
 <tr>
-<td>значення на стадії API</td>
-<td>Stage variables</td>
+<td data-label="Потрібно">значення на стадії API</td>
+<td data-label="Сервіс">Stage variables</td>
 </tr>
 <tr>
-<td>значення функції</td>
-<td>змінні середовища Lambda</td>
+<td data-label="Потрібно">значення функції</td>
+<td data-label="Сервіс">змінні середовища Lambda</td>
 </tr>
 </tbody>
 </table>

@@ -17,6 +17,16 @@
   th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
   td code, th code { white-space:nowrap; }
   th { background:#fff; }
+  @media (max-width: 640px) {
+    table, thead, tbody, tr, td { display:block; min-width:0; }
+    table { overflow:visible; }
+    thead { display:none; }
+    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
+    td { border:none; padding:.25rem 0; }
+    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
+    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
+    td code, th code { white-space:normal; }
+  }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -49,28 +59,28 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>Bucket</strong></td>
-<td>контейнер верхнього рівня; ім'я <strong>глобально унікальне</strong>, бакет живе в <strong>одному регіоні</strong>; вкладених бакетів нема; типово 100 на акаунт (можна збільшити)</td>
+<td data-label="Термін"><strong>Bucket</strong></td>
+<td data-label="Суть">контейнер верхнього рівня; ім'я <strong>глобально унікальне</strong>, бакет живе в <strong>одному регіоні</strong>; вкладених бакетів нема; типово 100 на акаунт (можна збільшити)</td>
 </tr>
 <tr>
-<td><strong>Object</strong></td>
-<td>файл плюс метадані; від 0 байт до <strong>48,8 ТіБ</strong>; одним PUT до <strong>5 ГБ</strong></td>
+<td data-label="Термін"><strong>Object</strong></td>
+<td data-label="Суть">файл плюс метадані; від 0 байт до <strong>48,8 ТіБ</strong>; одним PUT до <strong>5 ГБ</strong></td>
 </tr>
 <tr>
-<td><strong>Key</strong></td>
-<td>повне ім'я об'єкта, до 1024 байт; S3 плоский, <code>/</code> лише символ у ключі, а «теки» в консолі це <strong>prefix</strong></td>
+<td data-label="Термін"><strong>Key</strong></td>
+<td data-label="Суть">повне ім'я об'єкта, до 1024 байт; S3 плоский, <code>/</code> лише символ у ключі, а «теки» в консолі це <strong>prefix</strong></td>
 </tr>
 <tr>
-<td>Метадані</td>
-<td>системні (<code>Content-Type</code>, <code>Content-Length</code>, <code>ETag</code>, <code>Last-Modified</code>) і користувацькі <code>x-amz-meta-*</code></td>
+<td data-label="Термін">Метадані</td>
+<td data-label="Суть">системні (<code>Content-Type</code>, <code>Content-Length</code>, <code>ETag</code>, <code>Last-Modified</code>) і користувацькі <code>x-amz-meta-*</code></td>
 </tr>
 <tr>
-<td><strong>Теги</strong></td>
-<td>до <strong>10</strong> пар; можна змінювати, годяться для прав і lifecycle</td>
+<td data-label="Термін"><strong>Теги</strong></td>
+<td data-label="Суть">до <strong>10</strong> пар; можна змінювати, годяться для прав і lifecycle</td>
 </tr>
 <tr>
-<td><code>versionId</code></td>
-<td>ідентифікатор версії</td>
+<td data-label="Термін"><code>versionId</code></td>
+<td data-label="Суть">ідентифікатор версії</td>
 </tr>
 </tbody>
 </table>
@@ -93,52 +103,52 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>Standard</strong></td>
-<td>часто потрібні дані</td>
-<td>миттєво</td>
-<td>нема</td>
+<td data-label="Клас"><strong>Standard</strong></td>
+<td data-label="Для чого">часто потрібні дані</td>
+<td data-label="Доступ">миттєво</td>
+<td data-label="Мін. зберігання">нема</td>
 </tr>
 <tr>
-<td><strong>Express One Zone</strong></td>
-<td>дуже низька затримка (одиниці мс), одна AZ</td>
-<td>миттєво</td>
-<td>нема</td>
+<td data-label="Клас"><strong>Express One Zone</strong></td>
+<td data-label="Для чого">дуже низька затримка (одиниці мс), одна AZ</td>
+<td data-label="Доступ">миттєво</td>
+<td data-label="Мін. зберігання">нема</td>
 </tr>
 <tr>
-<td><strong>Intelligent-Tiering</strong></td>
-<td>невідомий патерн доступу</td>
-<td>миттєво, автоматично переміщає (30 днів без доступу: Infrequent, 90: Archive Instant Access; архівні рівні опційні; об'єкти менше 128 КБ не моніторяться)</td>
-<td>нема (є плата за моніторинг)</td>
+<td data-label="Клас"><strong>Intelligent-Tiering</strong></td>
+<td data-label="Для чого">невідомий патерн доступу</td>
+<td data-label="Доступ">миттєво, автоматично переміщає (30 днів без доступу: Infrequent, 90: Archive Instant Access; архівні рівні опційні; об'єкти менше 128 КБ не моніторяться)</td>
+<td data-label="Мін. зберігання">нема (є плата за моніторинг)</td>
 </tr>
 <tr>
-<td><strong>Standard-IA</strong></td>
-<td>рідко, але швидко</td>
-<td>миттєво</td>
-<td>30 днів</td>
+<td data-label="Клас"><strong>Standard-IA</strong></td>
+<td data-label="Для чого">рідко, але швидко</td>
+<td data-label="Доступ">миттєво</td>
+<td data-label="Мін. зберігання">30 днів</td>
 </tr>
 <tr>
-<td><strong>One Zone-IA</strong></td>
-<td>рідко, відтворювані дані</td>
-<td>миттєво, одна AZ</td>
-<td>30 днів</td>
+<td data-label="Клас"><strong>One Zone-IA</strong></td>
+<td data-label="Для чого">рідко, відтворювані дані</td>
+<td data-label="Доступ">миттєво, одна AZ</td>
+<td data-label="Мін. зберігання">30 днів</td>
 </tr>
 <tr>
-<td><strong>Glacier Instant Retrieval</strong></td>
-<td>архів з миттєвим доступом</td>
-<td>мілісекунди</td>
-<td>90 днів</td>
+<td data-label="Клас"><strong>Glacier Instant Retrieval</strong></td>
+<td data-label="Для чого">архів з миттєвим доступом</td>
+<td data-label="Доступ">мілісекунди</td>
+<td data-label="Мін. зберігання">90 днів</td>
 </tr>
 <tr>
-<td><strong>Glacier Flexible Retrieval</strong></td>
-<td>архів</td>
-<td>хвилини-години</td>
-<td>90 днів</td>
+<td data-label="Клас"><strong>Glacier Flexible Retrieval</strong></td>
+<td data-label="Для чого">архів</td>
+<td data-label="Доступ">хвилини-години</td>
+<td data-label="Мін. зберігання">90 днів</td>
 </tr>
 <tr>
-<td><strong>Glacier Deep Archive</strong></td>
-<td>найдешевший архів</td>
-<td>до 12-48 год</td>
-<td>180 днів</td>
+<td data-label="Клас"><strong>Glacier Deep Archive</strong></td>
+<td data-label="Для чого">найдешевший архів</td>
+<td data-label="Доступ">до 12-48 год</td>
+<td data-label="Мін. зберігання">180 днів</td>
 </tr>
 </tbody>
 </table>
@@ -158,52 +168,52 @@
 </thead>
 <tbody>
 <tr>
-<td>Standard</td>
-<td>~0,023</td>
-<td>безкоштовно (лише запити)</td>
-<td>нема</td>
-<td>нема</td>
-<td><code>GetObject</code></td>
+<td data-label="Клас">Standard</td>
+<td data-label="Зберігання">~0,023</td>
+<td data-label="Читання">безкоштовно (лише запити)</td>
+<td data-label="Мін. термін">нема</td>
+<td data-label="Мін. розмір рахунку">нема</td>
+<td data-label="Як отримати"><code>GetObject</code></td>
 </tr>
 <tr>
-<td>Standard-IA</td>
-<td>~0,0125</td>
-<td>плата за ГБ</td>
-<td>30 днів</td>
-<td>128 КБ</td>
-<td><code>GetObject</code></td>
+<td data-label="Клас">Standard-IA</td>
+<td data-label="Зберігання">~0,0125</td>
+<td data-label="Читання">плата за ГБ</td>
+<td data-label="Мін. термін">30 днів</td>
+<td data-label="Мін. розмір рахунку">128 КБ</td>
+<td data-label="Як отримати"><code>GetObject</code></td>
 </tr>
 <tr>
-<td>One Zone-IA</td>
-<td>~0,01</td>
-<td>плата за ГБ</td>
-<td>30 днів</td>
-<td>128 КБ</td>
-<td><code>GetObject</code></td>
+<td data-label="Клас">One Zone-IA</td>
+<td data-label="Зберігання">~0,01</td>
+<td data-label="Читання">плата за ГБ</td>
+<td data-label="Мін. термін">30 днів</td>
+<td data-label="Мін. розмір рахунку">128 КБ</td>
+<td data-label="Як отримати"><code>GetObject</code></td>
 </tr>
 <tr>
-<td>Glacier Instant</td>
-<td>~0,004</td>
-<td>висока плата за ГБ</td>
-<td>90 днів</td>
-<td>128 КБ</td>
-<td><code>GetObject</code> (мс)</td>
+<td data-label="Клас">Glacier Instant</td>
+<td data-label="Зберігання">~0,004</td>
+<td data-label="Читання">висока плата за ГБ</td>
+<td data-label="Мін. термін">90 днів</td>
+<td data-label="Мін. розмір рахунку">128 КБ</td>
+<td data-label="Як отримати"><code>GetObject</code> (мс)</td>
 </tr>
 <tr>
-<td>Glacier Flexible</td>
-<td>~0,0036</td>
-<td>залежить від швидкості</td>
-<td>90 днів</td>
-<td>нема</td>
-<td>спершу <strong>restore</strong>, потім <code>GetObject</code></td>
+<td data-label="Клас">Glacier Flexible</td>
+<td data-label="Зберігання">~0,0036</td>
+<td data-label="Читання">залежить від швидкості</td>
+<td data-label="Мін. термін">90 днів</td>
+<td data-label="Мін. розмір рахунку">нема</td>
+<td data-label="Як отримати">спершу <strong>restore</strong>, потім <code>GetObject</code></td>
 </tr>
 <tr>
-<td>Deep Archive</td>
-<td>~0,001</td>
-<td>залежить від швидкості</td>
-<td>180 днів</td>
-<td>нема</td>
-<td>спершу <strong>restore</strong></td>
+<td data-label="Клас">Deep Archive</td>
+<td data-label="Зберігання">~0,001</td>
+<td data-label="Читання">залежить від швидкості</td>
+<td data-label="Мін. термін">180 днів</td>
+<td data-label="Мін. розмір рахунку">нема</td>
+<td data-label="Як отримати">спершу <strong>restore</strong></td>
 </tr>
 </tbody>
 </table>
@@ -222,28 +232,28 @@
 </thead>
 <tbody>
 <tr>
-<td>часто читають</td>
-<td>Standard</td>
+<td data-label="Умова в задачі">часто читають</td>
+<td data-label="Клас">Standard</td>
 </tr>
 <tr>
-<td>невідомо, як читатимуть</td>
-<td>Intelligent-Tiering</td>
+<td data-label="Умова в задачі">невідомо, як читатимуть</td>
+<td data-label="Клас">Intelligent-Tiering</td>
 </tr>
 <tr>
-<td>рідко, але потрібно відразу</td>
-<td>Standard-IA (відтворювані: One Zone-IA)</td>
+<td data-label="Умова в задачі">рідко, але потрібно відразу</td>
+<td data-label="Клас">Standard-IA (відтворювані: One Zone-IA)</td>
 </tr>
 <tr>
-<td>архів, але потрібні мілісекунди</td>
-<td>Glacier Instant</td>
+<td data-label="Умова в задачі">архів, але потрібні мілісекунди</td>
+<td data-label="Клас">Glacier Instant</td>
 </tr>
 <tr>
-<td>архів, години чекати можна</td>
-<td>Glacier Flexible</td>
+<td data-label="Умова в задачі">архів, години чекати можна</td>
+<td data-label="Клас">Glacier Flexible</td>
 </tr>
 <tr>
-<td>архів на роки, найдешевше</td>
-<td>Deep Archive</td>
+<td data-label="Умова в задачі">архів на роки, найдешевше</td>
+<td data-label="Клас">Deep Archive</td>
 </tr>
 </tbody>
 </table>
@@ -259,20 +269,20 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>Transition</strong></td>
-<td>перенести в інший клас через N днів; об'єкти менше 128 КБ за замовчуванням не переходять (з вересня 2024), дозволити можна фільтром за розміром</td>
+<td data-label="Правило"><strong>Transition</strong></td>
+<td data-label="Що робить">перенести в інший клас через N днів; об'єкти менше 128 КБ за замовчуванням не переходять (з вересня 2024), дозволити можна фільтром за розміром</td>
 </tr>
 <tr>
-<td><strong>Expiration</strong></td>
-<td>видалити через N днів (у версійованому бакеті створює delete marker)</td>
+<td data-label="Правило"><strong>Expiration</strong></td>
+<td data-label="Що робить">видалити через N днів (у версійованому бакеті створює delete marker)</td>
 </tr>
 <tr>
-<td><strong>NoncurrentVersionExpiration</strong></td>
-<td>видалити старі версії</td>
+<td data-label="Правило"><strong>NoncurrentVersionExpiration</strong></td>
+<td data-label="Що робить">видалити старі версії</td>
 </tr>
 <tr>
-<td><strong>AbortIncompleteMultipartUpload</strong></td>
-<td>прибрати недозавантажені частини (вони коштують грошей, поки лежать)</td>
+<td data-label="Правило"><strong>AbortIncompleteMultipartUpload</strong></td>
+<td data-label="Що робить">прибрати недозавантажені частини (вони коштують грошей, поки лежать)</td>
 </tr>
 </tbody>
 </table>
@@ -295,14 +305,14 @@
 </thead>
 <tbody>
 <tr>
-<td>Lambda, SQS, SNS</td>
-<td><code>NotificationConfiguration</code> на бакеті</td>
-<td>простий випадок, один споживач, фільтри префікс і суфікс</td>
+<td data-label="Куди">Lambda, SQS, SNS</td>
+<td data-label="Конфіг"><code>NotificationConfiguration</code> на бакеті</td>
+<td data-label="Коли обирати">простий випадок, один споживач, фільтри префікс і суфікс</td>
 </tr>
 <tr>
-<td><strong>EventBridge</strong></td>
-<td>вмикається прапорцем на бакеті</td>
-<td>багато споживачів, фільтр за будь-якими полями, архів і replay, кілька цілей</td>
+<td data-label="Куди"><strong>EventBridge</strong></td>
+<td data-label="Конфіг">вмикається прапорцем на бакеті</td>
+<td data-label="Коли обирати">багато споживачів, фільтр за будь-якими полями, архів і replay, кілька цілей</td>
 </tr>
 </tbody>
 </table>
@@ -323,24 +333,24 @@
 </thead>
 <tbody>
 <tr>
-<td>Single PUT</td>
-<td>до 5 ГБ за запит</td>
+<td data-label="Механізм">Single PUT</td>
+<td data-label="Суть">до 5 ГБ за запит</td>
 </tr>
 <tr>
-<td><strong>Multipart upload</strong></td>
-<td>рекомендовано від 100 МБ, <strong>обов'язково понад 5 ГБ</strong>; частини 5 МБ - 5 ГБ, до <strong>10 000</strong> частин; паралельно, повтор лише невдалих частин</td>
+<td data-label="Механізм"><strong>Multipart upload</strong></td>
+<td data-label="Суть">рекомендовано від 100 МБ, <strong>обов'язково понад 5 ГБ</strong>; частини 5 МБ - 5 ГБ, до <strong>10 000</strong> частин; паралельно, повтор лише невдалих частин</td>
 </tr>
 <tr>
-<td><strong>Transfer Acceleration</strong></td>
-<td>вхід через найближчий edge-вузол CloudFront (додаткова плата)</td>
+<td data-label="Механізм"><strong>Transfer Acceleration</strong></td>
+<td data-label="Суть">вхід через найближчий edge-вузол CloudFront (додаткова плата)</td>
 </tr>
 <tr>
-<td><strong>Byte-range fetch</strong></td>
-<td>читання частини об'єкта (<code>Range</code>), паралельне завантаження</td>
+<td data-label="Механізм"><strong>Byte-range fetch</strong></td>
+<td data-label="Суть">читання частини об'єкта (<code>Range</code>), паралельне завантаження</td>
 </tr>
 <tr>
-<td><strong>S3 Select / Glacier Select</strong></td>
-<td>вибірка рядків з CSV, JSON, Parquet на боці S3 (нові клієнти не підключаються)</td>
+<td data-label="Механізм"><strong>S3 Select / Glacier Select</strong></td>
+<td data-label="Суть">вибірка рядків з CSV, JSON, Parquet на боці S3 (нові клієнти не підключаються)</td>
 </tr>
 </tbody>
 </table>
@@ -357,28 +367,28 @@
 </thead>
 <tbody>
 <tr>
-<td>Replication (CRR, SRR)</td>
-<td>асинхронне копіювання нових об'єктів в інший бакет між регіонами чи в межах регіону; потрібне версіонування</td>
+<td data-label="Тема">Replication (CRR, SRR)</td>
+<td data-label="Суть">асинхронне копіювання нових об'єктів в інший бакет між регіонами чи в межах регіону; потрібне версіонування</td>
 </tr>
 <tr>
-<td>Requester Pays</td>
-<td>платить той, хто читає (спільні дані)</td>
+<td data-label="Тема">Requester Pays</td>
+<td data-label="Суть">платить той, хто читає (спільні дані)</td>
 </tr>
 <tr>
-<td>Inventory, Storage Lens</td>
-<td>звіти про вміст і метрики</td>
+<td data-label="Тема">Inventory, Storage Lens</td>
+<td data-label="Суть">звіти про вміст і метрики</td>
 </tr>
 <tr>
-<td>Static website hosting</td>
-<td>сайт із бакета (HTTP; для HTTPS потрібен CloudFront)</td>
+<td data-label="Тема">Static website hosting</td>
+<td data-label="Суть">сайт із бакета (HTTP; для HTTPS потрібен CloudFront)</td>
 </tr>
 <tr>
-<td>Batch Operations</td>
-<td>масові дії над мільйонами об'єктів</td>
+<td data-label="Тема">Batch Operations</td>
+<td data-label="Суть">масові дії над мільйонами об'єктів</td>
 </tr>
 <tr>
-<td>Outposts, Object Lambda, Multi-Region Access Points</td>
-<td>рідкісні, лише теорія</td>
+<td data-label="Тема">Outposts, Object Lambda, Multi-Region Access Points</td>
+<td data-label="Суть">рідкісні, лише теорія</td>
 </tr>
 </tbody>
 </table>

@@ -17,6 +17,16 @@
   th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
   td code, th code { white-space:nowrap; }
   th { background:#fff; }
+  @media (max-width: 640px) {
+    table, thead, tbody, tr, td { display:block; min-width:0; }
+    table { overflow:visible; }
+    thead { display:none; }
+    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
+    td { border:none; padding:.25rem 0; }
+    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
+    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
+    td code, th code { white-space:normal; }
+  }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -51,44 +61,44 @@
 </thead>
 <tbody>
 <tr>
-<td>Lambda</td>
-<td>подія приходить об'єктом, відповідь серіалізується в JSON</td>
-<td><code>Date</code>, <code>BigInt</code>, цикли не переживуть JSON</td>
+<td data-label="Де">Lambda</td>
+<td data-label="Що відбувається">подія приходить об'єктом, відповідь серіалізується в JSON</td>
+<td data-label="Пастка"><code>Date</code>, <code>BigInt</code>, цикли не переживуть JSON</td>
 </tr>
 <tr>
-<td>API Gateway proxy</td>
-<td><code>event.body</code> це <strong>рядок</strong></td>
-<td><code>JSON.parse</code> на вході, <code>JSON.stringify</code> на виході, інакше 502</td>
+<td data-label="Де">API Gateway proxy</td>
+<td data-label="Що відбувається"><code>event.body</code> це <strong>рядок</strong></td>
+<td data-label="Пастка"><code>JSON.parse</code> на вході, <code>JSON.stringify</code> на виході, інакше 502</td>
 </tr>
 <tr>
-<td>SQS</td>
-<td><code>Body</code> завжди рядок</td>
-<td>свій JSON кладете самі</td>
+<td data-label="Де">SQS</td>
+<td data-label="Що відбувається"><code>Body</code> завжди рядок</td>
+<td data-label="Пастка">свій JSON кладете самі</td>
 </tr>
 <tr>
-<td>SNS → SQS</td>
-<td>конверт SNS всередині <code>Body</code></td>
-<td>подвійний <code>JSON.parse</code> або raw delivery</td>
+<td data-label="Де">SNS → SQS</td>
+<td data-label="Що відбувається">конверт SNS всередині <code>Body</code></td>
+<td data-label="Пастка">подвійний <code>JSON.parse</code> або raw delivery</td>
 </tr>
 <tr>
-<td>Kinesis</td>
-<td><code>data</code> у події Lambda в <strong>base64</strong></td>
-<td><code>Buffer.from(data, &quot;base64&quot;).toString()</code></td>
+<td data-label="Де">Kinesis</td>
+<td data-label="Що відбувається"><code>data</code> у події Lambda в <strong>base64</strong></td>
+<td data-label="Пастка"><code>Buffer.from(data, &quot;base64&quot;).toString()</code></td>
 </tr>
 <tr>
-<td>Firehose</td>
-<td>повернути <code>data</code> теж треба в base64</td>
-<td></td>
+<td data-label="Де">Firehose</td>
+<td data-label="Що відбувається">повернути <code>data</code> теж треба в base64</td>
+<td data-label="Пастка"></td>
 </tr>
 <tr>
-<td>DynamoDB низького рівня</td>
-<td>значення з типом: <code>{&quot;S&quot;:&quot;text&quot;}</code>, <code>{&quot;N&quot;:&quot;5&quot;}</code></td>
-<td>числа передаються рядком</td>
+<td data-label="Де">DynamoDB низького рівня</td>
+<td data-label="Що відбувається">значення з типом: <code>{&quot;S&quot;:&quot;text&quot;}</code>, <code>{&quot;N&quot;:&quot;5&quot;}</code></td>
+<td data-label="Пастка">числа передаються рядком</td>
 </tr>
 <tr>
-<td>S3</td>
-<td><code>Body</code> це потік</td>
-<td><code>transformToByteArray()</code> чи <code>transformToString()</code></td>
+<td data-label="Де">S3</td>
+<td data-label="Що відбувається"><code>Body</code> це потік</td>
+<td data-label="Пастка"><code>transformToByteArray()</code> чи <code>transformToString()</code></td>
 </tr>
 </tbody>
 </table>
@@ -108,46 +118,46 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>All at once</strong></td>
-<td><strong>так</strong></td>
-<td>наявні інстанси</td>
-<td>ручний redeploy</td>
-<td>найшвидше</td>
+<td data-label="Політика"><strong>All at once</strong></td>
+<td data-label="Простій"><strong>так</strong></td>
+<td data-label="Де код">наявні інстанси</td>
+<td data-label="Відкат">ручний redeploy</td>
+<td data-label="Час">найшвидше</td>
 </tr>
 <tr>
-<td><strong>Rolling</strong></td>
-<td>ні, але менше потужності</td>
-<td>наявні</td>
-<td>ручний</td>
-<td>помірно</td>
+<td data-label="Політика"><strong>Rolling</strong></td>
+<td data-label="Простій">ні, але менше потужності</td>
+<td data-label="Де код">наявні</td>
+<td data-label="Відкат">ручний</td>
+<td data-label="Час">помірно</td>
 </tr>
 <tr>
-<td><strong>Rolling with additional batch</strong></td>
-<td>ні, потужність та сама</td>
-<td>нові й наявні</td>
-<td>ручний</td>
-<td>довше</td>
+<td data-label="Політика"><strong>Rolling with additional batch</strong></td>
+<td data-label="Простій">ні, потужність та сама</td>
+<td data-label="Де код">нові й наявні</td>
+<td data-label="Відкат">ручний</td>
+<td data-label="Час">довше</td>
 </tr>
 <tr>
-<td><strong>Immutable</strong></td>
-<td>ні</td>
-<td>нові, друга ASG</td>
-<td>видалити нові</td>
-<td>найдовше</td>
+<td data-label="Політика"><strong>Immutable</strong></td>
+<td data-label="Простій">ні</td>
+<td data-label="Де код">нові, друга ASG</td>
+<td data-label="Відкат">видалити нові</td>
+<td data-label="Час">найдовше</td>
 </tr>
 <tr>
-<td><strong>Traffic splitting</strong></td>
-<td>ні</td>
-<td>нові</td>
-<td>перенаправити трафік</td>
-<td>найдовше</td>
+<td data-label="Політика"><strong>Traffic splitting</strong></td>
+<td data-label="Простій">ні</td>
+<td data-label="Де код">нові</td>
+<td data-label="Відкат">перенаправити трафік</td>
+<td data-label="Час">найдовше</td>
 </tr>
 <tr>
-<td><strong>Blue/green</strong></td>
-<td>ні</td>
-<td>нове середовище</td>
-<td><strong>swap URL</strong></td>
-<td>найдовше</td>
+<td data-label="Політика"><strong>Blue/green</strong></td>
+<td data-label="Простій">ні</td>
+<td data-label="Де код">нове середовище</td>
+<td data-label="Відкат"><strong>swap URL</strong></td>
+<td data-label="Час">найдовше</td>
 </tr>
 </tbody>
 </table>
@@ -171,20 +181,20 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>Target tracking</strong></td>
-<td>тримає метрику на цілі, як термостат</td>
+<td data-label="Політика"><strong>Target tracking</strong></td>
+<td data-label="Як">тримає метрику на цілі, як термостат</td>
 </tr>
 <tr>
-<td><strong>Step</strong></td>
-<td>сходинки за порогами alarm</td>
+<td data-label="Політика"><strong>Step</strong></td>
+<td data-label="Як">сходинки за порогами alarm</td>
 </tr>
 <tr>
-<td><strong>Scheduled</strong></td>
-<td>за розкладом</td>
+<td data-label="Політика"><strong>Scheduled</strong></td>
+<td data-label="Як">за розкладом</td>
 </tr>
 <tr>
-<td><strong>Predictive</strong></td>
-<td>прогнозує навантаження заздалегідь</td>
+<td data-label="Політика"><strong>Predictive</strong></td>
+<td data-label="Як">прогнозує навантаження заздалегідь</td>
 </tr>
 </tbody>
 </table>
@@ -200,20 +210,20 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>Provisioned concurrency</strong></td>
-<td>заздалегідь прогріті середовища Lambda</td>
+<td data-label="Поняття"><strong>Provisioned concurrency</strong></td>
+<td data-label="Суть">заздалегідь прогріті середовища Lambda</td>
 </tr>
 <tr>
-<td><strong>Connection pooling</strong></td>
-<td>перевикористання з'єднань; RDS Proxy</td>
+<td data-label="Поняття"><strong>Connection pooling</strong></td>
+<td data-label="Суть">перевикористання з'єднань; RDS Proxy</td>
 </tr>
 <tr>
-<td><strong>Thread pool</strong></td>
-<td>обмежена кількість робочих потоків; забагато дає тиск на базу</td>
+<td data-label="Поняття"><strong>Thread pool</strong></td>
+<td data-label="Суть">обмежена кількість робочих потоків; забагато дає тиск на базу</td>
 </tr>
 <tr>
-<td><strong>Keep-alive в SDK</strong></td>
-<td>HTTP-з'єднання перевикористовуються, менша затримка</td>
+<td data-label="Поняття"><strong>Keep-alive в SDK</strong></td>
+<td data-label="Суть">HTTP-з'єднання перевикористовуються, менша затримка</td>
 </tr>
 </tbody>
 </table>
@@ -231,24 +241,24 @@
 </thead>
 <tbody>
 <tr>
-<td>Сумісність</td>
-<td>кілька рушіїв</td>
-<td>MySQL, PostgreSQL</td>
+<td data-label="">Сумісність</td>
+<td data-label="RDS">кілька рушіїв</td>
+<td data-label="Aurora">MySQL, PostgreSQL</td>
 </tr>
 <tr>
-<td>Читання</td>
-<td>read replicas</td>
-<td>до 15 реплік, reader endpoint</td>
+<td data-label="">Читання</td>
+<td data-label="RDS">read replicas</td>
+<td data-label="Aurora">до 15 реплік, reader endpoint</td>
 </tr>
 <tr>
-<td>Зберігання</td>
-<td>EBS</td>
-<td>розподілене, три AZ, росте саме</td>
+<td data-label="">Зберігання</td>
+<td data-label="RDS">EBS</td>
+<td data-label="Aurora">розподілене, три AZ, росте саме</td>
 </tr>
 <tr>
-<td>Без серверів</td>
-<td>ні</td>
-<td>Aurora Serverless v2</td>
+<td data-label="">Без серверів</td>
+<td data-label="RDS">ні</td>
+<td data-label="Aurora">Aurora Serverless v2</td>
 </tr>
 </tbody>
 </table>
@@ -266,22 +276,22 @@
 </thead>
 <tbody>
 <tr>
-<td>Тип</td>
-<td>блочний диск</td>
-<td>файлова система NFS</td>
-<td>об'єкти</td>
+<td data-label="">Тип</td>
+<td data-label="EBS">блочний диск</td>
+<td data-label="EFS">файлова система NFS</td>
+<td data-label="S3">об'єкти</td>
 </tr>
 <tr>
-<td>Підключення</td>
-<td>один EC2 у своїй AZ (зазвичай)</td>
-<td><strong>багато</strong> EC2, контейнери, Lambda</td>
-<td>HTTP API</td>
+<td data-label="">Підключення</td>
+<td data-label="EBS">один EC2 у своїй AZ (зазвичай)</td>
+<td data-label="EFS"><strong>багато</strong> EC2, контейнери, Lambda</td>
+<td data-label="S3">HTTP API</td>
 </tr>
 <tr>
-<td>Коли</td>
-<td>диск бази на EC2</td>
-<td>спільні файли</td>
-<td>файли застосунку</td>
+<td data-label="">Коли</td>
+<td data-label="EBS">диск бази на EC2</td>
+<td data-label="EFS">спільні файли</td>
+<td data-label="S3">файли застосунку</td>
 </tr>
 </tbody>
 </table>
@@ -297,32 +307,32 @@
 </thead>
 <tbody>
 <tr>
-<td>Lambda до RDS у приватній підмережі</td>
-<td>конфігурація VPC функції</td>
+<td data-label="Потреба">Lambda до RDS у приватній підмережі</td>
+<td data-label="Сервіс">конфігурація VPC функції</td>
 </tr>
 <tr>
-<td>приватний виклик S3, DynamoDB</td>
-<td><strong>gateway endpoint</strong></td>
+<td data-label="Потреба">приватний виклик S3, DynamoDB</td>
+<td data-label="Сервіс"><strong>gateway endpoint</strong></td>
 </tr>
 <tr>
-<td>приватний виклик Bedrock та інших</td>
-<td><strong>interface endpoint (PrivateLink)</strong></td>
+<td data-label="Потреба">приватний виклик Bedrock та інших</td>
+<td data-label="Сервіс"><strong>interface endpoint (PrivateLink)</strong></td>
 </tr>
 <tr>
-<td>розподіл HTTP-трафіку</td>
-<td><strong>ALB</strong> (L7, шляхи)</td>
+<td data-label="Потреба">розподіл HTTP-трафіку</td>
+<td data-label="Сервіс"><strong>ALB</strong> (L7, шляхи)</td>
 </tr>
 <tr>
-<td>TCP, статичний IP, дуже великі обсяги</td>
-<td><strong>NLB</strong> (L4)</td>
+<td data-label="Потреба">TCP, статичний IP, дуже великі обсяги</td>
+<td data-label="Сервіс"><strong>NLB</strong> (L4)</td>
 </tr>
 <tr>
-<td>DNS, перемикання за здоров'ям</td>
-<td><strong>Route 53</strong></td>
+<td data-label="Потреба">DNS, перемикання за здоров'ям</td>
+<td data-label="Сервіс"><strong>Route 53</strong></td>
 </tr>
 <tr>
-<td>захист від SQL injection, XSS</td>
-<td><strong>WAF</strong></td>
+<td data-label="Потреба">захист від SQL injection, XSS</td>
+<td data-label="Сервіс"><strong>WAF</strong></td>
 </tr>
 </tbody>
 </table>

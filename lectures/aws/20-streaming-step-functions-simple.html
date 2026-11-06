@@ -17,6 +17,16 @@
   th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
   td code, th code { white-space:nowrap; }
   th { background:#fff; }
+  @media (max-width: 640px) {
+    table, thead, tbody, tr, td { display:block; min-width:0; }
+    table { overflow:visible; }
+    thead { display:none; }
+    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
+    td { border:none; padding:.25rem 0; }
+    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
+    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
+    td code, th code { white-space:normal; }
+  }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -50,44 +60,44 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>Kinesis Data Streams</strong></td>
-<td>потік записів у реальному часі, як Kafka</td>
+<td data-label="Термін"><strong>Kinesis Data Streams</strong></td>
+<td data-label="Суть">потік записів у реальному часі, як Kafka</td>
 </tr>
 <tr>
-<td><strong>Amazon Data Firehose</strong></td>
-<td>доставка потоку в сховище без коду</td>
+<td data-label="Термін"><strong>Amazon Data Firehose</strong></td>
+<td data-label="Суть">доставка потоку в сховище без коду</td>
 </tr>
 <tr>
-<td><strong>Step Functions</strong></td>
-<td>оркестратор: процес як машина станів</td>
+<td data-label="Термін"><strong>Step Functions</strong></td>
+<td data-label="Суть">оркестратор: процес як машина станів</td>
 </tr>
 <tr>
-<td><strong>Athena</strong></td>
-<td>SQL-запити по файлах у S3</td>
+<td data-label="Термін"><strong>Athena</strong></td>
+<td data-label="Суть">SQL-запити по файлах у S3</td>
 </tr>
 <tr>
-<td>shard</td>
-<td>одиниця потужності Kinesis (як партиція Kafka)</td>
+<td data-label="Термін">shard</td>
+<td data-label="Суть">одиниця потужності Kinesis (як партиція Kafka)</td>
 </tr>
 <tr>
-<td>partition key</td>
-<td>визначає шард, дає порядок</td>
+<td data-label="Термін">partition key</td>
+<td data-label="Суть">визначає шард, дає порядок</td>
 </tr>
 <tr>
-<td>sequence number</td>
-<td>номер запису в шарді</td>
+<td data-label="Термін">sequence number</td>
+<td data-label="Суть">номер запису в шарді</td>
 </tr>
 <tr>
-<td>enhanced fan-out</td>
-<td>окремий канал читання</td>
+<td data-label="Термін">enhanced fan-out</td>
+<td data-label="Суть">окремий канал читання</td>
 </tr>
 <tr>
-<td>ASL</td>
-<td>Amazon States Language (JSON-опис станів)</td>
+<td data-label="Термін">ASL</td>
+<td data-label="Суть">Amazon States Language (JSON-опис станів)</td>
 </tr>
 <tr>
-<td>saga</td>
-<td>ланцюг кроків із компенсаціями</td>
+<td data-label="Термін">saga</td>
+<td data-label="Суть">ланцюг кроків із компенсаціями</td>
 </tr>
 </tbody>
 </table>
@@ -104,39 +114,39 @@
 </thead>
 <tbody>
 <tr>
-<td>Модель</td>
-<td>черга</td>
-<td>pub/sub</td>
-<td>шина подій</td>
-<td>потік</td>
+<td data-label="">Модель</td>
+<td data-label="SQS">черга</td>
+<td data-label="SNS">pub/sub</td>
+<td data-label="EventBridge">шина подій</td>
+<td data-label="Kinesis">потік</td>
 </tr>
 <tr>
-<td>Хто читає</td>
-<td>один споживач на повідомлення</td>
-<td>усі підписники</td>
-<td>правила</td>
-<td>багато незалежних читачів</td>
+<td data-label="">Хто читає</td>
+<td data-label="SQS">один споживач на повідомлення</td>
+<td data-label="SNS">усі підписники</td>
+<td data-label="EventBridge">правила</td>
+<td data-label="Kinesis">багато незалежних читачів</td>
 </tr>
 <tr>
-<td>Зберігання</td>
-<td>до 14 днів, до видалення</td>
-<td>ні</td>
-<td>архів (опція)</td>
-<td>24 год - 365 днів, <strong>повторне читання</strong></td>
+<td data-label="">Зберігання</td>
+<td data-label="SQS">до 14 днів, до видалення</td>
+<td data-label="SNS">ні</td>
+<td data-label="EventBridge">архів (опція)</td>
+<td data-label="Kinesis">24 год - 365 днів, <strong>повторне читання</strong></td>
 </tr>
 <tr>
-<td>Порядок</td>
-<td>FIFO</td>
-<td>FIFO</td>
-<td>немає</td>
-<td>у межах шарда</td>
+<td data-label="">Порядок</td>
+<td data-label="SQS">FIFO</td>
+<td data-label="SNS">FIFO</td>
+<td data-label="EventBridge">немає</td>
+<td data-label="Kinesis">у межах шарда</td>
 </tr>
 <tr>
-<td>Типово</td>
-<td>розвантажити сервіс</td>
-<td>сповістити всіх</td>
-<td>маршрутизувати події</td>
-<td>телеметрія, логи</td>
+<td data-label="">Типово</td>
+<td data-label="SQS">розвантажити сервіс</td>
+<td data-label="SNS">сповістити всіх</td>
+<td data-label="EventBridge">маршрутизувати події</td>
+<td data-label="Kinesis">телеметрія, логи</td>
 </tr>
 </tbody>
 </table>
@@ -151,28 +161,28 @@
 </thead>
 <tbody>
 <tr>
-<td>Запис на шард</td>
-<td><strong>1 МБ/с або 1000 записів/с</strong></td>
+<td data-label="Параметр">Запис на шард</td>
+<td data-label="Значення"><strong>1 МБ/с або 1000 записів/с</strong></td>
 </tr>
 <tr>
-<td>Читання на шард</td>
-<td><strong>2 МБ/с</strong></td>
+<td data-label="Параметр">Читання на шард</td>
+<td data-label="Значення"><strong>2 МБ/с</strong></td>
 </tr>
 <tr>
-<td>Розмір запису</td>
-<td>до <strong>10 МіБ</strong></td>
+<td data-label="Параметр">Розмір запису</td>
+<td data-label="Значення">до <strong>10 МіБ</strong></td>
 </tr>
 <tr>
-<td>Зберігання</td>
-<td>24 год, 7 днів, до 365 днів</td>
+<td data-label="Параметр">Зберігання</td>
+<td data-label="Значення">24 год, 7 днів, до 365 днів</td>
 </tr>
 <tr>
-<td>On-demand</td>
-<td>автомасштабування, старт 4 МБ/с, до 200 МБ/с</td>
+<td data-label="Параметр">On-demand</td>
+<td data-label="Значення">автомасштабування, старт 4 МБ/с, до 200 МБ/с</td>
 </tr>
 <tr>
-<td>Provisioned</td>
-<td>задаєте шарди, оплата за шард-годину</td>
+<td data-label="Параметр">Provisioned</td>
+<td data-label="Значення">задаєте шарди, оплата за шард-годину</td>
 </tr>
 </tbody>
 </table>
@@ -191,24 +201,24 @@
 </thead>
 <tbody>
 <tr>
-<td>topic</td>
-<td>stream</td>
+<td data-label="Kafka">topic</td>
+<td data-label="Kinesis">stream</td>
 </tr>
 <tr>
-<td>partition</td>
-<td>shard</td>
+<td data-label="Kafka">partition</td>
+<td data-label="Kinesis">shard</td>
 </tr>
 <tr>
-<td>key</td>
-<td>partition key</td>
+<td data-label="Kafka">key</td>
+<td data-label="Kinesis">partition key</td>
 </tr>
 <tr>
-<td>offset</td>
-<td>sequence number</td>
+<td data-label="Kafka">offset</td>
+<td data-label="Kinesis">sequence number</td>
 </tr>
 <tr>
-<td>consumer group</td>
-<td>consumer / KCL application</td>
+<td data-label="Kafka">consumer group</td>
+<td data-label="Kinesis">consumer / KCL application</td>
 </tr>
 </tbody>
 </table>
@@ -232,24 +242,24 @@
 </thead>
 <tbody>
 <tr>
-<td>Час</td>
-<td>реальний</td>
-<td>майже реальний, через буфер</td>
+<td data-label="">Час</td>
+<td data-label="Kinesis Data Streams">реальний</td>
+<td data-label="Data Firehose">майже реальний, через буфер</td>
 </tr>
 <tr>
-<td>Споживачі</td>
-<td>свої</td>
-<td>пункт призначення</td>
+<td data-label="">Споживачі</td>
+<td data-label="Kinesis Data Streams">свої</td>
+<td data-label="Data Firehose">пункт призначення</td>
 </tr>
 <tr>
-<td>Зберігання, повторне читання</td>
-<td>так</td>
-<td>ні</td>
+<td data-label="">Зберігання, повторне читання</td>
+<td data-label="Kinesis Data Streams">так</td>
+<td data-label="Data Firehose">ні</td>
 </tr>
 <tr>
-<td>Керування</td>
-<td>шарди або on-demand</td>
-<td>не потрібне</td>
+<td data-label="">Керування</td>
+<td data-label="Kinesis Data Streams">шарди або on-demand</td>
+<td data-label="Data Firehose">не потрібне</td>
 </tr>
 </tbody>
 </table>
@@ -268,19 +278,19 @@
 </thead>
 <tbody>
 <tr>
-<td>Хто керує</td>
-<td>ніхто: сервіси реагують</td>
-<td>один процес знає весь шлях</td>
+<td data-label="">Хто керує</td>
+<td data-label="Хореографія (EventBridge, SNS)">ніхто: сервіси реагують</td>
+<td data-label="Оркестрація (Step Functions)">один процес знає весь шлях</td>
 </tr>
 <tr>
-<td>Видимість</td>
-<td>розкидана</td>
-<td>графічна історія кожного запуску</td>
+<td data-label="">Видимість</td>
+<td data-label="Хореографія (EventBridge, SNS)">розкидана</td>
+<td data-label="Оркестрація (Step Functions)">графічна історія кожного запуску</td>
 </tr>
 <tr>
-<td>Коли</td>
-<td>слабка зв'язність</td>
-<td>складні кроки, повтори, ручні кроки</td>
+<td data-label="">Коли</td>
+<td data-label="Хореографія (EventBridge, SNS)">слабка зв'язність</td>
+<td data-label="Оркестрація (Step Functions)">складні кроки, повтори, ручні кроки</td>
 </tr>
 </tbody>
 </table>
@@ -297,24 +307,24 @@
 </thead>
 <tbody>
 <tr>
-<td>Тривалість</td>
-<td>до 1 року <em>(не звірено)</em></td>
-<td>до 5 хв <em>(не звірено)</em></td>
+<td data-label="">Тривалість</td>
+<td data-label="Standard">до 1 року <em>(не звірено)</em></td>
+<td data-label="Express">до 5 хв <em>(не звірено)</em></td>
 </tr>
 <tr>
-<td>Виконання</td>
-<td>exactly-once <em>(не звірено)</em></td>
-<td>at-least-once <em>(не звірено)</em></td>
+<td data-label="">Виконання</td>
+<td data-label="Standard">exactly-once <em>(не звірено)</em></td>
+<td data-label="Express">at-least-once <em>(не звірено)</em></td>
 </tr>
 <tr>
-<td>Використання</td>
-<td>довгі процеси</td>
-<td>багато коротких подій</td>
+<td data-label="">Використання</td>
+<td data-label="Standard">довгі процеси</td>
+<td data-label="Express">багато коротких подій</td>
 </tr>
 <tr>
-<td>Історія</td>
-<td>у консолі</td>
-<td>у CloudWatch Logs</td>
+<td data-label="">Історія</td>
+<td data-label="Standard">у консолі</td>
+<td data-label="Express">у CloudWatch Logs</td>
 </tr>
 </tbody>
 </table>

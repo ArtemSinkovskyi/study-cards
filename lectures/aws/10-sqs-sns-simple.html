@@ -17,6 +17,16 @@
   th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
   td code, th code { white-space:nowrap; }
   th { background:#fff; }
+  @media (max-width: 640px) {
+    table, thead, tbody, tr, td { display:block; min-width:0; }
+    table { overflow:visible; }
+    thead { display:none; }
+    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
+    td { border:none; padding:.25rem 0; }
+    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
+    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
+    td code, th code { white-space:normal; }
+  }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -50,28 +60,28 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>SQS</strong></td>
-<td>керована черга: продюсери кладуть, споживачі забирають і видаляють</td>
+<td data-label="Термін"><strong>SQS</strong></td>
+<td data-label="Суть">керована черга: продюсери кладуть, споживачі забирають і видаляють</td>
 </tr>
 <tr>
-<td><strong>SNS</strong></td>
-<td>publish/subscribe: повідомлення в <strong>топік</strong>, далі всім підписникам (email, SQS, Lambda, HTTP, SMS)</td>
+<td data-label="Термін"><strong>SNS</strong></td>
+<td data-label="Суть">publish/subscribe: повідомлення в <strong>топік</strong>, далі всім підписникам (email, SQS, Lambda, HTTP, SMS)</td>
 </tr>
 <tr>
-<td><strong>DLQ</strong></td>
-<td>куди класти те, що не вдалося обробити; сама DLQ це звичайна черга</td>
+<td data-label="Термін"><strong>DLQ</strong></td>
+<td data-label="Суть">куди класти те, що не вдалося обробити; сама DLQ це звичайна черга</td>
 </tr>
 <tr>
-<td><strong>Visibility timeout</strong></td>
-<td>час після <code>ReceiveMessage</code>, коли повідомлення невидиме іншим; не видалили, повернеться в чергу</td>
+<td data-label="Термін"><strong>Visibility timeout</strong></td>
+<td data-label="Суть">час після <code>ReceiveMessage</code>, коли повідомлення невидиме іншим; не видалили, повернеться в чергу</td>
 </tr>
 <tr>
-<td><strong>Fan-out</strong></td>
-<td>один топік розсилає в кілька черг</td>
+<td data-label="Термін"><strong>Fan-out</strong></td>
+<td data-label="Суть">один топік розсилає в кілька черг</td>
 </tr>
 <tr>
-<td><strong>Event source mapping</strong></td>
-<td>Lambda сама опитує джерело й викликає функцію пачками</td>
+<td data-label="Термін"><strong>Event source mapping</strong></td>
+<td data-label="Суть">Lambda сама опитує джерело й викликає функцію пачками</td>
 </tr>
 </tbody>
 </table>
@@ -85,32 +95,32 @@
 </thead>
 <tbody>
 <tr>
-<td>Retention</td>
-<td>мінімум 60 с, <strong>типово 4 дні, максимум 14 днів</strong></td>
+<td data-label="Параметр">Retention</td>
+<td data-label="Значення">мінімум 60 с, <strong>типово 4 дні, максимум 14 днів</strong></td>
 </tr>
 <tr>
-<td>Visibility timeout</td>
-<td>типово 30 с, діапазон 0 - <strong>12 год</strong></td>
+<td data-label="Параметр">Visibility timeout</td>
+<td data-label="Значення">типово 30 с, діапазон 0 - <strong>12 год</strong></td>
 </tr>
 <tr>
-<td>Short polling</td>
-<td><code>ReceiveMessageWaitTimeSeconds = 0</code>: відповідь одразу, може бути порожньою навіть коли повідомлення є</td>
+<td data-label="Параметр">Short polling</td>
+<td data-label="Значення"><code>ReceiveMessageWaitTimeSeconds = 0</code>: відповідь одразу, може бути порожньою навіть коли повідомлення є</td>
 </tr>
 <tr>
-<td><strong>Long polling</strong></td>
-<td>чекає <strong>до 20 с</strong>, опитує всі сервери; дешевше загалом</td>
+<td data-label="Параметр"><strong>Long polling</strong></td>
+<td data-label="Значення">чекає <strong>до 20 с</strong>, опитує всі сервери; дешевше загалом</td>
 </tr>
 <tr>
-<td><code>DelaySeconds</code></td>
-<td>затримка доставки нового повідомлення, до <strong>15 хв</strong></td>
+<td data-label="Параметр"><code>DelaySeconds</code></td>
+<td data-label="Значення">затримка доставки нового повідомлення, до <strong>15 хв</strong></td>
 </tr>
 <tr>
-<td>Максимальний розмір</td>
-<td><strong>1 МіБ</strong> (більше: Extended Client Library кладе тіло в S3, до 2 ГБ)</td>
+<td data-label="Параметр">Максимальний розмір</td>
+<td data-label="Значення"><strong>1 МіБ</strong> (більше: Extended Client Library кладе тіло в S3, до 2 ГБ)</td>
 </tr>
 <tr>
-<td>Шифрування</td>
-<td>SSE-SQS (ключем керує SQS) або SSE-KMS</td>
+<td data-label="Параметр">Шифрування</td>
+<td data-label="Значення">SSE-SQS (ключем керує SQS) або SSE-KMS</td>
 </tr>
 </tbody>
 </table>
@@ -126,24 +136,24 @@
 </thead>
 <tbody>
 <tr>
-<td>Доставка</td>
-<td>at-least-once, можливі дублікати</td>
-<td>дедуплікація в межах <strong>5 хв</strong></td>
+<td data-label="">Доставка</td>
+<td data-label="Standard">at-least-once, можливі дублікати</td>
+<td data-label="FIFO">дедуплікація в межах <strong>5 хв</strong></td>
 </tr>
 <tr>
-<td>Порядок</td>
-<td>best-effort</td>
-<td>суворий у межах <code>MessageGroupId</code></td>
+<td data-label="">Порядок</td>
+<td data-label="Standard">best-effort</td>
+<td data-label="FIFO">суворий у межах <code>MessageGroupId</code></td>
 </tr>
 <tr>
-<td>Ім'я</td>
-<td>будь-яке</td>
-<td>закінчується на <strong><code>.fifo</code></strong></td>
+<td data-label="">Ім'я</td>
+<td data-label="Standard">будь-яке</td>
+<td data-label="FIFO">закінчується на <strong><code>.fifo</code></strong></td>
 </tr>
 <tr>
-<td>Пропускна здатність</td>
-<td>майже необмежена</td>
-<td>300 TPS на дію без батчингу, 3000 повідомлень/с з батчингом (по 10); high throughput підіймає ліміти залежно від регіону <em>(для eu-north-1 типові 2 400 / 24 000)</em></td>
+<td data-label="">Пропускна здатність</td>
+<td data-label="Standard">майже необмежена</td>
+<td data-label="FIFO">300 TPS на дію без батчингу, 3000 повідомлень/с з батчингом (по 10); high throughput підіймає ліміти залежно від регіону <em>(для eu-north-1 типові 2 400 / 24 000)</em></td>
 </tr>
 </tbody>
 </table>
@@ -183,24 +193,24 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>SQS як джерело</strong></td>
-<td><code>RedrivePolicy</code> на <strong>джерельній</strong> черзі (<code>deadLetterTargetArn</code>, <code>maxReceiveCount</code>); <code>RedriveAllowPolicy</code> на DLQ</td>
-<td>споживач: SQS повертає повідомлення після visibility timeout</td>
+<td data-label="Де"><strong>SQS як джерело</strong></td>
+<td data-label="Як налаштовується"><code>RedrivePolicy</code> на <strong>джерельній</strong> черзі (<code>deadLetterTargetArn</code>, <code>maxReceiveCount</code>); <code>RedriveAllowPolicy</code> на DLQ</td>
+<td data-label="Хто повторює">споживач: SQS повертає повідомлення після visibility timeout</td>
 </tr>
 <tr>
-<td><strong>Lambda async</strong> (EventBridge, S3, SNS)</td>
-<td><code>DeadLetterConfig</code> на <strong>функції</strong></td>
-<td>Lambda: <code>MaximumRetryAttempts</code></td>
+<td data-label="Де"><strong>Lambda async</strong> (EventBridge, S3, SNS)</td>
+<td data-label="Як налаштовується"><code>DeadLetterConfig</code> на <strong>функції</strong></td>
+<td data-label="Хто повторює">Lambda: <code>MaximumRetryAttempts</code></td>
 </tr>
 <tr>
-<td><strong>SNS підписка</strong></td>
-<td><code>RedrivePolicy</code> на <strong>підписці</strong>; DLQ лише SQS того ж акаунта й регіону</td>
-<td>SNS: помилка клієнта без повторів, помилка сервера до 100 015 повторів за 23 дні</td>
+<td data-label="Де"><strong>SNS підписка</strong></td>
+<td data-label="Як налаштовується"><code>RedrivePolicy</code> на <strong>підписці</strong>; DLQ лише SQS того ж акаунта й регіону</td>
+<td data-label="Хто повторює">SNS: помилка клієнта без повторів, помилка сервера до 100 015 повторів за 23 дні</td>
 </tr>
 <tr>
-<td><strong>EventBridge ціль</strong></td>
-<td>окреме налаштування DLQ на цілі</td>
-<td>EventBridge: 24 год і до 185 спроб</td>
+<td data-label="Де"><strong>EventBridge ціль</strong></td>
+<td data-label="Як налаштовується">окреме налаштування DLQ на цілі</td>
+<td data-label="Хто повторює">EventBridge: 24 год і до 185 спроб</td>
 </tr>
 </tbody>
 </table>
@@ -227,20 +237,20 @@
 </thead>
 <tbody>
 <tr>
-<td>Розмір пачки</td>
-<td>Standard до <strong>10 000</strong> записів (понад 10 потрібне вікно не менше 1 с), FIFO до <strong>10</strong></td>
+<td data-label="Параметр">Розмір пачки</td>
+<td data-label="Значення">Standard до <strong>10 000</strong> записів (понад 10 потрібне вікно не менше 1 с), FIFO до <strong>10</strong></td>
 </tr>
 <tr>
-<td>Типова пачка</td>
-<td>до 10</td>
+<td data-label="Параметр">Типова пачка</td>
+<td data-label="Значення">до 10</td>
 </tr>
 <tr>
-<td>Вікно пачки (<code>MaximumBatchingWindowInSeconds</code>)</td>
-<td>лише Standard, до <strong>5 хв</strong></td>
+<td data-label="Параметр">Вікно пачки (<code>MaximumBatchingWindowInSeconds</code>)</td>
+<td data-label="Значення">лише Standard, до <strong>5 хв</strong></td>
 </tr>
 <tr>
-<td>Обмеження</td>
-<td>поки не перевищено 6 МБ payload</td>
+<td data-label="Параметр">Обмеження</td>
+<td data-label="Значення">поки не перевищено 6 МБ payload</td>
 </tr>
 </tbody>
 </table>
@@ -271,29 +281,29 @@
 </thead>
 <tbody>
 <tr>
-<td>Порядок</td>
-<td>best-effort</td>
-<td>суворий у межах <code>MessageGroupId</code></td>
+<td data-label="">Порядок</td>
+<td data-label="Standard">best-effort</td>
+<td data-label="FIFO">суворий у межах <code>MessageGroupId</code></td>
 </tr>
 <tr>
-<td>Доставка</td>
-<td>at-least-once</td>
-<td>дедуплікація 5 хв; exactly-once лише з SQS FIFO і <strong>без</strong> filter policy</td>
+<td data-label="">Доставка</td>
+<td data-label="Standard">at-least-once</td>
+<td data-label="FIFO">дедуплікація 5 хв; exactly-once лише з SQS FIFO і <strong>без</strong> filter policy</td>
 </tr>
 <tr>
-<td>Ім'я</td>
-<td>будь-яке</td>
-<td>закінчується на <code>.fifo</code></td>
+<td data-label="">Ім'я</td>
+<td data-label="Standard">будь-яке</td>
+<td data-label="FIFO">закінчується на <code>.fifo</code></td>
 </tr>
 <tr>
-<td>Підписники</td>
-<td>усі протоколи</td>
-<td><strong>лише SQS</strong> (FIFO і Standard черги)</td>
+<td data-label="">Підписники</td>
+<td data-label="Standard">усі протоколи</td>
+<td data-label="FIFO"><strong>лише SQS</strong> (FIFO і Standard черги)</td>
 </tr>
 <tr>
-<td>Lambda</td>
-<td>напряму</td>
-<td>лише через чергу з тригером на лямбду</td>
+<td data-label="">Lambda</td>
+<td data-label="Standard">напряму</td>
+<td data-label="FIFO">лише через чергу з тригером на лямбду</td>
 </tr>
 </tbody>
 </table>
@@ -311,20 +321,20 @@
 </thead>
 <tbody>
 <tr>
-<td>клієнта (endpoint видалено)</td>
-<td>без повторів, в DLQ підписки</td>
+<td data-label="Помилка">клієнта (endpoint видалено)</td>
+<td data-label="Що робить SNS">без повторів, в DLQ підписки</td>
 </tr>
 <tr>
-<td>сервера, endpoint SQS чи Lambda</td>
-<td>до 100 015 повторів за 23 дні</td>
+<td data-label="Помилка">сервера, endpoint SQS чи Lambda</td>
+<td data-label="Що робить SNS">до 100 015 повторів за 23 дні</td>
 </tr>
 <tr>
-<td>HTTP</td>
-<td>політика користувача</td>
+<td data-label="Помилка">HTTP</td>
+<td data-label="Що робить SNS">політика користувача</td>
 </tr>
 <tr>
-<td>email, SMS, mobile push</td>
-<td>50 повторів за 6 год</td>
+<td data-label="Помилка">email, SMS, mobile push</td>
+<td data-label="Що робить SNS">50 повторів за 6 год</td>
 </tr>
 </tbody>
 </table>
@@ -357,32 +367,32 @@
 </thead>
 <tbody>
 <tr>
-<td>ключів у політиці</td>
-<td><strong>5</strong> (для вкладених рахуються лише листові)</td>
+<td data-label="Що">ключів у політиці</td>
+<td data-label="Ліміт"><strong>5</strong> (для вкладених рахуються лише листові)</td>
 </tr>
 <tr>
-<td>комбінацій значень (добуток довжин масивів)</td>
-<td><strong>150</strong></td>
+<td data-label="Що">комбінацій значень (добуток довжин масивів)</td>
+<td data-label="Ліміт"><strong>150</strong></td>
 </tr>
 <tr>
-<td>розмір політики</td>
-<td>256 КБ</td>
+<td data-label="Що">розмір політики</td>
+<td data-label="Ліміт">256 КБ</td>
 </tr>
 <tr>
-<td>політик на топік / акаунт</td>
-<td>200 / 10 000</td>
+<td data-label="Що">політик на топік / акаунт</td>
+<td data-label="Ліміт">200 / 10 000</td>
 </tr>
 <tr>
-<td>числа</td>
-<td>від −10⁹ до 10⁹, 5 знаків після коми</td>
+<td data-label="Що">числа</td>
+<td data-label="Ліміт">від −10⁹ до 10⁹, 5 знаків після коми</td>
 </tr>
 <tr>
-<td>рядки</td>
-<td>чутливі до регістру</td>
+<td data-label="Що">рядки</td>
+<td data-label="Ліміт">чутливі до регістру</td>
 </tr>
 <tr>
-<td>зміна набуває чинності</td>
-<td><strong>до 15 хв</strong></td>
+<td data-label="Що">зміна набуває чинності</td>
+<td data-label="Ліміт"><strong>до 15 хв</strong></td>
 </tr>
 </tbody>
 </table>

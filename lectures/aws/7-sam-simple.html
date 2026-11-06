@@ -17,6 +17,16 @@
   th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
   td code, th code { white-space:nowrap; }
   th { background:#fff; }
+  @media (max-width: 640px) {
+    table, thead, tbody, tr, td { display:block; min-width:0; }
+    table { overflow:visible; }
+    thead { display:none; }
+    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
+    td { border:none; padding:.25rem 0; }
+    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
+    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
+    td code, th code { white-space:normal; }
+  }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -49,52 +59,52 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>SAM</strong></td>
-<td>Serverless Application Model: шаблон плюс CLI</td>
+<td data-label="Термін"><strong>SAM</strong></td>
+<td data-label="Суть">Serverless Application Model: шаблон плюс CLI</td>
 </tr>
 <tr>
-<td><strong>CloudFormation</strong></td>
-<td>сервіс AWS, що створює ресурси за декларативним шаблоном і веде їх як <strong>стек</strong></td>
+<td data-label="Термін"><strong>CloudFormation</strong></td>
+<td data-label="Суть">сервіс AWS, що створює ресурси за декларативним шаблоном і веде їх як <strong>стек</strong></td>
 </tr>
 <tr>
-<td><strong>Stack</strong></td>
-<td>група ресурсів, якою керують як цілим</td>
+<td data-label="Термін"><strong>Stack</strong></td>
+<td data-label="Суть">група ресурсів, якою керують як цілим</td>
 </tr>
 <tr>
-<td><strong>Change set</strong></td>
-<td>перелік змін до виконання (як <code>terraform plan</code>)</td>
+<td data-label="Термін"><strong>Change set</strong></td>
+<td data-label="Суть">перелік змін до виконання (як <code>terraform plan</code>)</td>
 </tr>
 <tr>
-<td><strong>Transform</strong></td>
-<td>макрос, що розгортає SAM у CloudFormation</td>
+<td data-label="Термін"><strong>Transform</strong></td>
+<td data-label="Суть">макрос, що розгортає SAM у CloudFormation</td>
 </tr>
 <tr>
-<td><strong>Execution role</strong></td>
-<td>роль, яку функція приймає під час роботи</td>
+<td data-label="Термін"><strong>Execution role</strong></td>
+<td data-label="Суть">роль, яку функція приймає під час роботи</td>
 </tr>
 <tr>
-<td><strong>Alias</strong></td>
-<td>іменований вказівник на версію функції</td>
+<td data-label="Термін"><strong>Alias</strong></td>
+<td data-label="Суть">іменований вказівник на версію функції</td>
 </tr>
 <tr>
-<td><strong>Canary deployment</strong></td>
-<td>поступовий перехід: спершу малий відсоток трафіку</td>
+<td data-label="Термін"><strong>Canary deployment</strong></td>
+<td data-label="Суть">поступовий перехід: спершу малий відсоток трафіку</td>
 </tr>
 <tr>
-<td><strong>DLQ</strong></td>
-<td>черга для подій, які не вдалося обробити</td>
+<td data-label="Термін"><strong>DLQ</strong></td>
+<td data-label="Суть">черга для подій, які не вдалося обробити</td>
 </tr>
 <tr>
-<td><strong>Capabilities</strong></td>
-<td>явна згода на створення IAM-ресурсів</td>
+<td data-label="Термін"><strong>Capabilities</strong></td>
+<td data-label="Суть">явна згода на створення IAM-ресурсів</td>
 </tr>
 <tr>
-<td><strong>Outputs</strong></td>
-<td>значення, які стек показує після деплою</td>
+<td data-label="Термін"><strong>Outputs</strong></td>
+<td data-label="Суть">значення, які стек показує після деплою</td>
 </tr>
 <tr>
-<td><strong>CodeDeploy</strong></td>
-<td>сервіс поступового перемикання трафіку між версіями Lambda</td>
+<td data-label="Термін"><strong>CodeDeploy</strong></td>
+<td data-label="Суть">сервіс поступового перемикання трафіку між версіями Lambda</td>
 </tr>
 </tbody>
 </table>
@@ -123,32 +133,32 @@
 </thead>
 <tbody>
 <tr>
-<td><code>CodeUri</code></td>
-<td>шлях до коду відносно шаблону (можна вказати готову папку з пакетом)</td>
+<td data-label="Поле"><code>CodeUri</code></td>
+<td data-label="Зміст">шлях до коду відносно шаблону (можна вказати готову папку з пакетом)</td>
 </tr>
 <tr>
-<td><code>Handler</code></td>
-<td><code>index.handler</code> (файл <code>index</code>, експорт <code>handler</code>)</td>
+<td data-label="Поле"><code>Handler</code></td>
+<td data-label="Зміст"><code>index.handler</code> (файл <code>index</code>, експорт <code>handler</code>)</td>
 </tr>
 <tr>
-<td><code>Runtime</code></td>
-<td>наприклад <code>nodejs22.x</code></td>
+<td data-label="Поле"><code>Runtime</code></td>
+<td data-label="Зміст">наприклад <code>nodejs22.x</code></td>
 </tr>
 <tr>
-<td><code>Architectures</code></td>
-<td><code>[arm64]</code>: Graviton дешевший приблизно на 20%; zip мусить відповідати архітектурі</td>
+<td data-label="Поле"><code>Architectures</code></td>
+<td data-label="Зміст"><code>[arm64]</code>: Graviton дешевший приблизно на 20%; zip мусить відповідати архітектурі</td>
 </tr>
 <tr>
-<td><code>MemorySize</code></td>
-<td>з пам'яттю зростає CPU (повне vCPU приблизно на 1769 МБ)</td>
+<td data-label="Поле"><code>MemorySize</code></td>
+<td data-label="Зміст">з пам'яттю зростає CPU (повне vCPU приблизно на 1769 МБ)</td>
 </tr>
 <tr>
-<td><code>Timeout</code></td>
-<td>максимум 900 с; для async можна довше, ніж для API Gateway (29 с)</td>
+<td data-label="Поле"><code>Timeout</code></td>
+<td data-label="Зміст">максимум 900 с; для async можна довше, ніж для API Gateway (29 с)</td>
 </tr>
 <tr>
-<td><code>FunctionName</code></td>
-<td>явне ім'я; мінус: CloudFormation не замінить ресурс із фіксованим іменем без зміни імені</td>
+<td data-label="Поле"><code>FunctionName</code></td>
+<td data-label="Зміст">явне ім'я; мінус: CloudFormation не замінить ресурс із фіксованим іменем без зміни імені</td>
 </tr>
 </tbody>
 </table>
@@ -200,40 +210,40 @@ DeadLetterQueue:
 </thead>
 <tbody>
 <tr>
-<td>Регіон</td>
-<td>функція лише в <strong>us-east-1</strong></td>
+<td data-label="">Регіон</td>
+<td data-label="Lambda@Edge">функція лише в <strong>us-east-1</strong></td>
 </tr>
 <tr>
-<td>Версія</td>
-<td>лише <strong>пронумерована версія</strong>, не <code>$LATEST</code> і не alias</td>
+<td data-label="">Версія</td>
+<td data-label="Lambda@Edge">лише <strong>пронумерована версія</strong>, не <code>$LATEST</code> і не alias</td>
 </tr>
 <tr>
-<td>Не підтримуються</td>
-<td>змінні середовища, VPC, DLQ, layers, X-Ray, provisioned concurrency, контейнерні образи, arm64</td>
+<td data-label="">Не підтримуються</td>
+<td data-label="Lambda@Edge">змінні середовища, VPC, DLQ, layers, X-Ray, provisioned concurrency, контейнерні образи, arm64</td>
 </tr>
 <tr>
-<td>Ephemeral storage</td>
-<td>не більше 512 МБ</td>
+<td data-label="">Ephemeral storage</td>
+<td data-label="Lambda@Edge">не більше 512 МБ</td>
 </tr>
 <tr>
-<td>Runtime</td>
-<td>Node.js і Python</td>
+<td data-label="">Runtime</td>
+<td data-label="Lambda@Edge">Node.js і Python</td>
 </tr>
 <tr>
-<td>Таймаут</td>
-<td>30 с</td>
+<td data-label="">Таймаут</td>
+<td data-label="Lambda@Edge">30 с</td>
 </tr>
 <tr>
-<td>Розмір архіву</td>
-<td>50 МБ стиснутого</td>
+<td data-label="">Розмір архіву</td>
+<td data-label="Lambda@Edge">50 МБ стиснутого</td>
 </tr>
 <tr>
-<td>Розмір відповіді, згенерованої функцією</td>
-<td>40 КБ (viewer-події), 1 МБ (origin-події)</td>
+<td data-label="">Розмір відповіді, згенерованої функцією</td>
+<td data-label="Lambda@Edge">40 КБ (viewer-події), 1 МБ (origin-події)</td>
 </tr>
 <tr>
-<td>Конкурентність</td>
-<td>1000 на регіон, спільна з усіма Lambda</td>
+<td data-label="">Конкурентність</td>
+<td data-label="Lambda@Edge">1000 на регіон, спільна з усіма Lambda</td>
 </tr>
 </tbody>
 </table>
@@ -249,34 +259,34 @@ DeadLetterQueue:
 </thead>
 <tbody>
 <tr>
-<td>Складність</td>
-<td>прості перетворення заголовків, URL, перенаправлення</td>
-<td>складніша логіка, мережеві виклики</td>
+<td data-label="">Складність</td>
+<td data-label="CloudFront Functions">прості перетворення заголовків, URL, перенаправлення</td>
+<td data-label="Lambda@Edge">складніша логіка, мережеві виклики</td>
 </tr>
 <tr>
-<td>Розмір функції</td>
-<td><strong>10 КБ</strong></td>
-<td>50 МБ</td>
+<td data-label="">Розмір функції</td>
+<td data-label="CloudFront Functions"><strong>10 КБ</strong></td>
+<td data-label="Lambda@Edge">50 МБ</td>
 </tr>
 <tr>
-<td>Пам'ять</td>
-<td><strong>2 МБ</strong></td>
-<td>як у Lambda</td>
+<td data-label="">Пам'ять</td>
+<td data-label="CloudFront Functions"><strong>2 МБ</strong></td>
+<td data-label="Lambda@Edge">як у Lambda</td>
 </tr>
 <tr>
-<td>Ліміт на акаунт</td>
-<td>100 функцій</td>
-<td>100 на розподіл</td>
+<td data-label="">Ліміт на акаунт</td>
+<td data-label="CloudFront Functions">100 функцій</td>
+<td data-label="Lambda@Edge">100 на розподіл</td>
 </tr>
 <tr>
-<td>Мова</td>
-<td>JavaScript</td>
-<td>Node.js, Python</td>
+<td data-label="">Мова</td>
+<td data-label="CloudFront Functions">JavaScript</td>
+<td data-label="Lambda@Edge">Node.js, Python</td>
 </tr>
 <tr>
-<td>Ціна</td>
-<td>дешевше</td>
-<td>дорожче</td>
+<td data-label="">Ціна</td>
+<td data-label="CloudFront Functions">дешевше</td>
+<td data-label="Lambda@Edge">дорожче</td>
 </tr>
 </tbody>
 </table>
@@ -310,16 +320,16 @@ DeadLetterQueue:
 </thead>
 <tbody>
 <tr>
-<td><code>ci.yml</code></td>
-<td>PR і push у <code>main</code></td>
-<td>нема</td>
-<td><code>npm ci</code>, typecheck, тести, <code>package</code>, <code>sam validate --lint</code></td>
+<td data-label="Файл"><code>ci.yml</code></td>
+<td data-label="Коли">PR і push у <code>main</code></td>
+<td data-label="Доступ до AWS">нема</td>
+<td data-label="Що робить"><code>npm ci</code>, typecheck, тести, <code>package</code>, <code>sam validate --lint</code></td>
 </tr>
 <tr>
-<td><code>deploy.yml</code></td>
-<td>лише вручну (<code>workflow_dispatch</code>), лише з <code>main</code></td>
-<td>OIDC-роль</td>
-<td>тести, <code>package</code>, <code>sam deploy</code></td>
+<td data-label="Файл"><code>deploy.yml</code></td>
+<td data-label="Коли">лише вручну (<code>workflow_dispatch</code>), лише з <code>main</code></td>
+<td data-label="Доступ до AWS">OIDC-роль</td>
+<td data-label="Що робить">тести, <code>package</code>, <code>sam deploy</code></td>
 </tr>
 </tbody>
 </table>
@@ -342,32 +352,32 @@ DeadLetterQueue:
 </thead>
 <tbody>
 <tr>
-<td>CloudFormation на стек</td>
-<td>створити й виконати change set</td>
+<td data-label="Блок">CloudFormation на стек</td>
+<td data-label="Чому потрібен">створити й виконати change set</td>
 </tr>
 <tr>
-<td><code>cloudformation:CreateChangeSet</code> на <code>transform/Serverless-2016-10-31</code></td>
-<td>виконання макросу SAM</td>
+<td data-label="Блок"><code>cloudformation:CreateChangeSet</code> на <code>transform/Serverless-2016-10-31</code></td>
+<td data-label="Чому потрібен">виконання макросу SAM</td>
 </tr>
 <tr>
-<td>S3 на бакет артефактів</td>
-<td><code>sam deploy</code> завантажує туди пакет</td>
+<td data-label="Блок">S3 на бакет артефактів</td>
+<td data-label="Чому потрібен"><code>sam deploy</code> завантажує туди пакет</td>
 </tr>
 <tr>
-<td>Lambda</td>
-<td>функція, версії, alias, async-конфіг</td>
+<td data-label="Блок">Lambda</td>
+<td data-label="Чому потрібен">функція, версії, alias, async-конфіг</td>
 </tr>
 <tr>
-<td>IAM на ролі стеку</td>
-<td>SAM створює execution-роль і роль CodeDeploy</td>
+<td data-label="Блок">IAM на ролі стеку</td>
+<td data-label="Чому потрібен">SAM створює execution-роль і роль CodeDeploy</td>
 </tr>
 <tr>
-<td>CodeDeploy</td>
-<td><code>DeploymentPreference</code> створює application і deployment group</td>
+<td data-label="Блок">CodeDeploy</td>
+<td data-label="Чому потрібен"><code>DeploymentPreference</code> створює application і deployment group</td>
 </tr>
 <tr>
-<td>SQS, CloudWatch Logs, alarm, EventBridge</td>
-<td>DLQ, лог-група, alarm, правило</td>
+<td data-label="Блок">SQS, CloudWatch Logs, alarm, EventBridge</td>
+<td data-label="Чому потрібен">DLQ, лог-група, alarm, правило</td>
 </tr>
 </tbody>
 </table>
@@ -399,19 +409,19 @@ DeadLetterQueue:
 </thead>
 <tbody>
 <tr>
-<td>Питання</td>
-<td>що <strong>функція</strong> може робити</td>
-<td>хто може <strong>викликати</strong> функцію</td>
+<td data-label="">Питання</td>
+<td data-label="Execution role">що <strong>функція</strong> може робити</td>
+<td data-label="Resource-based policy">хто може <strong>викликати</strong> функцію</td>
 </tr>
 <tr>
-<td>Де в консолі</td>
-<td>Configuration → Permissions → Execution role</td>
-<td>Configuration → Permissions → Resource-based policy statements (на alias)</td>
+<td data-label="">Де в консолі</td>
+<td data-label="Execution role">Configuration → Permissions → Execution role</td>
+<td data-label="Resource-based policy">Configuration → Permissions → Resource-based policy statements (на alias)</td>
 </tr>
 <tr>
-<td>Створює SAM із</td>
-<td><code>Policies:</code> та <code>DeadLetterQueue</code></td>
-<td><code>Events:</code> (тип <code>EventBridgeRule</code>)</td>
+<td data-label="">Створює SAM із</td>
+<td data-label="Execution role"><code>Policies:</code> та <code>DeadLetterQueue</code></td>
+<td data-label="Resource-based policy"><code>Events:</code> (тип <code>EventBridgeRule</code>)</td>
 </tr>
 </tbody>
 </table>

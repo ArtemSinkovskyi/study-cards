@@ -17,6 +17,16 @@
   th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
   td code, th code { white-space:nowrap; }
   th { background:#fff; }
+  @media (max-width: 640px) {
+    table, thead, tbody, tr, td { display:block; min-width:0; }
+    table { overflow:visible; }
+    thead { display:none; }
+    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
+    td { border:none; padding:.25rem 0; }
+    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
+    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
+    td code, th code { white-space:normal; }
+  }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -56,44 +66,44 @@
 </thead>
 <tbody>
 <tr>
-<td>IAM-політика на користувачі чи ролі</td>
-<td>«що може цей суб'єкт»</td>
+<td data-label="Спосіб">IAM-політика на користувачі чи ролі</td>
+<td data-label="Суть">«що може цей суб'єкт»</td>
 </tr>
 <tr>
-<td>Bucket policy</td>
-<td>«що можна з цим бакетом і кому»</td>
+<td data-label="Спосіб">Bucket policy</td>
+<td data-label="Суть">«що можна з цим бакетом і кому»</td>
 </tr>
 <tr>
-<td>ACL</td>
-<td>застарілий механізм, зазвичай не потрібен</td>
+<td data-label="Спосіб">ACL</td>
+<td data-label="Суть">застарілий механізм, зазвичай не потрібен</td>
 </tr>
 <tr>
-<td>Block Public Access</td>
-<td>запобіжник від публічності</td>
+<td data-label="Спосіб">Block Public Access</td>
+<td data-label="Суть">запобіжник від публічності</td>
 </tr>
 <tr>
-<td>Presigned URL</td>
-<td>тимчасове посилання на об'єкт</td>
+<td data-label="Спосіб">Presigned URL</td>
+<td data-label="Суть">тимчасове посилання на об'єкт</td>
 </tr>
 <tr>
-<td>Access Points</td>
-<td>окрема точка входу з власною політикою на кожного споживача</td>
+<td data-label="Спосіб">Access Points</td>
+<td data-label="Суть">окрема точка входу з власною політикою на кожного споживача</td>
 </tr>
 <tr>
-<td>CloudFront + OAC</td>
-<td>приватний бакет за CDN</td>
+<td data-label="Спосіб">CloudFront + OAC</td>
+<td data-label="Суть">приватний бакет за CDN</td>
 </tr>
 <tr>
-<td>VPC gateway endpoint</td>
-<td>доступ з VPC без інтернету</td>
+<td data-label="Спосіб">VPC gateway endpoint</td>
+<td data-label="Суть">доступ з VPC без інтернету</td>
 </tr>
 <tr>
-<td>Тимчасові ключі STS чи Cognito</td>
-<td>клієнт сам ходить у S3</td>
+<td data-label="Спосіб">Тимчасові ключі STS чи Cognito</td>
+<td data-label="Суть">клієнт сам ходить у S3</td>
 </tr>
 <tr>
-<td>Object Lambda, Multi-Region Access Points</td>
-<td>перетворення даних, глобальна точка (лише теорія)</td>
+<td data-label="Спосіб">Object Lambda, Multi-Region Access Points</td>
+<td data-label="Суть">перетворення даних, глобальна точка (лише теорія)</td>
 </tr>
 </tbody>
 </table>
@@ -108,19 +118,19 @@
 </thead>
 <tbody>
 <tr>
-<td>Прикріплена до</td>
-<td>суб'єкта</td>
-<td>бакета</td>
+<td data-label="">Прикріплена до</td>
+<td data-label="IAM-політика">суб'єкта</td>
+<td data-label="Bucket policy">бакета</td>
 </tr>
 <tr>
-<td><code>Principal</code></td>
-<td>нема</td>
-<td>обов'язковий</td>
+<td data-label=""><code>Principal</code></td>
+<td data-label="IAM-політика">нема</td>
+<td data-label="Bucket policy">обов'язковий</td>
 </tr>
 <tr>
-<td>Кращий вибір</td>
-<td>«що можуть мої користувачі»</td>
-<td>публічний доступ, cross-account, умови на кшталт <code>aws:SourceIp</code>, <code>aws:SecureTransport</code></td>
+<td data-label="">Кращий вибір</td>
+<td data-label="IAM-політика">«що можуть мої користувачі»</td>
+<td data-label="Bucket policy">публічний доступ, cross-account, умови на кшталт <code>aws:SourceIp</code>, <code>aws:SecureTransport</code></td>
 </tr>
 </tbody>
 </table>
@@ -143,20 +153,20 @@
 </thead>
 <tbody>
 <tr>
-<td><code>block_public_acls</code></td>
-<td>відхиляє запити, що ставлять публічні ACL</td>
+<td data-label="Вимикач"><code>block_public_acls</code></td>
+<td data-label="Що робить">відхиляє запити, що ставлять публічні ACL</td>
 </tr>
 <tr>
-<td><code>ignore_public_acls</code></td>
-<td>ігнорує вже наявні публічні ACL</td>
+<td data-label="Вимикач"><code>ignore_public_acls</code></td>
+<td data-label="Що робить">ігнорує вже наявні публічні ACL</td>
 </tr>
 <tr>
-<td><code>block_public_policy</code></td>
-<td>відхиляє bucket policy, що робить бакет публічним</td>
+<td data-label="Вимикач"><code>block_public_policy</code></td>
+<td data-label="Що робить">відхиляє bucket policy, що робить бакет публічним</td>
 </tr>
 <tr>
-<td><code>restrict_public_buckets</code></td>
-<td>обмежує доступ до бакета з публічною політикою лише власниками й сервісами AWS</td>
+<td data-label="Вимикач"><code>restrict_public_buckets</code></td>
+<td data-label="Що робить">обмежує доступ до бакета з публічною політикою лише власниками й сервісами AWS</td>
 </tr>
 </tbody>
 </table>
@@ -174,20 +184,20 @@
 </thead>
 <tbody>
 <tr>
-<td>Коли</td>
-<td>віддати чи прийняти файл без публічного бакета й без видачі ключів клієнту</td>
+<td data-label="Властивість">Коли</td>
+<td data-label="Значення">віддати чи прийняти файл без публічного бакета й без видачі ключів клієнту</td>
 </tr>
 <tr>
-<td>Максимальний термін</td>
-<td>залежить від ключів: IAM-користувач до 7 діб, тимчасові ключі (роль) до терміну сеансу, найчастіше 1-12 год</td>
+<td data-label="Властивість">Максимальний термін</td>
+<td data-label="Значення">залежить від ключів: IAM-користувач до 7 діб, тимчасові ключі (роль) до терміну сеансу, найчастіше 1-12 год</td>
 </tr>
 <tr>
-<td>Права</td>
-<td>не більші за права підписанта. Якщо підписант втратив право, посилання перестає працювати</td>
+<td data-label="Властивість">Права</td>
+<td data-label="Значення">не більші за права підписанта. Якщо підписант втратив право, посилання перестає працювати</td>
 </tr>
 <tr>
-<td>Методи</td>
-<td>GET (скачати), PUT (завантажити), інші</td>
+<td data-label="Властивість">Методи</td>
+<td data-label="Значення">GET (скачати), PUT (завантажити), інші</td>
 </tr>
 </tbody>
 </table>
@@ -211,29 +221,29 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>SSE-S3</strong> (<code>AES256</code>)</td>
-<td>S3</td>
-<td>типово для всіх нових об'єктів (з січня 2023), безкоштовно, без налаштувань</td>
+<td data-label="Варіант"><strong>SSE-S3</strong> (<code>AES256</code>)</td>
+<td data-label="Хто тримає ключ">S3</td>
+<td data-label="Коротко">типово для всіх нових об'єктів (з січня 2023), безкоштовно, без налаштувань</td>
 </tr>
 <tr>
-<td><strong>SSE-KMS</strong> (<code>aws:kms</code>)</td>
-<td>KMS (ваш чи AWS-managed ключ)</td>
-<td>журнал у CloudTrail, політика ключа, можна відкликати доступ</td>
+<td data-label="Варіант"><strong>SSE-KMS</strong> (<code>aws:kms</code>)</td>
+<td data-label="Хто тримає ключ">KMS (ваш чи AWS-managed ключ)</td>
+<td data-label="Коротко">журнал у CloudTrail, політика ключа, можна відкликати доступ</td>
 </tr>
 <tr>
-<td><strong>DSSE-KMS</strong></td>
-<td>KMS</td>
-<td>два шари шифрування, для жорстких вимог</td>
+<td data-label="Варіант"><strong>DSSE-KMS</strong></td>
+<td data-label="Хто тримає ключ">KMS</td>
+<td data-label="Коротко">два шари шифрування, для жорстких вимог</td>
 </tr>
 <tr>
-<td><strong>SSE-C</strong></td>
-<td><strong>клієнт</strong> передає ключ у кожному запиті</td>
-<td>AWS ключ не зберігає; лише HTTPS; з квітня 2026 вимкнено за замовчуванням</td>
+<td data-label="Варіант"><strong>SSE-C</strong></td>
+<td data-label="Хто тримає ключ"><strong>клієнт</strong> передає ключ у кожному запиті</td>
+<td data-label="Коротко">AWS ключ не зберігає; лише HTTPS; з квітня 2026 вимкнено за замовчуванням</td>
 </tr>
 <tr>
-<td><strong>Client-side</strong></td>
-<td>клієнт шифрує до відправки</td>
-<td>AWS бачить лише шифротекст</td>
+<td data-label="Варіант"><strong>Client-side</strong></td>
+<td data-label="Хто тримає ключ">клієнт шифрує до відправки</td>
+<td data-label="Коротко">AWS бачить лише шифротекст</td>
 </tr>
 </tbody>
 </table>
@@ -260,20 +270,20 @@
 </thead>
 <tbody>
 <tr>
-<td>Versioning</td>
-<td>зберігає версії, видалення ставить delete marker</td>
+<td data-label="Механізм">Versioning</td>
+<td data-label="Що робить">зберігає версії, видалення ставить delete marker</td>
 </tr>
 <tr>
-<td>MFA Delete</td>
-<td>видалення версій потребує MFA</td>
+<td data-label="Механізм">MFA Delete</td>
+<td data-label="Що робить">видалення версій потребує MFA</td>
 </tr>
 <tr>
-<td>Object Lock (WORM)</td>
-<td>неможливо змінити чи видалити до дати (режими governance, compliance), є legal hold без терміну; працює лише з увімкненим версіонуванням, захищає конкретну версію</td>
+<td data-label="Механізм">Object Lock (WORM)</td>
+<td data-label="Що робить">неможливо змінити чи видалити до дати (режими governance, compliance), є legal hold без терміну; працює лише з увімкненим версіонуванням, захищає конкретну версію</td>
 </tr>
 <tr>
-<td>Lifecycle</td>
-<td>автоматичне видалення чи перехід</td>
+<td data-label="Механізм">Lifecycle</td>
+<td data-label="Що робить">автоматичне видалення чи перехід</td>
 </tr>
 </tbody>
 </table>

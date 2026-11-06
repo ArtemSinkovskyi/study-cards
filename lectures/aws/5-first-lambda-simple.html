@@ -17,6 +17,16 @@
   th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
   td code, th code { white-space:nowrap; }
   th { background:#fff; }
+  @media (max-width: 640px) {
+    table, thead, tbody, tr, td { display:block; min-width:0; }
+    table { overflow:visible; }
+    thead { display:none; }
+    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
+    td { border:none; padding:.25rem 0; }
+    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
+    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
+    td code, th code { white-space:normal; }
+  }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -50,48 +60,48 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>Execution environment</strong></td>
-<td>ізольоване середовище: runtime, ваш код і все, ініціалізоване поза handler; <strong>один виклик за раз</strong></td>
+<td data-label="Термін"><strong>Execution environment</strong></td>
+<td data-label="Суть">ізольоване середовище: runtime, ваш код і все, ініціалізоване поза handler; <strong>один виклик за раз</strong></td>
 </tr>
 <tr>
-<td><strong>Cold start / warm start</strong></td>
-<td>перший запуск нового середовища / наступні, швидші</td>
+<td data-label="Термін"><strong>Cold start / warm start</strong></td>
+<td data-label="Суть">перший запуск нового середовища / наступні, швидші</td>
 </tr>
 <tr>
-<td><strong>Handler</strong></td>
-<td>функція-обробник, яку викликає Lambda</td>
+<td data-label="Термін"><strong>Handler</strong></td>
+<td data-label="Суть">функція-обробник, яку викликає Lambda</td>
 </tr>
 <tr>
-<td><strong>Deployment package</strong></td>
-<td>пакет коду з залежностями</td>
+<td data-label="Термін"><strong>Deployment package</strong></td>
+<td data-label="Суть">пакет коду з залежностями</td>
 </tr>
 <tr>
-<td><strong>Bundle / bundler</strong></td>
-<td>один зібраний JS-файл / інструмент (esbuild), що його збирає</td>
+<td data-label="Термін"><strong>Bundle / bundler</strong></td>
+<td data-label="Суть">один зібраний JS-файл / інструмент (esbuild), що його збирає</td>
 </tr>
 <tr>
-<td><strong>Tree shaking</strong></td>
-<td>викидання невикористаного коду під час збірки</td>
+<td data-label="Термін"><strong>Tree shaking</strong></td>
+<td data-label="Суть">викидання невикористаного коду під час збірки</td>
 </tr>
 <tr>
-<td><strong>Layer</strong></td>
-<td>окремий архів із залежностями</td>
+<td data-label="Термін"><strong>Layer</strong></td>
+<td data-label="Суть">окремий архів із залежностями</td>
 </tr>
 <tr>
-<td><strong>Provisioned concurrency</strong></td>
-<td>заздалегідь прогріті середовища (платно)</td>
+<td data-label="Термін"><strong>Provisioned concurrency</strong></td>
+<td data-label="Суть">заздалегідь прогріті середовища (платно)</td>
 </tr>
 <tr>
-<td><strong>Reserved concurrency</strong></td>
-<td>зарезервована частина ліміту акаунта і водночас стеля для функції (безкоштовно)</td>
+<td data-label="Термін"><strong>Reserved concurrency</strong></td>
+<td data-label="Суть">зарезервована частина ліміту акаунта і водночас стеля для функції (безкоштовно)</td>
 </tr>
 <tr>
-<td><strong>Destination / DLQ</strong></td>
-<td>куди йде подія після всіх невдалих спроб</td>
+<td data-label="Термін"><strong>Destination / DLQ</strong></td>
+<td data-label="Суть">куди йде подія після всіх невдалих спроб</td>
 </tr>
 <tr>
-<td><strong>SAM</strong></td>
-<td>шаблон <code>template.yaml</code> (скорочений CloudFormation) плюс CLI (<code>sam build</code>, <code>sam deploy</code>, <code>sam local invoke</code>)</td>
+<td data-label="Термін"><strong>SAM</strong></td>
+<td data-label="Суть">шаблон <code>template.yaml</code> (скорочений CloudFormation) плюс CLI (<code>sam build</code>, <code>sam deploy</code>, <code>sam local invoke</code>)</td>
 </tr>
 </tbody>
 </table>
@@ -105,32 +115,32 @@
 </thead>
 <tbody>
 <tr>
-<td>Експортована функція, на яку вказує налаштування <code>handler</code> (<code>index.handler</code> = файл <code>index</code>, експорт <code>handler</code>)</td>
-<td>вимога Lambda; назва довільна</td>
+<td data-label="Що">Експортована функція, на яку вказує налаштування <code>handler</code> (<code>index.handler</code> = файл <code>index</code>, експорт <code>handler</code>)</td>
+<td data-label="Чиє">вимога Lambda; назва довільна</td>
 </tr>
 <tr>
-<td>Сигнатура <code>(event, context) =&gt; Promise</code></td>
-<td>контракт runtime Node.js (старий <code>callback</code> теж підтримується)</td>
+<td data-label="Що">Сигнатура <code>(event, context) =&gt; Promise</code></td>
+<td data-label="Чиє">контракт runtime Node.js (старий <code>callback</code> теж підтримується)</td>
 </tr>
 <tr>
-<td>Форма <code>event</code></td>
-<td>визначає джерело, не ви</td>
+<td data-label="Що">Форма <code>event</code></td>
+<td data-label="Чиє">визначає джерело, не ви</td>
 </tr>
 <tr>
-<td>Повернене значення</td>
-<td>для sync іде викликачу (API Gateway зробить з нього HTTP-відповідь), для async ігнорується</td>
+<td data-label="Що">Повернене значення</td>
+<td data-label="Чиє">для sync іде викликачу (API Gateway зробить з нього HTTP-відповідь), для async ігнорується</td>
 </tr>
 <tr>
-<td>Кинута помилка</td>
-<td>виклик невдалий; async Lambda повторить ще двічі, потім DLQ чи destination</td>
+<td data-label="Що">Кинута помилка</td>
+<td data-label="Чиє">виклик невдалий; async Lambda повторить ще двічі, потім DLQ чи destination</td>
 </tr>
 <tr>
-<td>Логіка окремо від handler</td>
-<td>рекомендація Lambda best practices: handler лише розбирає подію й викликає звичайні функції</td>
+<td data-label="Що">Логіка окремо від handler</td>
+<td data-label="Чиє">рекомендація Lambda best practices: handler лише розбирає подію й викликає звичайні функції</td>
 </tr>
 <tr>
-<td>Налаштування в змінних середовища, ініціалізація поза handler</td>
-<td>рекомендація AWS</td>
+<td data-label="Що">Налаштування в змінних середовища, ініціалізація поза handler</td>
+<td data-label="Чиє">рекомендація AWS</td>
 </tr>
 </tbody>
 </table>
@@ -156,24 +166,24 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>Logger</strong></td>
-<td>структурований JSON-лог з контекстом виклику (<code>cold_start</code>, <code>function_name</code>, <code>function_request_id</code>)</td>
+<td data-label="Модуль"><strong>Logger</strong></td>
+<td data-label="Що робить">структурований JSON-лог з контекстом виклику (<code>cold_start</code>, <code>function_name</code>, <code>function_request_id</code>)</td>
 </tr>
 <tr>
-<td><strong>Parser</strong></td>
-<td>перевіряє форму події під час виконання (zod-схеми); готові схеми, наприклад для подій S3 через EventBridge</td>
+<td data-label="Модуль"><strong>Parser</strong></td>
+<td data-label="Що робить">перевіряє форму події під час виконання (zod-схеми); готові схеми, наприклад для подій S3 через EventBridge</td>
 </tr>
 <tr>
-<td><strong>Idempotency</strong></td>
-<td>не виконує ту саму подію двічі, стан у DynamoDB</td>
+<td data-label="Модуль"><strong>Idempotency</strong></td>
+<td data-label="Що робить">не виконує ту саму подію двічі, стан у DynamoDB</td>
 </tr>
 <tr>
-<td><strong>Metrics</strong></td>
-<td>метрики CloudWatch у форматі EMF, без викликів API</td>
+<td data-label="Модуль"><strong>Metrics</strong></td>
+<td data-label="Що робить">метрики CloudWatch у форматі EMF, без викликів API</td>
 </tr>
 <tr>
-<td><strong>Tracer</strong></td>
-<td>трейси X-Ray</td>
+<td data-label="Модуль"><strong>Tracer</strong></td>
+<td data-label="Що робить">трейси X-Ray</td>
 </tr>
 </tbody>
 </table>
@@ -201,19 +211,19 @@
 </thead>
 <tbody>
 <tr>
-<td>Zip напряму (<code>update-function-code --zip-file</code>)</td>
-<td><strong>50 МБ</strong> стиснутого</td>
-<td>звичайний випадок</td>
+<td data-label="Спосіб">Zip напряму (<code>update-function-code --zip-file</code>)</td>
+<td data-label="Ліміт"><strong>50 МБ</strong> стиснутого</td>
+<td data-label="Коли">звичайний випадок</td>
 </tr>
 <tr>
-<td>Zip через S3</td>
-<td><strong>250 МБ</strong> розпакованого, разом з усіма layers (до 5)</td>
-<td>пакет більший за 50 МБ</td>
+<td data-label="Спосіб">Zip через S3</td>
+<td data-label="Ліміт"><strong>250 МБ</strong> розпакованого, разом з усіма layers (до 5)</td>
+<td data-label="Коли">пакет більший за 50 МБ</td>
 </tr>
 <tr>
-<td>Container image з ECR</td>
-<td><strong>10 ГБ</strong></td>
-<td>великі залежності: ML-модель, ffmpeg, Chromium</td>
+<td data-label="Спосіб">Container image з ECR</td>
+<td data-label="Ліміт"><strong>10 ГБ</strong></td>
+<td data-label="Коли">великі залежності: ML-модель, ffmpeg, Chromium</td>
 </tr>
 </tbody>
 </table>
@@ -248,24 +258,24 @@
 </thead>
 <tbody>
 <tr>
-<td>Rust / Go (бінарник на <code>provided.al2023</code>)</td>
-<td>приблизно 10-50 мс</td>
-<td>найшвидший старт</td>
+<td data-label="Runtime">Rust / Go (бінарник на <code>provided.al2023</code>)</td>
+<td data-label="Cold start">приблизно 10-50 мс</td>
+<td data-label="Примітка">найшвидший старт</td>
 </tr>
 <tr>
-<td>Node.js</td>
-<td>приблизно 100-300 мс, із sharp 200-400 мс</td>
-<td>sharp (libvips) найшвидший для ресайзу</td>
+<td data-label="Runtime">Node.js</td>
+<td data-label="Cold start">приблизно 100-300 мс, із sharp 200-400 мс</td>
+<td data-label="Примітка">sharp (libvips) найшвидший для ресайзу</td>
 </tr>
 <tr>
-<td>Python</td>
-<td>приблизно 150-300 мс</td>
-<td></td>
+<td data-label="Runtime">Python</td>
+<td data-label="Cold start">приблизно 150-300 мс</td>
+<td data-label="Примітка"></td>
 </tr>
 <tr>
-<td>Java / Kotlin</td>
-<td>1-5 с без SnapStart</td>
-<td></td>
+<td data-label="Runtime">Java / Kotlin</td>
+<td data-label="Cold start">1-5 с без SnapStart</td>
+<td data-label="Примітка"></td>
 </tr>
 </tbody>
 </table>
@@ -291,34 +301,34 @@
 </thead>
 <tbody>
 <tr>
-<td>Origin = S3</td>
-<td>приватний бакет через <strong>OAC</strong></td>
-<td>публічне читання потрібних префіксів</td>
+<td data-label="">Origin = S3</td>
+<td data-label="AWS CloudFront">приватний бакет через <strong>OAC</strong></td>
+<td data-label="Зовнішній CDN (наприклад Cloudflare)">публічне читання потрібних префіксів</td>
 </tr>
 <tr>
-<td>Доступ до S3</td>
-<td>bucket policy <code>Principal: cloudfront.amazonaws.com</code> з <code>AWS:SourceArn</code></td>
-<td>bucket policy <code>Principal: *</code> лише на потрібні префікси</td>
+<td data-label="">Доступ до S3</td>
+<td data-label="AWS CloudFront">bucket policy <code>Principal: cloudfront.amazonaws.com</code> з <code>AWS:SourceArn</code></td>
+<td data-label="Зовнішній CDN (наприклад Cloudflare)">bucket policy <code>Principal: *</code> лише на потрібні префікси</td>
 </tr>
 <tr>
-<td>Сертифікат</td>
-<td>ACM у <code>us-east-1</code></td>
-<td>керує CDN</td>
+<td data-label="">Сертифікат</td>
+<td data-label="AWS CloudFront">ACM у <code>us-east-1</code></td>
+<td data-label="Зовнішній CDN (наприклад Cloudflare)">керує CDN</td>
 </tr>
 <tr>
-<td>Кеш</td>
-<td>TTL з <code>Cache-Control</code> або політика кешу; інвалідація платна понад ліміт</td>
-<td>TTL з <code>Cache-Control</code>; purge вручну чи через API</td>
+<td data-label="">Кеш</td>
+<td data-label="AWS CloudFront">TTL з <code>Cache-Control</code> або політика кешу; інвалідація платна понад ліміт</td>
+<td data-label="Зовнішній CDN (наприклад Cloudflare)">TTL з <code>Cache-Control</code>; purge вручну чи через API</td>
 </tr>
 <tr>
-<td>Підписані URL і cookie</td>
-<td>є (приватний контент)</td>
-<td>окремі механізми</td>
+<td data-label="">Підписані URL і cookie</td>
+<td data-label="AWS CloudFront">є (приватний контент)</td>
+<td data-label="Зовнішній CDN (наприклад Cloudflare)">окремі механізми</td>
 </tr>
 <tr>
-<td>Edge-код</td>
-<td>Lambda@Edge, CloudFront Functions</td>
-<td>Workers</td>
+<td data-label="">Edge-код</td>
+<td data-label="AWS CloudFront">Lambda@Edge, CloudFront Functions</td>
+<td data-label="Зовнішній CDN (наприклад Cloudflare)">Workers</td>
 </tr>
 </tbody>
 </table>

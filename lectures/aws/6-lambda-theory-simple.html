@@ -17,6 +17,16 @@
   th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
   td code, th code { white-space:nowrap; }
   th { background:#fff; }
+  @media (max-width: 640px) {
+    table, thead, tbody, tr, td { display:block; min-width:0; }
+    table { overflow:visible; }
+    thead { display:none; }
+    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
+    td { border:none; padding:.25rem 0; }
+    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
+    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
+    td code, th code { white-space:normal; }
+  }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -57,19 +67,19 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>Init</strong></td>
-<td>запуск runtime і код <strong>поза handler</strong> (імпорти, <code>new S3Client()</code>, читання конфігурації)</td>
-<td>ліміт <strong>10 с</strong>; за новими правилами Init тарифікується, тож важкий Init коштує грошей</td>
+<td data-label="Фаза"><strong>Init</strong></td>
+<td data-label="Що відбувається">запуск runtime і код <strong>поза handler</strong> (імпорти, <code>new S3Client()</code>, читання конфігурації)</td>
+<td data-label="Нюанси">ліміт <strong>10 с</strong>; за новими правилами Init тарифікується, тож важкий Init коштує грошей</td>
 </tr>
 <tr>
-<td><strong>Invoke</strong></td>
-<td>виклик <code>handler(event, context)</code></td>
-<td>одне середовище обробляє <strong>один виклик за раз</strong></td>
+<td data-label="Фаза"><strong>Invoke</strong></td>
+<td data-label="Що відбувається">виклик <code>handler(event, context)</code></td>
+<td data-label="Нюанси">одне середовище обробляє <strong>один виклик за раз</strong></td>
 </tr>
 <tr>
-<td><strong>Shutdown</strong></td>
-<td>середовище гасять після бездіяльності</td>
-<td></td>
+<td data-label="Фаза"><strong>Shutdown</strong></td>
+<td data-label="Що відбувається">середовище гасять після бездіяльності</td>
+<td data-label="Нюанси"></td>
 </tr>
 </tbody>
 </table>
@@ -94,48 +104,48 @@
 </thead>
 <tbody>
 <tr>
-<td>Timeout</td>
-<td>за замовчуванням <strong>3 с</strong>, максимум <strong>15 хв (900 с)</strong></td>
+<td data-label="Що">Timeout</td>
+<td data-label="Значення">за замовчуванням <strong>3 с</strong>, максимум <strong>15 хв (900 с)</strong></td>
 </tr>
 <tr>
-<td>Пам'ять</td>
-<td><strong>128 МБ - 10 240 МБ</strong>, крок 1 МБ</td>
+<td data-label="Що">Пам'ять</td>
+<td data-label="Значення"><strong>128 МБ - 10 240 МБ</strong>, крок 1 МБ</td>
 </tr>
 <tr>
-<td>CPU</td>
-<td>росте з пам'яттю; <strong>1769 МБ = 1 vCPU</strong>, 10 ГБ приблизно 6 vCPU</td>
+<td data-label="Що">CPU</td>
+<td data-label="Значення">росте з пам'яттю; <strong>1769 МБ = 1 vCPU</strong>, 10 ГБ приблизно 6 vCPU</td>
 </tr>
 <tr>
-<td><code>/tmp</code></td>
-<td>512 МБ, до <strong>10 ГБ</strong></td>
+<td data-label="Що"><code>/tmp</code></td>
+<td data-label="Значення">512 МБ, до <strong>10 ГБ</strong></td>
 </tr>
 <tr>
-<td>Змінні середовища</td>
-<td><strong>4 КБ</strong> сумарно</td>
+<td data-label="Що">Змінні середовища</td>
+<td data-label="Значення"><strong>4 КБ</strong> сумарно</td>
 </tr>
 <tr>
-<td>Payload sync</td>
-<td><strong>6 МБ</strong></td>
+<td data-label="Що">Payload sync</td>
+<td data-label="Значення"><strong>6 МБ</strong></td>
 </tr>
 <tr>
-<td>Payload async</td>
-<td><strong>1 МБ</strong> (раніше 256 КБ; у старих матеріалах для іспиту ще трапляється 256 КБ)</td>
+<td data-label="Що">Payload async</td>
+<td data-label="Значення"><strong>1 МБ</strong> (раніше 256 КБ; у старих матеріалах для іспиту ще трапляється 256 КБ)</td>
 </tr>
 <tr>
-<td>Deployment package</td>
-<td>zip напряму <strong>50 МБ</strong>; розпаковано з layers <strong>250 МБ</strong>; container image <strong>10 ГБ</strong></td>
+<td data-label="Що">Deployment package</td>
+<td data-label="Значення">zip напряму <strong>50 МБ</strong>; розпаковано з layers <strong>250 МБ</strong>; container image <strong>10 ГБ</strong></td>
 </tr>
 <tr>
-<td>Layers</td>
-<td>до <strong>5</strong> на функцію</td>
+<td data-label="Що">Layers</td>
+<td data-label="Значення">до <strong>5</strong> на функцію</td>
 </tr>
 <tr>
-<td>Concurrency акаунта</td>
-<td><strong>1000</strong> на регіон (можна підняти); у нових акаунтів стартова квота нижча</td>
+<td data-label="Що">Concurrency акаунта</td>
+<td data-label="Значення"><strong>1000</strong> на регіон (можна підняти); у нових акаунтів стартова квота нижча</td>
 </tr>
 <tr>
-<td>Init</td>
-<td><strong>10 с</strong></td>
+<td data-label="Що">Init</td>
+<td data-label="Значення"><strong>10 с</strong></td>
 </tr>
 </tbody>
 </table>
@@ -159,46 +169,46 @@
 </thead>
 <tbody>
 <tr>
-<td>Хто викликає</td>
-<td>клієнт чекає</td>
-<td>джерело кидає подію і йде</td>
-<td><strong>сама Lambda</strong> опитує джерело</td>
+<td data-label="">Хто викликає</td>
+<td data-label="Синхронний">клієнт чекає</td>
+<td data-label="Асинхронний">джерело кидає подію і йде</td>
+<td data-label="Event source mapping"><strong>сама Lambda</strong> опитує джерело</td>
 </tr>
 <tr>
-<td><code>InvocationType</code></td>
-<td><code>RequestResponse</code></td>
-<td><code>Event</code></td>
-<td>внутрішньо</td>
+<td data-label=""><code>InvocationType</code></td>
+<td data-label="Синхронний"><code>RequestResponse</code></td>
+<td data-label="Асинхронний"><code>Event</code></td>
+<td data-label="Event source mapping">внутрішньо</td>
 </tr>
 <tr>
-<td>Джерела</td>
-<td>API Gateway, ALB, Function URL, Cognito, Lambda@Edge, SDK</td>
-<td><strong>S3, SNS, EventBridge</strong>, SES, CloudWatch Logs</td>
-<td><strong>SQS, Kinesis, DynamoDB Streams</strong>, Kafka (MSK), MQ</td>
+<td data-label="">Джерела</td>
+<td data-label="Синхронний">API Gateway, ALB, Function URL, Cognito, Lambda@Edge, SDK</td>
+<td data-label="Асинхронний"><strong>S3, SNS, EventBridge</strong>, SES, CloudWatch Logs</td>
+<td data-label="Event source mapping"><strong>SQS, Kinesis, DynamoDB Streams</strong>, Kafka (MSK), MQ</td>
 </tr>
 <tr>
-<td>Відповідь</td>
-<td>результат чи помилка йде <strong>викликачу</strong></td>
-<td>одразу <code>202</code>, результат ігнорується</td>
-<td>результат ігнорується, але успіх чи помилка керує джерелом</td>
+<td data-label="">Відповідь</td>
+<td data-label="Синхронний">результат чи помилка йде <strong>викликачу</strong></td>
+<td data-label="Асинхронний">одразу <code>202</code>, результат ігнорується</td>
+<td data-label="Event source mapping">результат ігнорується, але успіх чи помилка керує джерелом</td>
 </tr>
 <tr>
-<td><strong>Хто повторює</strong></td>
-<td><strong>клієнт</strong></td>
-<td><strong>Lambda</strong>: 2 повтори</td>
-<td>Lambda через джерело</td>
+<td data-label=""><strong>Хто повторює</strong></td>
+<td data-label="Синхронний"><strong>клієнт</strong></td>
+<td data-label="Асинхронний"><strong>Lambda</strong>: 2 повтори</td>
+<td data-label="Event source mapping">Lambda через джерело</td>
 </tr>
 <tr>
-<td>Куди йде невдача</td>
-<td>клієнту</td>
-<td>DLQ чи on-failure destination</td>
-<td>SQS: DLQ <strong>черги</strong>; потоки: on-failure destination</td>
+<td data-label="">Куди йде невдача</td>
+<td data-label="Синхронний">клієнту</td>
+<td data-label="Асинхронний">DLQ чи on-failure destination</td>
+<td data-label="Event source mapping">SQS: DLQ <strong>черги</strong>; потоки: on-failure destination</td>
 </tr>
 <tr>
-<td>Формат події</td>
-<td>залежить від джерела</td>
-<td>залежить від джерела</td>
-<td>батч записів (<code>Records</code>)</td>
+<td data-label="">Формат події</td>
+<td data-label="Синхронний">залежить від джерела</td>
+<td data-label="Асинхронний">залежить від джерела</td>
+<td data-label="Event source mapping">батч записів (<code>Records</code>)</td>
 </tr>
 </tbody>
 </table>
@@ -229,24 +239,24 @@
 </thead>
 <tbody>
 <tr>
-<td>Умова</td>
-<td>лише невдача</td>
-<td><strong>успіх і невдача</strong></td>
+<td data-label="">Умова</td>
+<td data-label="DLQ">лише невдача</td>
+<td data-label="Destinations"><strong>успіх і невдача</strong></td>
 </tr>
 <tr>
-<td>Куди</td>
-<td>SQS або SNS</td>
-<td>SQS, SNS, <strong>Lambda, EventBridge</strong> (S3 для невдач)</td>
+<td data-label="">Куди</td>
+<td data-label="DLQ">SQS або SNS</td>
+<td data-label="Destinations">SQS, SNS, <strong>Lambda, EventBridge</strong> (S3 для невдач)</td>
 </tr>
 <tr>
-<td>Що в повідомленні</td>
-<td>подія</td>
-<td>подія <strong>плюс контекст</strong>: помилка, кількість спроб, <code>requestId</code></td>
+<td data-label="">Що в повідомленні</td>
+<td data-label="DLQ">подія</td>
+<td data-label="Destinations">подія <strong>плюс контекст</strong>: помилка, кількість спроб, <code>requestId</code></td>
 </tr>
 <tr>
-<td>Порада AWS</td>
-<td>старіший варіант</td>
-<td><strong>рекомендований</strong></td>
+<td data-label="">Порада AWS</td>
+<td data-label="DLQ">старіший варіант</td>
+<td data-label="Destinations"><strong>рекомендований</strong></td>
 </tr>
 </tbody>
 </table>
@@ -291,22 +301,22 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>Unreserved</strong></td>
-<td>спільний пул акаунта (1000 на регіон)</td>
-<td>ні</td>
-<td>усі функції без резервів ділять залишок</td>
+<td data-label="Тип"><strong>Unreserved</strong></td>
+<td data-label="Що">спільний пул акаунта (1000 на регіон)</td>
+<td data-label="Платно">ні</td>
+<td data-label="Нюанс">усі функції без резервів ділять залишок</td>
 </tr>
 <tr>
-<td><strong>Reserved</strong></td>
-<td>гарантована <strong>і обмежена зверху</strong> частина ліміту</td>
-<td>ні</td>
-<td><code>0</code> вимикає функцію; захищає інших від цієї й цю від інших</td>
+<td data-label="Тип"><strong>Reserved</strong></td>
+<td data-label="Що">гарантована <strong>і обмежена зверху</strong> частина ліміту</td>
+<td data-label="Платно">ні</td>
+<td data-label="Нюанс"><code>0</code> вимикає функцію; захищає інших від цієї й цю від інших</td>
 </tr>
 <tr>
-<td><strong>Provisioned</strong></td>
-<td>заздалегідь прогріті середовища</td>
-<td><strong>так</strong></td>
-<td>лише на <strong>версію чи alias</strong>, не на <code>$LATEST</code></td>
+<td data-label="Тип"><strong>Provisioned</strong></td>
+<td data-label="Що">заздалегідь прогріті середовища</td>
+<td data-label="Платно"><strong>так</strong></td>
+<td data-label="Нюанс">лише на <strong>версію чи alias</strong>, не на <code>$LATEST</code></td>
 </tr>
 </tbody>
 </table>
@@ -331,29 +341,29 @@
 </thead>
 <tbody>
 <tr>
-<td>Питання</td>
-<td>що <strong>функція</strong> може робити</td>
-<td>хто може <strong>викликати функцію</strong></td>
+<td data-label="">Питання</td>
+<td data-label="Execution role">що <strong>функція</strong> може робити</td>
+<td data-label="Resource-based policy">хто може <strong>викликати функцію</strong></td>
 </tr>
 <tr>
-<td>Де живе</td>
-<td>IAM-роль з довірою <code>lambda.amazonaws.com</code></td>
-<td>прикріплена до самої функції</td>
+<td data-label="">Де живе</td>
+<td data-label="Execution role">IAM-роль з довірою <code>lambda.amazonaws.com</code></td>
+<td data-label="Resource-based policy">прикріплена до самої функції</td>
 </tr>
 <tr>
-<td>Приклад</td>
-<td><code>s3:GetObject</code>, <code>logs:*</code></td>
-<td><code>lambda:InvokeFunction</code> для <code>events.amazonaws.com</code> з <code>SourceArn</code></td>
+<td data-label="">Приклад</td>
+<td data-label="Execution role"><code>s3:GetObject</code>, <code>logs:*</code></td>
+<td data-label="Resource-based policy"><code>lambda:InvokeFunction</code> для <code>events.amazonaws.com</code> з <code>SourceArn</code></td>
 </tr>
 <tr>
-<td>SAM / Terraform</td>
-<td><code>Policies</code> у функції / <code>aws_iam_role</code></td>
-<td>SAM створює сам для <code>Events</code>; у Terraform це <code>aws_lambda_permission</code></td>
+<td data-label="">SAM / Terraform</td>
+<td data-label="Execution role"><code>Policies</code> у функції / <code>aws_iam_role</code></td>
+<td data-label="Resource-based policy">SAM створює сам для <code>Events</code>; у Terraform це <code>aws_lambda_permission</code></td>
 </tr>
 <tr>
-<td>Cross-account</td>
-<td>роль в акаунті функції</td>
-<td>головний спосіб дати <strong>чужому акаунту</strong> викликати функцію</td>
+<td data-label="">Cross-account</td>
+<td data-label="Execution role">роль в акаунті функції</td>
+<td data-label="Resource-based policy">головний спосіб дати <strong>чужому акаунту</strong> викликати функцію</td>
 </tr>
 </tbody>
 </table>
@@ -368,12 +378,12 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>Push</strong> (S3, SNS, EventBridge, API GW)</td>
-<td><strong>resource-based policy</strong> на функції</td>
+<td data-label="Тип джерела"><strong>Push</strong> (S3, SNS, EventBridge, API GW)</td>
+<td data-label="Що потрібно"><strong>resource-based policy</strong> на функції</td>
 </tr>
 <tr>
-<td><strong>Poll</strong> (SQS, Kinesis, DynamoDB Streams)</td>
-<td><strong>execution role</strong> з правами читання (<code>sqs:ReceiveMessage</code>, <code>DeleteMessage</code>, <code>GetQueueAttributes</code>)</td>
+<td data-label="Тип джерела"><strong>Poll</strong> (SQS, Kinesis, DynamoDB Streams)</td>
+<td data-label="Що потрібно"><strong>execution role</strong> з правами читання (<code>sqs:ReceiveMessage</code>, <code>DeleteMessage</code>, <code>GetQueueAttributes</code>)</td>
 </tr>
 </tbody>
 </table>
@@ -395,19 +405,19 @@
 </thead>
 <tbody>
 <tr>
-<td><strong><code>$LATEST</code></strong></td>
-<td>поточний робочий код</td>
-<td><strong>так</strong></td>
+<td data-label="Поняття"><strong><code>$LATEST</code></strong></td>
+<td data-label="Що">поточний робочий код</td>
+<td data-label="Змінне?"><strong>так</strong></td>
 </tr>
 <tr>
-<td><strong>Версія</strong> (1, 2, ...)</td>
-<td>знімок коду <strong>і конфігурації</strong></td>
-<td><strong>ні</strong></td>
+<td data-label="Поняття"><strong>Версія</strong> (1, 2, ...)</td>
+<td data-label="Що">знімок коду <strong>і конфігурації</strong></td>
+<td data-label="Змінне?"><strong>ні</strong></td>
 </tr>
 <tr>
-<td><strong>Alias</strong> (<code>prod</code>)</td>
-<td>іменований вказівник на версію</td>
-<td>вказівник можна переставити</td>
+<td data-label="Поняття"><strong>Alias</strong> (<code>prod</code>)</td>
+<td data-label="Що">іменований вказівник на версію</td>
+<td data-label="Змінне?">вказівник можна переставити</td>
 </tr>
 </tbody>
 </table>
@@ -438,24 +448,24 @@
 </thead>
 <tbody>
 <tr>
-<td>код з залежностями менше 50 МБ</td>
-<td>zip напряму</td>
+<td data-label="Ситуація">код з залежностями менше 50 МБ</td>
+<td data-label="Рішення">zip напряму</td>
 </tr>
 <tr>
-<td>zip більше 50 МБ (до 250 МБ розпаковано)</td>
-<td>завантажити через S3</td>
+<td data-label="Ситуація">zip більше 50 МБ (до 250 МБ розпаковано)</td>
+<td data-label="Рішення">завантажити через S3</td>
 </tr>
 <tr>
-<td>спільна залежність для кількох функцій</td>
-<td>layer</td>
+<td data-label="Ситуація">спільна залежність для кількох функцій</td>
+<td data-label="Рішення">layer</td>
 </tr>
 <tr>
-<td>понад 250 МБ (ML-модель, ffmpeg, Chromium)</td>
-<td>container image з ECR (до 10 ГБ)</td>
+<td data-label="Ситуація">понад 250 МБ (ML-модель, ffmpeg, Chromium)</td>
+<td data-label="Рішення">container image з ECR (до 10 ГБ)</td>
 </tr>
 <tr>
-<td>нативна залежність працює локально, падає в Lambda (<code>invalid ELF header</code>)</td>
-<td>збірка під Linux і архітектуру Lambda</td>
+<td data-label="Ситуація">нативна залежність працює локально, падає в Lambda (<code>invalid ELF header</code>)</td>
+<td data-label="Рішення">збірка під Linux і архітектуру Lambda</td>
 </tr>
 </tbody>
 </table>
@@ -471,19 +481,19 @@
 </thead>
 <tbody>
 <tr>
-<td>Змінні середовища</td>
-<td>нечутлива конфігурація</td>
-<td>до 4 КБ, шифруються в спокої KMS</td>
+<td data-label="Спосіб">Змінні середовища</td>
+<td data-label="Коли">нечутлива конфігурація</td>
+<td data-label="Нюанс">до 4 КБ, шифруються в спокої KMS</td>
 </tr>
 <tr>
-<td>SSM Parameter Store</td>
-<td>конфіг і малі секрети</td>
-<td><code>String</code>, <code>StringList</code>, <code>SecureString</code> (KMS), стандартний рівень безкоштовний, без автоматичної ротації</td>
+<td data-label="Спосіб">SSM Parameter Store</td>
+<td data-label="Коли">конфіг і малі секрети</td>
+<td data-label="Нюанс"><code>String</code>, <code>StringList</code>, <code>SecureString</code> (KMS), стандартний рівень безкоштовний, без автоматичної ротації</td>
 </tr>
 <tr>
-<td>Secrets Manager</td>
-<td>секрети з <strong>ротацією</strong></td>
-<td>платний за секрет, ротація через Lambda</td>
+<td data-label="Спосіб">Secrets Manager</td>
+<td data-label="Коли">секрети з <strong>ротацією</strong></td>
+<td data-label="Нюанс">платний за секрет, ротація через Lambda</td>
 </tr>
 </tbody>
 </table>
@@ -502,32 +512,32 @@
 </thead>
 <tbody>
 <tr>
-<td><code>Invocations</code></td>
-<td>кількість викликів</td>
+<td data-label="Метрика"><code>Invocations</code></td>
+<td data-label="Означає">кількість викликів</td>
 </tr>
 <tr>
-<td><code>Errors</code></td>
-<td>виклики з помилкою функції</td>
+<td data-label="Метрика"><code>Errors</code></td>
+<td data-label="Означає">виклики з помилкою функції</td>
 </tr>
 <tr>
-<td><code>Throttles</code></td>
-<td>відхилені через concurrency (<strong>не входять</strong> в <code>Errors</code>)</td>
+<td data-label="Метрика"><code>Throttles</code></td>
+<td data-label="Означає">відхилені через concurrency (<strong>не входять</strong> в <code>Errors</code>)</td>
 </tr>
 <tr>
-<td><code>Duration</code></td>
-<td>тривалість</td>
+<td data-label="Метрика"><code>Duration</code></td>
+<td data-label="Означає">тривалість</td>
 </tr>
 <tr>
-<td><code>ConcurrentExecutions</code></td>
-<td>паралельні виконання</td>
+<td data-label="Метрика"><code>ConcurrentExecutions</code></td>
+<td data-label="Означає">паралельні виконання</td>
 </tr>
 <tr>
-<td><code>IteratorAge</code></td>
-<td>відставання від потоку</td>
+<td data-label="Метрика"><code>IteratorAge</code></td>
+<td data-label="Означає">відставання від потоку</td>
 </tr>
 <tr>
-<td><code>AsyncEventAge</code>, <code>DeadLetterErrors</code>, <code>DestinationDeliveryFailures</code></td>
-<td>здоров'я async-черги</td>
+<td data-label="Метрика"><code>AsyncEventAge</code>, <code>DeadLetterErrors</code>, <code>DestinationDeliveryFailures</code></td>
+<td data-label="Означає">здоров'я async-черги</td>
 </tr>
 </tbody>
 </table>
@@ -554,19 +564,19 @@
 </thead>
 <tbody>
 <tr>
-<td>API Gateway (REST, HTTP API)</td>
-<td>повноцінний API: авторизація, throttling, кеш, usage plans</td>
-<td><strong>proxy integration</strong>: Lambda отримує весь запит і сама формує відповідь</td>
+<td data-label="">API Gateway (REST, HTTP API)</td>
+<td data-label="Що">повноцінний API: авторизація, throttling, кеш, usage plans</td>
+<td data-label="Нюанси"><strong>proxy integration</strong>: Lambda отримує весь запит і сама формує відповідь</td>
 </tr>
 <tr>
-<td>Function URL</td>
-<td>вбудована HTTPS-адреса функції</td>
-<td>auth <code>AWS_IAM</code> чи <code>NONE</code>, є CORS; простіше й дешевше, без можливостей API Gateway</td>
+<td data-label="">Function URL</td>
+<td data-label="Що">вбудована HTTPS-адреса функції</td>
+<td data-label="Нюанси">auth <code>AWS_IAM</code> чи <code>NONE</code>, є CORS; простіше й дешевше, без можливостей API Gateway</td>
 </tr>
 <tr>
-<td>ALB</td>
-<td>балансувальник з Lambda як ціллю</td>
-<td>коли ALB уже є</td>
+<td data-label="">ALB</td>
+<td data-label="Що">балансувальник з Lambda як ціллю</td>
+<td data-label="Нюанси">коли ALB уже є</td>
 </tr>
 </tbody>
 </table>
@@ -580,24 +590,24 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>429</strong></td>
-<td>throttling: перевищено concurrency</td>
+<td data-label="Код"><strong>429</strong></td>
+<td data-label="Причина">throttling: перевищено concurrency</td>
 </tr>
 <tr>
-<td><strong>502</strong></td>
-<td>неправильний формат відповіді (proxy) або падіння функції</td>
+<td data-label="Код"><strong>502</strong></td>
+<td data-label="Причина">неправильний формат відповіді (proxy) або падіння функції</td>
 </tr>
 <tr>
-<td><strong>504</strong></td>
-<td>timeout інтеграції: за замовчуванням до 29 с, навіть якщо функція має 15 хв (для Regional і Private REST API з червня 2024 можна підняти до 300 с; для HTTP API ні)</td>
+<td data-label="Код"><strong>504</strong></td>
+<td data-label="Причина">timeout інтеграції: за замовчуванням до 29 с, навіть якщо функція має 15 хв (для Regional і Private REST API з червня 2024 можна підняти до 300 с; для HTTP API ні)</td>
 </tr>
 <tr>
-<td><strong>403</strong></td>
-<td>немає права викликати (resource policy)</td>
+<td data-label="Код"><strong>403</strong></td>
+<td data-label="Причина">немає права викликати (resource policy)</td>
 </tr>
 <tr>
-<td><strong>413</strong></td>
-<td>payload більший за ліміт</td>
+<td data-label="Код"><strong>413</strong></td>
+<td data-label="Причина">payload більший за ліміт</td>
 </tr>
 </tbody>
 </table>
@@ -612,28 +622,28 @@
 </thead>
 <tbody>
 <tr>
-<td><code>AWS::Serverless::Function</code></td>
-<td>Lambda плюс роль плюс тригери (<code>Events</code>)</td>
+<td data-label="Тип"><code>AWS::Serverless::Function</code></td>
+<td data-label="Створює">Lambda плюс роль плюс тригери (<code>Events</code>)</td>
 </tr>
 <tr>
-<td><code>AWS::Serverless::Api</code> / <code>HttpApi</code></td>
-<td>API Gateway</td>
+<td data-label="Тип"><code>AWS::Serverless::Api</code> / <code>HttpApi</code></td>
+<td data-label="Створює">API Gateway</td>
 </tr>
 <tr>
-<td><code>AWS::Serverless::SimpleTable</code></td>
-<td>таблиця DynamoDB</td>
+<td data-label="Тип"><code>AWS::Serverless::SimpleTable</code></td>
+<td data-label="Створює">таблиця DynamoDB</td>
 </tr>
 <tr>
-<td><code>AWS::Serverless::LayerVersion</code></td>
-<td>layer</td>
+<td data-label="Тип"><code>AWS::Serverless::LayerVersion</code></td>
+<td data-label="Створює">layer</td>
 </tr>
 <tr>
-<td><code>AWS::Serverless::StateMachine</code></td>
-<td>Step Functions</td>
+<td data-label="Тип"><code>AWS::Serverless::StateMachine</code></td>
+<td data-label="Створює">Step Functions</td>
 </tr>
 <tr>
-<td><code>AWS::Serverless::Application</code></td>
-<td>вкладений застосунок</td>
+<td data-label="Тип"><code>AWS::Serverless::Application</code></td>
+<td data-label="Створює">вкладений застосунок</td>
 </tr>
 </tbody>
 </table>
@@ -647,40 +657,40 @@
 </thead>
 <tbody>
 <tr>
-<td><code>sam init</code></td>
-<td>створює проєкт</td>
+<td data-label="Команда"><code>sam init</code></td>
+<td data-label="Що робить">створює проєкт</td>
 </tr>
 <tr>
-<td><code>sam build</code></td>
-<td>збирає (<code>--use-container</code> збирає в Docker-образі Lambda)</td>
+<td data-label="Команда"><code>sam build</code></td>
+<td data-label="Що робить">збирає (<code>--use-container</code> збирає в Docker-образі Lambda)</td>
 </tr>
 <tr>
-<td><code>sam local invoke</code></td>
-<td>запускає функцію локально з тестовою подією</td>
+<td data-label="Команда"><code>sam local invoke</code></td>
+<td data-label="Що робить">запускає функцію локально з тестовою подією</td>
 </tr>
 <tr>
-<td><code>sam local start-api</code></td>
-<td>піднімає локальний API</td>
+<td data-label="Команда"><code>sam local start-api</code></td>
+<td data-label="Що робить">піднімає локальний API</td>
 </tr>
 <tr>
-<td><code>sam validate</code></td>
-<td>перевіряє шаблон</td>
+<td data-label="Команда"><code>sam validate</code></td>
+<td data-label="Що робить">перевіряє шаблон</td>
 </tr>
 <tr>
-<td><code>sam deploy</code> (<code>--guided</code>)</td>
-<td>пакує й розгортає через CloudFormation</td>
+<td data-label="Команда"><code>sam deploy</code> (<code>--guided</code>)</td>
+<td data-label="Що робить">пакує й розгортає через CloudFormation</td>
 </tr>
 <tr>
-<td><code>sam sync</code></td>
-<td>швидка синхронізація під час розробки (не для prod)</td>
+<td data-label="Команда"><code>sam sync</code></td>
+<td data-label="Що робить">швидка синхронізація під час розробки (не для prod)</td>
 </tr>
 <tr>
-<td><code>sam logs</code></td>
-<td>читає логи</td>
+<td data-label="Команда"><code>sam logs</code></td>
+<td data-label="Що робить">читає логи</td>
 </tr>
 <tr>
-<td><code>sam pipeline</code></td>
-<td>генерує CI/CD</td>
+<td data-label="Команда"><code>sam pipeline</code></td>
+<td data-label="Що робить">генерує CI/CD</td>
 </tr>
 </tbody>
 </table>
@@ -694,16 +704,16 @@
 </thead>
 <tbody>
 <tr>
-<td><code>Canary10Percent5Minutes</code></td>
-<td>10% одразу, решта через 5 хв</td>
+<td data-label="Тип"><code>Canary10Percent5Minutes</code></td>
+<td data-label="Як зміщується трафік">10% одразу, решта через 5 хв</td>
 </tr>
 <tr>
-<td><code>Linear10PercentEvery1Minute</code></td>
-<td>+10% щохвилини</td>
+<td data-label="Тип"><code>Linear10PercentEvery1Minute</code></td>
+<td data-label="Як зміщується трафік">+10% щохвилини</td>
 </tr>
 <tr>
-<td><code>AllAtOnce</code></td>
-<td>усе одразу</td>
+<td data-label="Тип"><code>AllAtOnce</code></td>
+<td data-label="Як зміщується трафік">усе одразу</td>
 </tr>
 </tbody>
 </table>
@@ -721,96 +731,96 @@
 </thead>
 <tbody>
 <tr>
-<td>повільно через відкриття з'єднань на кожен виклик</td>
-<td>ініціалізація поза handler</td>
+<td data-label="Симптом">повільно через відкриття з'єднань на кожен виклик</td>
+<td data-label="Відповідь">ініціалізація поза handler</td>
 </tr>
 <tr>
-<td><code>invalid ELF header</code></td>
-<td>збірка під Linux і архітектуру функції</td>
+<td data-label="Симптом"><code>invalid ELF header</code></td>
+<td data-label="Відповідь">збірка під Linux і архітектуру функції</td>
 </tr>
 <tr>
-<td>пакет 70 МБ не завантажується напряму</td>
-<td>через S3</td>
+<td data-label="Симптом">пакет 70 МБ не завантажується напряму</td>
+<td data-label="Відповідь">через S3</td>
 </tr>
 <tr>
-<td>залежності більше 250 МБ</td>
-<td>container image (ECR)</td>
+<td data-label="Симптом">залежності більше 250 МБ</td>
+<td data-label="Відповідь">container image (ECR)</td>
 </tr>
 <tr>
-<td>спільна бібліотека для багатьох функцій</td>
-<td>layer</td>
+<td data-label="Симптом">спільна бібліотека для багатьох функцій</td>
+<td data-label="Відповідь">layer</td>
 </tr>
 <tr>
-<td>Java Lambda повільно стартує</td>
-<td>SnapStart, provisioned concurrency</td>
+<td data-label="Симптом">Java Lambda повільно стартує</td>
+<td data-label="Відповідь">SnapStart, provisioned concurrency</td>
 </tr>
 <tr>
-<td>cold start заважає sync API</td>
-<td>provisioned concurrency на alias</td>
+<td data-label="Симптом">cold start заважає sync API</td>
+<td data-label="Відповідь">provisioned concurrency на alias</td>
 </tr>
 <tr>
-<td>async-подія зникла після помилок</td>
-<td>немає DLQ чи destination</td>
+<td data-label="Симптом">async-подія зникла після помилок</td>
+<td data-label="Відповідь">немає DLQ чи destination</td>
 </tr>
 <tr>
-<td>потрібен успіх <strong>і</strong> невдача async</td>
-<td>destinations</td>
+<td data-label="Симптом">потрібен успіх <strong>і</strong> невдача async</td>
+<td data-label="Відповідь">destinations</td>
 </tr>
 <tr>
-<td>SQS обробляє двічі</td>
-<td>visibility timeout менше 6× timeout функції; немає ідемпотентності</td>
+<td data-label="Симптом">SQS обробляє двічі</td>
+<td data-label="Відповідь">visibility timeout менше 6× timeout функції; немає ідемпотентності</td>
 </tr>
 <tr>
-<td>поганий запис зупиняє шард Kinesis</td>
-<td>bisect, max record age, on-failure destination</td>
+<td data-label="Симптом">поганий запис зупиняє шард Kinesis</td>
+<td data-label="Відповідь">bisect, max record age, on-failure destination</td>
 </tr>
 <tr>
-<td>функція не читає з SQS</td>
-<td>права в execution role</td>
+<td data-label="Симптом">функція не читає з SQS</td>
+<td data-label="Відповідь">права в execution role</td>
 </tr>
 <tr>
-<td>EventBridge чи S3 не викликає функцію</td>
-<td>resource-based policy</td>
+<td data-label="Симптом">EventBridge чи S3 не викликає функцію</td>
+<td data-label="Відповідь">resource-based policy</td>
 </tr>
 <tr>
-<td>cross-account виклик функції</td>
-<td>resource-based policy</td>
+<td data-label="Симптом">cross-account виклик функції</td>
+<td data-label="Відповідь">resource-based policy</td>
 </tr>
 <tr>
-<td>429 від Lambda</td>
-<td>ліміт concurrency</td>
+<td data-label="Симптом">429 від Lambda</td>
+<td data-label="Відповідь">ліміт concurrency</td>
 </tr>
 <tr>
-<td>одна функція з'їла весь ліміт</td>
-<td>reserved concurrency</td>
+<td data-label="Симптом">одна функція з'їла весь ліміт</td>
+<td data-label="Відповідь">reserved concurrency</td>
 </tr>
 <tr>
-<td>502 від API Gateway</td>
-<td>формат proxy-відповіді</td>
+<td data-label="Симптом">502 від API Gateway</td>
+<td data-label="Відповідь">формат proxy-відповіді</td>
 </tr>
 <tr>
-<td>504 від API Gateway</td>
-<td>timeout інтеграції (приблизно 29 с)</td>
+<td data-label="Симптом">504 від API Gateway</td>
+<td data-label="Відповідь">timeout інтеграції (приблизно 29 с)</td>
 </tr>
 <tr>
-<td>Lambda у VPC без інтернету чи S3</td>
-<td>NAT або VPC endpoint</td>
+<td data-label="Симптом">Lambda у VPC без інтернету чи S3</td>
+<td data-label="Відповідь">NAT або VPC endpoint</td>
 </tr>
 <tr>
-<td>секрети з ротацією</td>
-<td>Secrets Manager</td>
+<td data-label="Симптом">секрети з ротацією</td>
+<td data-label="Відповідь">Secrets Manager</td>
 </tr>
 <tr>
-<td>кастомні метрики без API</td>
-<td>EMF</td>
+<td data-label="Симптом">кастомні метрики без API</td>
+<td data-label="Відповідь">EMF</td>
 </tr>
 <tr>
-<td>обробка більше 15 хв</td>
-<td>не Lambda</td>
+<td data-label="Симптом">обробка більше 15 хв</td>
+<td data-label="Відповідь">не Lambda</td>
 </tr>
 <tr>
-<td>оркестрація кількох Lambda</td>
-<td><strong>Step Functions</strong>, а не Lambda з Lambda (платите за очікування)</td>
+<td data-label="Симптом">оркестрація кількох Lambda</td>
+<td data-label="Відповідь"><strong>Step Functions</strong>, а не Lambda з Lambda (платите за очікування)</td>
 </tr>
 </tbody>
 </table>

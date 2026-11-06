@@ -17,6 +17,16 @@
   th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
   td code, th code { white-space:nowrap; }
   th { background:#fff; }
+  @media (max-width: 640px) {
+    table, thead, tbody, tr, td { display:block; min-width:0; }
+    table { overflow:visible; }
+    thead { display:none; }
+    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
+    td { border:none; padding:.25rem 0; }
+    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
+    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
+    td code, th code { white-space:normal; }
+  }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -49,64 +59,64 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>Метрика</strong></td>
-<td>часовий ряд чисел (<code>Errors</code> функції за хвилину); має namespace, ім'я, dimensions</td>
+<td data-label="Термін"><strong>Метрика</strong></td>
+<td data-label="Суть">часовий ряд чисел (<code>Errors</code> функції за хвилину); має namespace, ім'я, dimensions</td>
 </tr>
 <tr>
-<td><strong>Namespace</strong></td>
-<td>контейнер метрик сервісу (<code>AWS/Lambda</code>, <code>AWS/SQS</code>)</td>
+<td data-label="Термін"><strong>Namespace</strong></td>
+<td data-label="Суть">контейнер метрик сервісу (<code>AWS/Lambda</code>, <code>AWS/SQS</code>)</td>
 </tr>
 <tr>
-<td><strong>Dimension</strong></td>
-<td>пара «ім'я = значення», що уточнює метрику (<code>FunctionName=...</code>); <strong>кожна нова комбінація dimensions це нова метрика</strong></td>
+<td data-label="Термін"><strong>Dimension</strong></td>
+<td data-label="Суть">пара «ім'я = значення», що уточнює метрику (<code>FunctionName=...</code>); <strong>кожна нова комбінація dimensions це нова метрика</strong></td>
 </tr>
 <tr>
-<td><strong>Alarm</strong></td>
-<td>правило, що стежить за <strong>однією</strong> метрикою й змінює стан</td>
+<td data-label="Термін"><strong>Alarm</strong></td>
+<td data-label="Суть">правило, що стежить за <strong>однією</strong> метрикою й змінює стан</td>
 </tr>
 <tr>
-<td><strong>Log group / log stream</strong></td>
-<td>група логів (одна на функцію) і потоки в ній (по одному на середовище)</td>
+<td data-label="Термін"><strong>Log group / log stream</strong></td>
+<td data-label="Суть">група логів (одна на функцію) і потоки в ній (по одному на середовище)</td>
 </tr>
 <tr>
-<td><strong>Logs Insights</strong></td>
-<td>мова запитів над логами</td>
+<td data-label="Термін"><strong>Logs Insights</strong></td>
+<td data-label="Суть">мова запитів над логами</td>
 </tr>
 <tr>
-<td><strong>Dashboard</strong></td>
-<td>сторінка з віджетами</td>
+<td data-label="Термін"><strong>Dashboard</strong></td>
+<td data-label="Суть">сторінка з віджетами</td>
 </tr>
 <tr>
-<td>statistic</td>
-<td>агрегація: Sum, Average, Maximum, p99</td>
+<td data-label="Термін">statistic</td>
+<td data-label="Суть">агрегація: Sum, Average, Maximum, p99</td>
 </tr>
 <tr>
-<td>period</td>
-<td>інтервал агрегації, секунди</td>
+<td data-label="Термін">period</td>
+<td data-label="Суть">інтервал агрегації, секунди</td>
 </tr>
 <tr>
-<td><code>TreatMissingData</code></td>
-<td>що робити, коли даних нема</td>
+<td data-label="Термін"><code>TreatMissingData</code></td>
+<td data-label="Суть">що робити, коли даних нема</td>
 </tr>
 <tr>
-<td>composite alarm</td>
-<td>alarm, що поєднує інші alarm</td>
+<td data-label="Термін">composite alarm</td>
+<td data-label="Суть">alarm, що поєднує інші alarm</td>
 </tr>
 <tr>
-<td>metric filter</td>
-<td>правило, що рахує патерни в логах як метрику</td>
+<td data-label="Термін">metric filter</td>
+<td data-label="Суть">правило, що рахує патерни в логах як метрику</td>
 </tr>
 <tr>
-<td>subscription filter</td>
-<td>пересилання логів в інший сервіс</td>
+<td data-label="Термін">subscription filter</td>
+<td data-label="Суть">пересилання логів в інший сервіс</td>
 </tr>
 <tr>
-<td>EMF</td>
-<td>Embedded Metric Format: метрики прямо з JSON-логу</td>
+<td data-label="Термін">EMF</td>
+<td data-label="Суть">Embedded Metric Format: метрики прямо з JSON-логу</td>
 </tr>
 <tr>
-<td>Live Tail</td>
-<td>потік логів у реальному часі</td>
+<td data-label="Термін">Live Tail</td>
+<td data-label="Суть">потік логів у реальному часі</td>
 </tr>
 </tbody>
 </table>
@@ -122,49 +132,49 @@
 </thead>
 <tbody>
 <tr>
-<td><code>Invocations</code></td>
-<td>кількість викликів</td>
-<td>не рахує тротлінг</td>
+<td data-label="Метрика"><code>Invocations</code></td>
+<td data-label="Що означає">кількість викликів</td>
+<td data-label="Нюанс">не рахує тротлінг</td>
 </tr>
 <tr>
-<td><code>Errors</code></td>
-<td>виклики з помилкою</td>
-<td><strong>не включає <code>Throttles</code></strong></td>
+<td data-label="Метрика"><code>Errors</code></td>
+<td data-label="Що означає">виклики з помилкою</td>
+<td data-label="Нюанс"><strong>не включає <code>Throttles</code></strong></td>
 </tr>
 <tr>
-<td><code>Throttles</code></td>
-<td>відхилені через ліміт паралельності</td>
-<td></td>
+<td data-label="Метрика"><code>Throttles</code></td>
+<td data-label="Що означає">відхилені через ліміт паралельності</td>
+<td data-label="Нюанс"></td>
 </tr>
 <tr>
-<td><code>Duration</code></td>
-<td>тривалість</td>
-<td>статистики p50, p99</td>
+<td data-label="Метрика"><code>Duration</code></td>
+<td data-label="Що означає">тривалість</td>
+<td data-label="Нюанс">статистики p50, p99</td>
 </tr>
 <tr>
-<td><code>ConcurrentExecutions</code></td>
-<td>паралельні виконання</td>
-<td></td>
+<td data-label="Метрика"><code>ConcurrentExecutions</code></td>
+<td data-label="Що означає">паралельні виконання</td>
+<td data-label="Нюанс"></td>
 </tr>
 <tr>
-<td><code>AsyncEventAge</code></td>
-<td>вік async-події на момент обробки</td>
-<td>лише async</td>
+<td data-label="Метрика"><code>AsyncEventAge</code></td>
+<td data-label="Що означає">вік async-події на момент обробки</td>
+<td data-label="Нюанс">лише async</td>
 </tr>
 <tr>
-<td><code>AsyncEventsDropped</code></td>
-<td>async-події, відкинуті після повторів без DLQ</td>
-<td>лише async</td>
+<td data-label="Метрика"><code>AsyncEventsDropped</code></td>
+<td data-label="Що означає">async-події, відкинуті після повторів без DLQ</td>
+<td data-label="Нюанс">лише async</td>
 </tr>
 <tr>
-<td><code>DeadLetterErrors</code></td>
-<td>не вдалося записати в DLQ</td>
-<td></td>
+<td data-label="Метрика"><code>DeadLetterErrors</code></td>
+<td data-label="Що означає">не вдалося записати в DLQ</td>
+<td data-label="Нюанс"></td>
 </tr>
 <tr>
-<td><code>IteratorAge</code></td>
-<td>відставання потоку</td>
-<td>лише Kinesis і DynamoDB Streams</td>
+<td data-label="Метрика"><code>IteratorAge</code></td>
+<td data-label="Що означає">відставання потоку</td>
+<td data-label="Нюанс">лише Kinesis і DynamoDB Streams</td>
 </tr>
 </tbody>
 </table>
@@ -184,32 +194,32 @@
 </thead>
 <tbody>
 <tr>
-<td><code>Namespace</code>, <code>MetricName</code>, <code>Dimensions</code></td>
-<td>що міряємо</td>
+<td data-label="Параметр"><code>Namespace</code>, <code>MetricName</code>, <code>Dimensions</code></td>
+<td data-label="Зміст">що міряємо</td>
 </tr>
 <tr>
-<td><code>Statistic</code></td>
-<td>як агрегуємо в періоді (<code>Sum</code>)</td>
+<td data-label="Параметр"><code>Statistic</code></td>
+<td data-label="Зміст">як агрегуємо в періоді (<code>Sum</code>)</td>
 </tr>
 <tr>
-<td><code>Period</code></td>
-<td>довжина одного datapoint (60 с для Lambda); метрики SQS надходять щохвилини, але можна ставити й 300 с</td>
+<td data-label="Параметр"><code>Period</code></td>
+<td data-label="Зміст">довжина одного datapoint (60 с для Lambda); метрики SQS надходять щохвилини, але можна ставити й 300 с</td>
 </tr>
 <tr>
-<td><code>EvaluationPeriods</code></td>
-<td>скільки періодів дивимось</td>
+<td data-label="Параметр"><code>EvaluationPeriods</code></td>
+<td data-label="Зміст">скільки періодів дивимось</td>
 </tr>
 <tr>
-<td><code>Threshold</code> і <code>ComparisonOperator</code></td>
-<td>умова</td>
+<td data-label="Параметр"><code>Threshold</code> і <code>ComparisonOperator</code></td>
+<td data-label="Зміст">умова</td>
 </tr>
 <tr>
-<td><code>TreatMissingData</code></td>
-<td><code>breaching</code>, <code>notBreaching</code>, <code>ignore</code>, <code>missing</code> (за замовчуванням)</td>
+<td data-label="Параметр"><code>TreatMissingData</code></td>
+<td data-label="Зміст"><code>breaching</code>, <code>notBreaching</code>, <code>ignore</code>, <code>missing</code> (за замовчуванням)</td>
 </tr>
 <tr>
-<td><code>AlarmActions</code></td>
-<td>що робити в <code>ALARM</code> (SNS, Auto Scaling, EC2 stop/terminate/recover, Systems Manager)</td>
+<td data-label="Параметр"><code>AlarmActions</code></td>
+<td data-label="Зміст">що робити в <code>ALARM</code> (SNS, Auto Scaling, EC2 stop/terminate/recover, Systems Manager)</td>
 </tr>
 </tbody>
 </table>
@@ -250,32 +260,32 @@
 </thead>
 <tbody>
 <tr>
-<td>Перші 10 стандартних alarm на акаунт</td>
-<td><strong>безкоштовно</strong> (рахується кількість alarm, не спрацювань)</td>
+<td data-label="Що">Перші 10 стандартних alarm на акаунт</td>
+<td data-label="Ціна"><strong>безкоштовно</strong> (рахується кількість alarm, не спрацювань)</td>
 </tr>
 <tr>
-<td>Далі</td>
-<td>близько 0,10 USD за alarm на місяць (high-res близько 0,30, composite близько 0,50)</td>
+<td data-label="Що">Далі</td>
+<td data-label="Ціна">близько 0,10 USD за alarm на місяць (high-res близько 0,30, composite близько 0,50)</td>
 </tr>
 <tr>
-<td>SNS: перші 1000 листів на місяць</td>
-<td>безкоштовно</td>
+<td data-label="Що">SNS: перші 1000 листів на місяць</td>
+<td data-label="Ціна">безкоштовно</td>
 </tr>
 <tr>
-<td>Дашборди</td>
-<td>3 безкоштовно (до 50 метрик кожен)</td>
+<td data-label="Що">Дашборди</td>
+<td data-label="Ціна">3 безкоштовно (до 50 метрик кожен)</td>
 </tr>
 <tr>
-<td>Логи</td>
-<td>5 ГБ на місяць безкоштовно на збір, зберігання і скановані Logs Insights дані разом; далі збір 0,50 USD за ГБ</td>
+<td data-label="Що">Логи</td>
+<td data-label="Ціна">5 ГБ на місяць безкоштовно на збір, зберігання і скановані Logs Insights дані разом; далі збір 0,50 USD за ГБ</td>
 </tr>
 <tr>
-<td>Власні метрики</td>
-<td>перші 10 безкоштовно</td>
+<td data-label="Що">Власні метрики</td>
+<td data-label="Ціна">перші 10 безкоштовно</td>
 </tr>
 <tr>
-<td>Lambda</td>
-<td>1 млн запитів і 400 000 ГБ·с безкоштовно; 0,20 USD за 1 млн; тарифікований час включає ініціалізацію поза handler</td>
+<td data-label="Що">Lambda</td>
+<td data-label="Ціна">1 млн запитів і 400 000 ГБ·с безкоштовно; 0,20 USD за 1 млн; тарифікований час включає ініціалізацію поза handler</td>
 </tr>
 </tbody>
 </table>
@@ -309,24 +319,24 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>Event history</strong> (90 днів management-подій, вкладка в консолі)</td>
-<td>безкоштовно, увімкнено за замовчуванням</td>
+<td data-label="Що"><strong>Event history</strong> (90 днів management-подій, вкладка в консолі)</td>
+<td data-label="Ціна">безкоштовно, увімкнено за замовчуванням</td>
 </tr>
 <tr>
-<td>Trail (потік подій у S3), перша копія management-подій регіону</td>
-<td>безкоштовно (платите лише за S3)</td>
+<td data-label="Що">Trail (потік подій у S3), перша копія management-подій регіону</td>
+<td data-label="Ціна">безкоштовно (платите лише за S3)</td>
 </tr>
 <tr>
-<td>Додаткові копії management-подій</td>
-<td>близько 2 USD за 100 000 подій</td>
+<td data-label="Що">Додаткові копії management-подій</td>
+<td data-label="Ціна">близько 2 USD за 100 000 подій</td>
 </tr>
 <tr>
-<td><strong>Data events</strong> (читання об'єктів S3, виклики Lambda)</td>
-<td>близько 0,10 USD за 100 000 подій</td>
+<td data-label="Що"><strong>Data events</strong> (читання об'єктів S3, виклики Lambda)</td>
+<td data-label="Ціна">близько 0,10 USD за 100 000 подій</td>
 </tr>
 <tr>
-<td>Insights (близько 0,35 USD за 100 000 management-подій), CloudTrail Lake</td>
-<td>платно</td>
+<td data-label="Що">Insights (близько 0,35 USD за 100 000 management-подій), CloudTrail Lake</td>
+<td data-label="Ціна">платно</td>
 </tr>
 </tbody>
 </table>

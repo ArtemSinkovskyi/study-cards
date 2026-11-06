@@ -17,6 +17,16 @@
   th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
   td code, th code { white-space:nowrap; }
   th { background:#fff; }
+  @media (max-width: 640px) {
+    table, thead, tbody, tr, td { display:block; min-width:0; }
+    table { overflow:visible; }
+    thead { display:none; }
+    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
+    td { border:none; padding:.25rem 0; }
+    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
+    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
+    td code, th code { white-space:normal; }
+  }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -50,44 +60,44 @@
 </thead>
 <tbody>
 <tr>
-<td>trace</td>
-<td>усі дані одного запиту, має trace ID</td>
+<td data-label="Термін">trace</td>
+<td data-label="Суть">усі дані одного запиту, має trace ID</td>
 </tr>
 <tr>
-<td>segment</td>
-<td>робота одного сервісу</td>
+<td data-label="Термін">segment</td>
+<td data-label="Суть">робота одного сервісу</td>
 </tr>
 <tr>
-<td>subsegment</td>
-<td>деталь: виклик DynamoDB, функція</td>
+<td data-label="Термін">subsegment</td>
+<td data-label="Суть">деталь: виклик DynamoDB, функція</td>
 </tr>
 <tr>
-<td>service map / graph</td>
-<td>карта сервісів</td>
+<td data-label="Термін">service map / graph</td>
+<td data-label="Суть">карта сервісів</td>
 </tr>
 <tr>
-<td>annotation</td>
-<td><strong>індексована</strong> мітка для пошуку</td>
+<td data-label="Термін">annotation</td>
+<td data-label="Суть"><strong>індексована</strong> мітка для пошуку</td>
 </tr>
 <tr>
-<td>metadata</td>
-<td><strong>неіндексовані</strong> дані</td>
+<td data-label="Термін">metadata</td>
+<td data-label="Суть"><strong>неіндексовані</strong> дані</td>
 </tr>
 <tr>
-<td>sampling</td>
-<td>яку частку запитів трейсити</td>
+<td data-label="Термін">sampling</td>
+<td data-label="Суть">яку частку запитів трейсити</td>
 </tr>
 <tr>
-<td>inferred segment</td>
-<td>вузол сервісу, що сам не шле дані</td>
+<td data-label="Термін">inferred segment</td>
+<td data-label="Суть">вузол сервісу, що сам не шле дані</td>
 </tr>
 <tr>
-<td>filter expression</td>
-<td>запит по трейсах</td>
+<td data-label="Термін">filter expression</td>
+<td data-label="Суть">запит по трейсах</td>
 </tr>
 <tr>
-<td>group</td>
-<td>збережений фільтр</td>
+<td data-label="Термін">group</td>
+<td data-label="Суть">збережений фільтр</td>
 </tr>
 </tbody>
 </table>
@@ -110,29 +120,29 @@
 </thead>
 <tbody>
 <tr>
-<td>Індексуються</td>
-<td>так</td>
-<td>ні</td>
+<td data-label="">Індексуються</td>
+<td data-label="Annotations">так</td>
+<td data-label="Metadata">ні</td>
 </tr>
 <tr>
-<td>Пошук фільтром</td>
-<td>так</td>
-<td>ні</td>
+<td data-label="">Пошук фільтром</td>
+<td data-label="Annotations">так</td>
+<td data-label="Metadata">ні</td>
 </tr>
 <tr>
-<td>Типи</td>
-<td>прості значення</td>
-<td>будь-які, об'єкти</td>
+<td data-label="">Типи</td>
+<td data-label="Annotations">прості значення</td>
+<td data-label="Metadata">будь-які, об'єкти</td>
 </tr>
 <tr>
-<td>Для чого</td>
-<td><code>userId</code>, <code>orderId</code></td>
-<td>повний вхід, відлагодження</td>
+<td data-label="">Для чого</td>
+<td data-label="Annotations"><code>userId</code>, <code>orderId</code></td>
+<td data-label="Metadata">повний вхід, відлагодження</td>
 </tr>
 <tr>
-<td>Ліміт</td>
-<td>50 на трейс (індексованих)</td>
-<td></td>
+<td data-label="">Ліміт</td>
+<td data-label="Annotations">50 на трейс (індексованих)</td>
+<td data-label="Metadata"></td>
 </tr>
 </tbody>
 </table>
@@ -159,19 +169,19 @@
 </thead>
 <tbody>
 <tr>
-<td><code>PutMetricData</code></td>
-<td>виклик API</td>
-<td>простий випадок, але це мережа й гроші на виклик</td>
+<td data-label="Спосіб"><code>PutMetricData</code></td>
+<td data-label="Як">виклик API</td>
+<td data-label="Коли">простий випадок, але це мережа й гроші на виклик</td>
 </tr>
 <tr>
-<td><strong>Metric filter</strong></td>
-<td>лог перетворюється на метрику</td>
-<td>не хочете змінювати код</td>
+<td data-label="Спосіб"><strong>Metric filter</strong></td>
+<td data-label="Як">лог перетворюється на метрику</td>
+<td data-label="Коли">не хочете змінювати код</td>
 </tr>
 <tr>
-<td><strong>EMF</strong></td>
-<td>структурований JSON у лог</td>
-<td><strong>Lambda</strong>: без додаткового виклику</td>
+<td data-label="Спосіб"><strong>EMF</strong></td>
+<td data-label="Як">структурований JSON у лог</td>
+<td data-label="Коли"><strong>Lambda</strong>: без додаткового виклику</td>
 </tr>
 </tbody>
 </table>
@@ -200,24 +210,24 @@
 </thead>
 <tbody>
 <tr>
-<td>що впало</td>
-<td>CloudWatch Logs, Logs Insights</td>
+<td data-label="Симптом">що впало</td>
+<td data-label="Інструмент">CloudWatch Logs, Logs Insights</td>
 </tr>
 <tr>
-<td>скільки і як часто</td>
-<td>CloudWatch Metrics</td>
+<td data-label="Симптом">скільки і як часто</td>
+<td data-label="Інструмент">CloudWatch Metrics</td>
 </tr>
 <tr>
-<td>де затримка в ланцюгу</td>
-<td><strong>X-Ray</strong></td>
+<td data-label="Симптом">де затримка в ланцюгу</td>
+<td data-label="Інструмент"><strong>X-Ray</strong></td>
 </tr>
 <tr>
-<td>хто зробив виклик API</td>
-<td><strong>CloudTrail</strong></td>
+<td data-label="Симптом">хто зробив виклик API</td>
+<td data-label="Інструмент"><strong>CloudTrail</strong></td>
 </tr>
 <tr>
-<td>деплой не пройшов</td>
-<td>CloudFormation events, CodeDeploy logs</td>
+<td data-label="Симптом">деплой не пройшов</td>
+<td data-label="Інструмент">CloudFormation events, CodeDeploy logs</td>
 </tr>
 </tbody>
 </table>

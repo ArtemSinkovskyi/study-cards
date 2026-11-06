@@ -17,6 +17,16 @@
   th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
   td code, th code { white-space:nowrap; }
   th { background:#fff; }
+  @media (max-width: 640px) {
+    table, thead, tbody, tr, td { display:block; min-width:0; }
+    table { overflow:visible; }
+    thead { display:none; }
+    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
+    td { border:none; padding:.25rem 0; }
+    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
+    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
+    td code, th code { white-space:normal; }
+  }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -52,24 +62,24 @@
 </thead>
 <tbody>
 <tr>
-<td>Хто вирішує, коли</td>
-<td>Ви</td>
-<td>API, коли вхід сягає порогу</td>
+<td data-label="">Хто вирішує, коли</td>
+<td data-label="За запитом (on-demand)">Ви</td>
+<td data-label="За порогом (threshold)">API, коли вхід сягає порогу</td>
 </tr>
 <tr>
-<td>Як вмикається</td>
-<td>Верхній параметр <code>compaction</code></td>
-<td>Редагування <code>compact_20260112</code> у <code>context_management</code></td>
+<td data-label="">Як вмикається</td>
+<td data-label="За запитом (on-demand)">Верхній параметр <code>compaction</code></td>
+<td data-label="За порогом (threshold)">Редагування <code>compact_20260112</code> у <code>context_management</code></td>
 </tr>
 <tr>
-<td>Beta-заголовок</td>
-<td><code>compact-2026-09-04</code></td>
-<td><code>compact-2026-01-12</code></td>
+<td data-label="">Beta-заголовок</td>
+<td data-label="За запитом (on-demand)"><code>compact-2026-09-04</code></td>
+<td data-label="За порогом (threshold)"><code>compact-2026-01-12</code></td>
 </tr>
 <tr>
-<td>Де блок підсумку</td>
-<td><strong>Першим</strong> у <code>messages</code></td>
-<td>Після підсумованого, API сам відкидає старе</td>
+<td data-label="">Де блок підсумку</td>
+<td data-label="За запитом (on-demand)"><strong>Першим</strong> у <code>messages</code></td>
+<td data-label="За порогом (threshold)">Після підсумованого, API сам відкидає старе</td>
 </tr>
 </tbody>
 </table>
@@ -115,16 +125,16 @@
 </thead>
 <tbody>
 <tr>
-<td><code>summarized</code></td>
-<td>Видно короткий підсумок роздумів</td>
+<td data-label="Значення"><code>summarized</code></td>
+<td data-label="Що дає">Видно короткий підсумок роздумів</td>
 </tr>
 <tr>
-<td><code>omitted</code></td>
-<td>Блок приходить порожнім, підпис лишається</td>
+<td data-label="Значення"><code>omitted</code></td>
+<td data-label="Що дає">Блок приходить порожнім, підпис лишається</td>
 </tr>
 <tr>
-<td><code>updates</code> (beta)</td>
-<td>Короткі оновлення прогресу між викликами</td>
+<td data-label="Значення"><code>updates</code> (beta)</td>
+<td data-label="Що дає">Короткі оновлення прогресу між викликами</td>
 </tr>
 </tbody>
 </table>

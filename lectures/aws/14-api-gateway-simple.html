@@ -17,6 +17,16 @@
   th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
   td code, th code { white-space:nowrap; }
   th { background:#fff; }
+  @media (max-width: 640px) {
+    table, thead, tbody, tr, td { display:block; min-width:0; }
+    table { overflow:visible; }
+    thead { display:none; }
+    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
+    td { border:none; padding:.25rem 0; }
+    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
+    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
+    td code, th code { white-space:normal; }
+  }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -50,44 +60,44 @@
 </thead>
 <tbody>
 <tr>
-<td>Ціна</td>
-<td>дорожчий</td>
-<td>дешевший</td>
+<td data-label="">Ціна</td>
+<td data-label="REST API">дорожчий</td>
+<td data-label="HTTP API">дешевший</td>
 </tr>
 <tr>
-<td>Endpoint</td>
-<td>edge, regional, private</td>
-<td>лише regional</td>
+<td data-label="">Endpoint</td>
+<td data-label="REST API">edge, regional, private</td>
+<td data-label="HTTP API">лише regional</td>
 </tr>
 <tr>
-<td>API keys і usage plans</td>
-<td>є</td>
-<td>нема</td>
+<td data-label="">API keys і usage plans</td>
+<td data-label="REST API">є</td>
+<td data-label="HTTP API">нема</td>
 </tr>
 <tr>
-<td>Кеш, валідація, трансформація тіла, mock</td>
-<td>є</td>
-<td>нема</td>
+<td data-label="">Кеш, валідація, трансформація тіла, mock</td>
+<td data-label="REST API">є</td>
+<td data-label="HTTP API">нема</td>
 </tr>
 <tr>
-<td>WAF, X-Ray, canary, resource policy</td>
-<td>є</td>
-<td>нема</td>
+<td data-label="">WAF, X-Ray, canary, resource policy</td>
+<td data-label="REST API">є</td>
+<td data-label="HTTP API">нема</td>
 </tr>
 <tr>
-<td>Lambda-авторизатор, IAM, Cognito</td>
-<td>є</td>
-<td>є</td>
+<td data-label="">Lambda-авторизатор, IAM, Cognito</td>
+<td data-label="REST API">є</td>
+<td data-label="HTTP API">є</td>
 </tr>
 <tr>
-<td>JWT-авторизатор</td>
-<td>через Lambda</td>
-<td>вбудований</td>
+<td data-label="">JWT-авторизатор</td>
+<td data-label="REST API">через Lambda</td>
+<td data-label="HTTP API">вбудований</td>
 </tr>
 <tr>
-<td>Автодеплой</td>
-<td>нема</td>
-<td>є</td>
+<td data-label="">Автодеплой</td>
+<td data-label="REST API">нема</td>
+<td data-label="HTTP API">є</td>
 </tr>
 </tbody>
 </table>
@@ -103,24 +113,24 @@
 </thead>
 <tbody>
 <tr>
-<td>Lambda proxy (<code>AWS_PROXY</code>)</td>
-<td>весь запит у <code>event</code>, відповідь від функції як є</td>
+<td data-label="Тип">Lambda proxy (<code>AWS_PROXY</code>)</td>
+<td data-label="Що робить">весь запит у <code>event</code>, відповідь від функції як є</td>
 </tr>
 <tr>
-<td>Lambda non-proxy (<code>AWS</code>)</td>
-<td>перетворення через mapping templates</td>
+<td data-label="Тип">Lambda non-proxy (<code>AWS</code>)</td>
+<td data-label="Що робить">перетворення через mapping templates</td>
 </tr>
 <tr>
-<td>HTTP / HTTP_PROXY</td>
-<td>на зовнішній HTTP</td>
+<td data-label="Тип">HTTP / HTTP_PROXY</td>
+<td data-label="Що робить">на зовнішній HTTP</td>
 </tr>
 <tr>
-<td>AWS service</td>
-<td>напряму в SQS, DynamoDB, без Lambda</td>
+<td data-label="Тип">AWS service</td>
+<td data-label="Що робить">напряму в SQS, DynamoDB, без Lambda</td>
 </tr>
 <tr>
-<td>Mock</td>
-<td>відповідь без бекенду</td>
+<td data-label="Тип">Mock</td>
+<td data-label="Що робить">відповідь без бекенду</td>
 </tr>
 </tbody>
 </table>
@@ -137,36 +147,36 @@
 </thead>
 <tbody>
 <tr>
-<td>400</td>
-<td>помилка запиту, валідація</td>
+<td data-label="Код">400</td>
+<td data-label="Причина">помилка запиту, валідація</td>
 </tr>
 <tr>
-<td>401</td>
-<td>нема чи поганий токен</td>
+<td data-label="Код">401</td>
+<td data-label="Причина">нема чи поганий токен</td>
 </tr>
 <tr>
-<td>403</td>
-<td>заборонено (політика, WAF, авторизатор повернув Deny)</td>
+<td data-label="Код">403</td>
+<td data-label="Причина">заборонено (політика, WAF, авторизатор повернув Deny)</td>
 </tr>
 <tr>
-<td>429</td>
-<td>перевищено ліміт</td>
+<td data-label="Код">429</td>
+<td data-label="Причина">перевищено ліміт</td>
 </tr>
 <tr>
-<td>500</td>
-<td>внутрішня помилка</td>
+<td data-label="Код">500</td>
+<td data-label="Причина">внутрішня помилка</td>
 </tr>
 <tr>
-<td>502</td>
-<td>неправильна відповідь Lambda</td>
+<td data-label="Код">502</td>
+<td data-label="Причина">неправильна відповідь Lambda</td>
 </tr>
 <tr>
-<td>503</td>
-<td>бекенд недоступний <em>(не звірено)</em></td>
+<td data-label="Код">503</td>
+<td data-label="Причина">бекенд недоступний <em>(не звірено)</em></td>
 </tr>
 <tr>
-<td>504</td>
-<td>timeout інтеграції <em>(не звірено)</em></td>
+<td data-label="Код">504</td>
+<td data-label="Причина">timeout інтеграції <em>(не звірено)</em></td>
 </tr>
 </tbody>
 </table>
@@ -193,32 +203,32 @@
 </thead>
 <tbody>
 <tr>
-<td>IAM (SigV4)</td>
-<td>сервіси AWS, внутрішнє</td>
+<td data-label="Спосіб">IAM (SigV4)</td>
+<td data-label="Коли">сервіси AWS, внутрішнє</td>
 </tr>
 <tr>
-<td>Cognito authorizer</td>
-<td>користувачі в user pool</td>
+<td data-label="Спосіб">Cognito authorizer</td>
+<td data-label="Коли">користувачі в user pool</td>
 </tr>
 <tr>
-<td>Lambda authorizer</td>
-<td>свій токен, сторонні IdP</td>
+<td data-label="Спосіб">Lambda authorizer</td>
+<td data-label="Коли">свій токен, сторонні IdP</td>
 </tr>
 <tr>
-<td>JWT authorizer</td>
-<td>HTTP API з OIDC</td>
+<td data-label="Спосіб">JWT authorizer</td>
+<td data-label="Коли">HTTP API з OIDC</td>
 </tr>
 <tr>
-<td>Resource policy</td>
-<td>обмежити IP, акаунти, VPC (REST)</td>
+<td data-label="Спосіб">Resource policy</td>
+<td data-label="Коли">обмежити IP, акаунти, VPC (REST)</td>
 </tr>
 <tr>
-<td>API key + usage plan</td>
-<td><strong>ідентифікація клієнтів і квоти</strong>, а не авторизація</td>
+<td data-label="Спосіб">API key + usage plan</td>
+<td data-label="Коли"><strong>ідентифікація клієнтів і квоти</strong>, а не авторизація</td>
 </tr>
 <tr>
-<td>mTLS, WAF</td>
-<td>взаємний TLS; захист від атак (WAF лише REST)</td>
+<td data-label="Спосіб">mTLS, WAF</td>
+<td data-label="Коли">взаємний TLS; захист від атак (WAF лише REST)</td>
 </tr>
 </tbody>
 </table>

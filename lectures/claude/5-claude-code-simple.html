@@ -17,6 +17,16 @@
   th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
   td code, th code { white-space:nowrap; }
   th { background:#fff; }
+  @media (max-width: 640px) {
+    table, thead, tbody, tr, td { display:block; min-width:0; }
+    table { overflow:visible; }
+    thead { display:none; }
+    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
+    td { border:none; padding:.25rem 0; }
+    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
+    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
+    td code, th code { white-space:normal; }
+  }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -48,8 +58,8 @@
 </thead>
 <tbody>
 <tr>
-<td>CLAUDE.md, rules, skills, auto memory</td>
-<td>Правила дозволів (deny), hooks з exit 2, managed settings, sandbox</td>
+<td data-label="Лише радить">CLAUDE.md, rules, skills, auto memory</td>
+<td data-label="Примусово діє">Правила дозволів (deny), hooks з exit 2, managed settings, sandbox</td>
 </tr>
 </tbody>
 </table>
@@ -76,16 +86,16 @@
 </thead>
 <tbody>
 <tr>
-<td>лише <code>AGENTS.md</code></td>
-<td><code>AGENTS.md</code></td>
+<td data-label="У репозиторії">лише <code>AGENTS.md</code></td>
+<td data-label="Claude читає"><code>AGENTS.md</code></td>
 </tr>
 <tr>
-<td><code>AGENTS.md</code> і <code>CLAUDE.md</code></td>
-<td>лише <code>CLAUDE.md</code></td>
+<td data-label="У репозиторії"><code>AGENTS.md</code> і <code>CLAUDE.md</code></td>
+<td data-label="Claude читає">лише <code>CLAUDE.md</code></td>
 </tr>
 <tr>
-<td><code>CLAUDE.md</code>, що імпортує <code>@AGENTS.md</code></td>
-<td>обидва</td>
+<td data-label="У репозиторії"><code>CLAUDE.md</code>, що імпортує <code>@AGENTS.md</code></td>
+<td data-label="Claude читає">обидва</td>
 </tr>
 </tbody>
 </table>
@@ -109,28 +119,28 @@
 </thead>
 <tbody>
 <tr>
-<td><code>default</code></td>
-<td>Питає при першому використанні інструмента</td>
+<td data-label="Режим"><code>default</code></td>
+<td data-label="Що робить">Питає при першому використанні інструмента</td>
 </tr>
 <tr>
-<td><code>acceptEdits</code></td>
-<td>Сам приймає редагування файлів</td>
+<td data-label="Режим"><code>acceptEdits</code></td>
+<td data-label="Що робить">Сам приймає редагування файлів</td>
 </tr>
 <tr>
-<td><code>plan</code></td>
-<td>Лише читає й планує, без змін</td>
+<td data-label="Режим"><code>plan</code></td>
+<td data-label="Що робить">Лише читає й планує, без змін</td>
 </tr>
 <tr>
-<td><code>auto</code></td>
-<td>Окрема модель-класифікатор перевіряє дії</td>
+<td data-label="Режим"><code>auto</code></td>
+<td data-label="Що робить">Окрема модель-класифікатор перевіряє дії</td>
 </tr>
 <tr>
-<td><code>dontAsk</code></td>
-<td>Відмовляє у всьому, що питало б (для CI)</td>
+<td data-label="Режим"><code>dontAsk</code></td>
+<td data-label="Що робить">Відмовляє у всьому, що питало б (для CI)</td>
 </tr>
 <tr>
-<td><code>bypassPermissions</code></td>
-<td>Без запитів, лише для ізольованих середовищ</td>
+<td data-label="Режим"><code>bypassPermissions</code></td>
+<td data-label="Що робить">Без запитів, лише для ізольованих середовищ</td>
 </tr>
 </tbody>
 </table>
@@ -159,29 +169,29 @@
 </thead>
 <tbody>
 <tr>
-<td><code>PreToolUse</code></td>
-<td><strong>Перед</strong> інструментом</td>
-<td>Заблокувати</td>
+<td data-label="Подія"><code>PreToolUse</code></td>
+<td data-label="Коли"><strong>Перед</strong> інструментом</td>
+<td data-label="Що можна">Заблокувати</td>
 </tr>
 <tr>
-<td><code>PostToolUse</code></td>
-<td><strong>Після</strong> інструмента</td>
-<td>Нічого скасувати (вже виконано)</td>
+<td data-label="Подія"><code>PostToolUse</code></td>
+<td data-label="Коли"><strong>Після</strong> інструмента</td>
+<td data-label="Що можна">Нічого скасувати (вже виконано)</td>
 </tr>
 <tr>
-<td><code>UserPromptSubmit</code></td>
-<td>Перед обробкою промпта</td>
-<td>Заблокувати чи додати контекст</td>
+<td data-label="Подія"><code>UserPromptSubmit</code></td>
+<td data-label="Коли">Перед обробкою промпта</td>
+<td data-label="Що можна">Заблокувати чи додати контекст</td>
 </tr>
 <tr>
-<td><code>Stop</code></td>
-<td>Коли Claude закінчив відповідати</td>
-<td>Не дати зупинитись</td>
+<td data-label="Подія"><code>Stop</code></td>
+<td data-label="Коли">Коли Claude закінчив відповідати</td>
+<td data-label="Що можна">Не дати зупинитись</td>
 </tr>
 <tr>
-<td><code>SessionStart</code></td>
-<td>На початку сесії (з <code>compact</code> після ущільнення)</td>
-<td>Додати контекст</td>
+<td data-label="Подія"><code>SessionStart</code></td>
+<td data-label="Коли">На початку сесії (з <code>compact</code> після ущільнення)</td>
+<td data-label="Що можна">Додати контекст</td>
 </tr>
 </tbody>
 </table>
@@ -196,16 +206,16 @@
 </thead>
 <tbody>
 <tr>
-<td><code>0</code></td>
-<td>Успіх</td>
+<td data-label="Код"><code>0</code></td>
+<td data-label="Що відбувається">Успіх</td>
 </tr>
 <tr>
-<td><code>2</code></td>
-<td><strong>Блокує</strong> дію (stderr іде моделі як причина)</td>
+<td data-label="Код"><code>2</code></td>
+<td data-label="Що відбувається"><strong>Блокує</strong> дію (stderr іде моделі як причина)</td>
 </tr>
 <tr>
-<td>інший, зокрема <code>1</code></td>
-<td>Не блокує, дія триває</td>
+<td data-label="Код">інший, зокрема <code>1</code></td>
+<td data-label="Що відбувається">Не блокує, дія триває</td>
 </tr>
 </tbody>
 </table>

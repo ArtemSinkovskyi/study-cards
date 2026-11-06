@@ -17,6 +17,16 @@
   th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
   td code, th code { white-space:nowrap; }
   th { background:#fff; }
+  @media (max-width: 640px) {
+    table, thead, tbody, tr, td { display:block; min-width:0; }
+    table { overflow:visible; }
+    thead { display:none; }
+    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
+    td { border:none; padding:.25rem 0; }
+    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
+    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
+    td code, th code { white-space:normal; }
+  }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -51,24 +61,24 @@
 </thead>
 <tbody>
 <tr>
-<td>Root</td>
-<td>пароль і MFA</td>
-<td>лише разові дії (закрити акаунт, змінити план)</td>
+<td data-label="Ідентичність">Root</td>
+<td data-label="Облікові дані">пароль і MFA</td>
+<td data-label="Коли застосовувати">лише разові дії (закрити акаунт, змінити план)</td>
 </tr>
 <tr>
-<td>IAM user</td>
-<td>пароль, access key</td>
-<td>людина чи програма без кращого варіанту</td>
+<td data-label="Ідентичність">IAM user</td>
+<td data-label="Облікові дані">пароль, access key</td>
+<td data-label="Коли застосовувати">людина чи програма без кращого варіанту</td>
 </tr>
 <tr>
-<td>IAM role</td>
-<td>тимчасові ключі через STS</td>
-<td>сервіси AWS, CI, інший акаунт, федерація</td>
+<td data-label="Ідентичність">IAM role</td>
+<td data-label="Облікові дані">тимчасові ключі через STS</td>
+<td data-label="Коли застосовувати">сервіси AWS, CI, інший акаунт, федерація</td>
 </tr>
 <tr>
-<td>IAM Identity Center</td>
-<td>SSO, тимчасові ключі</td>
-<td>люди в багатьох акаунтах (рекомендовано AWS)</td>
+<td data-label="Ідентичність">IAM Identity Center</td>
+<td data-label="Облікові дані">SSO, тимчасові ключі</td>
+<td data-label="Коли застосовувати">люди в багатьох акаунтах (рекомендовано AWS)</td>
 </tr>
 </tbody>
 </table>
@@ -84,40 +94,40 @@
 </thead>
 <tbody>
 <tr>
-<td><code>Version</code></td>
-<td>завжди <code>2012-10-17</code>: це версія мови політик, а не дата вашої політики. Без неї діє старіша мова, де не працюють змінні на кшталт <code>${aws:username}</code> <em>(не звірено)</em></td>
+<td data-label="Елемент"><code>Version</code></td>
+<td data-label="Що означає">завжди <code>2012-10-17</code>: це версія мови політик, а не дата вашої політики. Без неї діє старіша мова, де не працюють змінні на кшталт <code>${aws:username}</code> <em>(не звірено)</em></td>
 </tr>
 <tr>
-<td><code>Statement</code></td>
-<td>список правил</td>
+<td data-label="Елемент"><code>Statement</code></td>
+<td data-label="Що означає">список правил</td>
 </tr>
 <tr>
-<td><code>Sid</code></td>
-<td>довільне ім'я правила</td>
+<td data-label="Елемент"><code>Sid</code></td>
+<td data-label="Що означає">довільне ім'я правила</td>
 </tr>
 <tr>
-<td><code>Effect</code></td>
-<td><code>Allow</code> або <code>Deny</code></td>
+<td data-label="Елемент"><code>Effect</code></td>
+<td data-label="Що означає"><code>Allow</code> або <code>Deny</code></td>
 </tr>
 <tr>
-<td><code>Action</code></td>
-<td>операції <code>service:Operation</code>, дозволені <code>*</code></td>
+<td data-label="Елемент"><code>Action</code></td>
+<td data-label="Що означає">операції <code>service:Operation</code>, дозволені <code>*</code></td>
 </tr>
 <tr>
-<td><code>NotAction</code></td>
-<td>«усе, окрім цього» (обережно)</td>
+<td data-label="Елемент"><code>NotAction</code></td>
+<td data-label="Що означає">«усе, окрім цього» (обережно)</td>
 </tr>
 <tr>
-<td><code>Resource</code></td>
-<td>на що поширюється: ARN або шаблон</td>
+<td data-label="Елемент"><code>Resource</code></td>
+<td data-label="Що означає">на що поширюється: ARN або шаблон</td>
 </tr>
 <tr>
-<td><code>Principal</code></td>
-<td><strong>лише в resource-based політиках</strong>: кому</td>
+<td data-label="Елемент"><code>Principal</code></td>
+<td data-label="Що означає"><strong>лише в resource-based політиках</strong>: кому</td>
 </tr>
 <tr>
-<td><code>Condition</code></td>
-<td>додаткова умова: префікс, IP, MFA, тег, час</td>
+<td data-label="Елемент"><code>Condition</code></td>
+<td data-label="Що означає">додаткова умова: префікс, IP, MFA, тег, час</td>
 </tr>
 </tbody>
 </table>
@@ -133,36 +143,36 @@
 </thead>
 <tbody>
 <tr>
-<td>AWS managed</td>
-<td>до чого завгодно, підтримує AWS (<code>AdministratorAccess</code>)</td>
+<td data-label="Тип">AWS managed</td>
+<td data-label="Де прикріплена">до чого завгодно, підтримує AWS (<code>AdministratorAccess</code>)</td>
 </tr>
 <tr>
-<td>Customer managed</td>
-<td>до чого завгодно, пишете ви, багаторазова</td>
+<td data-label="Тип">Customer managed</td>
+<td data-label="Де прикріплена">до чого завгодно, пишете ви, багаторазова</td>
 </tr>
 <tr>
-<td>Inline</td>
-<td>вбудована в одну ідентичність, живе й помирає з нею</td>
+<td data-label="Тип">Inline</td>
+<td data-label="Де прикріплена">вбудована в одну ідентичність, живе й помирає з нею</td>
 </tr>
 <tr>
-<td>Resource-based</td>
-<td>на ресурсі (bucket policy, resource policy Lambda)</td>
+<td data-label="Тип">Resource-based</td>
+<td data-label="Де прикріплена">на ресурсі (bucket policy, resource policy Lambda)</td>
 </tr>
 <tr>
-<td>Trust policy</td>
-<td>на ролі (різновид resource-based): хто може її прийняти</td>
+<td data-label="Тип">Trust policy</td>
+<td data-label="Де прикріплена">на ролі (різновид resource-based): хто може її прийняти</td>
 </tr>
 <tr>
-<td>Permissions boundary</td>
-<td>на користувача чи роль: стеля прав</td>
+<td data-label="Тип">Permissions boundary</td>
+<td data-label="Де прикріплена">на користувача чи роль: стеля прав</td>
 </tr>
 <tr>
-<td>SCP</td>
-<td>на організацію чи OU: стеля для акаунта</td>
+<td data-label="Тип">SCP</td>
+<td data-label="Де прикріплена">на організацію чи OU: стеля для акаунта</td>
 </tr>
 <tr>
-<td>Session policy</td>
-<td>під час <code>AssumeRole</code>: звужує сеанс</td>
+<td data-label="Тип">Session policy</td>
+<td data-label="Де прикріплена">під час <code>AssumeRole</code>: звужує сеанс</td>
 </tr>
 </tbody>
 </table>
@@ -178,19 +188,19 @@
 </thead>
 <tbody>
 <tr>
-<td>Прикріплена до</td>
-<td>користувача, групи, ролі</td>
-<td>ресурсу</td>
+<td data-label="">Прикріплена до</td>
+<td data-label="Identity-based">користувача, групи, ролі</td>
+<td data-label="Resource-based">ресурсу</td>
 </tr>
 <tr>
-<td><code>Principal</code></td>
-<td><strong>нема</strong> (суб'єкт відомий)</td>
-<td><strong>обов'язковий</strong></td>
+<td data-label=""><code>Principal</code></td>
+<td data-label="Identity-based"><strong>нема</strong> (суб'єкт відомий)</td>
+<td data-label="Resource-based"><strong>обов'язковий</strong></td>
 </tr>
 <tr>
-<td>Між акаунтами</td>
-<td>потрібна і у вихідному, і в цільовому акаунті</td>
-<td><strong>достатньо однієї</strong> політики на ресурсі</td>
+<td data-label="">Між акаунтами</td>
+<td data-label="Identity-based">потрібна і у вихідному, і в цільовому акаунті</td>
+<td data-label="Resource-based"><strong>достатньо однієї</strong> політики на ресурсі</td>
 </tr>
 </tbody>
 </table>
@@ -212,20 +222,20 @@
 </thead>
 <tbody>
 <tr>
-<td>Lambda, EC2, ECS</td>
-<td><code>Service: lambda.amazonaws.com</code></td>
+<td data-label="Хто приймає">Lambda, EC2, ECS</td>
+<td data-label="Principal"><code>Service: lambda.amazonaws.com</code></td>
 </tr>
 <tr>
-<td>Користувач з іншого акаунта</td>
-<td><code>AWS: arn:aws:iam::&lt;акаунт&gt;:root</code></td>
+<td data-label="Хто приймає">Користувач з іншого акаунта</td>
+<td data-label="Principal"><code>AWS: arn:aws:iam::&lt;акаунт&gt;:root</code></td>
 </tr>
 <tr>
-<td>Зовнішній OIDC-провайдер</td>
-<td><code>Federated: ...:oidc-provider/&lt;провайдер&gt;</code></td>
+<td data-label="Хто приймає">Зовнішній OIDC-провайдер</td>
+<td data-label="Principal"><code>Federated: ...:oidc-provider/&lt;провайдер&gt;</code></td>
 </tr>
 <tr>
-<td>SAML-провайдер</td>
-<td><code>Federated: ...:saml-provider/...</code></td>
+<td data-label="Хто приймає">SAML-провайдер</td>
+<td data-label="Principal"><code>Federated: ...:saml-provider/...</code></td>
 </tr>
 </tbody>
 </table>
@@ -240,16 +250,16 @@
 </thead>
 <tbody>
 <tr>
-<td><code>AssumeRole</code></td>
-<td>користувачі й сервіси в AWS</td>
+<td data-label="Виклик"><code>AssumeRole</code></td>
+<td data-label="Для кого">користувачі й сервіси в AWS</td>
 </tr>
 <tr>
-<td><code>AssumeRoleWithWebIdentity</code></td>
-<td>OIDC (Google, GitHub, HCP Terraform)</td>
+<td data-label="Виклик"><code>AssumeRoleWithWebIdentity</code></td>
+<td data-label="Для кого">OIDC (Google, GitHub, HCP Terraform)</td>
 </tr>
 <tr>
-<td><code>AssumeRoleWithSAML</code></td>
-<td>SAML</td>
+<td data-label="Виклик"><code>AssumeRoleWithSAML</code></td>
+<td data-label="Для кого">SAML</td>
 </tr>
 </tbody>
 </table>
@@ -274,48 +284,48 @@
 </thead>
 <tbody>
 <tr>
-<td>ABAC</td>
-<td>права за тегами (<code>aws:PrincipalTag</code>, <code>aws:ResourceTag</code>), масштабується краще за ролі на кожен проєкт</td>
+<td data-label="Тема">ABAC</td>
+<td data-label="Суть">права за тегами (<code>aws:PrincipalTag</code>, <code>aws:ResourceTag</code>), масштабується краще за ролі на кожен проєкт</td>
 </tr>
 <tr>
-<td>Permission boundary</td>
-<td>стеля: ефективні права це перетин identity policy і boundary. Дають змогу делегувати створення ролей без ризику ескалації</td>
+<td data-label="Тема">Permission boundary</td>
+<td data-label="Суть">стеля: ефективні права це перетин identity policy і boundary. Дають змогу делегувати створення ролей без ризику ескалації</td>
 </tr>
 <tr>
-<td>SCP</td>
-<td>політика AWS Organizations; <strong>не надає прав</strong>, лише обмежує</td>
+<td data-label="Тема">SCP</td>
+<td data-label="Суть">політика AWS Organizations; <strong>не надає прав</strong>, лише обмежує</td>
 </tr>
 <tr>
-<td>Policy variables</td>
-<td><code>${aws:username}</code> у <code>Resource</code>: «кожен користувач лише у своїй теці»</td>
+<td data-label="Тема">Policy variables</td>
+<td data-label="Суть"><code>${aws:username}</code> у <code>Resource</code>: «кожен користувач лише у своїй теці»</td>
 </tr>
 <tr>
-<td><code>iam:PassRole</code></td>
-<td>право «передати» роль сервісу (наприклад, Lambda чи CloudFormation). Без нього не створити функцію з роллю</td>
+<td data-label="Тема"><code>iam:PassRole</code></td>
+<td data-label="Суть">право «передати» роль сервісу (наприклад, Lambda чи CloudFormation). Без нього не створити функцію з роллю</td>
 </tr>
 <tr>
-<td>External ID</td>
-<td>захист від «confused deputy» при доступі стороннього сервісу до вашого акаунта</td>
+<td data-label="Тема">External ID</td>
+<td data-label="Суть">захист від «confused deputy» при доступі стороннього сервісу до вашого акаунта</td>
 </tr>
 <tr>
-<td>MFA у політиці</td>
-<td>умова <code>aws:MultiFactorAuthPresent</code></td>
+<td data-label="Тема">MFA у політиці</td>
+<td data-label="Суть">умова <code>aws:MultiFactorAuthPresent</code></td>
 </tr>
 <tr>
-<td>Access Analyzer</td>
-<td>знаходить ресурси, доступні ззовні, і невикористані права</td>
+<td data-label="Тема">Access Analyzer</td>
+<td data-label="Суть">знаходить ресурси, доступні ззовні, і невикористані права</td>
 </tr>
 <tr>
-<td>Credential report, Access Advisor</td>
-<td>аудит ключів і того, які сервіси реально використовуються</td>
+<td data-label="Тема">Credential report, Access Advisor</td>
+<td data-label="Суть">аудит ключів і того, які сервіси реально використовуються</td>
 </tr>
 <tr>
-<td>Ротація access keys</td>
-<td><strong>максимум два ключі</strong> на користувача: створити новий, перемкнути, видалити старий</td>
+<td data-label="Тема">Ротація access keys</td>
+<td data-label="Суть"><strong>максимум два ключі</strong> на користувача: створити новий, перемкнути, видалити старий</td>
 </tr>
 <tr>
-<td>Cognito</td>
-<td>User Pools (автентифікація, JWT) проти Identity Pools (AWS-креди)</td>
+<td data-label="Тема">Cognito</td>
+<td data-label="Суть">User Pools (автентифікація, JWT) проти Identity Pools (AWS-креди)</td>
 </tr>
 </tbody>
 </table>
@@ -339,32 +349,32 @@
 </thead>
 <tbody>
 <tr>
-<td>Чи дає SCP права?</td>
-<td><strong>Ні</strong>, лише обмежує</td>
+<td data-label="Питання">Чи дає SCP права?</td>
+<td data-label="Відповідь"><strong>Ні</strong>, лише обмежує</td>
 </tr>
 <tr>
-<td>На кого діє?</td>
-<td>на користувачів і ролі в <strong>member-акаунтах</strong>, включно з root-користувачем такого акаунта</td>
+<td data-label="Питання">На кого діє?</td>
+<td data-label="Відповідь">на користувачів і ролі в <strong>member-акаунтах</strong>, включно з root-користувачем такого акаунта</td>
 </tr>
 <tr>
-<td>На кого не діє?</td>
-<td>на <strong>management-акаунт</strong> організації; на service-linked ролі</td>
+<td data-label="Питання">На кого не діє?</td>
+<td data-label="Відповідь">на <strong>management-акаунт</strong> організації; на service-linked ролі</td>
 </tr>
 <tr>
-<td>SCP проти permission boundary</td>
-<td>SCP обмежує акаунт чи OU, boundary окремого користувача чи роль у межах акаунта</td>
+<td data-label="Питання">SCP проти permission boundary</td>
+<td data-label="Відповідь">SCP обмежує акаунт чи OU, boundary окремого користувача чи роль у межах акаунта</td>
 </tr>
 <tr>
-<td>Де живе?</td>
-<td>AWS Organizations; SCP доступні лише з увімкненими <strong>all features</strong>, а не лише consolidated billing</td>
+<td data-label="Питання">Де живе?</td>
+<td data-label="Відповідь">AWS Organizations; SCP доступні лише з увімкненими <strong>all features</strong>, а не лише consolidated billing</td>
 </tr>
 <tr>
-<td>Споріднене</td>
-<td><strong>RCP</strong> (resource control policy): стеля для ресурсів в акаунтах, наприклад S3-бакетів</td>
+<td data-label="Питання">Споріднене</td>
+<td data-label="Відповідь"><strong>RCP</strong> (resource control policy): стеля для ресурсів в акаунтах, наприклад S3-бакетів</td>
 </tr>
 <tr>
-<td>Типове застосування</td>
-<td>заборонити регіони, заборонити вимикати CloudTrail чи GuardDuty, заборонити вихід з організації, змусити шифрування</td>
+<td data-label="Питання">Типове застосування</td>
+<td data-label="Відповідь">заборонити регіони, заборонити вимикати CloudTrail чи GuardDuty, заборонити вихід з організації, змусити шифрування</td>
 </tr>
 </tbody>
 </table>

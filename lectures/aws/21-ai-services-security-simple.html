@@ -17,6 +17,16 @@
   th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
   td code, th code { white-space:nowrap; }
   th { background:#fff; }
+  @media (max-width: 640px) {
+    table, thead, tbody, tr, td { display:block; min-width:0; }
+    table { overflow:visible; }
+    thead { display:none; }
+    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
+    td { border:none; padding:.25rem 0; }
+    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
+    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
+    td code, th code { white-space:normal; }
+  }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -52,12 +62,12 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>Converse</strong></td>
-<td>єдиний формат для різних моделей</td>
+<td data-label="API"><strong>Converse</strong></td>
+<td data-label="Для чого">єдиний формат для різних моделей</td>
 </tr>
 <tr>
-<td><strong>InvokeModel</strong></td>
-<td>формат конкретної моделі</td>
+<td data-label="API"><strong>InvokeModel</strong></td>
+<td data-label="Для чого">формат конкретної моделі</td>
 </tr>
 </tbody>
 </table>
@@ -90,34 +100,34 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>Content filters</strong></td>
-<td>шкідливий зміст: Hate, Insults, Sexual, Violence, Misconduct, <strong>Prompt Attack</strong></td>
-<td>блокувати образи</td>
+<td data-label="Фільтр"><strong>Content filters</strong></td>
+<td data-label="Що робить">шкідливий зміст: Hate, Insults, Sexual, Violence, Misconduct, <strong>Prompt Attack</strong></td>
+<td data-label="Приклад">блокувати образи</td>
 </tr>
 <tr>
-<td><strong>Denied topics</strong></td>
-<td>заборонені теми</td>
-<td>інвестпоради в банку</td>
+<td data-label="Фільтр"><strong>Denied topics</strong></td>
+<td data-label="Що робить">заборонені теми</td>
+<td data-label="Приклад">інвестпоради в банку</td>
 </tr>
 <tr>
-<td><strong>Word filters</strong></td>
-<td>слова, фрази</td>
-<td>назви конкурентів</td>
+<td data-label="Фільтр"><strong>Word filters</strong></td>
+<td data-label="Що робить">слова, фрази</td>
+<td data-label="Приклад">назви конкурентів</td>
 </tr>
 <tr>
-<td><strong>Sensitive information filters</strong></td>
-<td><strong>блокує чи маскує</strong> PII, свої regex</td>
-<td>маскувати SSN</td>
+<td data-label="Фільтр"><strong>Sensitive information filters</strong></td>
+<td data-label="Що робить"><strong>блокує чи маскує</strong> PII, свої regex</td>
+<td data-label="Приклад">маскувати SSN</td>
 </tr>
 <tr>
-<td><strong>Contextual grounding</strong></td>
-<td>відповідь не спирається на джерело</td>
-<td>галюцинації в RAG</td>
+<td data-label="Фільтр"><strong>Contextual grounding</strong></td>
+<td data-label="Що робить">відповідь не спирається на джерело</td>
+<td data-label="Приклад">галюцинації в RAG</td>
 </tr>
 <tr>
-<td><strong>Automated Reasoning</strong></td>
-<td>перевірка логічними правилами</td>
-<td>правила полісу</td>
+<td data-label="Фільтр"><strong>Automated Reasoning</strong></td>
+<td data-label="Що робить">перевірка логічними правилами</td>
+<td data-label="Приклад">правила полісу</td>
 </tr>
 </tbody>
 </table>
@@ -138,20 +148,20 @@
 </thead>
 <tbody>
 <tr>
-<td>прибрати номери карток</td>
-<td>sensitive information (mask)</td>
+<td data-label="Потреба">прибрати номери карток</td>
+<td data-label="Фільтр">sensitive information (mask)</td>
 </tr>
 <tr>
-<td>не обговорювати конкурентів</td>
-<td>word filter чи denied topic</td>
+<td data-label="Потреба">не обговорювати конкурентів</td>
+<td data-label="Фільтр">word filter чи denied topic</td>
 </tr>
 <tr>
-<td>захист від «ігноруй інструкції»</td>
-<td>content filter: Prompt Attack</td>
+<td data-label="Потреба">захист від «ігноруй інструкції»</td>
+<td data-label="Фільтр">content filter: Prompt Attack</td>
 </tr>
 <tr>
-<td>модель вигадує</td>
-<td>contextual grounding</td>
+<td data-label="Потреба">модель вигадує</td>
+<td data-label="Фільтр">contextual grounding</td>
 </tr>
 </tbody>
 </table>
@@ -167,20 +177,20 @@
 </thead>
 <tbody>
 <tr>
-<td>агент робить зайве</td>
-<td><strong>tool-use authorization</strong>: лише дозволені інструменти, мінімальні права</td>
+<td data-label="Ризик">агент робить зайве</td>
+<td data-label="Рішення"><strong>tool-use authorization</strong>: лише дозволені інструменти, мінімальні права</td>
 </tr>
 <tr>
-<td>дані одного користувача в сесії іншого</td>
-<td><strong>session isolation</strong></td>
+<td data-label="Ризик">дані одного користувача в сесії іншого</td>
+<td data-label="Рішення"><strong>session isolation</strong></td>
 </tr>
 <tr>
-<td>небезпечна дія (видалити, оплатити)</td>
-<td><strong>human-in-the-loop</strong> схвалення</td>
+<td data-label="Ризик">небезпечна дія (видалити, оплатити)</td>
+<td data-label="Рішення"><strong>human-in-the-loop</strong> схвалення</td>
 </tr>
 <tr>
-<td>непряме впорскування через документ чи сайт</td>
-<td>вміст інструмента це дані, а не команди; фільтри</td>
+<td data-label="Ризик">непряме впорскування через документ чи сайт</td>
+<td data-label="Рішення">вміст інструмента це дані, а не команди; фільтри</td>
 </tr>
 </tbody>
 </table>
@@ -194,36 +204,36 @@
 </thead>
 <tbody>
 <tr>
-<td>Runtime</td>
-<td>безсерверний запуск агентів, справжня ізоляція сесій</td>
+<td data-label="Компонент">Runtime</td>
+<td data-label="Що робить">безсерверний запуск агентів, справжня ізоляція сесій</td>
 </tr>
 <tr>
-<td>Memory</td>
-<td>коротка й довга пам'ять</td>
+<td data-label="Компонент">Memory</td>
+<td data-label="Що робить">коротка й довга пам'ять</td>
 </tr>
 <tr>
-<td>Gateway</td>
-<td>перетворює API й Lambda на MCP-інструменти</td>
+<td data-label="Компонент">Gateway</td>
+<td data-label="Що робить">перетворює API й Lambda на MCP-інструменти</td>
 </tr>
 <tr>
-<td>Identity</td>
-<td>ідентичність агента, сумісна з Cognito, Okta, Auth0</td>
+<td data-label="Компонент">Identity</td>
+<td data-label="Що робить">ідентичність агента, сумісна з Cognito, Okta, Auth0</td>
 </tr>
 <tr>
-<td>Policy</td>
-<td>детерміновані правила на кожен виклик інструмента</td>
+<td data-label="Компонент">Policy</td>
+<td data-label="Що робить">детерміновані правила на кожен виклик інструмента</td>
 </tr>
 <tr>
-<td>Observability</td>
-<td>трасування кроків через OpenTelemetry</td>
+<td data-label="Компонент">Observability</td>
+<td data-label="Що робить">трасування кроків через OpenTelemetry</td>
 </tr>
 <tr>
-<td>Code Interpreter, Browser</td>
-<td>ізольовані пісочниці</td>
+<td data-label="Компонент">Code Interpreter, Browser</td>
+<td data-label="Що робить">ізольовані пісочниці</td>
 </tr>
 <tr>
-<td>Evaluations, Registry, Harness</td>
-<td>оцінка, каталог, готовий цикл агента</td>
+<td data-label="Компонент">Evaluations, Registry, Harness</td>
+<td data-label="Що робить">оцінка, каталог, готовий цикл агента</td>
 </tr>
 </tbody>
 </table>
@@ -257,24 +267,24 @@
 </thead>
 <tbody>
 <tr>
-<td>1.1.9 код, огляд, сканування</td>
-<td>spec-driven генерація, автоматичний code review</td>
+<td data-label="Навичка">1.1.9 код, огляд, сканування</td>
+<td data-label="Де застосувати">spec-driven генерація, автоматичний code review</td>
 </tr>
 <tr>
-<td>3.2.5 тести</td>
-<td>генерація тестів, аналіз результатів</td>
+<td data-label="Навичка">3.2.5 тести</td>
+<td data-label="Де застосувати">генерація тестів, аналіз результатів</td>
 </tr>
 <tr>
-<td>3.3.9 CI/CD</td>
-<td>затвердження деплою, перевірка після нього</td>
+<td data-label="Навичка">3.3.9 CI/CD</td>
+<td data-label="Де застосувати">затвердження деплою, перевірка після нього</td>
 </tr>
 <tr>
-<td>4.1.5 відлагодження</td>
-<td>аналіз помилок, пропозиції виправлень</td>
+<td data-label="Навичка">4.1.5 відлагодження</td>
+<td data-label="Де застосувати">аналіз помилок, пропозиції виправлень</td>
 </tr>
 <tr>
-<td>4.3.6 оптимізація</td>
-<td>пошук вузьких місць</td>
+<td data-label="Навичка">4.3.6 оптимізація</td>
+<td data-label="Де застосувати">пошук вузьких місць</td>
 </tr>
 </tbody>
 </table>

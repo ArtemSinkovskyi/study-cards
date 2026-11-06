@@ -17,6 +17,16 @@
   th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
   td code, th code { white-space:nowrap; }
   th { background:#fff; }
+  @media (max-width: 640px) {
+    table, thead, tbody, tr, td { display:block; min-width:0; }
+    table { overflow:visible; }
+    thead { display:none; }
+    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
+    td { border:none; padding:.25rem 0; }
+    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
+    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
+    td code, th code { white-space:normal; }
+  }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -55,34 +65,34 @@
 </thead>
 <tbody>
 <tr>
-<td>Питання</td>
-<td>Хто ти? (автентифікація)</td>
-<td>Що можна в AWS? (авторизація)</td>
+<td data-label="">Питання</td>
+<td data-label="User pool">Хто ти? (автентифікація)</td>
+<td data-label="Identity pool">Що можна в AWS? (авторизація)</td>
 </tr>
 <tr>
-<td>Зберігає користувачів</td>
-<td>так</td>
-<td>ні</td>
+<td data-label="">Зберігає користувачів</td>
+<td data-label="User pool">так</td>
+<td data-label="Identity pool">ні</td>
 </tr>
 <tr>
-<td>Видає</td>
-<td>JWT</td>
-<td>тимчасові ключі AWS</td>
+<td data-label="">Видає</td>
+<td data-label="User pool">JWT</td>
+<td data-label="Identity pool">тимчасові ключі AWS</td>
 </tr>
 <tr>
-<td>Вхід через Google, SAML, OIDC</td>
-<td>так</td>
-<td>так</td>
+<td data-label="">Вхід через Google, SAML, OIDC</td>
+<td data-label="User pool">так</td>
+<td data-label="Identity pool">так</td>
 </tr>
 <tr>
-<td>Гості</td>
-<td>ні</td>
-<td><strong>так</strong>, окрема обмежена роль</td>
+<td data-label="">Гості</td>
+<td data-label="User pool">ні</td>
+<td data-label="Identity pool"><strong>так</strong>, окрема обмежена роль</td>
 </tr>
 <tr>
-<td>Типове застосування</td>
-<td>захист свого API</td>
-<td>прямий доступ до S3 чи DynamoDB з клієнта</td>
+<td data-label="">Типове застосування</td>
+<td data-label="User pool">захист свого API</td>
+<td data-label="Identity pool">прямий доступ до S3 чи DynamoDB з клієнта</td>
 </tr>
 </tbody>
 </table>
@@ -101,16 +111,16 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>ID token</strong></td>
-<td>інформація про користувача (<code>claims</code>); для Cognito authorizer у REST API</td>
+<td data-label="Токен"><strong>ID token</strong></td>
+<td data-label="Для чого">інформація про користувача (<code>claims</code>); для Cognito authorizer у REST API</td>
 </tr>
 <tr>
-<td><strong>Access token</strong></td>
-<td>права, <code>scopes</code></td>
+<td data-label="Токен"><strong>Access token</strong></td>
+<td data-label="Для чого">права, <code>scopes</code></td>
 </tr>
 <tr>
-<td><strong>Refresh token</strong></td>
-<td>оновлення перших двох</td>
+<td data-label="Токен"><strong>Refresh token</strong></td>
+<td data-label="Для чого">оновлення перших двох</td>
 </tr>
 </tbody>
 </table>
@@ -137,20 +147,20 @@
 </thead>
 <tbody>
 <tr>
-<td>GitHub Actions у AWS</td>
-<td><strong>OIDC</strong> і <code>AssumeRoleWithWebIdentity</code></td>
+<td data-label="Сценарій">GitHub Actions у AWS</td>
+<td data-label="Механізм"><strong>OIDC</strong> і <code>AssumeRoleWithWebIdentity</code></td>
 </tr>
 <tr>
-<td>Корпоративний логін співробітників</td>
-<td><strong>SAML</strong> і <code>AssumeRoleWithSAML</code>, IAM Identity Center</td>
+<td data-label="Сценарій">Корпоративний логін співробітників</td>
+<td data-label="Механізм"><strong>SAML</strong> і <code>AssumeRoleWithSAML</code>, IAM Identity Center</td>
 </tr>
 <tr>
-<td>Застосунок із Google</td>
-<td>Cognito</td>
+<td data-label="Сценарій">Застосунок із Google</td>
+<td data-label="Механізм">Cognito</td>
 </tr>
 <tr>
-<td>Сервіс у чужому акаунті</td>
-<td><code>AssumeRole</code> між акаунтами</td>
+<td data-label="Сценарій">Сервіс у чужому акаунті</td>
+<td data-label="Механізм"><code>AssumeRole</code> між акаунтами</td>
 </tr>
 </tbody>
 </table>
@@ -165,16 +175,16 @@
 </thead>
 <tbody>
 <tr>
-<td>Cognito authorizer</td>
-<td>перевіряє токен user pool, без коду</td>
+<td data-label="Спосіб">Cognito authorizer</td>
+<td data-label="Що">перевіряє токен user pool, без коду</td>
 </tr>
 <tr>
-<td>Lambda authorizer</td>
-<td>своя логіка, сторонній токен</td>
+<td data-label="Спосіб">Lambda authorizer</td>
+<td data-label="Що">своя логіка, сторонній токен</td>
 </tr>
 <tr>
-<td>IAM (SigV4)</td>
-<td>клієнт має AWS-ключі (з identity pool)</td>
+<td data-label="Спосіб">IAM (SigV4)</td>
+<td data-label="Що">клієнт має AWS-ключі (з identity pool)</td>
 </tr>
 </tbody>
 </table>

@@ -17,6 +17,16 @@
   th, td { border:1px solid #e3dfd6; padding:.4rem .6rem; text-align:left; vertical-align:top; min-width:7rem; overflow-wrap:normal; word-break:normal; hyphens:none; }
   td code, th code { white-space:nowrap; }
   th { background:#fff; }
+  @media (max-width: 640px) {
+    table, thead, tbody, tr, td { display:block; min-width:0; }
+    table { overflow:visible; }
+    thead { display:none; }
+    tr { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; margin:.7rem 0; padding:.5rem .8rem; }
+    td { border:none; padding:.25rem 0; }
+    td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
+    td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
+    td code, th code { white-space:normal; }
+  }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
   pre code { background:none; padding:0; }
@@ -51,34 +61,34 @@
 </thead>
 <tbody>
 <tr>
-<td>Ключ</td>
-<td>будь-який PK і SK, інакші ніж у таблиці</td>
-<td><strong>той самий PK</strong>, інший SK</td>
+<td data-label="">Ключ</td>
+<td data-label="GSI (глобальний)">будь-який PK і SK, інакші ніж у таблиці</td>
+<td data-label="LSI (локальний)"><strong>той самий PK</strong>, інший SK</td>
 </tr>
 <tr>
-<td>Коли створити</td>
-<td>будь-коли</td>
-<td><strong>лише під час створення таблиці</strong></td>
+<td data-label="">Коли створити</td>
+<td data-label="GSI (глобальний)">будь-коли</td>
+<td data-label="LSI (локальний)"><strong>лише під час створення таблиці</strong></td>
 </tr>
 <tr>
-<td>Кількість</td>
-<td>20 за замовчуванням</td>
-<td>5</td>
+<td data-label="">Кількість</td>
+<td data-label="GSI (глобальний)">20 за замовчуванням</td>
+<td data-label="LSI (локальний)">5</td>
 </tr>
 <tr>
-<td>Консистентність</td>
-<td>лише eventually</td>
-<td>eventually або strongly</td>
+<td data-label="">Консистентність</td>
+<td data-label="GSI (глобальний)">лише eventually</td>
+<td data-label="LSI (локальний)">eventually або strongly</td>
 </tr>
 <tr>
-<td>Потужність</td>
-<td>своя, окремо від таблиці</td>
-<td>спільна з таблицею</td>
+<td data-label="">Потужність</td>
+<td data-label="GSI (глобальний)">своя, окремо від таблиці</td>
+<td data-label="LSI (локальний)">спільна з таблицею</td>
 </tr>
 <tr>
-<td>Обмеження</td>
-<td>немає</td>
-<td>колекція одного PK до 10 ГБ <em>(не звірено)</em></td>
+<td data-label="">Обмеження</td>
+<td data-label="GSI (глобальний)">немає</td>
+<td data-label="LSI (локальний)">колекція одного PK до 10 ГБ <em>(не звірено)</em></td>
 </tr>
 </tbody>
 </table>
@@ -94,19 +104,19 @@
 </thead>
 <tbody>
 <tr>
-<td><code>KEYS_ONLY</code></td>
-<td>лише ключі</td>
-<td>найменший індекс</td>
+<td data-label="Тип"><code>KEYS_ONLY</code></td>
+<td data-label="Що в індексі">лише ключі</td>
+<td data-label="Коли">найменший індекс</td>
 </tr>
 <tr>
-<td><code>INCLUDE</code></td>
-<td>ключі й вибрані поля</td>
-<td>потрібні кілька полів</td>
+<td data-label="Тип"><code>INCLUDE</code></td>
+<td data-label="Що в індексі">ключі й вибрані поля</td>
+<td data-label="Коли">потрібні кілька полів</td>
 </tr>
 <tr>
-<td><code>ALL</code></td>
-<td>усе</td>
-<td>потрібні майже всі поля, зберігання до подвоєння</td>
+<td data-label="Тип"><code>ALL</code></td>
+<td data-label="Що в індексі">усе</td>
+<td data-label="Коли">потрібні майже всі поля, зберігання до подвоєння</td>
 </tr>
 </tbody>
 </table>
@@ -127,19 +137,19 @@
 </thead>
 <tbody>
 <tr>
-<td>Замовлення</td>
-<td><code>status</code></td>
-<td><code>orderId</code> або <code>userId</code></td>
+<td data-label="Дані">Замовлення</td>
+<td data-label="Поганий PK"><code>status</code></td>
+<td data-label="Хороший PK"><code>orderId</code> або <code>userId</code></td>
 </tr>
 <tr>
-<td>Логи подій</td>
-<td><code>date</code> (усе сьогодні в один розділ)</td>
-<td><code>deviceId</code> + SK <code>timestamp</code></td>
+<td data-label="Дані">Логи подій</td>
+<td data-label="Поганий PK"><code>date</code> (усе сьогодні в один розділ)</td>
+<td data-label="Хороший PK"><code>deviceId</code> + SK <code>timestamp</code></td>
 </tr>
 <tr>
-<td>Ігрові рахунки</td>
-<td><code>gameTitle</code> без GSI</td>
-<td><code>userId</code>, GSI за <code>gameTitle</code> + <code>score</code></td>
+<td data-label="Дані">Ігрові рахунки</td>
+<td data-label="Поганий PK"><code>gameTitle</code> без GSI</td>
+<td data-label="Хороший PK"><code>userId</code>, GSI за <code>gameTitle</code> + <code>score</code></td>
 </tr>
 </tbody>
 </table>
@@ -162,19 +172,19 @@
 </thead>
 <tbody>
 <tr>
-<td><code>BatchWriteItem</code></td>
-<td>до 25 записів <em>(не звірено)</em></td>
-<td><strong>не атомарна</strong>, дивіться <code>UnprocessedItems</code></td>
+<td data-label="Операція"><code>BatchWriteItem</code></td>
+<td data-label="Що робить">до 25 записів <em>(не звірено)</em></td>
+<td data-label="Гарантія"><strong>не атомарна</strong>, дивіться <code>UnprocessedItems</code></td>
 </tr>
 <tr>
-<td><code>BatchGetItem</code></td>
-<td>до 100 читань <em>(не звірено)</em></td>
-<td>не атомарна, дивіться <code>UnprocessedKeys</code></td>
+<td data-label="Операція"><code>BatchGetItem</code></td>
+<td data-label="Що робить">до 100 читань <em>(не звірено)</em></td>
+<td data-label="Гарантія">не атомарна, дивіться <code>UnprocessedKeys</code></td>
 </tr>
 <tr>
-<td><code>TransactWriteItems</code></td>
-<td>до 100 записів <em>(не звірено)</em></td>
-<td><strong>все або нічого</strong></td>
+<td data-label="Операція"><code>TransactWriteItems</code></td>
+<td data-label="Що робить">до 100 записів <em>(не звірено)</em></td>
+<td data-label="Гарантія"><strong>все або нічого</strong></td>
 </tr>
 </tbody>
 </table>
@@ -200,24 +210,24 @@
 </thead>
 <tbody>
 <tr>
-<td>Планування</td>
-<td>не потрібне</td>
-<td>задаєте RCU і WCU</td>
+<td data-label="">Планування</td>
+<td data-label="On-demand">не потрібне</td>
+<td data-label="Provisioned">задаєте RCU і WCU</td>
 </tr>
 <tr>
-<td>Оплата</td>
-<td>за кожен запит</td>
-<td>за зарезервовану потужність щогодини</td>
+<td data-label="">Оплата</td>
+<td data-label="On-demand">за кожен запит</td>
+<td data-label="Provisioned">за зарезервовану потужність щогодини</td>
 </tr>
 <tr>
-<td>Коли</td>
-<td>нове застосування, непередбачуване навантаження</td>
-<td>стабільне, передбачуване</td>
+<td data-label="">Коли</td>
+<td data-label="On-demand">нове застосування, непередбачуване навантаження</td>
+<td data-label="Provisioned">стабільне, передбачуване</td>
 </tr>
 <tr>
-<td>Тротлінг</td>
-<td>рідко, при різкому стрибку вище попереднього піку</td>
-<td>при перевищенні</td>
+<td data-label="">Тротлінг</td>
+<td data-label="On-demand">рідко, при різкому стрибку вище попереднього піку</td>
+<td data-label="Provisioned">при перевищенні</td>
 </tr>
 </tbody>
 </table>
@@ -233,20 +243,20 @@
 </thead>
 <tbody>
 <tr>
-<td><code>KEYS_ONLY</code></td>
-<td>лише ключі</td>
+<td data-label="StreamViewType (назви не звірено)"><code>KEYS_ONLY</code></td>
+<td data-label="Що в записі">лише ключі</td>
 </tr>
 <tr>
-<td><code>NEW_IMAGE</code></td>
-<td>новий стан</td>
+<td data-label="StreamViewType (назви не звірено)"><code>NEW_IMAGE</code></td>
+<td data-label="Що в записі">новий стан</td>
 </tr>
 <tr>
-<td><code>OLD_IMAGE</code></td>
-<td>старий стан</td>
+<td data-label="StreamViewType (назви не звірено)"><code>OLD_IMAGE</code></td>
+<td data-label="Що в записі">старий стан</td>
 </tr>
 <tr>
-<td><code>NEW_AND_OLD_IMAGES</code></td>
-<td>обидва</td>
+<td data-label="StreamViewType (назви не звірено)"><code>NEW_AND_OLD_IMAGES</code></td>
+<td data-label="Що в записі">обидва</td>
 </tr>
 </tbody>
 </table>
