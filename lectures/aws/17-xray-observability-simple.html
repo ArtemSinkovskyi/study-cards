@@ -26,6 +26,9 @@
     td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
     td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
     td code, th code { white-space:normal; }
+    table.two td:not(:first-child)::before { display:none; }
+    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
+    table.two tr { margin:.5rem 0; }
   }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
@@ -51,7 +54,7 @@
 <p><strong>X-Ray показує шлях одного запиту через усі сервіси і скільки часу зайняв кожен.</strong> Метрики кажуть «скільки», логи «що», X-Ray «де саме застряг». Образ: багажна бирка, що йде з валізою через усі пункти.</p>
 <p>Це AWS-варіант розподіленого трейсингу, ідея така сама, як в OpenTelemetry.</p>
 <h2>Крок 1. Словник</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Термін</th>
@@ -201,7 +204,7 @@
 </ul>
 <p><strong>Сповіщення про квоти й завершення деплою</strong> (навичка 4.2.3): EventBridge ловить подію CodeDeploy чи CodePipeline і шле в SNS; у <strong>Service Quotas</strong> є alarm-и на використання <em>(не звірено)</em>.</p>
 <h2>Крок 9. Куди дивитись при проблемі</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Симптом</th>

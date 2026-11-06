@@ -26,6 +26,9 @@
     td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
     td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
     td code, th code { white-space:normal; }
+    table.two td:not(:first-child)::before { display:none; }
+    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
+    table.two tr { margin:.5rem 0; }
   }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
@@ -51,7 +54,7 @@
 <p><strong>Типова Lambda на іспиті: подія з S3 (через EventBridge) запускає функцію, яка читає об'єкт, обробляє і пише результат в інший префікс.</strong> Функція асинхронна, тому помилка дає повтори й DLQ. Прикладом тут була генерація зменшених копій картинок (мініатюр).</p>
 <p>Схема: завантаження у <code>images/</code> → S3 надсилає Object Created в EventBridge → правило з фільтром за префіксом → Lambda → читає <code>images/*</code>, пише <code>thumbs/*</code> → логи в CloudWatch → після повторів невдача йде в DLQ чи destination.</p>
 <h2>Крок 1. Словник</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Термін</th>
@@ -106,7 +109,7 @@
 </tbody>
 </table>
 <h2>Крок 2. Що в handler стандарт Lambda, а що вибір</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Що</th>
@@ -157,7 +160,7 @@
 </ul>
 <h2>Крок 4. Powertools for AWS Lambda</h2>
 <p>Набір утиліт від AWS, фактичний стандарт для Lambda. Модулі ставляться окремо:</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Модуль</th>

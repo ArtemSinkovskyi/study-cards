@@ -26,6 +26,9 @@
     td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
     td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
     td code, th code { white-space:normal; }
+    table.two td:not(:first-child)::before { display:none; }
+    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
+    table.two tr { margin:.5rem 0; }
   }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
@@ -50,7 +53,7 @@
 <h2>Головна ідея</h2>
 <p><strong>S3 це об'єктне сховище.</strong> Для іспиту треба знати модель даних, класи зберігання, lifecycle, версіонування, події, завантаження великих файлів, CORS і ціни. Доступ і шифрування окремо в <a href="2-s3-access-encryption-simple.html">лекції 2</a>.</p>
 <h2>Крок 1. Модель даних</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Термін</th>
@@ -223,7 +226,7 @@
 <p><strong>Як об'єкт потрапляє в клас:</strong> клієнт указує <code>StorageClass</code> у <code>PutObject</code>; lifecycle Transition; Intelligent-Tiering сам. Lifecycle рухає лише «вниз» (Standard → IA → Glacier → Deep Archive), назад не повертає, перехід в IA можливий не раніше ніж через 30 днів після створення.</p>
 <p><strong>Політики:</strong> заборонити писати в дорогий клас: <code>Deny</code> на <code>s3:PutObject</code> з умовою <code>StringEquals</code> на <code>s3:x-amz-storage-class</code>. Дозволити restore: <code>s3:RestoreObject</code>. Керувати lifecycle: <code>s3:PutLifecycleConfiguration</code>.</p>
 <h3>Як вибрати</h3>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Умова в задачі</th>
@@ -260,7 +263,7 @@
 <p>Малі файли (менше 128 КБ) у IA і Glacier Instant коштують як 128 КБ, тож економії нема. Сервіс, який робить <code>GetObject</code> і не вміє чекати restore, впаде на архівному об'єкті.</p>
 <h2>Крок 3. Lifecycle</h2>
 <p>Правила на префікс, тег чи розмір:</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Правило</th>
@@ -324,7 +327,7 @@
 <li>З Terraform: <code>aws_s3_bucket_notification</code> із <code>eventbridge = true</code> лише вмикає надсилання подій на default-шину; саме правило створює SAM разом із функцією.</li>
 </ul>
 <h2>Крок 6. Завантаження й швидкість</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Механізм</th>
@@ -358,7 +361,7 @@
 <h2>Крок 7. CORS</h2>
 <p>Потрібен, коли <strong>браузер</strong> ходить у S3 з іншого домену (наприклад, JS завантажує на presigned PUT). Налаштовується на бакеті: <code>AllowedOrigins</code>, <code>AllowedMethods</code>, <code>AllowedHeaders</code>. Якщо запис робить бекенд, CORS не потрібен.</p>
 <h2>Крок 8. Інше для іспиту</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Тема</th>

@@ -26,6 +26,9 @@
     td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
     td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
     td code, th code { white-space:normal; }
+    table.two td:not(:first-child)::before { display:none; }
+    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
+    table.two tr { margin:.5rem 0; }
   }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
@@ -49,7 +52,7 @@
 </blockquote>
 <h2>Що це за іспит</h2>
 <p><strong>Claude Certified Architect, Foundations (CCA-F)</strong> це сертифікація Anthropic. Дані з сторонніх сайтів, офіційного посібника я не знайшов, тож перевірте на офіційній сторінці Anthropic перед записом.</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Що</th>

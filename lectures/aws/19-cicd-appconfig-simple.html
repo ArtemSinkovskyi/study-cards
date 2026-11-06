@@ -26,6 +26,9 @@
     td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
     td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
     td code, th code { white-space:normal; }
+    table.two td:not(:first-child)::before { display:none; }
+    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
+    table.two tr { margin:.5rem 0; }
   }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
@@ -51,7 +54,7 @@
 <p><strong>CodePipeline оркеструє, CodeBuild збирає, CodeDeploy деплоїть.</strong> AppConfig змінює поведінку застосунку без деплою коду.</p>
 <p>Схема: репозиторій → CodePipeline → CodeBuild (тести, збірка) → артефакти в S3 → деплой у staging → manual approval → CodeDeploy canary в prod → rollback за alarm.</p>
 <h2>Крок 1. Зіставлення з тим, що ви знаєте</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Звичне</th>
@@ -90,7 +93,7 @@
 </tbody>
 </table>
 <h2>Крок 2. Словник</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Термін</th>
@@ -232,7 +235,7 @@
 <li>Навичка 3.2.4: середовища через Lambda aliases, теги образів, Amplify branches, Copilot environments, stages API Gateway.</li>
 </ul>
 <h2>Крок 8. IaC: CloudFormation, SAM, CDK</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th></th>
@@ -263,7 +266,7 @@
 <h2>Крок 9. AppConfig</h2>
 <p><strong>AWS AppConfig</strong> змінює поведінку застосунку <strong>без деплою коду</strong>: feature flags і динамічна конфігурація. Розгортання миттєве або поступове зі спостереженням: якщо CloudWatch alarm спрацював, <strong>автоматичний відкат</strong>. Приклад: новий формат вмикається прапорцем для 10% завантажень.</p>
 <p><strong>Вибір сервісу конфігурації</strong> (навичка 3.1.4):</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Потрібно</th>

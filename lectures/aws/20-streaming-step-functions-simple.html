@@ -26,6 +26,9 @@
     td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
     td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
     td code, th code { white-space:normal; }
+    table.two td:not(:first-child)::before { display:none; }
+    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
+    table.two tr { margin:.5rem 0; }
   }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
@@ -51,7 +54,7 @@
 <p><strong>Kinesis це річка, з якої п'ють багато хто і яка пам'ятає останні години чи дні. SQS це черга в касу: купив і пішов. Firehose це труба в басейн.</strong> Step Functions веде багатокроковий процес як машину станів.</p>
 <p>Навички: 1.1.1, 1.1.3, 1.1.6 (потоки), 1.1.8.</p>
 <h2>Крок 1. Словник</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Термін</th>
@@ -152,7 +155,7 @@
 </table>
 <p>Правило: <strong>повторне читання, порядок, кілька споживачів, багато даних означає Kinesis.</strong> Це ще й про зв'язність (навичка 1.1.1): чим менше сервіси знають один про одного, тим слабша зв'язність.</p>
 <h2>Крок 3. Kinesis Data Streams</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Параметр</th>
@@ -192,7 +195,7 @@
 <li><strong>Enhanced fan-out:</strong> кожен споживач отримує свої 2 МБ/с на шард через <code>SubscribeToShard</code>, а не ділить спільні.</li>
 </ul>
 <p>Порівняння з Kafka:</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Kafka</th>

@@ -26,6 +26,9 @@
     td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
     td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
     td code, th code { white-space:normal; }
+    table.two td:not(:first-child)::before { display:none; }
+    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
+    table.two tr { margin:.5rem 0; }
   }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
@@ -95,7 +98,7 @@
 </ul>
 <h2>Крок 2. Ресурси й ліміти</h2>
 <p>Ці числа питають прямо.</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Що</th>
@@ -369,7 +372,7 @@
 </table>
 <p>Базові політики: <code>AWSLambdaBasicExecutionRole</code> (логи), <code>AWSLambdaVPCAccessExecutionRole</code> (VPC), <code>AWSXRayDaemonWriteAccess</code> (X-Ray).</p>
 <p><strong>Push чи poll:</strong></p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Тип джерела</th>
@@ -439,7 +442,7 @@
 <li><strong>входять у ліміт 250 МБ</strong>;</li>
 <li><strong>не підтримуються</strong> для функцій як container image.</li>
 </ul>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Ситуація</th>
@@ -503,7 +506,7 @@
 <h2>Крок 10. Спостережуваність</h2>
 <p><strong>Логи.</strong> Log group <code>/aws/lambda/&lt;назва&gt;</code>. Retention за замовчуванням «ніколи не видаляти». У кожному виклику рядки <code>START</code>, <code>END</code>, <code>REPORT</code> (<code>Duration</code>, <code>Billed Duration</code>, <code>Memory Size</code>, <code>Max Memory Used</code>, <code>Init Duration</code> лише при cold start). <strong>Logs Insights</strong> запитує структуровані JSON-логи. <strong>Metric filter</strong> перетворює шаблон у логах на метрику.</p>
 <p><strong>Метрики:</strong></p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Метрика</th>
@@ -581,7 +584,7 @@
 </tbody>
 </table>
 <p>Відповідь для proxy: <code>{ &quot;statusCode&quot;: 200, &quot;headers&quot;: {...}, &quot;body&quot;: &quot;...&quot;, &quot;isBase64Encoded&quot;: false }</code>. <code>body</code> це <strong>рядок</strong>, а не об'єкт. Неправильний формат дає <strong>502</strong>.</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Код</th>
@@ -613,7 +616,7 @@
 </table>
 <h2>Крок 13. SAM і CodeDeploy</h2>
 <p><strong>SAM</strong> це шаблон плюс CLI. Шаблон це CloudFormation з <code>Transform: AWS::Serverless-2016-10-31</code>.</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Тип</th>
@@ -648,7 +651,7 @@
 </tbody>
 </table>
 <p><code>Globals</code> це спільні налаштування для всіх функцій.</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Команда</th>
@@ -695,7 +698,7 @@
 </tbody>
 </table>
 <p><strong>CodeDeploy і <code>DeploymentPreference</code>.</strong> З <code>AutoPublishAlias</code> SAM публікує версію і веде alias, а CodeDeploy змінює вагу трафіку:</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Тип</th>
@@ -722,7 +725,7 @@
 <li><strong><code>Alarms</code>:</strong> якщо alarm спрацював під час розгортання, CodeDeploy <strong>автоматично відкочує</strong>.</li>
 </ul>
 <h2>Шпаргалка: симптом і відповідь</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Симптом</th>

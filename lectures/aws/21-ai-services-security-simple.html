@@ -26,6 +26,9 @@
     td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
     td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
     td code, th code { white-space:normal; }
+    table.two td:not(:first-child)::before { display:none; }
+    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
+    table.two tr { margin:.5rem 0; }
   }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
@@ -53,7 +56,7 @@
 <p>Увага: <strong>Quick Sight поза іспитом, а Amazon Quick у списку in-scope</strong>. Це різні позиції.</p>
 <h2>Крок 1. Виклик Bedrock</h2>
 <p>Два API:</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>API</th>
@@ -139,7 +142,7 @@
 <li>тегами можна перевіряти лише частину запиту: тільки ввід користувача, не системні інструкції.</li>
 </ul>
 <p>Мапа питань іспиту:</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Потреба</th>
@@ -168,7 +171,7 @@
 <p>Важливо: <strong>guardrail не замінює авторизацію.</strong> Модель не має мати прав більше, ніж потрібно.</p>
 <h2>Крок 5. Безпека агентів</h2>
 <p>Агент сам викликає інструменти. Ризики й рішення:</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Ризик</th>
@@ -195,7 +198,7 @@
 </tbody>
 </table>
 <p><strong>AgentCore:</strong></p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Компонент</th>
@@ -258,7 +261,7 @@
 <li><strong>MCP</strong>: підключення зовнішніх інструментів;</li>
 <li>є міграція з Amazon Q Developer і Q CLI.</li>
 </ul>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Навичка</th>

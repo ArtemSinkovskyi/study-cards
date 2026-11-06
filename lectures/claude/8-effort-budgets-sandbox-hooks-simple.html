@@ -26,6 +26,9 @@
     td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
     td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
     td code, th code { white-space:normal; }
+    table.two td:not(:first-child)::before { display:none; }
+    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
+    table.two tr { margin:.5rem 0; }
   }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
@@ -51,7 +54,7 @@
 <p><strong>Це лекція про керування витратами (effort, бюджет), про те, що не можна ламати в розмові (збережені роздуми), і про межі безпеки (sandbox, hooks).</strong></p>
 <h2>Частина 1. Effort</h2>
 <p><strong>Effort</strong> це параметр <code>output_config.effort</code>: скільки зусиль вкладає модель. Він діє на <strong>всі токени</strong>: текст, виклики інструментів і роздуми.</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Рівень</th>
@@ -90,7 +93,7 @@
 <li>Щоб думати менше, спершу <strong>знижуйте effort</strong>, а не просіть у промпті.</li>
 </ul>
 <h3>Зміна effort у розмові</h3>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Спосіб</th>
@@ -124,7 +127,7 @@
 <h2>Частина 3. Збережені роздуми (Claude 5.1+)</h2>
 <p>Коли ви повертаєте блок <code>thinking</code>, API перевіряє його підпис: <strong>чи може модель його прочитати і чи все перед ним лишилось незмінним</strong>.</p>
 <p>Правило: працюйте <strong>append-only</strong>, тобто лише додавайте повідомлення в кінець.</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Дозволено</th>
@@ -175,7 +178,7 @@
 <li>Змінні середовища (з секретами) успадковуються.</li>
 </ul>
 <p>Два режими sandbox:</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Режим</th>

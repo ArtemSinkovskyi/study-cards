@@ -26,6 +26,9 @@
     td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
     td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
     td code, th code { white-space:normal; }
+    table.two td:not(:first-child)::before { display:none; }
+    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
+    table.two tr { margin:.5rem 0; }
   }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
@@ -104,7 +107,7 @@
 <p>Запам'ятайте: <strong>усе «просунуте» лише в REST API</strong>. HTTP API обирають, коли потрібен дешевий проксі до Lambda. <strong>WebSocket API</strong> для двостороннього зв'язку (чат, сповіщення).</p>
 <p>Типи endpoint: <strong>Edge-optimized</strong> (через CloudFront), <strong>Regional</strong>, <strong>Private</strong> (лише з VPC, через interface endpoint).</p>
 <h2>Крок 2. Інтеграції</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Тип</th>
@@ -138,7 +141,7 @@
 <p>Функція мусить повернути об'єкт із <code>statusCode</code>, <code>headers</code>, <code>body</code> і <code>isBase64Encoded</code>. <code>body</code> це <strong>рядок</strong>, а не об'єкт. Якщо формат інший, клієнт отримує <strong>502 Bad Gateway</strong>. Запам'ятайте: 502 з API Gateway і Lambda означає, що функція повернула неправильний формат.</p>
 <p>CORS у proxy-режимі робить <strong>сама функція</strong>: <code>Access-Control-Allow-Origin</code> у <code>headers</code> відповіді.</p>
 <h3>Коди помилок</h3>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Код</th>
@@ -194,7 +197,7 @@
 <li><strong>Mock-інтеграція:</strong> фронтенд може працювати, поки бекенду ще нема. Відповідь береться з шаблону, Lambda не викликається.</li>
 </ul>
 <h2>Крок 5. Захист і обмеження</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Спосіб</th>

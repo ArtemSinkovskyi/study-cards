@@ -26,6 +26,9 @@
     td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
     td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
     td code, th code { white-space:normal; }
+    table.two td:not(:first-child)::before { display:none; }
+    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
+    table.two tr { margin:.5rem 0; }
   }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
@@ -172,7 +175,7 @@
 <p>Конфігурація в репозиторії: каталог <code>.ebextensions</code> <em>(не звірено)</em>.</p>
 <h2>Крок 3. EC2 і Auto Scaling (навичка 4.3.1)</h2>
 <p><strong>Auto Scaling group (ASG)</strong> це група інстансів, якою керують разом. Може охоплювати кілька AZ, але не регіони.</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Політика</th>
@@ -201,7 +204,7 @@
 <p>ASG замінює інстанс, що не пройшов EC2 чи ELB health check.</p>
 <p><strong>Instance metadata:</strong> застосунок на EC2 отримує роль через IMDSv2 (<code>169.254.169.254</code>). Роль EC2 завжди краща за ключі <em>(не звірено)</em>.</p>
 <h2>Крок 4. Конкурентність (навичка 4.3.1)</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Поняття</th>
@@ -298,7 +301,7 @@
 <p><em>(не звірено)</em></p>
 <h2>Крок 7. Мережа: мінімум для розробника</h2>
 <p>Проєктування мереж Exam Guide виключає, але використання лишається (1.2.1, 2.3.2).</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Потреба</th>

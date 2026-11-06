@@ -26,6 +26,9 @@
     td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
     td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
     td code, th code { white-space:normal; }
+    table.two td:not(:first-child)::before { display:none; }
+    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
+    table.two tr { margin:.5rem 0; }
   }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
@@ -85,7 +88,7 @@
 <p><strong>Правило іспиту:</strong> програмі всередині AWS (Lambda, EC2, ECS) дають <strong>роль</strong>, а не access key. Людям у кількох акаунтах дають <strong>Identity Center</strong>. CI (GitHub, HCP Terraform) дають роль через <strong>OIDC</strong>. Програмі поза AWS лишається IAM user із ключем як компроміс. Access key у коді чи змінних середовища це антипатерн, якщо є альтернатива.</p>
 <h2>Крок 2. З чого складається політика</h2>
 <p>Політика це JSON-документ зі списком правил (<code>Statement</code>):</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Елемент</th>
@@ -134,7 +137,7 @@
 <p>Як читати: <strong>хто</strong> (Principal) <strong>може чи не може</strong> (Effect) <strong>що робити</strong> (Action) <strong>з чим</strong> (Resource) <strong>за якої умови</strong> (Condition).</p>
 <p><strong>Класика іспиту.</strong> Дії над <strong>бакетом</strong> (<code>s3:ListBucket</code>) вказують на ARN бакета, а дії над <strong>об'єктами</strong> (<code>s3:PutObject</code>, <code>s3:GetObject</code>) на ARN із <code>/*</code>. Тому в одній політиці можуть бути два statements з різними <code>Resource</code>. Помилка «<code>ListBucket</code> на <code>bucket/*</code>» дає <code>AccessDenied</code>, бо такого ресурсу для цієї дії нема.</p>
 <h3>Типи політик</h3>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Тип</th>
@@ -213,7 +216,7 @@
 </ol>
 <p>Схема: суб'єкт кличе <code>AssumeRole</code> у STS, STS перевіряє trust policy, видає тимчасові ключі й <strong>session token</strong>, далі суб'єкт робить запити, а сервіс перевіряє permissions policy ролі.</p>
 <p>Типові довірені суб'єкти в trust policy:</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Хто приймає</th>
@@ -241,7 +244,7 @@
 </table>
 <p><strong>Тимчасові дані.</strong> <code>AssumeRole</code> повертає access key, secret і <strong>session token</strong> на термін <strong>від 15 хв до 12 год</strong> (за замовчуванням 1 год). Потім роль приймають знову, SDK робить це сам.</p>
 <p><strong>Три виклики STS:</strong></p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Виклик</th>
@@ -275,7 +278,7 @@
 </ol>
 <p>Lambda бере облікові дані своєї execution role зі змінних середовища, які сама ж і встановлює.</p>
 <h2>Крок 6. Додаткові теми для іспиту</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Тема</th>
@@ -340,7 +343,7 @@
 <li>Дві стратегії: <strong>deny-list</strong> (лишити <code>FullAWSAccess</code>, додати <code>Deny</code> на небажане; простіше й типове) і <strong>allow-list</strong> (прибрати <code>FullAWSAccess</code>, явно дозволити потрібне).</li>
 </ul>
 <p>Приклад: заборонити всі регіони, крім <code>eu-north-1</code>. Це <code>Deny</code> з умовою <code>aws:RequestedRegion</code> і <code>NotAction</code>, який виключає глобальні сервіси (<code>iam:*</code>, <code>organizations:*</code>, <code>sts:*</code>, <code>support:*</code>), бо вони не прив'язані до регіону.</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Питання</th>

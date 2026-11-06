@@ -26,6 +26,9 @@
     td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
     td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
     td code, th code { white-space:normal; }
+    table.two td:not(:first-child)::before { display:none; }
+    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
+    table.two tr { margin:.5rem 0; }
   }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
@@ -51,7 +54,7 @@
 <p><strong>SQS це черга: повідомлення лежить, поки його не заберуть і не видалять. SNS це розсилка: одне повідомлення йде всім підписникам.</strong> Разом вони дають fan-out: топік SNS розкладає подію по кількох чергах SQS, і кожен споживач обробляє її сам.</p>
 <p>На іспиті це навички: sync чи async, event-driven патерни, оптимізація повідомлень (fan-out), обробка помилок (DLQ).</p>
 <h2>Крок 1. Словник</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Термін</th>
@@ -86,7 +89,7 @@
 </tbody>
 </table>
 <h2>Крок 2. Параметри черги SQS</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Параметр</th>
@@ -228,7 +231,7 @@
 </ul>
 <h2>Крок 6. Lambda ↔ SQS</h2>
 <p>Lambda опитує чергу через <strong>event source mapping</strong> і викликає функцію <strong>синхронно</strong>, пачкою. Лямбда й черга в одному регіоні, але можуть бути в різних акаунтах.</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Параметр</th>
@@ -312,7 +315,7 @@
 <p><strong>Підтвердження</strong> потрібне для HTTP(S), email і ресурсів в іншому акаунті. Email-підписка спершу в <code>PendingConfirmation</code> і не працює, доки не натиснути посилання. Якщо власник SQS-черги сам створює підписку, вона підтверджується автоматично.</p>
 <p><strong>Розмір повідомлення SNS:</strong> 256 КіБ, до 1 МіБ через <code>MaximumMessageSize</code>; кожні 64 КБ це окремий запит.</p>
 <p><strong>Повтори доставки SNS:</strong></p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Помилка</th>
@@ -358,7 +361,7 @@
 <p>Приклад: <code>{&quot;eventType&quot;: [&quot;image.uploaded&quot;], &quot;sizeBytes&quot;: [{&quot;numeric&quot;: [&quot;&gt;&quot;, 1048576]}], &quot;path&quot;: [{&quot;anything-but&quot;: {&quot;prefix&quot;: &quot;_test/&quot;}}]}</code>.</p>
 <p><strong>Оператори:</strong> точний збіг, <code>anything-but</code>, <code>prefix</code>, <code>suffix</code>, <code>equals-ignore-case</code>, діапазони чисел, IP (CIDR), <code>exists</code>, <code>$or</code>, wildcard.</p>
 <p><strong>Ліміти:</strong></p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Що</th>

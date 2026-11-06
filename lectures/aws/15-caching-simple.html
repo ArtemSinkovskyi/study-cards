@@ -26,6 +26,9 @@
     td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
     td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
     td code, th code { white-space:normal; }
+    table.two td:not(:first-child)::before { display:none; }
+    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
+    table.two tr { margin:.5rem 0; }
   }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
@@ -51,7 +54,7 @@
 <p><strong>На іспиті тут питають «що обрати»: важливіше розрізняти варіанти, ніж знати налаштування.</strong> Навички: 1.3.2 (обрати сховище), 1.3.3 (обрати кеш), 4.3.4 (ElastiCache, DAX, CloudFront).</p>
 <p>Кеш можна поставити на кожному кроці шляху: браузер (<code>Cache-Control</code>) → CloudFront → API Gateway cache → Lambda (змінні поза handler, <code>/tmp</code>) → ElastiCache або DAX → база. Правило: <strong>чим ближче до користувача, тим дешевше й швидше, але тим важче скинути.</strong></p>
 <h2>Крок 1. Словник</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Термін</th>
@@ -128,7 +131,7 @@
 </table>
 <p>Найчастіша комбінація: <strong>lazy loading плюс TTL</strong>. Питання «кеш містить застарілі дані» означає write-through або коротший TTL. «Кеш забитий непотрібним» означає lazy loading.</p>
 <h2>Крок 3. Який кеш обрати</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Сценарій</th>
@@ -274,7 +277,7 @@
 <li>Parameter Store і Secrets Manager кешують через Lambda-розширення <em>(не звірено)</em>.</li>
 </ul>
 <h2>Крок 9. Як обрати сховище</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Потрібно</th>

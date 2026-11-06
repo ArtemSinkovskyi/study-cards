@@ -26,6 +26,9 @@
     td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
     td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
     td code, th code { white-space:normal; }
+    table.two td:not(:first-child)::before { display:none; }
+    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
+    table.two tr { margin:.5rem 0; }
   }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
@@ -57,7 +60,7 @@
 </ol>
 <p>В одному акаунті достатньо одного Allow. <strong>Явний Deny перемагає завжди.</strong></p>
 <h2>Крок 1. Способи надати доступ</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Спосіб</th>
@@ -144,7 +147,7 @@
 </ul>
 <h3>Block Public Access</h3>
 <p>Чотири вимикачі, кожен окремо:</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Вимикач</th>
@@ -175,7 +178,7 @@
 <p><strong>Типова задача:</strong> публічна bucket policy є, а об'єкт не відкривається. Перевірте BPA (<code>block_public_policy</code>, <code>restrict_public_buckets</code>).</p>
 <h3>Presigned URL</h3>
 <p>Сервіс, у якого є права, підписує URL своїми ключами. Той, хто має посилання, діє <strong>від імені підписанта</strong>, поки діє термін.</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Властивість</th>
@@ -261,7 +264,7 @@
 <h3>Під час передавання</h3>
 <p>Це HTTPS (TLS). Вимагати його можна політикою: <code>Deny</code> на <code>s3:*</code> для бакета й об'єктів з умовою <code>aws:SecureTransport</code> рівним <code>false</code>.</p>
 <h3>Захист від видалення й зміни</h3>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Механізм</th>

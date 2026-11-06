@@ -26,6 +26,9 @@
     td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
     td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
     td code, th code { white-space:normal; }
+    table.two td:not(:first-child)::before { display:none; }
+    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
+    table.two tr { margin:.5rem 0; }
   }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
@@ -51,7 +54,7 @@
 <p><strong>EventBridge відповідає на питання «хто і як дізнається, що щось сталося».</strong> Подія потрапляє на шину, правило перевіряє її за шаблоном і надсилає цілям.</p>
 <p>Схема: джерело (сервіс AWS, ваш код, SaaS) → <strong>event bus</strong> → <strong>rule</strong> (патерн) → <strong>target</strong> (Lambda, SQS, SNS, Step Functions та інші).</p>
 <h2>Крок 1. Словник</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Термін</th>
@@ -124,7 +127,7 @@
 <li>значення в патерні завжди в масиві.</li>
 </ul>
 <p>Приклад: <code>source: [aws.s3]</code>, <code>detail-type: [Object Created]</code>, <code>detail.bucket.name: [моє-ім'я]</code>, <code>detail.object.key: [{prefix: images/}]</code>. Читається: подія з S3 <strong>І</strong> Object Created <strong>І</strong> цей бакет <strong>І</strong> ключ починається з <code>images/</code>.</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Оператор</th>
@@ -162,7 +165,7 @@
 <p>Перевірити патерн без деплою: <code>aws events test-event-pattern</code>.</p>
 <h2>Крок 5. Цілі, права, налаштування</h2>
 <p>Хто дозволяє доставку:</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Ціль</th>
@@ -181,7 +184,7 @@
 </tbody>
 </table>
 <p>Налаштування цілі:</p>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Параметр</th>
@@ -333,7 +336,7 @@
 <li>повторити події минулого тижня: Archive &amp; Replay.</li>
 </ul>
 <h2>Крок 9. Ціна <em>(не звірено)</em></h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Що</th>

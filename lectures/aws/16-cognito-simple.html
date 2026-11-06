@@ -26,6 +26,9 @@
     td:first-child { font-weight:600; border-bottom:1px solid #eee; margin-bottom:.35rem; padding-bottom:.35rem; }
     td:not(:first-child)::before { content:attr(data-label); display:block; font-size:.75rem; color:#6b6b70; text-transform:uppercase; letter-spacing:.03em; }
     td code, th code { white-space:normal; }
+    table.two td:not(:first-child)::before { display:none; }
+    table.two td:first-child { border-bottom:none; margin-bottom:0; padding-bottom:.1rem; }
+    table.two tr { margin:.5rem 0; }
   }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
   pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
@@ -102,7 +105,7 @@
 <li><strong>Клієнт сам викликає сервіс AWS</strong> означає identity pool (часто разом із user pool).</li>
 </ul>
 <h2>Крок 2. Токени</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Токен</th>
@@ -138,7 +141,7 @@
 <p>Те саме для DynamoDB: умова <code>dynamodb:LeadingKeys</code> дозволяє лише рядки зі своїм partition key <em>(не звірено)</em>. Це <strong>fine-grained access</strong> (навичка 2.1.2).</p>
 <p><strong>Гості</strong> отримують окрему роль, і вона має бути дуже обмеженою.</p>
 <h2>Крок 5. Федерація без Cognito</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Сценарій</th>
@@ -166,7 +169,7 @@
 </table>
 <p>Спільне: ніяких довгих ключів, лише тимчасові облікові дані STS.</p>
 <h2>Крок 6. Авторизація в API</h2>
-<table>
+<table class="two">
 <thead>
 <tr>
 <th>Спосіб</th>
