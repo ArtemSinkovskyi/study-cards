@@ -185,7 +185,7 @@
 <li><strong>1 мільйон запитів на місяць безкоштовно</strong>;</li>
 <li>у межах регіону трафік безкоштовний;</li>
 <li>порожні <code>ReceiveMessage</code> теж запити, тому long polling дешевше (тарифікується так само, але порожніх відповідей менше);</li>
-<li>базові ціни приблизно 0,40 USD (Standard) і 0,50 USD (FIFO) за мільйон запитів <em>(не звірено)</em>.</li>
+<li>базові ціни приблизно 0,40 USD (Standard) і 0,50 USD (FIFO) за мільйон запитів (за сторонніми джерелами; офіційна сторінка цін таблицю не віддала).</li>
 </ul>
 <h2>Крок 5. Де які DLQ</h2>
 <table>
@@ -344,7 +344,7 @@
 </tbody>
 </table>
 <p>Alarm CloudWatch не може публікувати в топік, зашифрований ключем <code>alias/aws/sns</code>.</p>
-<p><strong>Ціни SNS</strong> <em>(не звірено)</em>: перші 1000 email безкоштовно, email 2 USD за 100 000, запити 0,50 USD за мільйон.</p>
+<p><strong>Ціни SNS</strong> (за сторонніми джерелами): перші 1000 email безкоштовно, email 2 USD за 100 000, запити 0,50 USD за мільйон.</p>
 <h3>Raw message delivery</h3>
 <p>Вмикається на підписці (<code>RawMessageDelivery = true</code>), лише для <strong>SQS, HTTP/S, Firehose</strong>. Без нього SQS отримує JSON-конверт SNS (поля <code>Type</code>, <code>MessageId</code>, <code>TopicArn</code>, <code>Message</code>, <code>Timestamp</code>, <code>Signature</code>...). З ним лише текст повідомлення.</p>
 <ul>

@@ -144,7 +144,7 @@
 <h2>Крок 3. CodePipeline</h2>
 <ul>
 <li>складається з <strong>stages</strong>, у кожному <strong>actions</strong>, послідовно чи паралельно; мінімум <strong>два stages</strong>;</li>
-<li><strong>artifacts</strong> передаються між діями (зберігаються в S3 <em>(не звірено)</em>);</li>
+<li><strong>artifacts</strong> передаються між діями (зберігаються в S3-бакеті того ж регіону);</li>
 <li>зміна в джерелі запускає прогін; кнопка <strong>Release change</strong> перезапускає останню ревізію;</li>
 <li>вимкнений <strong>transition</strong> зупиняє просування далі;</li>
 <li><strong>manual approval</strong> додається дією;</li>
@@ -263,7 +263,7 @@
 </tr>
 </tbody>
 </table>
-<p>CDK <em>(не звірено)</em>: <code>cdk synth</code>, <code>cdk diff</code>, <code>cdk deploy</code>; <code>cdk bootstrap</code> готує акаунт; тести через <code>aws-cdk-lib/assertions</code> (навичка 3.2.1).</p>
+<p>CDK: <code>cdk synth</code>, <code>cdk diff</code>, <code>cdk deploy</code>; <code>cdk bootstrap</code> готує акаунт; тести через <code>aws-cdk-lib/assertions</code> <em>(цю частину не звірено)</em> (навичка 3.2.1).</p>
 <p>CloudFormation: <strong>change sets</strong> (подивитись зміни перед застосуванням), <strong>drift detection</strong>, <code>DeletionPolicy</code>, intrinsic-функції <code>!Ref</code>, <code>!GetAtt</code>, <code>!Sub</code>.</p>
 <h2>Крок 9. AppConfig</h2>
 <p><strong>AWS AppConfig</strong> змінює поведінку застосунку <strong>без деплою коду</strong>: feature flags і динамічна конфігурація. Розгортання миттєве або поступове зі спостереженням: якщо CloudWatch alarm спрацював, <strong>автоматичний відкат</strong>. Приклад: новий формат вмикається прапорцем для 10% завантажень.</p>

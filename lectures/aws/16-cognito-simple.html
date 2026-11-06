@@ -136,7 +136,7 @@
 <li><strong>MFA</strong>: email OTP, SMS OTP, TOTP;</li>
 <li><strong>Lambda triggers</strong>: pre sign-up, post confirmation, pre authentication, post authentication, кастомізація повідомлень. Приклад: post confirmation створює запис користувача в DynamoDB;</li>
 <li>федерація з соцмережами, SAML, OIDC;</li>
-<li><strong>managed login / hosted UI</strong>: готова сторінка входу <em>(не звірено)</em>.</li>
+<li><strong>managed login</strong> (новий, з редактором стилів) і <strong>hosted UI</strong> (класичний): готова сторінка входу для user pool; домен використовує або один, або інший. Нові пули за замовчуванням отримують managed login.</li>
 </ul>
 <h2>Крок 4. Identity pool і «лише своє»</h2>
 <p>Identity pool роздає роль. Щоб кожен бачив лише своє, у політиці ролі використовують <strong>змінну</strong> <code>${cognito-identity.amazonaws.com:sub}</code> у ARN, наприклад <code>arn:aws:s3:::user-files/${cognito-identity.amazonaws.com:sub}/*</code>.</p>
@@ -196,7 +196,7 @@
 <p>API Gateway із Cognito authorizer передає <code>claims</code> у <code>event.requestContext.authorizer.claims</code>, тож функція бачить, хто викликає.</p>
 <h2>Крок 7. Програмний доступ</h2>
 <ul>
-<li>Порядок пошуку облікових даних SDK: параметри коду, env, <code>~/.aws</code>, роль контейнера, роль EC2 <em>(не звірено)</em>.</li>
+<li>Порядок пошуку облікових даних SDK залежить від SDK і версії, але загалом так: змінні середовища, потім спільні файли конфігурації (профілі), потім облікові дані контейнера, потім роль EC2. Береться перше знайдене.</li>
 <li><strong>SigV4</strong> підписує запити до AWS.</li>
 <li>Роль завжди краща за ключі.</li>
 <li><code>AssumeRole</code> у коді повертає тимчасові ключі на 15 хв - 12 год.</li>

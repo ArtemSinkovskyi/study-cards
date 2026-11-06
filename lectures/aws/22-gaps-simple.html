@@ -174,7 +174,7 @@
 <li>«Канарковий тест частиною трафіку»: Traffic splitting.</li>
 <li>«Несумісна версія, зміна ресурсів»: Blue/green, CNAME swap. Єдиний варіант зі зміною DNS.</li>
 </ul>
-<p>Конфігурація в репозиторії: каталог <code>.ebextensions</code> <em>(не звірено)</em>.</p>
+<p>Конфігурація в репозиторії: каталог <code>.ebextensions</code>.</p>
 <h2>Крок 3. EC2 і Auto Scaling (навичка 4.3.1)</h2>
 <p><strong>Auto Scaling group (ASG)</strong> це група інстансів, якою керують разом. Може охоплювати кілька AZ, але не регіони.</p>
 <table class="two">
@@ -204,7 +204,7 @@
 </tbody>
 </table>
 <p>ASG замінює інстанс, що не пройшов EC2 чи ELB health check.</p>
-<p><strong>Instance metadata:</strong> застосунок на EC2 отримує роль через IMDSv2 (<code>169.254.169.254</code>). Роль EC2 завжди краща за ключі <em>(не звірено)</em>.</p>
+<p><strong>Instance metadata:</strong> застосунок на EC2 отримує роль через IMDSv2 (<code>169.254.169.254</code>, спершу PUT-запит за токеном). Роль EC2 завжди краща за ключі.</p>
 <h2>Крок 4. Конкурентність (навичка 4.3.1)</h2>
 <table class="two">
 <thead>
@@ -346,10 +346,10 @@
 <p>Lambda у VPC не має виходу в інтернет без NAT Gateway.</p>
 <h2>Крок 8. Інструменти</h2>
 <ul>
-<li><strong>CodeArtifact:</strong> приватні npm, Maven, PyPI; upstream до публічних; токен входу живе обмежений час <em>(не звірено)</em>.</li>
+<li><strong>CodeArtifact:</strong> приватні npm, Maven, PyPI; upstream до публічних; токен входу живе до 12 годин; перелік форматів і upstream <em>(не звірено)</em>.</li>
 <li><strong>Amplify:</strong> хостинг фронтенду; гілка дає середовище (навичка 3.2.4).</li>
 <li><strong>CloudShell:</strong> термінал у браузері з готовими обліковими даними.</li>
-<li><strong>AWS CLI:</strong> <code>--query</code> фільтрує вивід на клієнті (JMESPath), <code>--filter</code> на сервері; <code>--dry-run</code> для EC2; пагінація автоматична <em>(не звірено)</em>.</li>
+<li><strong>AWS CLI:</strong> <code>--query</code> фільтрує вивід на клієнті (JMESPath), а серверну фільтрацію дає параметр самого сервісу (часто <code>--filters</code>); пагінація автоматична, а <code>--no-paginate</code> віддає лише першу сторінку; <code>--dry-run</code> для EC2 <em>(не звірено)</em>.</li>
 <li><strong>SDK:</strong> повтори вбудовані; регіон і облікові дані задаються ланцюжком.</li>
 </ul>
 <h2>Крок 9. Що офіційно поза іспитом</h2>

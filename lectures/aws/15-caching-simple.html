@@ -172,7 +172,7 @@
 <li>корисний для <strong>гарячих ключів</strong> (розвантажує hot partition);</li>
 <li>найкраще, коли cache hit більше 90%.</li>
 </ul>
-<p><strong>Не підходить:</strong> потрібні strongly consistent читання (такі запити DAX проксує прямо в DynamoDB без кешу <em>(не звірено)</em>); багато записів; мало повторних читань; не потрібні мікросекунди.</p>
+<p><strong>Не підходить:</strong> потрібні strongly consistent читання (такі запити DAX пропускає прямо в DynamoDB і не кешує; так само TransactGetItems); багато записів; мало повторних читань; не потрібні мікросекунди.</p>
 <p><strong>DAX чи ElastiCache:</strong> DAX лише для DynamoDB, без коду кешування. ElastiCache для всього іншого, але логіку кешу пишете самі.</p>
 <h2>Крок 5. ElastiCache</h2>
 <p>Рушії: <strong>Valkey</strong>, <strong>Redis OSS</strong>, <strong>Memcached</strong>.</p>
@@ -276,7 +276,7 @@
 <li>об'єкти <strong>поза handler</strong> живуть між викликами (клієнт S3, конфіг);</li>
 <li><code>/tmp</code> теж лишається, поки середовище живе;</li>
 <li>покладатися не можна: середовище зникає, у кожного своя копія;</li>
-<li>Parameter Store і Secrets Manager кешують через Lambda-розширення <em>(не звірено)</em>.</li>
+<li>Parameter Store і Secrets Manager кешують через <strong>Lambda-розширення Parameters and Secrets</strong>: воно піднімає локальний HTTP-сервер на порту 2773 і тримає значення в пам'яті, тож функція не ходить в API на кожен виклик.</li>
 </ul>
 <h2>Крок 9. Як обрати сховище</h2>
 <table class="two">

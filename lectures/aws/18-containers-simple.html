@@ -190,8 +190,8 @@
 <li><strong>Blue/green через CodeDeploy:</strong> дві target groups, перемикання трафіку.</li>
 <li><strong>Circuit breaker</strong> відкочує, якщо новий деплой не стає здоровим (працює лише з rolling update).</li>
 <li>ALB: ECS реєструє задачі сам, динамічні порти, path-based routing.</li>
-<li><code>awsvpc</code> дає кожній задачі свій ENI, тож security group працює на рівні задачі <em>(не звірено)</em>.</li>
-<li><strong>Автомасштабування:</strong> Target Tracking за CPU, пам'яттю чи <code>ALBRequestCountPerTarget</code> <em>(не звірено)</em>.</li>
+<li><code>awsvpc</code> дає кожній задачі свій ENI, тож security group працює на рівні задачі.</li>
+<li><strong>Автомасштабування:</strong> Target Tracking за CPU, пам'яттю чи <code>ALBRequestCountPerTarget</code> (для останнього до сервісу має бути підключений Application Load Balancer).</li>
 </ul>
 <h2>Крок 7. EKS, Copilot, інше</h2>
 <ul>

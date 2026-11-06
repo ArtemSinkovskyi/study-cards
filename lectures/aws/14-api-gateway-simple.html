@@ -255,7 +255,7 @@
 <p><strong>CORS бакета</strong> потрібен, якщо браузер завантажує напряму (<code>PUT</code>, дозволені заголовки). Інакше браузер блокує запит, хоч посилання правильне.</p>
 <h2>Крок 7. Тестові події й метрики</h2>
 <ul>
-<li>Тестову подію генерує <code>sam local generate-event apigateway aws-proxy</code>, локально API піднімає <code>sam local start-api</code> <em>(не звірено)</em>.</li>
+<li>Тестову подію генерує <code>sam local generate-event apigateway aws-proxy</code>, локально API піднімає <code>sam local start-api</code>.</li>
 <li><strong>Custom domain</strong> потребує ACM-сертифіката (лекція 13).</li>
 <li><strong>Access logs</strong> і <strong>execution logs</strong> у CloudWatch (execution лише REST).</li>
 <li>Метрики: <code>Count</code>, <code>4XXError</code>, <code>5XXError</code>, <code>Latency</code> (весь шлях), <code>IntegrationLatency</code> (лише бекенд). Різниця двох це час у самому Gateway.</li>

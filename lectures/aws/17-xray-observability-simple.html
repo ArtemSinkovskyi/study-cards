@@ -159,7 +159,7 @@
 <li>Для деталей у коді: Powertools Tracer, що обгортає SDK-клієнти (<code>captureAWSv3Client</code>), плюс <code>putAnnotation</code>.</li>
 <li><strong>API Gateway:</strong> увімкнути X-Ray на stage (<strong>лише REST API</strong>, не HTTP API).</li>
 <li><strong>EC2 і контейнери:</strong> потрібен <strong>X-Ray daemon</strong>: приймає дані по <strong>UDP 2000</strong> і шле в X-Ray. В ECS це sidecar-контейнер.</li>
-<li>Сучасний шлях: <strong>AWS Distro for OpenTelemetry (ADOT)</strong> і <strong>CloudWatch Application Signals</strong> <em>(не звірено)</em>.</li>
+<li>Сучасний шлях: <strong>AWS Distro for OpenTelemetry (ADOT)</strong> і <strong>CloudWatch Application Signals</strong> (для Lambda він підключається шаром ADOT; старий X-Ray SDK із daemon AWS позначає як legacy).</li>
 </ul>
 <h2>Крок 5. Як це виглядає</h2>
 <p>Уявний трейс повільного запиту: API Gateway 2980 мс, у ньому Lambda 2940 мс, в ній Init 390 мс (холодний старт), DynamoDB 18 мс, <strong>S3 Get 2400 мс</strong>. Висновок: повільний S3 для великого файлу, а не база. Без трейсу оптимізували б не те.</p>
