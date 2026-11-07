@@ -42,6 +42,15 @@
   .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
   .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
   .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
   .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
   .drow .dbox { flex:1 1 auto; }
   .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
@@ -399,6 +408,49 @@
 <tr>
 <td data-label="Що">Pipes</td>
 <td data-label="Орієнтир">приблизно 0,40 USD за мільйон запитів</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>Event</strong></td>
+<td data-label="Що це">JSON-повідомлення про те, що щось сталося</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Event bus</strong></td>
+<td data-label="Що це">канал, куди приходять події (default, custom, partner)</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Rule</strong></td>
+<td data-label="Що це">правило: якщо подія підходить під шаблон, надіслати її в ціль</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Event pattern</strong></td>
+<td data-label="Що це">шаблон, за яким правило відбирає події</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Target</strong></td>
+<td data-label="Що це">ціль правила: Lambda, SQS, SNS, інша шина тощо</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Scheduler</strong></td>
+<td data-label="Що це">запуск за розкладом (cron чи одноразово)</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Archive &amp; Replay</strong></td>
+<td data-label="Що це">збереження подій і повторне програвання</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Pipes</strong></td>
+<td data-label="Що це">з'єднання джерела з ціллю з фільтром і збагаченням</td>
 </tr>
 </tbody>
 </table></div>

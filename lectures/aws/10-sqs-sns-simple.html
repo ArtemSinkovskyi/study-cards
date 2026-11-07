@@ -42,6 +42,15 @@
   .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
   .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
   .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
   .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
   .drow .dbox { flex:1 1 auto; }
   .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
@@ -465,6 +474,49 @@
 <li>Фаза Init тарифікується.</li>
 <li>Alarm CloudWatch оцінює більше точок, ніж <code>EvaluationPeriods</code>: реальна breaching-точка тримає <code>ALARM</code>, доки не випаде з діапазону.</li>
 </ul>
+<h2>Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>Queue</strong></td>
+<td data-label="Що це">черга повідомлень, споживач сам забирає й видаляє</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Visibility timeout</strong></td>
+<td data-label="Що це">час, коли забране повідомлення приховане від інших споживачів</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Long polling</strong></td>
+<td data-label="Що це">очікування повідомлення до 20 с замість порожніх відповідей</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>DLQ</strong></td>
+<td data-label="Що це">черга для повідомлень, які не вдалося обробити за N спроб</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Fan-out</strong></td>
+<td data-label="Що це">одне повідомлення SNS розсилається в кілька черг чи ціль</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>FIFO</strong></td>
+<td data-label="Що це">черга зі строгим порядком у межах <code>MessageGroupId</code> і дедуплікацією</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Pub/sub</strong></td>
+<td data-label="Що це">видавець шле в топік, усі підписники отримують копію</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Redrive</strong></td>
+<td data-label="Що це">повернення повідомлень з DLQ у вихідну чергу</td>
+</tr>
+</tbody>
+</table></div>
 <h2>🖼 Схема: SQS, SNS, Kinesis: три моделі</h2><div class="dg"><div class="dtitle">Три моделі</div><div class="dcols"><div class="dcol aws"><b><img class="dicon" src="../../icons/sqs.svg" alt="">SQS</b><ul><li>черга (queue)</li><li>Consumer сам опитує й видаляє</li></ul></div><div class="dcol yellow"><b><img class="dicon" src="../../icons/sns.svg" alt="">SNS</b><ul><li>pub/sub</li><li>одне повідомлення всім підписникам</li></ul></div><div class="dcol blue"><b><img class="dicon" src="../../icons/kinesis.svg" alt="">Kinesis</b><ul><li>real-time streaming</li><li>Data Streams, Firehose, Flink</li></ul></div></div><div class="dtitle">SQS: потік</div><div class="dflow"><div class="dbox aws">Producer: SendMessage / SendMessageBatch (до 1024 КБ)</div><div class="darrow">↓</div><div class="dbox yellow"><img class="dicon" src="../../icons/sqs.svg" alt="">SQS Queue: зберігає (retention 4 дні, до 14)</div><div class="darrow">↓</div><div class="dbox green">Consumer: ReceiveMessage (до 10 за раз), потім DeleteMessage</div></div><div class="dnote">Long polling: WaitTimeSeconds 0-20 с. Повідомлення живе, доки не мине термін чи його не видалять.</div><div class="dtitle">Властивості SQS</div><div class="drow"><div class="dbox gray">Необмежена пропускна здатність</div><div class="dbox gray">Затримка менше 10 мс</div><div class="dbox gray">Можливі дублікати (at least once)</div><div class="dbox gray">Порядок best-effort</div></div><div class="dtitle">Standard проти FIFO</div><div class="tw"><table><thead><tr><th></th><th>Standard</th><th>FIFO</th></tr></thead><tbody><tr><td>Доставка</td><td>at-least-once</td><td>exactly-once processing</td></tr><tr><td>Дублікати</td><td>можливі</td><td>ні (deduplication 5 хв)</td></tr><tr><td>Пропускна здатність</td><td>практично необмежена</td><td>300/с на кожну дію API (3000 з batching); вище у high throughput mode</td></tr><tr><td>Порядок</td><td>best-effort</td><td>суворий</td></tr></tbody></table></div><div class="dtitle">Керування чергою</div><div class="tw"><table class="two"><thead><tr><th>API</th><th>Що робить</th></tr></thead><tbody><tr><td>CreateQueue / DeleteQueue</td><td>створити, видалити чергу</td></tr><tr><td>DeleteMessage / Batch</td><td>видалити одне чи кілька повідомлень</td></tr><tr><td>PurgeQueue</td><td>видалити все; незворотно; раз на 60 с</td></tr><tr><td>ChangeMessageVisibility</td><td>змінити visibility timeout</td></tr><tr><td>Get/SetQueueAttributes</td><td>властивості черги</td></tr></tbody></table></div><div class="dtitle">Безпека</div><div class="dcols"><div class="dcol green"><b>Шифрування</b><ul><li>at-rest: KMS</li><li>in-flight: HTTPS</li><li>client-side за бажанням</li></ul></div><div class="dcol yellow"><b>Доступ</b><ul><li class="hi"><img class="dicon" src="../../icons/iam.svg" alt="">IAM policies</li><li class="hi"><img class="dicon" src="../../icons/sqs.svg" alt="">SQS Access Policies (як bucket policy)</li><li class="hi"><span class="dgap"></span>cross-account за Principal</li><li class="hi"><img class="dicon" src="../../icons/s3.svg" alt="">S3 → SQS за умовою</li></ul></div></div><div class="dnote">DLQ і redrive налаштовуються через атрибути черги (redrive policy).</div></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>SQS платить за запити (64 КБ = 1 запит), не за зберігання. Retention до 14 днів, visibility до 12 год, long polling до 20 с.</li>

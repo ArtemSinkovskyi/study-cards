@@ -42,6 +42,15 @@
   .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
   .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
   .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
   .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
   .drow .dbox { flex:1 1 auto; }
   .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
@@ -465,6 +474,49 @@ DeadLetterQueue:
 </tbody>
 </table></div>
 <p>Типова роль має три політики: <code>AWSLambdaBasicExecutionRole</code> (керована AWS, логи), вбудована з ваших <code>Policies:</code>, вбудована <code>DeadLetterQueuePolicy</code> (<code>sqs:SendMessage</code> на DLQ), яку SAM додав сам.</p>
+<h2>Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>SAM</strong></td>
+<td data-label="Що це">надбудова над CloudFormation з короткими описами serverless-ресурсів</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Template</strong></td>
+<td data-label="Що це">файл YAML/JSON з описом ресурсів</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Stack</strong></td>
+<td data-label="Що це">набір ресурсів, створених з одного шаблону й що керуються разом</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Change set</strong></td>
+<td data-label="Що це">попередній перегляд змін перед оновленням стека</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Transform</strong></td>
+<td data-label="Що це">рядок <code>AWS::Serverless-2016-10-31</code>, що розгортає SAM у CloudFormation</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Capabilities</strong></td>
+<td data-label="Що це">явна згода на створення IAM-ресурсів у стеку</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>DeploymentPreference</strong></td>
+<td data-label="Що це">налаштування поступового деплою функції через CodeDeploy</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Lambda@Edge</strong></td>
+<td data-label="Що це">Lambda на edge-вузлах CloudFront, лише з <code>us-east-1</code></td>
+</tr>
+</tbody>
+</table></div>
 <h2>🖼 Схема: CloudFormation: ресурси</h2><div class="dg"><div class="dtitle">Навіщо</div><div class="drow"><div class="dbox aws">Інфраструктура як код</div><div class="dbox aws">Не винаходити колесо</div><div class="dbox aws">Продуктивність: створити й перестворити на льоту</div><div class="dbox aws">Прозорість вартості</div><div class="dbox aws">Розділення середовищ</div></div><div class="dtitle">Як це працює</div><div class="dflow"><div class="dbox yellow">Template (YAML/JSON): опис ресурсів</div><div class="darrow">↓</div><div class="dbox aws">Stack: створює й веде ресурси як одне ціле</div><div class="darrow">↓</div><div class="dbox green">Ресурси: майже всі ресурси AWS (S3, EC2, Lambda, RDS, IAM...)</div></div><div class="dnote">Change Set показує diff: що зміниться. Capabilities додають, якщо потрібні (наприклад для IAM).</div><div class="dtitle">Команди</div><div class="tw"><table class="two"><thead><tr><th>Дія</th><th>Команда</th></tr></thead><tbody><tr><td>створити</td><td>aws cloudformation create-stack --stack-name ... --template-body file://...</td></tr><tr><td>розгорнути</td><td>aws cloudformation deploy --template-file template.yaml --stack-name ...</td></tr><tr><td>видалити</td><td>aws cloudformation delete-stack --stack-name ...</td></tr><tr><td>список</td><td>aws cloudformation list-stacks [--stack-status-filter CREATE_COMPLETE]</td></tr></tbody></table></div><div class="dtitle">Pseudo parameters</div><div class="tw"><table class="two"><thead><tr><th>Параметр</th><th>Що повертає</th></tr></thead><tbody><tr><td>AWS::AccountId</td><td>ID облікового запису</td></tr><tr><td>AWS::Region</td><td>регіон стека</td></tr><tr><td>AWS::StackName</td><td>ім&#x27;я стека</td></tr><tr><td>AWS::StackId</td><td>ARN стека</td></tr><tr><td>AWS::Partition</td><td>aws, aws-cn чи aws-us-gov</td></tr><tr><td>AWS::NotificationARNs</td><td>список ARN для оповіщень</td></tr><tr><td>AWS::NoValue</td><td>умовно прибирає властивість ресурсу (разом з Fn::If)</td></tr></tbody></table></div><div class="dnote">Intrinsic functions (!Ref, !GetAtt, !Sub...) обчислює сам CloudFormation під час створення чи оновлення стека.</div></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li><code>Transform: AWS::Serverless-2016-10-31</code> розгортає SAM у CloudFormation. Деплой іде через change set і стек.</li>

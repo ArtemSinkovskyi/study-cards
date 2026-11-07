@@ -42,6 +42,15 @@
   .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
   .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
   .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
   .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
   .drow .dbox { flex:1 1 auto; }
   .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
@@ -399,6 +408,49 @@
 <li>бакет клієнтських файлів: приватний, доступ лише через сервіс за токеном, події немає, Lambda не запускається (і прав у неї на нього нема).</li>
 </ul>
 <p>Мініатюри публічні, а приватні файли (плани, фото) лишаються приватними.</p>
+<h2>Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>Handler</strong></td>
+<td data-label="Що це">функція, яку Lambda викликає на кожну подію</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Cold start</strong></td>
+<td data-label="Що це">перший виклик у новому середовищі: тут ще йде ініціалізація</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Execution environment</strong></td>
+<td data-label="Що це">ізольоване середовище, де живе ваш код між викликами</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Layer</strong></td>
+<td data-label="Що це">архів з бібліотеками, спільний для кількох функцій</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Reserved concurrency</strong></td>
+<td data-label="Що це">гарантована й водночас максимальна кількість одночасних викликів</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Provisioned concurrency</strong></td>
+<td data-label="Що це">заздалегідь прогріті середовища, платно навіть без викликів</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>SnapStart</strong></td>
+<td data-label="Що це">знімок ініціалізованого середовища для швидкого старту (Java та інші)</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Idempotency</strong></td>
+<td data-label="Що це">повторний виклик з тими ж даними не ламає результат</td>
+</tr>
+</tbody>
+</table></div>
 <div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>Handler <code>index.handler</code>, сигнатура <code>(event, context)</code>. Async: помилку кидають, щоб Lambda повторила.</li>

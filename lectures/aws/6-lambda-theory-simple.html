@@ -42,6 +42,15 @@
   .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
   .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
   .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
   .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
   .drow .dbox { flex:1 1 auto; }
   .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
@@ -863,7 +872,50 @@
 </tr>
 </tbody>
 </table></div>
-<h2>🖼 Схема: Lambda: переваги й тригери</h2><div class="dg"><div class="dtitle">Навіщо Lambda</div><div class="drow"><div class="dbox aws">Немає серверів</div><div class="dbox aws">Коротке виконання</div><div class="dbox aws">За запитом</div><div class="dbox aws">Автомасштаб</div><div class="dbox aws">Платите за запит і час</div><div class="dbox aws">До 10 ГБ RAM (більше RAM дає більше CPU й мережі)</div></div><div class="dnote">Free tier: 1 000 000 запитів і 400 000 ГБ-с на місяць.</div><div class="dtitle">Тригери</div><div class="drow"><div class="dbox blue"><img class="dicon" src="../../icons/api-gateway.svg" alt="">API Gateway</div><div class="dbox blue"><img class="dicon" src="../../icons/kinesis.svg" alt="">Kinesis</div><div class="dbox blue"><img class="dicon" src="../../icons/dynamodb.svg" alt="">DynamoDB</div><div class="dbox blue"><img class="dicon" src="../../icons/s3.svg" alt="">S3</div><div class="dbox blue"><img class="dicon" src="../../icons/cloudfront.svg" alt="">CloudFront</div><div class="dbox blue"><img class="dicon" src="../../icons/eventbridge.svg" alt="">EventBridge</div><div class="dbox blue"><img class="dicon" src="../../icons/sqs.svg" alt="">SQS</div><div class="dbox blue"><img class="dicon" src="../../icons/sns.svg" alt="">SNS</div><div class="dbox blue"><img class="dicon" src="../../icons/cloudwatch.svg" alt="">CloudWatch Logs</div><div class="dbox blue"><img class="dicon" src="../../icons/cognito.svg" alt="">Cognito</div></div><div class="dtitle">Приклади</div><div class="dflow"><div class="dbox aws">Нове фото в S3</div><div class="darrow">↓</div><div class="dbox green"><img class="dicon" src="../../icons/lambda.svg" alt="">Lambda створює мініатюру</div><div class="darrow">↓</div><div class="dbox aws">Мініатюра в S3, метадані в DynamoDB</div></div><div class="dflow"><div class="dbox yellow"><img class="dicon" src="../../icons/eventbridge.svg" alt="">EventBridge: щогодини</div><div class="darrow">↓</div><div class="dbox green"><img class="dicon" src="../../icons/lambda.svg" alt="">Lambda виконує задачу (cron без сервера)</div></div><div class="dtitle">Три способи виклику</div><div class="dcols"><div class="dcol green"><b>Synchronous</b><ul><li class="hi"><span class="dgap"></span>клієнт чекає результат</li><li class="hi"><img class="dicon" src="../../icons/elb.svg" alt="">ALB, API Gateway, CloudFront, S3 Batch, CLI, SDK, Cognito, Step Functions</li><li class="hi"><span class="dgap"></span>помилки й повтори на боці клієнта</li></ul></div><div class="dcol yellow"><b>Asynchronous</b><ul><li class="hi"><span class="dgap"></span>подія йде в чергу подій</li><li class="hi"><img class="dicon" src="../../icons/s3.svg" alt="">S3, SNS, EventBridge, CodeCommit, CodePipeline, CloudWatch Logs, SES</li><li class="hi"><img class="dicon" src="../../icons/lambda.svg" alt="">Lambda сама повторює; обробка має бути ідемпотентною</li></ul></div></div><div class="dnote">При повторах у CloudWatch Logs будуть дублікати записів.</div><div class="dtitle">Куди йде невдача (async)</div><div class="dcols"><div class="dcol red"><b>DLQ</b><ul><li class="hi"><img class="dicon" src="../../icons/sns.svg" alt="">SNS або SQS</li><li class="hi"><span class="dgap"></span>«впала: збережи подію, розберуся потім»</li></ul></div><div class="dcol green"><b>Destination</b><ul><li>успіх: далі в аналітику</li><li>помилка: запусти іншу Lambda</li><li>AWS радить саме його (з листопада 2019), можна обидва</li></ul></div></div><div class="dtitle">ALB викликає Lambda</div><div class="dflow"><div class="dbox blue">Клієнт: HTTP/HTTPS</div><div class="darrow">↓</div><div class="dbox aws"><img class="dicon" src="../../icons/elb.svg" alt="">ALB (target group) викликає Lambda синхронно</div><div class="darrow">↓</div><div class="dbox green">HTTP-запит перетворюється на JSON для функції</div></div></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
+<h2>Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>Синхронний виклик</strong></td>
+<td data-label="Що це">клієнт чекає відповідь, помилки й повтори на ньому</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Асинхронний виклик</strong></td>
+<td data-label="Що це">подія стає в чергу, Lambda сама повторює при помилці</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Event source mapping</strong></td>
+<td data-label="Що це">Lambda сама опитує джерело (SQS, Kinesis, DynamoDB) і викликає функцію</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>DLQ</strong></td>
+<td data-label="Що це">черга чи топік для подій, які так і не вдалося обробити</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Destination</strong></td>
+<td data-label="Що це">куди надіслати результат async-виклику: успіх чи помилку</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Alias</strong></td>
+<td data-label="Що це">вказівник на версію функції, його можна переносити</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Version</strong></td>
+<td data-label="Що це">незмінний знімок коду й налаштувань функції</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Execution role</strong></td>
+<td data-label="Що це">роль, під якою функція звертається до AWS</td>
+</tr>
+</tbody>
+</table></div>
+<h2>🖼 Схема: Lambda: переваги й тригери</h2><div class="dg"><div class="dtitle">Навіщо Lambda</div><div class="drow"><div class="dbox aws">Немає серверів</div><div class="dbox aws">Коротке виконання</div><div class="dbox aws">За запитом</div><div class="dbox aws">Автомасштаб</div><div class="dbox aws">Платите за запит і час</div><div class="dbox aws">До 10 ГБ RAM (більше RAM дає більше CPU й мережі)</div></div><div class="dnote">Free tier: 1 000 000 запитів і 400 000 ГБ-с на місяць.</div><div class="dtitle">Тригери: хто викликає Lambda</div><div class="dgroup green"><b>Синхронно: клієнт чекає відповідь</b><div class="dkids"><div class="dbox green"><img class="dicon" src="../../icons/api-gateway.svg" alt="">API Gateway</div><div class="dbox green"><img class="dicon" src="../../icons/cloudfront.svg" alt="">CloudFront (Lambda@Edge)</div><div class="dbox green"><img class="dicon" src="../../icons/cognito.svg" alt="">Cognito</div></div></div><div class="dgroup yellow"><b>Асинхронно: подія стає в чергу</b><div class="dkids"><div class="dbox yellow"><img class="dicon" src="../../icons/s3.svg" alt="">S3</div><div class="dbox yellow"><img class="dicon" src="../../icons/sns.svg" alt="">SNS</div><div class="dbox yellow"><img class="dicon" src="../../icons/eventbridge.svg" alt="">EventBridge</div><div class="dbox yellow"><img class="dicon" src="../../icons/cloudwatch.svg" alt="">CloudWatch Logs</div></div></div><div class="dgroup blue"><b><img class="dicon" src="../../icons/lambda.svg" alt="">Lambda сама опитує джерело (event source mapping)</b><div class="dkids"><div class="dbox blue"><img class="dicon" src="../../icons/sqs.svg" alt="">SQS</div><div class="dbox blue"><img class="dicon" src="../../icons/kinesis.svg" alt="">Kinesis</div><div class="dbox blue"><img class="dicon" src="../../icons/dynamodb.svg" alt="">DynamoDB Streams</div></div></div><div class="dtitle">Приклади</div><div class="dflow"><div class="dbox aws">Нове фото в S3</div><div class="darrow">↓</div><div class="dbox green"><img class="dicon" src="../../icons/lambda.svg" alt="">Lambda створює мініатюру</div><div class="darrow">↓</div><div class="dbox aws">Мініатюра в S3, метадані в DynamoDB</div></div><div class="dflow"><div class="dbox yellow"><img class="dicon" src="../../icons/eventbridge.svg" alt="">EventBridge: щогодини</div><div class="darrow">↓</div><div class="dbox green"><img class="dicon" src="../../icons/lambda.svg" alt="">Lambda виконує задачу (cron без сервера)</div></div><div class="dtitle">Три способи виклику</div><div class="dcols"><div class="dcol green"><b>Synchronous</b><ul><li class="hi"><span class="dgap"></span>клієнт чекає результат</li><li class="hi"><img class="dicon" src="../../icons/elb.svg" alt="">ALB, API Gateway, CloudFront, S3 Batch, CLI, SDK, Cognito, Step Functions</li><li class="hi"><span class="dgap"></span>помилки й повтори на боці клієнта</li></ul></div><div class="dcol yellow"><b>Asynchronous</b><ul><li class="hi"><span class="dgap"></span>подія йде в чергу подій</li><li class="hi"><img class="dicon" src="../../icons/s3.svg" alt="">S3, SNS, EventBridge, CodeCommit, CodePipeline, CloudWatch Logs, SES</li><li class="hi"><img class="dicon" src="../../icons/lambda.svg" alt="">Lambda сама повторює; обробка має бути ідемпотентною</li></ul></div></div><div class="dnote">При повторах у CloudWatch Logs будуть дублікати записів.</div><div class="dtitle">Куди йде невдача (async)</div><div class="dcols"><div class="dcol red"><b>DLQ</b><ul><li class="hi"><img class="dicon" src="../../icons/sns.svg" alt="">SNS або SQS</li><li class="hi"><span class="dgap"></span>«впала: збережи подію, розберуся потім»</li></ul></div><div class="dcol green"><b>Destination</b><ul><li>успіх: далі в аналітику</li><li>помилка: запусти іншу Lambda</li><li>AWS радить саме його (з листопада 2019), можна обидва</li></ul></div></div><div class="dtitle">ALB викликає Lambda</div><div class="dflow"><div class="dbox blue">Клієнт: HTTP/HTTPS</div><div class="darrow">↓</div><div class="dbox aws"><img class="dicon" src="../../icons/elb.svg" alt="">ALB (target group) викликає Lambda синхронно</div><div class="darrow">↓</div><div class="dbox green">HTTP-запит перетворюється на JSON для функції</div></div></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>Timeout 3 с за замовчуванням, максимум 15 хв. Пам'ять 128 МБ - 10 ГБ, CPU росте з пам'яттю.</li>
 <li>Sync повторює клієнт. Async: 2 повтори, потім DLQ чи destination. Poll: за правилами джерела.</li>

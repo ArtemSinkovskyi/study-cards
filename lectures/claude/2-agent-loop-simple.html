@@ -42,6 +42,15 @@
   .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
   .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
   .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
   .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
   .drow .dbox { flex:1 1 auto; }
   .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
@@ -208,7 +217,42 @@ show(response);
 <li><strong>pause_turn.</strong> Серверні інструменти мають свій внутрішній цикл, обмежений 10 кругами. Коли він упирається в ліміт, приходить <code>pause_turn</code>: «ще не закінчено». Просто надішліть розмову знову.</li>
 <li><strong>disable_parallel_tool_use.</strong> Вимикає паралельні виклики. Параметр лежить <strong>всередині <code>tool_choice</code></strong>, а не окремо.</li>
 </ul>
-<div class="remember"><h2>Що запам'ятати на іспит</h2>
+<h2>Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>Agent loop</strong></td>
+<td data-label="Що це">цикл: запит, відповідь моделі, виклик інструмента, знову запит</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>stop_reason</strong></td>
+<td data-label="Що це">чому модель зупинилася: <code>tool_use</code>, <code>end_turn</code>, <code>max_tokens</code> тощо</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>tool_use / tool_result</strong></td>
+<td data-label="Що це">блок, у якому модель просить інструмент, і блок з результатом</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Паралельні виклики</strong></td>
+<td data-label="Що це">кілька <code>tool_use</code> в одній відповіді, результати йдуть назад разом</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>pause_turn</strong></td>
+<td data-label="Що це">серверний інструмент призупинив хід, треба продовжити</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Клієнтський / серверний інструмент</strong></td>
+<td data-label="Що це">виконує ваш код чи виконує Anthropic</td>
+</tr>
+</tbody>
+</table></div>
+<h2>🖼 Схема: Claude: цикл агента і stop_reason</h2><div class="dg"><div class="dtitle">Модель просить, ваш код виконує</div><div class="dflow"><div class="dbox aws">Ви: питання й описи інструментів</div><div class="darrow">↓</div><div class="dbox yellow">Модель: блок tool_use (id, ім&#x27;я, вхід)</div><div class="darrow">↓</div><div class="dbox blue">Ваш код: реально виконує інструмент</div><div class="darrow">↓</div><div class="dbox green">Ви: блок tool_result з тим самим tool_use_id</div><div class="darrow">↓</div><div class="dbox aws">Модель: відповідь користувачу (end_turn)</div></div><div class="dnote">Модель сказала, що хоче, але не виконала. Виконали ви.</div><div class="dtitle">stop_reason: що робити далі</div><div class="tw"><table class="two"><thead><tr><th>Значення</th><th>Що робите</th></tr></thead><tbody><tr><td>tool_use</td><td>виконати інструмент, надіслати результат, питати знову</td></tr><tr><td>end_turn</td><td>показати відповідь, вихід із циклу</td></tr><tr><td>max_tokens</td><td>відповідь обрізана, збільшити ліміт</td></tr><tr><td>refusal</td><td>модель відмовилась, дивитись stop_details</td></tr></tbody></table></div><div class="dnote">Цикл: поки stop_reason це tool_use, виконуємо й питаємо знову. Поставте власний ліміт кругів, наприклад 10.</div><div class="dtitle">Три правила, на яких помиляються</div><div class="dcols"><div class="dcol blue"><b>Кілька tool_use за раз</b><ul><li>виконати всі</li><li>повернути всі результати одним повідомленням</li></ul></div><div class="dcol red"><b>Інструмент упав</b><ul><li>tool_result з is_error: true</li><li>зрозумілий текст: «повтори за 60 секунд»</li></ul></div><div class="dcol yellow"><b>Ліміт кругів</b><ul><li>документація його не ставить</li><li>свій ліміт у циклі</li></ul></div></div><div class="dtitle">Хто виконує інструмент</div><div class="dgroup green"><b>Виконуєте ви</b><div class="dkids"><div class="dbox green">власні: get_weather, запит у вашу базу</div><div class="dbox green">готові від Anthropic: bash, text_editor, memory</div></div></div><div class="dgroup blue"><b>Виконує Anthropic (серверні)</b><div class="dkids"><div class="dbox blue">web_search</div><div class="dbox blue">web_fetch</div><div class="dbox blue">code_execution</div></div></div><div class="dnote">pause_turn: внутрішній цикл серверних інструментів упирається в 10 кругів, надішліть розмову знову. disable_parallel_tool_use лежить усередині tool_choice.</div></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>Модель просить, ваш код виконує.</li>
 <li>Цикл іде, поки <code>stop_reason</code> дорівнює <code>tool_use</code>.</li>

@@ -42,6 +42,15 @@
   .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
   .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
   .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
   .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
   .drow .dbox { flex:1 1 auto; }
   .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
@@ -247,7 +256,42 @@
 <li><strong>Prompt hook</strong> повертає <code>{&quot;ok&quot;: true|false, &quot;reason&quot;}</code>; для <code>Stop</code> <code>ok: false</code> змушує Claude працювати далі, для <code>PreToolUse</code> забороняє виклик.</li>
 <li><strong>Безпека:</strong> command hooks виконуються <strong>з усіма правами вашого користувача</strong>. У режимі <code>-p</code> (без діалогу довіри) hooks із <code>.claude/settings.json</code> репозиторію <strong>запускаються без перевірки довіри</strong>. Перед скриптуванням <code>claude -p</code> над чужим репозиторієм перегляньте його <code>.claude/</code>.</li>
 </ul>
-<div class="remember"><h2>Що запам'ятати на іспит</h2>
+<h2>Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>Effort</strong></td>
+<td data-label="Що це">рівень старанності: впливає на роздуми, виклики інструментів і довжину відповіді</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Task budget</strong></td>
+<td data-label="Що це">дорадчий ліміт токенів на весь цикл агента, модель його бачить</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Sandbox</strong></td>
+<td data-label="Що це">ізоляція команд Bash від файлів і мережі поза дозволеним</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Command / Prompt hook</strong></td>
+<td data-label="Що це">hook, що виконує команду, чи hook, що питає модель</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Stop hook</strong></td>
+<td data-label="Що це">спрацьовує, коли агент хоче зупинитися, може змусити продовжити</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>PreCompact / PostToolUse</strong></td>
+<td data-label="Що це">події перед ущільненням і після виклику інструмента</td>
+</tr>
+</tbody>
+</table></div>
+<h2>🖼 Схема: Claude: effort, бюджет, sandbox, hooks</h2><div class="dg"><div class="dtitle">Effort: рівні</div><div class="tw"><table class="two"><thead><tr><th>Рівень</th><th>Коли</th></tr></thead><tbody><tr><td>low</td><td>прості завдання, швидкість, субагенти</td></tr><tr><td>medium</td><td>баланс швидкості й якості</td></tr><tr><td>high</td><td>складні завдання (типово)</td></tr><tr><td>xhigh</td><td>довгі агентні й кодові завдання</td></tr><tr><td>max</td><td>найглибше мислення без обмежень</td></tr></tbody></table></div><div class="dnote">Effort це сигнал, а не жорсткий бюджет: жорстка стеля це max_tokens. adaptive не рівень effort, а режим thinking. На Opus 5.5 і Haiku 5.5 типово medium.</div><div class="dtitle">Зміна effort у розмові</div><div class="dcols"><div class="dcol red"><b>Нове верхнє значення</b><ul><li>скидає кеш</li></ul></div><div class="dcol green"><b>Per-message effort (beta)</b><ul><li>повідомлення role system з output_config.effort</li><li>зберігає кеш</li></ul></div></div><div class="dtitle">Task budget</div><div class="dgroup blue"><b>Дорадчий бюджет токенів на весь цикл агента</b><div class="dkids"><div class="dbox blue">мінімум 20 000 токенів, менше дає 400</div><div class="dbox blue">модель бачить зворотний відлік</div><div class="dbox blue">жорстка стеля лишається max_tokens</div><div class="dbox blue">не підтримується в Claude Code</div></div></div><div class="dtitle">Збережені роздуми: працюйте append-only</div><div class="dcols"><div class="dcol green"><b>Дозволено</b><ul><li>додати повідомлення в кінець</li><li>змінити effort, max_tokens, tool_choice</li><li>додати чи прибрати cache_control</li><li>серверне ущільнення, context editing</li></ul></div><div class="dcol red"><b>Ламає блоки</b><ul><li>змінити system</li><li>змінити набір інструментів</li><li>змінити чи видалити раніші повідомлення</li><li>скоротити раніший tool_result</li></ul></div></div><div class="dnote">Зміни system робіть повідомленням role system в кінці, зміни інструментів через tool_addition і tool_removal. Логуйте input_transformations на кожному ході.</div><div class="dtitle">Sandbox у Claude Code</div><div class="dgroup green"><b>Усередині sandbox</b><div class="dkids"><div class="dbox green">Bash, PowerShell, Monitor і їхні дочірні процеси</div></div></div><div class="dgroup red"><b>Поза sandbox</b><div class="dkids"><div class="dbox red">Read, Edit, Write</div><div class="dbox red">MCP-сервери</div><div class="dbox red">hooks</div></div></div><div class="dnote">Вимкнений за замовчуванням. macOS, Linux, WSL2. Читання відкрите майже всюди (~/.ssh, ~/.aws), додайте denyRead. Проксі не розшифровує TLS. Дозволи й sandbox доповнюють одне одного.</div><div class="dtitle">Hooks: що ще знати</div><div class="tw"><table class="two"><thead><tr><th>Подія</th><th>Суть</th></tr></thead><tbody><tr><td>PreToolUse</td><td>не спрацьовує на @file, блокуйте через Read deny</td></tr><tr><td>PostToolUse</td><td>не скасує дію, вона вже виконана</td></tr><tr><td>PermissionRequest</td><td>забороняє лише command hook</td></tr><tr><td>Stop</td><td>до 8 продовжень поспіль, перевіряйте stop_hook_active</td></tr><tr><td>Async hook</td><td>нічого не блокує</td></tr></tbody></table></div></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>Effort за замовчуванням <code>high</code>, на Opus 5.5 і Haiku 5.5 <code>medium</code>. Це сигнал, жорстка стеля <code>max_tokens</code>.</li>
 <li>Зміна верхнього effort скидає кеш, per-message effort ні.</li>

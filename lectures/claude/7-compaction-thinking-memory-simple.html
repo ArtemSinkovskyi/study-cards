@@ -42,6 +42,15 @@
   .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
   .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
   .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
   .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
   .drow .dbox { flex:1 1 auto; }
   .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
@@ -201,7 +210,42 @@
 <p><strong>Безпека лежить на вас.</strong> Шлях типу <code>/memories/../../secrets.env</code> виходить за каталог (path traversal). Перевіряйте кожен шлях: починається з <code>/memories</code>, канонізуйте, відхиляйте <code>../</code> і <code>%2e%2e%2f</code>.</p>
 <p>Пам'ять поєднують із ущільненням: підсумок зберігає загальне, а пам'ять усе, що <strong>має</strong> пережити підсумок.</p>
 <p><strong>Багатосесійний шаблон:</strong> перша сесія створює журнал прогресу й чекліст, кожна наступна починає з їх читання, наприкінці оновлює журнал. Функцію позначайте завершеною лише після наскрізної перевірки.</p>
-<div class="remember"><h2>Що запам'ятати на іспит</h2>
+<h2>Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>Compaction block</strong></td>
+<td data-label="Що це">блок з підсумком, що замінює стару частину розмови</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Thinking</strong></td>
+<td data-label="Що це">роздуми моделі перед відповіддю</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Adaptive thinking</strong></td>
+<td data-label="Що це">модель сама обирає глибину роздумів</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Memory tool</strong></td>
+<td data-label="Що це">інструмент, що зберігає нотатки у файлах між розмовами</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Клієнтський інструмент</strong></td>
+<td data-label="Що це">виконує ваш код, безпека на вас</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Інструкції ущільнення</strong></td>
+<td data-label="Що це">підказка, що саме зберегти в підсумку</td>
+</tr>
+</tbody>
+</table></div>
+<h2>🖼 Схема: Claude: compaction, thinking, memory</h2><div class="dg"><div class="dtitle">Compaction: два режими</div><div class="tw"><table><thead><tr><th></th><th>За запитом</th><th>За порогом</th></tr></thead><tbody><tr><td>Хто вирішує</td><td>ви</td><td>API, коли вхід сягає порогу</td></tr><tr><td>Як вмикається</td><td>верхній параметр compaction</td><td>compact_20260112 у context_management</td></tr><tr><td>Beta-заголовок</td><td>compact-2026-09-04</td><td>compact-2026-01-12</td></tr><tr><td>Блок підсумку</td><td>першим у messages</td><td>після підсумованого</td></tr></tbody></table></div><div class="dnote">Документація радить режим за запитом, де він доступний. Поріг за замовчуванням 150 000 токенів, мінімум 50 000.</div><div class="dtitle">За запитом: чотири кроки</div><div class="dflow"><div class="dbox aws">1. Надсилаєте розмову з compaction: summarize</div><div class="darrow">↓</div><div class="dbox yellow">2. Відповідь: один блок compaction і stop_reason compaction</div><div class="darrow">↓</div><div class="dbox blue">3. Блок ставите першим у messages, підсумовані повідомлення прибираєте</div><div class="darrow">↓</div><div class="dbox green">4. Блок шлете точно як отримали, один на запит</div></div><div class="dcols"><div class="dcol red"><b>Тихі помилки</b><ul><li>підсумовані повідомлення лишились після блока</li><li>блок не додали в наступний запит</li></ul></div><div class="dcol gray"><b>Одразу 400</b><ul><li>підсумовані повідомлення лишились перед блоком</li><li>compaction разом з context_management</li></ul></div></div><div class="dtitle">Thinking: як показувати (display)</div><div class="dgroup blue"><b>display</b><div class="dkids"><div class="dbox blue">summarized: видно короткий підсумок</div><div class="dbox blue">omitted: порожній блок, підпис лишається, менше затримки, вартість та сама</div><div class="dbox blue">updates (beta): оновлення прогресу між викликами</div></div></div><div class="dcols"><div class="dcol red"><b>Не можна</b><ul><li>thinking enabled з budget_tokens на нових моделях: 400</li><li>перемикати thinking посеред ходу з інструментами</li><li>temperature, top_p, top_k з API 2026-10-21: 400</li></ul></div><div class="dcol green"><b>Обов&#x27;язково</b><ul><li>повертати thinking і redacted_thinking без змін</li><li>змінений блок: 400</li></ul></div></div><div class="dtitle">Memory tool</div><div class="dgroup green"><b>Клієнтський: виконує ваш застосунок</b><div class="dkids"><div class="dbox green">каталог /memories</div><div class="dbox green">команди: view, create, str_replace, insert, delete, rename</div><div class="dbox green">безпека на вас: перевіряйте шляхи (path traversal)</div></div></div><div class="dnote">Підсумок зберігає загальне, пам&#x27;ять зберігає те, що має пережити підсумок. Платите за повні згенеровані роздуми, а не за видимий підсумок.</div></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>Два режими ущільнення: за запитом (блок першим, ви прибираєте підсумовані) і за порогом (150 000, мінімум 50 000).</li>
 <li>Вартість це сума <code>usage.iterations</code>.</li>

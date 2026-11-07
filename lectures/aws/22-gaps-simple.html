@@ -42,6 +42,15 @@
   .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
   .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
   .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
   .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
   .drow .dbox { flex:1 1 auto; }
   .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
@@ -389,7 +398,50 @@
 <h2>Крок 9. Що офіційно поза іспитом</h2>
 <p>Зі сторінки Out-of-Scope: <strong>Amazon Rekognition, Polly, SageMaker AI, Strands Agents, Quick Sight, Connect, Elastic Transcoder, Shield, Storage Gateway, Snow Family, Transfer Family</strong>. Якщо така назва є у варіанті відповіді, це майже напевно не те.</p>
 <p><strong>Нове в C03 порівняно з C02:</strong> завдання 2.3 про AI-безпеку, AI-навички в 1.1, 3.2, 3.3, 4.1, 4.3, presigned URL (2.1), образи контейнерів (3.1), деплой контейнерів (3.3). Вага Troubleshooting виросла з 18% до 22%.</p>
-<h2>🖼 Схема: Elastic Beanstalk</h2><div class="dg"><div class="dtitle">Що це</div><div class="dnote">Сервіс для легкого деплою: сам керує EC2, балансувальниками й масштабуванням. Веб-додатки й бекенди (Java, Python, Node.js, .NET).</div><div class="dtitle">Шлях</div><div class="dflow"><div class="dbox aws">Create: Application</div><div class="darrow">↓</div><div class="dbox aws">Upload: Version (свій код, приклад AWS чи збережена версія)</div><div class="darrow">↓</div><div class="dbox aws">Launch: Environment (Web server чи Worker, платформа, preset)</div><div class="darrow">↓</div><div class="dbox green">Manage: оновлювати версію</div></div><div class="dtitle">CLI</div><div class="drow"><div class="dbox gray">eb create</div><div class="dbox gray">eb events</div><div class="dbox gray">eb health</div><div class="dbox gray">eb logs</div><div class="dbox gray">eb open</div><div class="dbox gray">eb status</div></div><div class="dtitle">Розширення середовища</div><div class="dcols"><div class="dcol aws"><b>`.ebextensions/`</b><ul><li>у корені коду</li><li>YAML/JSON, файли `.config`</li><li>додати RDS, ElastiCache, DynamoDB</li><li>option_settings для змін</li></ul></div><div class="dcol yellow"><b>Версії</b><ul><li>максимум 1000 версій</li><li>не чистите: деплой стане неможливим</li><li>lifecycle policy за місцем чи за часом</li><li>використані версії не видаляються</li></ul></div></div><div class="dnote">Cloning робить копію середовища з тією самою конфігурацією (LB, RDS, env vars). Корисно для тестового середовища. Для особливої платформи беріть Docker.</div><div class="dcols"><div class="dcol green"><b>✅ коли доречно</b><ul><li>швидкий MVP</li><li>мінімум DevOps</li><li>класичні моноліти</li></ul></div><div class="dcol red"><b>❌ коли ні</b><ul><li>потрібен повний контроль над інфраструктурою</li></ul></div></div></div><h2>🖼 Схема: Beanstalk: способи оновлення</h2><div class="dg"><div class="dtitle">Способи оновлення</div><div class="dstep"><div class="dlabel">⚡ All-at-once</div><div class="dpills"><span class="pill red">v1 STOPPED</span><span class="pill red">v1 STOPPED</span><span class="pill green">v2 RUNNING</span><span class="pill green">v2 RUNNING</span></div><div class="dcap">Усе за раз: є простій (downtime).</div></div><div class="dstep"><div class="dlabel">🔄 Rolling</div><div class="dpills"><span class="pill green">v1 RUNNING</span><span class="pill green">v1 RUNNING</span><span class="pill yellow">v2 PENDING</span></div><div class="dcap">Батчами (розмір налаштовується, може бути 1): менший ризик, повільніше. Потужність на час оновлення зменшується.</div></div><div class="dstep"><div class="dlabel">🧱 Rolling з batch</div><div class="dpills"><span class="pill blue">batch = 2</span><span class="pill yellow">v2 PENDING</span><span class="pill yellow">v2 PENDING</span></div><div class="dcap">Кілька за раз: швидше, але ризик вищий.</div></div><div class="dstep"><div class="dlabel">🧊 Immutable</div><div class="dpills"><span class="pill green">v1 RUNNING</span><span class="pill yellow">v2 нові інстанси</span><span class="pill green">v2 RUNNING</span></div><div class="dcap">Нові інстанси у тимчасовому ASG, потім заміна. Схоже на blue-green, але без switch.</div></div><div class="dstep"><div class="dlabel">🔵🟢 Blue-green</div><div class="dpills"><span class="pill blue">BLUE v1</span><span class="pill green">GREEN v2</span><span class="pill yellow">switch</span></div><div class="dcap">Не вбудована політика, а ручний прийом: друге середовище, потім swap URL.</div></div><div class="dstep"><div class="dlabel">🚦 Traffic splitting</div><div class="dpills"><span class="pill blue">v1 ← 90%</span><span class="pill yellow">v2 ← 10%</span></div><div class="dcap">Піднімає повний набір нових інстансів, шле на них заданий відсоток на заданий час оцінювання. Якщо здорові, весь трафік іде на v2, інакше відкат. Потрібен ALB.</div></div><div class="dnote">Traffic splitting це ЩО ми робимо (ділимо трафік), Canary це НАВІЩО (безпечна перевірка), Weighted це ЯК (через ваги).</div></div><h2>🖼 Схема: EC2: сімейства інстансів</h2><div class="dg"><div class="dtitle">Сімейства інстансів</div><div class="tw"><table class="two"><thead><tr><th>Літера</th><th>Для чого</th></tr></thead><tbody><tr><td>T / M</td><td>T: tiny, M: medium, збалансоване, стандартна частота CPU</td></tr><tr><td>C</td><td>compute: обчислення</td></tr><tr><td>R / X / z</td><td>R: більше RAM, X: максимум RAM, z: висока частота CPU. Для RAM-інтенсивних задач, баз даних, аналітики</td></tr><tr><td>I / D / H</td><td>I: максимальний IOPS, D: dense, величезні обсяги диска, H: високий throughput для потоків даних</td></tr><tr><td>P / G / Inf / Trn</td><td>GPU й прискорювачі (ML)</td></tr></tbody></table></div><div class="dnote">Мнемоніка: I це Input/Output per sec, D це dense (густий, щільний), H це High disk throughput.</div></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
+<h2>Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>Auto Scaling group</strong></td>
+<td data-label="Що це">група EC2, що сама змінює кількість серверів</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Target tracking</strong></td>
+<td data-label="Що це">масштабування, що тримає метрику біля цілі</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>ALB / NLB</strong></td>
+<td data-label="Що це">балансувальник рівня HTTP чи рівня TCP/UDP</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>WAF</strong></td>
+<td data-label="Що це">фільтр веб-запитів за правилами</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Shield</strong></td>
+<td data-label="Що це">захист від DDoS</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>RDS Proxy</strong></td>
+<td data-label="Що це">пул з'єднань між Lambda і базою</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Read replica</strong></td>
+<td data-label="Що це">копія бази лише для читання</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Instance metadata</strong></td>
+<td data-label="Що це">дані про інстанс, доступні зсередини (IMDS)</td>
+</tr>
+</tbody>
+</table></div>
+<h2>🖼 Схема: Elastic Beanstalk</h2><div class="dg"><div class="dtitle">Що це</div><div class="dnote">Сервіс для легкого деплою: сам керує EC2, балансувальниками й масштабуванням. Веб-додатки й бекенди (Java, Python, Node.js, .NET).</div><div class="dtitle">Шлях</div><div class="dflow"><div class="dbox aws">Create: Application</div><div class="darrow">↓</div><div class="dbox aws">Upload: Version (свій код, приклад AWS чи збережена версія)</div><div class="darrow">↓</div><div class="dbox aws">Launch: Environment (Web server чи Worker, платформа, preset)</div><div class="darrow">↓</div><div class="dbox green">Manage: оновлювати версію</div></div><div class="dtitle">CLI</div><div class="drow"><div class="dbox gray">eb create</div><div class="dbox gray">eb events</div><div class="dbox gray">eb health</div><div class="dbox gray">eb logs</div><div class="dbox gray">eb open</div><div class="dbox gray">eb status</div></div><div class="dtitle">Розширення середовища</div><div class="dcols"><div class="dcol aws"><b>`.ebextensions/`</b><ul><li>у корені коду</li><li>YAML/JSON, файли `.config`</li><li>додати RDS, ElastiCache, DynamoDB</li><li>option_settings для змін</li></ul></div><div class="dcol yellow"><b>Версії</b><ul><li>максимум 1000 версій</li><li>не чистите: деплой стане неможливим</li><li>lifecycle policy за місцем чи за часом</li><li>використані версії не видаляються</li></ul></div></div><div class="dnote">Cloning робить копію середовища з тією самою конфігурацією (LB, RDS, env vars). Корисно для тестового середовища. Для особливої платформи беріть Docker.</div><div class="dcols"><div class="dcol green"><b>✅ коли доречно</b><ul><li>швидкий MVP</li><li>мінімум DevOps</li><li>класичні моноліти</li></ul></div><div class="dcol red"><b>❌ коли ні</b><ul><li>потрібен повний контроль над інфраструктурою</li></ul></div></div></div><h2>🖼 Схема: Beanstalk: способи оновлення</h2><div class="dg"><div class="dtitle">Способи оновлення: групи</div><div class="dgroup yellow"><b>На тих самих інстансах (in-place)</b><div class="dkids"><div class="dbox yellow">All-at-once</div><div class="dbox yellow">Rolling</div><div class="dbox yellow">Rolling з додатковим batch</div></div></div><div class="dgroup blue"><b>На нових інстансах</b><div class="dkids"><div class="dbox blue">Immutable</div><div class="dbox blue">Traffic splitting</div></div></div><div class="dgroup gray"><b>Окреме середовище (ручний прийом, не політика)</b><div class="dkids"><div class="dbox gray">Blue-green: swap URL</div></div></div><div class="dtitle">Способи оновлення: крок за кроком</div><div class="dstep"><div class="dlabel">⚡ All-at-once</div><div class="dpills"><span class="pill red">v1 STOPPED</span><span class="pill red">v1 STOPPED</span><span class="pill green">v2 RUNNING</span><span class="pill green">v2 RUNNING</span></div><div class="dcap">Усе за раз: є простій (downtime).</div></div><div class="dstep"><div class="dlabel">🔄 Rolling</div><div class="dpills"><span class="pill green">v1 RUNNING</span><span class="pill green">v1 RUNNING</span><span class="pill yellow">v2 PENDING</span></div><div class="dcap">Батчами (розмір налаштовується, може бути 1): менший ризик, повільніше. Потужність на час оновлення зменшується.</div></div><div class="dstep"><div class="dlabel">🧱 Rolling з batch</div><div class="dpills"><span class="pill blue">batch = 2</span><span class="pill yellow">v2 PENDING</span><span class="pill yellow">v2 PENDING</span></div><div class="dcap">Кілька за раз: швидше, але ризик вищий.</div></div><div class="dstep"><div class="dlabel">🧊 Immutable</div><div class="dpills"><span class="pill green">v1 RUNNING</span><span class="pill yellow">v2 нові інстанси</span><span class="pill green">v2 RUNNING</span></div><div class="dcap">Нові інстанси у тимчасовому ASG, потім заміна. Схоже на blue-green, але без switch.</div></div><div class="dstep"><div class="dlabel">🔵🟢 Blue-green</div><div class="dpills"><span class="pill blue">BLUE v1</span><span class="pill green">GREEN v2</span><span class="pill yellow">switch</span></div><div class="dcap">Не вбудована політика, а ручний прийом: друге середовище, потім swap URL.</div></div><div class="dstep"><div class="dlabel">🚦 Traffic splitting</div><div class="dpills"><span class="pill blue">v1 ← 90%</span><span class="pill yellow">v2 ← 10%</span></div><div class="dcap">Піднімає повний набір нових інстансів, шле на них заданий відсоток на заданий час оцінювання. Якщо здорові, весь трафік іде на v2, інакше відкат. Потрібен ALB.</div></div><div class="dnote">Traffic splitting це ЩО ми робимо (ділимо трафік), Canary це НАВІЩО (безпечна перевірка), Weighted це ЯК (через ваги).</div></div><h2>🖼 Схема: EC2: сімейства інстансів</h2><div class="dg"><div class="dtitle">Сімейства інстансів</div><div class="tw"><table class="two"><thead><tr><th>Літера</th><th>Для чого</th></tr></thead><tbody><tr><td>T / M</td><td>T: tiny, M: medium, збалансоване, стандартна частота CPU</td></tr><tr><td>C</td><td>compute: обчислення</td></tr><tr><td>R / X / z</td><td>R: більше RAM, X: максимум RAM, z: висока частота CPU. Для RAM-інтенсивних задач, баз даних, аналітики</td></tr><tr><td>I / D / H</td><td>I: максимальний IOPS, D: dense, величезні обсяги диска, H: високий throughput для потоків даних</td></tr><tr><td>P / G / Inf / Trn</td><td>GPU й прискорювачі (ML)</td></tr></tbody></table></div><div class="dnote">Мнемоніка: I це Input/Output per sec, D це dense (густий, щільний), H це High disk throughput.</div></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>API Gateway proxy: <code>event.body</code> це рядок, <code>JSON.parse</code> на вході й <code>JSON.stringify</code> на виході.</li>
 <li>Kinesis <code>data</code> у Lambda в base64.</li>

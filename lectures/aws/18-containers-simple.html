@@ -42,6 +42,15 @@
   .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
   .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
   .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
   .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
   .drow .dbox { flex:1 1 auto; }
   .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
@@ -237,6 +246,49 @@
 </ul>
 <h2>Крок 8. VPC і доступ</h2>
 <p>Коли Lambda чи задача мають доступ до RDS у VPC (навичка 1.2.1): вказати subnets і security groups. Lambda у VPC без NAT не має інтернету. До S3 краще через <strong>gateway endpoint</strong>, до інших сервісів через <strong>interface endpoint (PrivateLink)</strong>.</p>
+<h2>Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>ECR</strong></td>
+<td data-label="Що це">сховище образів контейнерів</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Task definition</strong></td>
+<td data-label="Що це">опис, як запускати контейнери (образ, пам'ять, порти, ролі)</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Task / Service</strong></td>
+<td data-label="Що це">запущена група контейнерів і керування N таких tasks</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Fargate / EC2 launch type</strong></td>
+<td data-label="Що це">AWS керує серверами чи ви керуєте ними</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Task role / Execution role</strong></td>
+<td data-label="Що це">роль вашого коду чи роль, що тягне образ і секрети</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Rolling update</strong></td>
+<td data-label="Що це">заміна tasks поступово без простою</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>EKS</strong></td>
+<td data-label="Що це">керований Kubernetes</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Circuit breaker</strong></td>
+<td data-label="Що це">автоматичний відкат невдалого деплою</td>
+</tr>
+</tbody>
+</table></div>
 <h2>🖼 Схема: ECS: контейнери, tasks, services</h2><div class="dg"><div class="dtitle">Від образу до сервісу</div><div class="dflow"><div class="dbox blue">Docker image: створюєш образ</div><div class="darrow">↓</div><div class="dbox aws"><img class="dicon" src="../../icons/ecr.svg" alt="">ECR: сховище образів (замість Docker Hub), public чи private</div><div class="darrow">↓</div><div class="dbox yellow">Task Definition: опис, ЯК запускати контейнер (образ, порти, CPU/RAM, змінні, IAM-роль, логи)</div><div class="darrow">↓</div><div class="dbox green">Task: група контейнерів, запущених разом</div><div class="darrow">↓</div><div class="dbox aws">Service: тримає N tasks працюючими, масштабує</div></div><div class="dnote">Усе це живе в ECS cluster. ECS запускає контейнери, EKS це Kubernetes (на діаграмі лише ECS).</div><div class="dtitle">Launch type</div><div class="dcols"><div class="dcol green"><b><img class="dicon" src="../../icons/fargate.svg" alt="">Fargate</b><ul><li>serverless compute</li><li>AWS виділяє «комп&#x27;ютер» під контейнер</li></ul></div><div class="dcol yellow"><b><img class="dicon" src="../../icons/ec2.svg" alt="">EC2</b><ul><li>self-managed</li><li>роль інстанса має містити:</li><li>ecr:GetAuthorizationToken</li><li>ecr:BatchCheckLayerAvailability</li><li>ecr:GetDownloadUrlForLayer</li><li>ecr:BatchGetImage</li></ul></div></div><div class="dtitle">Змінні й секрети</div><div class="dnote">Task Execution Role (AmazonECSTaskExecutionRolePolicy) бере файли з S3 і значення з Secrets Manager чи SSM Parameter Store ще до старту.</div><div class="dtitle">Essential контейнери</div><div class="dcols"><div class="dcol red"><b>Container A (essential)</b><ul><li>впав: ECS зупиняє всю task</li></ul></div><div class="dcol green"><b>Container B (not essential)</b><ul><li>впав: task продовжує працювати</li></ul></div></div><div class="dtitle">Масштабування сервісу</div><div class="tw"><table class="two"><thead><tr><th>Тип</th><th>Суть</th></tr></thead><tbody><tr><td>Target Tracking</td><td>за цільовим значенням метрики CloudWatch</td></tr><tr><td>Step Scaling</td><td>за конкретним CloudWatch alarm</td></tr><tr><td>Scheduled</td><td>за розкладом, передбачувані зміни</td></tr></tbody></table></div><div class="dnote">Service Auto Scaling міняє кількість tasks за CPU, RAM чи Request count per Target. ASG масштабує лише EC2-інстанси.</div><div class="dtitle">Task Placement (EC2)</div><div class="dcols"><div class="dcol blue"><b>Strategies: ЯК обирати</b><ul><li>binpack: щільно пакує в інстанси з найменшим вільним CPU чи RAM, мінімізує витрати</li><li>spread: рівномірно по інстансах, AZ</li><li>random: випадково серед підходящих</li></ul></div><div class="dcol yellow"><b>Constraints: ДЕ можна</b><ul><li>distinctInstance: різні EC2</li><li>memberOf: лише з потрібним ECS attribute</li></ul></div></div><div class="dnote">AWS Copilot CLI керує конфігами, деплоєм, генерує CloudFormation. Структура: Application, Environments (test/prod), Services (web/api/worker).</div></div><h2>🖼 Схема: ECS: rolling update крок за кроком</h2><div class="dg"><div class="dtitle">Rolling update: завжди 3 таски</div><div class="dstep"><div class="dlabel">Крок 1</div><div class="dpills"><span class="pill green">v1 RUNNING</span><span class="pill green">v1 RUNNING</span><span class="pill green">v1 RUNNING</span><span class="pill yellow">v2 PENDING</span></div><div class="dcap">Спершу піднімають нову v2. Старі v1 ще працюють.</div></div><div class="dstep"><div class="dlabel">Крок 2</div><div class="dpills"><span class="pill green">v1 RUNNING</span><span class="pill green">v1 RUNNING</span><span class="pill orange">v1 виводиться</span><span class="pill green">v2 RUNNING</span></div><div class="dcap">Коли v2 RUNNING, одну v1 виводять з балансувальника (draining) і зупиняють.</div></div><div class="dstep"><div class="dlabel">Крок 3</div><div class="dpills"><span class="pill green">v1 RUNNING</span><span class="pill green">v1 RUNNING</span><span class="pill red">v1 STOPPED</span><span class="pill green">v2 RUNNING</span></div><div class="dcap">Лише після вимкнення з балансувальника стара таска зупиняється, і так по колу.</div></div><div class="dnote">Одночасно можуть бути 4 таски RUNNING (3 × v1 і 1 × v2). Спочатку нова стає RUNNING, і лише потім дотунують стару. Якщо запущених стане 2 при desiredCount 3, так не можна.</div><div class="tw"><table class="two"><thead><tr><th>Параметр</th><th>Значення</th></tr></thead><tbody><tr><td>minimumHealthyPercent</td><td>100%: завжди має бути доступно 100% від числа tasks</td></tr><tr><td>maximumPercent</td><td>200%: можна піднімати до 2 × desiredCount</td></tr></tbody></table></div></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>ECR зберігає образи, ECS запускає, Fargate прибирає сервери, EKS це Kubernetes.</li>

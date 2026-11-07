@@ -42,6 +42,15 @@
   .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
   .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
   .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
   .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
   .drow .dbox { flex:1 1 auto; }
   .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
@@ -386,6 +395,49 @@
 <li>У невдалій події <code>AssumeRoleWithWebIdentity</code> нема <code>Resource name</code>: це ознака відхиленого виклику. Причину читають у JSON події: <code>errorCode</code>, <code>errorMessage</code>. Тимчасові ключі STS мають <code>AccessKey</code> з <code>ASIA...</code>.</li>
 <li>Для запитів над журналом: Athena або CloudTrail Lake.</li>
 </ul>
+<h2>Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>Metric</strong></td>
+<td data-label="Що це">ряд чисел у часі (CPU, кількість запитів)</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Namespace</strong></td>
+<td data-label="Що це">контейнер метрик (<code>AWS/Lambda</code>)</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Dimension</strong></td>
+<td data-label="Що це">атрибут, що розрізняє метрики: <code>FunctionName</code>, <code>InstanceId</code></td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Alarm</strong></td>
+<td data-label="Що це">реакція на метрику: поріг, кілька періодів, дія (SNS, Auto Scaling)</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Log group / log stream</strong></td>
+<td data-label="Що це">група логів одного застосунку і потік одного джерела в ній</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Metric filter</strong></td>
+<td data-label="Що це">перетворює збіги в логах на метрику</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Logs Insights</strong></td>
+<td data-label="Що це">запити до логів мовою CloudWatch</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>CloudTrail</strong></td>
+<td data-label="Що це">журнал викликів API: хто, що, коли зробив</td>
+</tr>
+</tbody>
+</table></div>
 <h2>🖼 Схема: CloudWatch, моніторинг, аудит</h2><div class="dg"><div class="dtitle">CloudWatch Metrics</div><div class="drow"><div class="dbox aws">Метрики є для кожного сервісу AWS</div><div class="dbox aws">Метрика належить namespace</div><div class="dbox aws">Має timestamp</div><div class="dbox aws">Dimension: атрибут метрики (instance id, середовище), до 30 на метрику</div><div class="dbox aws">Можна будувати dashboards</div><div class="dbox aws">Free Tier: 10 detailed monitoring метрик</div></div><div class="dtitle">Власні метрики</div><div class="tw"><table class="two"><thead><tr><th>Що</th><th>Суть</th></tr></thead><tbody><tr><td>API</td><td>PutMetricData</td></tr><tr><td>Dimensions</td><td>розбити метрики за атрибутами</td></tr><tr><td>Standard resolution</td><td>1 хвилина</td></tr><tr><td>High resolution</td><td>зберігається до 1 с (запит з періодом 1/5/10/30 с чи кратне 60), дорожче</td></tr></tbody></table></div><div class="dtitle">CloudWatch Logs</div><div class="dflow"><div class="dbox aws">Log group: ім&#x27;я застосунку</div><div class="darrow">↓</div><div class="dbox aws">Log stream: інстанси, файли, контейнери</div><div class="darrow">↓</div><div class="dbox yellow">Retention: від 1 дня до 10 років або ніколи</div></div><div class="dnote">Логи шифруються типово, можна свій KMS-ключ.</div><div class="dtitle">Джерела логів</div><div class="drow"><div class="dbox blue">Logs Agent (старий, лише в Logs)</div><div class="dbox blue">Unified Agent (ще RAM, CPU, диск, процеси)</div><div class="dbox blue"><img class="dicon" src="../../icons/ec2.svg" alt="">EC2, ECS, On-premises</div><div class="dbox blue"><img class="dicon" src="../../icons/lambda.svg" alt="">Lambda, API Gateway</div><div class="dbox blue"><img class="dicon" src="../../icons/vpc.svg" alt="">VPC Flow Logs</div><div class="dbox blue"><img class="dicon" src="../../icons/route53.svg" alt="">Route 53 (DNS-запити)</div><div class="dbox blue"><img class="dicon" src="../../icons/cloudtrail.svg" alt="">CloudTrail, Elastic Beanstalk</div></div><div class="dtitle">Куди відправити логи</div><div class="dcols"><div class="dcol yellow"><b>Export</b><ul><li>в S3, CreateExportTask</li><li>від секунд до кількох годин</li><li>не real-time</li></ul></div><div class="dcol green"><b>Subscription</b><ul><li class="hi"><span class="dgap"></span>майже real-time</li><li class="hi"><img class="dicon" src="../../icons/lambda.svg" alt="">Lambda, Kinesis Streams/Firehose, OpenSearch</li><li class="hi"><span class="dgap"></span>можна з кількох акаунтів</li></ul></div></div><div class="dnote">Subscription Filter не те саме, що Metric Filter: перший стримить події в інші сервіси, другий перетворює шаблон у логах на метрику.</div><div class="dtitle">Alarm</div><div class="dflow"><div class="dbox aws">Логи з EC2 (Logs Agent)</div><div class="darrow">↓</div><div class="dbox yellow">Metric Filter, наприклад [ERROR]</div><div class="darrow">↓</div><div class="dbox red"><img class="dicon" src="../../icons/cloudwatch.svg" alt="">CloudWatch Alarm: OK, INSUFFICIENT_DATA, ALARM</div><div class="darrow">↓</div><div class="dbox green"><img class="dicon" src="../../icons/sns.svg" alt="">SNS, Auto Scaling або дія з EC2 (stop, terminate, reboot, recover)</div></div><div class="dnote">Composite Alarm поєднує alarm-и через AND і OR.</div><div class="dtitle">Synthetics Canary</div><div class="dnote">Скрипт, який AWS запускає за розкладом (щохвилини, 5, 15), щоб перевіряти доступність і роботу. Під капотом це Lambda (Node.js чи Python, Puppeteer).</div></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>Alarm стежить за <strong>однією</strong> метрикою; платять за кількість alarm, не за спрацювання; 10 безкоштовні.</li>

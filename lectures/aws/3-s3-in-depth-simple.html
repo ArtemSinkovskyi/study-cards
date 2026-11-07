@@ -42,6 +42,15 @@
   .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
   .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
   .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
   .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
   .drow .dbox { flex:1 1 auto; }
   .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
@@ -433,7 +442,50 @@
 </table></div>
 <h2>Крок 9. Ціни</h2>
 <p>Тарифікується: зберігання (ГБ-місяць), запити (PUT і GET окремо), вихідний трафік в інтернет, опційні функції. <strong>Вхідний трафік у S3 безкоштовний; передавання між S3 і сервісами AWS у тому самому регіоні безкоштовне.</strong></p>
-<h2>🖼 Схема: S3: імена, класи зберігання</h2><div class="dg"><div class="dtitle">Ім&#x27;я бакета</div><div class="dcols"><div class="dcol green"><b>✅ можна</b><ul><li>глобально унікальне</li><li>3-63 символи</li><li>починається з малої літери чи цифри</li></ul></div><div class="dcol red"><b>❌ не можна</b><ul><li>великі літери й `_`</li><li>формат IP (192.168.1.1)</li><li>префікс xn--</li><li>суфікс -s3alias</li></ul></div></div><div class="dtitle">Класи зберігання</div><div class="dflow"><div class="dbox green"><img class="dicon" src="../../icons/s3.svg" alt="">S3 Standard: частий доступ, продакшн, веб-додатки</div><div class="darrow">↓</div><div class="dbox yellow">Infrequent Access: рідко, але швидко</div><div class="darrow">↓</div><div class="dbox yellow">One Zone-IA: менш критичні дані, можна втратити одну AZ</div><div class="darrow">↓</div><div class="dbox blue"><img class="dicon" src="../../icons/glacier.svg" alt="">Glacier Instant: архів, мілісекунди</div><div class="darrow">↓</div><div class="dbox blue"><img class="dicon" src="../../icons/glacier.svg" alt="">Glacier Flexible: архів, хвилини-години</div><div class="darrow">↓</div><div class="dbox gray"><img class="dicon" src="../../icons/glacier.svg" alt="">Glacier Deep Archive: найдешевше, години</div></div><div class="dnote">Intelligent-Tiering сам переміщає об&#x27;єкти між рівнями залежно від частоти доступу. Автоматично: Frequent, Infrequent (30 днів без доступу), Archive Instant (90 днів). Необов&#x27;язкові, їх вмикають окремо: Archive Access і Deep Archive Access.</div><div class="dtitle">Ключ і префікс</div><div class="dnote">Ключ це повний шлях: префікс (папки) плюс ім&#x27;я файла.<br>s3://my-bucket/folder/sub/file.txt</div><div class="dtitle">Події</div><div class="dflow"><div class="dbox aws"><img class="dicon" src="../../icons/s3.svg" alt="">S3 bucket: подія ObjectCreated</div><div class="darrow">↓</div><div class="dbox yellow"><img class="dicon" src="../../icons/eventbridge.svg" alt="">EventBridge (типово вимкнено, вмикається на бакеті)</div><div class="darrow">↓</div><div class="dbox blue">Rule: source aws.s3, prefix images/, suffix .json</div><div class="darrow">↓</div><div class="dbox green">Цілі: Lambda, SNS, SQS</div></div><div class="dnote">Доставка: near-real-time (зазвичай за секунди), at-least-once. Можна вмикати разом із класичними сповіщеннями.</div><div class="dtitle">Ліміти</div><div class="tw"><table class="two"><thead><tr><th>Що</th><th>Значення</th></tr></thead><tbody><tr><td>PUT, COPY, POST, DELETE</td><td>~3 500 запитів/с на префікс</td></tr><tr><td>GET, HEAD</td><td>~5 500 запитів/с на префікс</td></tr><tr><td>Більше 5 ГБ</td><td>обов&#x27;язково multi-part (кожна частина окремий паралельний PUT)</td></tr><tr><td>Макс. об&#x27;єкт</td><td>50 ТБ (з грудня 2025; раніше 5 ТБ, на іспиті можуть питати 5 ТБ). Реальна межа 48,8 ТіБ через multipart</td></tr></tbody></table></div><div class="dtitle">Інше</div><div class="dcols"><div class="dcol aws"><b>Lifecycle</b><ul><li>Expiration: видалити через N днів</li><li>Transition: перенести в інший клас</li></ul></div><div class="dcol aws"><b>Версіонування й реплікація</b><ul><li>Versioning вмикається на бакеті</li><li>CRR: інший регіон; SRR: той самий</li><li>реплікуються лише нові об&#x27;єкти</li><li>MFA Delete: MFA для видалення</li></ul></div></div></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
+<h2>Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>Bucket / Object / Key</strong></td>
+<td data-label="Що це">контейнер, файл у ньому і його повне ім'я-шлях</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Prefix</strong></td>
+<td data-label="Що це">початок ключа, схожий на «папку» (<code>images/2025/</code>)</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Storage class</strong></td>
+<td data-label="Що це">клас зберігання: чим рідше доступ, тим дешевше</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Lifecycle rule</strong></td>
+<td data-label="Що це">правило: перенести об'єкт в інший клас чи видалити через N днів</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Versioning</strong></td>
+<td data-label="Що це">зберігання всіх версій об'єкта, видалення лише ставить delete marker</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Multipart upload</strong></td>
+<td data-label="Що це">завантаження великого файла частинами, обов'язково понад 5 ГБ</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Byte-range fetch</strong></td>
+<td data-label="Що це">читання лише частини об'єкта за діапазоном байтів</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Transfer Acceleration</strong></td>
+<td data-label="Що це">прискорене завантаження через найближчий edge-вузол</td>
+</tr>
+</tbody>
+</table></div>
+<h2>🖼 Схема: S3: імена, класи зберігання</h2><div class="dg"><div class="dtitle">Ім&#x27;я бакета</div><div class="dcols"><div class="dcol green"><b>✅ можна</b><ul><li>глобально унікальне</li><li>3-63 символи</li><li>починається з малої літери чи цифри</li></ul></div><div class="dcol red"><b>❌ не можна</b><ul><li>великі літери й `_`</li><li>формат IP (192.168.1.1)</li><li>префікс xn--</li><li>суфікс -s3alias</li></ul></div></div><div class="dtitle">Класи зберігання</div><div class="dgroup green"><b><img class="dicon" src="../../icons/s3.svg" alt="">S3 Standard: частий доступ, продакшн, веб-додатки</b></div><div class="dgroup yellow"><b>Infrequent Access (IA): рідко, але швидко</b><div class="dkids"><div class="dbox yellow">Standard-IA: кілька AZ</div><div class="dbox yellow">One Zone-IA: одна AZ, менш критичні дані, AZ можна втратити</div></div></div><div class="dgroup blue"><b><img class="dicon" src="../../icons/glacier.svg" alt="">Glacier: архів</b><div class="dkids"><div class="dbox blue">Instant Retrieval: мілісекунди</div><div class="dbox blue">Flexible Retrieval: хвилини-години</div><div class="dbox blue">Deep Archive: найдешевше, години</div></div></div><div class="dnote">Intelligent-Tiering сам переміщає об&#x27;єкти між рівнями залежно від частоти доступу. Автоматично: Frequent, Infrequent (30 днів без доступу), Archive Instant (90 днів). Необов&#x27;язкові, їх вмикають окремо: Archive Access і Deep Archive Access.</div><div class="dtitle">Ключ і префікс</div><div class="dnote">Ключ це повний шлях: префікс (папки) плюс ім&#x27;я файла.<br>s3://my-bucket/folder/sub/file.txt</div><div class="dtitle">Події</div><div class="dflow"><div class="dbox aws"><img class="dicon" src="../../icons/s3.svg" alt="">S3 bucket: подія ObjectCreated</div><div class="darrow">↓</div><div class="dbox yellow"><img class="dicon" src="../../icons/eventbridge.svg" alt="">EventBridge (типово вимкнено, вмикається на бакеті)</div><div class="darrow">↓</div><div class="dbox blue">Rule: source aws.s3, prefix images/, suffix .json</div><div class="darrow">↓</div><div class="dbox green">Цілі: Lambda, SNS, SQS</div></div><div class="dnote">Доставка: near-real-time (зазвичай за секунди), at-least-once. Можна вмикати разом із класичними сповіщеннями.</div><div class="dtitle">Ліміти</div><div class="tw"><table class="two"><thead><tr><th>Що</th><th>Значення</th></tr></thead><tbody><tr><td>PUT, COPY, POST, DELETE</td><td>~3 500 запитів/с на префікс</td></tr><tr><td>GET, HEAD</td><td>~5 500 запитів/с на префікс</td></tr><tr><td>Більше 5 ГБ</td><td>обов&#x27;язково multi-part (кожна частина окремий паралельний PUT)</td></tr><tr><td>Макс. об&#x27;єкт</td><td>50 ТБ (з грудня 2025; раніше 5 ТБ, на іспиті можуть питати 5 ТБ). Реальна межа 48,8 ТіБ через multipart</td></tr></tbody></table></div><div class="dtitle">Інше</div><div class="dcols"><div class="dcol aws"><b>Lifecycle</b><ul><li>Expiration: видалити через N днів</li><li>Transition: перенести в інший клас</li></ul></div><div class="dcol aws"><b>Версіонування й реплікація</b><ul><li>Versioning вмикається на бакеті</li><li>CRR: інший регіон; SRR: той самий</li><li>реплікуються лише нові об&#x27;єкти</li><li>MFA Delete: MFA для видалення</li></ul></div></div></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>S3 плоский: ключ плюс префікси. Префікси задають межі прав, подій і lifecycle.</li>
 <li>Сильна консистентність з 2020 року.</li>

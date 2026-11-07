@@ -42,6 +42,15 @@
   .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
   .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
   .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
   .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
   .drow .dbox { flex:1 1 auto; }
   .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
@@ -414,6 +423,57 @@
 <tr>
 <td data-label="Питання">Типове застосування</td>
 <td data-label="Відповідь">заборонити регіони, заборонити вимикати CloudTrail чи GuardDuty, заборонити вихід з організації, змусити шифрування</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>Автентифікація</strong></td>
+<td data-label="Що це">перевірка, хто ти (пароль, ключ, токен)</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Авторизація</strong></td>
+<td data-label="Що це">перевірка, що тобі дозволено робити</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Principal</strong></td>
+<td data-label="Що це">суб'єкт запиту: користувач, роль, сервіс, акаунт</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>ARN</strong></td>
+<td data-label="Що це">унікальне ім'я ресурсу AWS, наприклад <code>arn:aws:s3:::my-bucket</code></td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>STS</strong></td>
+<td data-label="Що це">сервіс, що видає тимчасові ключі (AssumeRole)</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Session token</strong></td>
+<td data-label="Що це">третя частина тимчасових ключів поруч з access key і secret</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Trust policy</strong></td>
+<td data-label="Що це">політика на ролі: хто може її прийняти</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Permission boundary</strong></td>
+<td data-label="Що це">стеля прав для користувача чи ролі, сама прав не дає</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>SCP</strong></td>
+<td data-label="Що це">стеля прав для акаунтів в AWS Organizations, прав не дає</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>OIDC</strong></td>
+<td data-label="Що це">стандарт входу через зовнішнього провайдера (Google, GitHub), дає токен</td>
 </tr>
 </tbody>
 </table></div>

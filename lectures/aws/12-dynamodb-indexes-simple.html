@@ -42,6 +42,15 @@
   .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
   .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
   .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
   .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
   .drow .dbox { flex:1 1 auto; }
   .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
@@ -318,6 +327,49 @@
 <li>права функції: <code>GetItem</code>, <code>PutItem</code>, <code>UpdateItem</code>, <code>DeleteItem</code>.</li>
 </ul>
 <p>Важливо: ідемпотентність захищає від <strong>подвійної роботи</strong>, а не від помилок. Powertools не зберігає результат упалої функції, тож подія все одно може дійти до DLQ.</p>
+<h2>Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>GSI</strong></td>
+<td data-label="Що це">глобальний індекс з іншим partition key, можна додати будь-коли</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>LSI</strong></td>
+<td data-label="Що це">локальний індекс з тим самим partition key, створюється разом з таблицею</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>TTL</strong></td>
+<td data-label="Що це">автоматичне видалення записів після вказаного часу</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>DynamoDB Streams</strong></td>
+<td data-label="Що це">потік змін таблиці (запис, оновлення, видалення)</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Transaction</strong></td>
+<td data-label="Що це">кілька операцій як одна: або всі, або жодна</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>DAX</strong></td>
+<td data-label="Що це">кеш в пам'яті перед DynamoDB для читань</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Global tables</strong></td>
+<td data-label="Що це">таблиця, що реплікується між регіонами</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>PITR</strong></td>
+<td data-label="Що це">відновлення таблиці на будь-який момент за останні 35 днів</td>
+</tr>
+</tbody>
+</table></div>
 <div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>Запит не лягає на ключ: GSI (будь-коли, будь-який ключ, лише eventually).</li>
