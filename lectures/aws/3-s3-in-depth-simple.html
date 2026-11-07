@@ -30,6 +30,31 @@
   .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
   .remember h2 { border-top:none; margin-top:.8rem; }
   .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dtitle { font-weight:700; color:#24466b; margin:1.1rem 0 .4rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.7rem; padding:.5rem .7rem; font-size:.88rem; line-height:1.35; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:.5rem; }
+  .dcol ul { margin:.3rem 0 0; padding-left:1.05rem; font-size:.84rem; }
+  .dcol b { font-size:.9rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.5rem .7rem; color:#555; font-size:.84rem; background:#fffdf7; margin:.6rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:flex; flex-wrap:wrap; gap:.35rem; margin:.3rem 0; }
+  .dcap { font-size:.84rem; color:#555; }
+  .pill { border-radius:.5rem; padding:.25rem .55rem; font-size:.76rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
   .dcards { margin:1.2rem 0; }
   a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
   .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
@@ -403,7 +428,7 @@
 </table></div>
 <h2>Крок 9. Ціни</h2>
 <p>Тарифікується: зберігання (ГБ-місяць), запити (PUT і GET окремо), вихідний трафік в інтернет, опційні функції. <strong>Вхідний трафік у S3 безкоштовний; передавання між S3 і сервісами AWS у тому самому регіоні безкоштовне.</strong></p>
-<div class="dcards"><a class="dcard" href="../../diagrams/s3.html">🖼 Моя схема: S3: імена, класи зберігання</a></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
+<h2>🖼 Схема: S3: імена, класи зберігання</h2><div class="dg"><div class="dtitle">Ім&#x27;я бакета</div><div class="dcols"><div class="dcol green"><b>✅ можна</b><ul><li>глобально унікальне</li><li>3-63 символи</li><li>починається з малої літери чи цифри</li></ul></div><div class="dcol red"><b>❌ не можна</b><ul><li>великі літери й `_`</li><li>формат IP (192.168.1.1)</li><li>префікс xn--</li><li>суфікс -s3alias</li></ul></div></div><div class="dtitle">Класи зберігання</div><div class="dflow"><div class="dbox green">S3 Standard: частий доступ, продакшн, веб-додатки</div><div class="darrow">↓</div><div class="dbox yellow">Infrequent Access: рідко, але швидко</div><div class="darrow">↓</div><div class="dbox yellow">One Zone-IA: менш критичні дані, можна втратити одну AZ</div><div class="darrow">↓</div><div class="dbox blue">Glacier Instant: архів, мілісекунди</div><div class="darrow">↓</div><div class="dbox blue">Glacier Flexible: архів, хвилини-години</div><div class="darrow">↓</div><div class="dbox gray">Glacier Deep Archive: найдешевше, години</div></div><div class="dnote">Intelligent-Tiering сам переміщає об&#x27;єкти між рівнями залежно від частоти доступу. Рівні: Frequent, Infrequent, Archive Instant, Flexible, Deep (останні три необов&#x27;язкові).</div><div class="dtitle">Ключ і префікс</div><div class="dnote">Ключ це повний шлях: префікс (папки) плюс ім&#x27;я файла.<br>s3://my-bucket/folder/sub/file.txt</div><div class="dtitle">Події</div><div class="dflow"><div class="dbox aws">S3 bucket: подія ObjectCreated</div><div class="darrow">↓</div><div class="dbox yellow">EventBridge (типово вимкнено, вмикається на бакеті)</div><div class="darrow">↓</div><div class="dbox blue">Rule: source aws.s3, prefix images/, suffix .json</div><div class="darrow">↓</div><div class="dbox green">Цілі: Lambda, SNS, SQS</div></div><div class="dnote">Доставка: near-real-time, at-least-once, best-effort. Можна вмикати разом із класичними сповіщеннями.</div><div class="dtitle">Ліміти</div><div class="tw"><table class="two"><thead><tr><th>Що</th><th>Значення</th></tr></thead><tbody><tr><td>PUT, COPY, POST, DELETE</td><td>~3 500 запитів/с на префікс</td></tr><tr><td>GET, HEAD</td><td>~5 500 запитів/с на префікс</td></tr><tr><td>Більше 5 ГБ</td><td>обов&#x27;язково multi-part (кожна частина окремий паралельний PUT)</td></tr><tr><td>Макс. об&#x27;єкт</td><td>5 ТБ у конспекті; зараз AWS пише 48,8 ТіБ</td></tr></tbody></table></div><div class="dtitle">Інше</div><div class="dcols"><div class="dcol aws"><b>Lifecycle</b><ul><li>Expiration: видалити через N днів</li><li>Transition: перенести в інший клас</li></ul></div><div class="dcol aws"><b>Версіонування й реплікація</b><ul><li>Versioning вмикається на бакеті</li><li>CRR: інший регіон; SRR: той самий</li><li>реплікуються лише нові об&#x27;єкти</li><li>MFA Delete: MFA для видалення</li></ul></div></div></div><a class="dcard" href="../../diagrams/s3.html">🖼 Відкрити повну схему з конспекту (гортати й масштабувати)</a><div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>S3 плоский: ключ плюс префікси. Префікси задають межі прав, подій і lifecycle.</li>
 <li>Сильна консистентність з 2020 року.</li>

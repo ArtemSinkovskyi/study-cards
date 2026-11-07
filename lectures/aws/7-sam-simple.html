@@ -30,6 +30,31 @@
   .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
   .remember h2 { border-top:none; margin-top:.8rem; }
   .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dtitle { font-weight:700; color:#24466b; margin:1.1rem 0 .4rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.7rem; padding:.5rem .7rem; font-size:.88rem; line-height:1.35; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:.5rem; }
+  .dcol ul { margin:.3rem 0 0; padding-left:1.05rem; font-size:.84rem; }
+  .dcol b { font-size:.9rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.5rem .7rem; color:#555; font-size:.84rem; background:#fffdf7; margin:.6rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:flex; flex-wrap:wrap; gap:.35rem; margin:.3rem 0; }
+  .dcap { font-size:.84rem; color:#555; }
+  .pill { border-radius:.5rem; padding:.25rem .55rem; font-size:.76rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
   .dcards { margin:1.2rem 0; }
   a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
   .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
@@ -435,7 +460,7 @@ DeadLetterQueue:
 </tbody>
 </table></div>
 <p>Типова роль має три політики: <code>AWSLambdaBasicExecutionRole</code> (керована AWS, логи), вбудована з ваших <code>Policies:</code>, вбудована <code>DeadLetterQueuePolicy</code> (<code>sqs:SendMessage</code> на DLQ), яку SAM додав сам.</p>
-<div class="dcards"><a class="dcard" href="../../diagrams/cloudformation.html">🖼 Моя схема: CloudFormation: ресурси</a></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
+<h2>🖼 Схема: CloudFormation: ресурси</h2><div class="dg"><div class="dtitle">Навіщо</div><div class="drow"><div class="dbox aws">Інфраструктура як код</div><div class="dbox aws">Не винаходити колесо</div><div class="dbox aws">Продуктивність: створити й перестворити на льоту</div><div class="dbox aws">Прозорість вартості</div><div class="dbox aws">Розділення середовищ</div></div><div class="dtitle">Як це працює</div><div class="dflow"><div class="dbox yellow">Template (YAML/JSON): опис ресурсів</div><div class="darrow">↓</div><div class="dbox aws">Stack: створює й веде ресурси як одне ціле</div><div class="darrow">↓</div><div class="dbox green">Ресурси: майже всі ресурси AWS (S3, EC2, Lambda, RDS, IAM...)</div></div><div class="dnote">Change Set показує diff: що зміниться. Capabilities додають, якщо потрібні (наприклад для IAM).</div><div class="dtitle">Команди</div><div class="tw"><table class="two"><thead><tr><th>Дія</th><th>Команда</th></tr></thead><tbody><tr><td>створити</td><td>aws cloudformation create-stack --stack-name ... --template-body file://...</td></tr><tr><td>розгорнути</td><td>aws cloudformation deploy --template-file template.yaml --stack-name ...</td></tr><tr><td>видалити</td><td>aws cloudformation delete-stack --stack-name ...</td></tr><tr><td>список</td><td>aws cloudformation list-stacks [--stack-status-filter CREATE_COMPLETE]</td></tr></tbody></table></div><div class="dtitle">Pseudo parameters</div><div class="tw"><table class="two"><thead><tr><th>Параметр</th><th>Що повертає</th></tr></thead><tbody><tr><td>AWS::AccountId</td><td>ID облікового запису</td></tr><tr><td>AWS::Region</td><td>регіон стека</td></tr><tr><td>AWS::StackName</td><td>ім&#x27;я стека</td></tr><tr><td>AWS::StackId</td><td>ARN стека</td></tr><tr><td>AWS::Partition</td><td>aws, aws-cn чи aws-us-gov</td></tr><tr><td>AWS::NotificationARNs</td><td>список ARN для оповіщень</td></tr><tr><td>AWS::NoValue</td><td>умовне видалення ресурсу</td></tr></tbody></table></div><div class="dnote">Intrinsic functions (!Ref, !GetAtt, !Sub...) обчислює сам CloudFormation під час створення чи оновлення стека.</div></div><a class="dcard" href="../../diagrams/cloudformation.html">🖼 Відкрити повну схему з конспекту (гортати й масштабувати)</a><div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li><code>Transform: AWS::Serverless-2016-10-31</code> розгортає SAM у CloudFormation. Деплой іде через change set і стек.</li>
 <li><code>AutoPublishAlias</code> створює версію й alias. <code>DeploymentPreference</code> зсуває трафік через CodeDeploy: Canary, Linear, AllAtOnce. Alarm дає автовідкат. <code>Hooks</code>: <code>PreTraffic</code>, <code>PostTraffic</code>.</li>
