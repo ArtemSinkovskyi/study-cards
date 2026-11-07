@@ -270,7 +270,7 @@
 </tr>
 </tbody>
 </table></div>
-<p>Помилка тротлінгу: <code>ProvisionedThroughputExceededException</code>. SDK повторює сам з <strong>exponential backoff</strong>. Якщо тротлить лише один ключ при вільній потужності таблиці, це hot partition: змініть ключ або додайте DAX. На один розділ діє ліміт 3 000 RCU і 1 000 WCU <em>(не звірено)</em>.</p>
+<p>Помилка тротлінгу: <code>ProvisionedThroughputExceededException</code>. SDK повторює сам з <strong>exponential backoff</strong>. Якщо тротлить лише один ключ при вільній потужності таблиці, це hot partition: змініть ключ або додайте DAX. На один розділ діє ліміт 3 000 RCU і 1 000 WCU.</p>
 <h2>Крок 9. Streams</h2>
 <p><strong>DynamoDB Streams</strong> це журнал змін таблиці, зберігається <strong>24 години</strong>. Lambda читає його через event source mapping.</p>
 <div class="tw"><table class="two">

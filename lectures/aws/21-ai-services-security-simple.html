@@ -127,7 +127,7 @@
 <h2>Крок 3. Приватність</h2>
 <p>Зі сторінки Bedrock: вміст «не використовується для покращення базових моделей і не передається провайдерам моделей». Вхідні й вихідні дані не використовуються для тренування моделей Amazon чи сторонніх. Це головна відповідь на питання «чи вчиться модель на наших даних».</p>
 <p><strong>Приватне з'єднання:</strong> <strong>AWS PrivateLink</strong> (interface VPC endpoint) дає доступ до Bedrock без публічного інтернету. Питання «дані не мають іти через інтернет» означає interface VPC endpoint.</p>
-<p>Шифрування: дані в передачі шифруються TLS. Власний ключ KMS можна задати для custom models (<code>customModelKmsKeyId</code>) і для агентів (<code>customerEncryptionKeyArn</code>); для guardrails джерела розходяться <em>(не звірено)</em>.</p>
+<p>Шифрування: дані в передачі шифруються TLS. Власний ключ KMS можна задати для custom models (<code>customModelKmsKeyId</code>) і для агентів (<code>customerEncryptionKeyArn</code>); для guardrails теж можна задати власний ключ KMS (за замовчуванням ключ керує AWS).</p>
 <h2>Крок 4. Guardrails</h2>
 <div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
