@@ -30,6 +30,8 @@
   .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
   .remember h2 { border-top:none; margin-top:.8rem; }
   .remember li { margin:.35rem 0; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
   .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
   @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
@@ -205,7 +207,7 @@
 </ul>
 <h2>Крок 8. VPC і доступ</h2>
 <p>Коли Lambda чи задача мають доступ до RDS у VPC (навичка 1.2.1): вказати subnets і security groups. Lambda у VPC без NAT не має інтернету. До S3 краще через <strong>gateway endpoint</strong>, до інших сервісів через <strong>interface endpoint (PrivateLink)</strong>.</p>
-<div class="remember"><h2>Що запам'ятати на іспит</h2>
+<div class="dcards"><a class="dcard" href="../../diagrams/ecs.html">🖼 Моя схема: ECS: контейнери, tasks, services</a><a class="dcard" href="../../diagrams/rolling-update.html">🖼 Моя схема: ECS: rolling update крок за кроком</a></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>ECR зберігає образи, ECS запускає, Fargate прибирає сервери, EKS це Kubernetes.</li>
 <li>Task definition це рецепт, task це запуск, service тримає кількість.</li>

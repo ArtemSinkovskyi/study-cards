@@ -30,6 +30,8 @@
   .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
   .remember h2 { border-top:none; margin-top:.8rem; }
   .remember li { margin:.35rem 0; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
   .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
   @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
   code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
@@ -357,7 +359,7 @@
 <h2>Крок 9. Що офіційно поза іспитом</h2>
 <p>Зі сторінки Out-of-Scope: <strong>Amazon Rekognition, Polly, SageMaker AI, Strands Agents, Quick Sight, Connect, Elastic Transcoder, Shield, Storage Gateway, Snow Family, Transfer Family</strong>. Якщо така назва є у варіанті відповіді, це майже напевно не те.</p>
 <p><strong>Нове в C03 порівняно з C02:</strong> завдання 2.3 про AI-безпеку, AI-навички в 1.1, 3.2, 3.3, 4.1, 4.3, presigned URL (2.1), образи контейнерів (3.1), деплой контейнерів (3.3). Вага Troubleshooting виросла з 18% до 22%.</p>
-<div class="remember"><h2>Що запам'ятати на іспит</h2>
+<div class="dcards"><a class="dcard" href="../../diagrams/beanstalk.html">🖼 Моя схема: Elastic Beanstalk</a><a class="dcard" href="../../diagrams/beanstalk-deployment.html">🖼 Моя схема: Beanstalk: способи оновлення</a><a class="dcard" href="../../diagrams/ec2.html">🖼 Моя схема: EC2: сімейства інстансів</a></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>API Gateway proxy: <code>event.body</code> це рядок, <code>JSON.parse</code> на вході й <code>JSON.stringify</code> на виході.</li>
 <li>Kinesis <code>data</code> у Lambda в base64.</li>
