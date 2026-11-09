@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Картки: ідентифікація і доступ</title>
+<style>
+  :root { --bg:#f7f5f0; --card:#fff; --ink:#1d1d1f; --mut:#6b6b70; --line:#e3dfd6; --acc:#24466b; --ok:#1e7a46; --bad:#b3261e; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui, Segoe UI, Roboto, sans-serif; }
+  header { background:var(--card); border-bottom:1px solid var(--line); padding:.75rem 1rem; }
+  .wrap { max-width:40rem; margin:0 auto; padding:0 1rem; }
+  header .wrap { padding:0; }
+  h1 { font-size:1.05rem; margin:0 0 .5rem; }
+  .row { display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; }
+  select, .chip { font:inherit; padding:.35rem .6rem; border:1px solid var(--line); border-radius:.5rem; background:var(--bg); }
+  .chip { cursor:pointer; }
+  .chip.on { background:var(--acc); color:#fff; border-color:var(--acc); }
+  .bar { height:.4rem; background:var(--line); border-radius:1rem; margin-top:.6rem; overflow:hidden; }
+  .bar i { display:block; height:100%; background:var(--ok); width:0; transition:width .2s; }
+  .st { font-size:.85rem; color:var(--mut); margin-top:.3rem; }
+  main { padding:1.2rem 0 3rem; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:.9rem; min-height:15rem; padding:1.4rem; cursor:pointer; display:flex; flex-direction:column; justify-content:center; text-align:center; user-select:none; }
+  .term.q { font:600 1.2rem/1.4 system-ui, Segoe UI, Roboto, sans-serif; }
+  .term { font:600 1.7rem/1.3 ui-monospace, Consolas, monospace; word-break:break-word; }
+  .hint { color:var(--mut); font-size:.85rem; margin-top:1rem; }
+  .group { color:var(--acc); font-size:.8rem; text-transform:uppercase; letter-spacing:.05em; margin-bottom:.8rem; }
+  .back { text-align:left; }
+  .back .lit { color:var(--mut); font-size:.95rem; }
+  .back p { margin:.7rem 0 0; }
+  .back b { color:var(--acc); }
+  .def { background:#f1f6ee; border-radius:.5rem; padding:.5rem .7rem; }
+  .ex { background:#1d1d1f; color:#f4f1ea; border-radius:.5rem; padding:.6rem .8rem; font:.82rem/1.45 ui-monospace, Consolas, monospace; overflow-x:auto; white-space:pre; margin:.7rem 0 0; }
+  .pic { display:flex; align-items:center; gap:.8rem; background:#fff7e6; border:1px dashed #e3c987; border-radius:.6rem; padding:.5rem .8rem; margin:.2rem 0 .6rem; }
+  .pic .big { font-size:2rem; line-height:1; }
+  .pic .cap { font-size:.92rem; color:#5a4a1f; }
+  .refs { margin-top:.8rem; padding-top:.6rem; border-top:1px dashed var(--line); font-size:.85rem; color:var(--mut); }
+  .refs ul { margin:.3rem 0 0; padding-left:1.1rem; }
+  .refs a { color:var(--acc); }
+  .why { background:#fff6e0; border-radius:.5rem; padding:.5rem .7rem; }
+  .tip { margin-top:.9rem; padding:.55rem .7rem; background:#eef3f9; border-radius:.5rem; font-size:.92rem; }
+  .btns { display:flex; gap:.7rem; margin-top:1rem; }
+  .btns button { flex:1; padding:.8rem; font:inherit; border-radius:.6rem; border:0; cursor:pointer; color:#fff; }
+  .know { background:var(--ok); }
+  .no { background:var(--bad); }
+  .small { background:#fff !important; color:var(--acc) !important; border:1px solid var(--acc) !important; flex:none !important; padding:.5rem .8rem !important; }
+  .done { text-align:center; padding:2rem 1rem; background:var(--card); border:1px solid var(--line); border-radius:.9rem; }
+</style>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>Картки термінів</h1>
+  <div class="row">
+    <select id="group"></select>
+    <span class="chip on" id="m1">Скорочення → назва</span>
+    <span class="chip" id="m2">Назва → скорочення</span>
+  </div>
+  <div class="bar"><i id="fill"></i></div>
+  <div class="st" id="st"></div>
+</div></header>
+<main><div class="wrap" id="app"></div></main>
+
+<script>
+const GROUP_ICONS = {"Ідентифікація і доступ": "🛂"};
+function gi(g) { return (GROUP_ICONS[g] || "📌") + " " + g; }
+
+const GLOSSARY = [];
+const CARDS = [
+ {"g": "Ідентифікація і доступ", "t": "IAM", "lit": "", "q": "IAM", "m": "Identity and Access Management", "d": "сервіс AWS, що керує користувачами, ролями й політиками.", "a": "відповідає на питання «хто що може робити з ресурсами AWS».", "tip": "У принципі: хто (identity) і що йому дозволено (access).", "ic": "🛂", "cap": "Охоронець на вході: перевіряє, хто ти, і чи є в тебе право зайти.", "why": ""},
+ {"g": "Ідентифікація і доступ", "t": "STS", "lit": "", "q": "STS", "m": "Security Token Service", "d": "сервіс, що видає тимчасові облікові дані (ключ, секрет, session token).", "a": "щоб не зберігати довгі ключі: роль «приймають» через AssumeRole і отримують ключі на годину.", "tip": "Security Token: токен безпеки, тобто тимчасова перепустка.", "ic": "🎟️", "cap": "Разова перепустка замість постійного ключа.", "why": ""},
+ {"g": "Ідентифікація і доступ", "t": "ARN", "lit": "", "q": "ARN", "m": "Amazon Resource Name", "d": "унікальне ім'я будь-якого ресурсу AWS, наприклад arn:aws:s3:::my-bucket.", "a": "щоб у політиках і викликах вказати саме той ресурс, який потрібен, без плутанини.", "tip": "Формат: arn:партиція:сервіс:регіон:акаунт:ресурс.", "ic": "🏷️", "cap": "Поштова адреса ресурсу: за нею його знайде будь-який сервіс.", "why": ""},
+ {"g": "Ідентифікація і доступ", "t": "SSO", "lit": "", "q": "SSO", "m": "Single Sign-On", "d": "єдиний вхід: один раз ввійшов і користуєшся багатьма застосунками без нових паролів.", "a": "менше паролів для користувача, а адміністратор вимикає доступ в одному місці.", "tip": "Single: один. Sign-On: вхід.", "ic": "🔑", "cap": "Один ключ від усіх дверей у будівлі.", "why": ""},
+ {"g": "Ідентифікація і доступ", "t": "SAML", "lit": "", "q": "SAML", "m": "Security Assertion Markup Language", "d": "XML-стандарт обміну даними про вхід між провайдером ідентичності й застосунком.", "a": "корпоративний SSO: IdP підписує «підтвердження», що цей користувач справді увійшов.", "tip": "SAML = XML і корпоративні застосунки. OIDC = JSON і сучасні веб-/мобільні.", "ic": "📜", "cap": "Підписана довідка від відділу кадрів: цей працівник справжній.", "why": ""},
+ {"g": "Ідентифікація і доступ", "t": "OIDC", "lit": "", "q": "OIDC", "m": "OpenID Connect", "d": "надбудова над OAuth 2.0: сервіс (Google, GitHub) видає підписаний JWT-токен про користувача.", "a": "вхід через зовнішнього провайдера; в AWS так GitHub Actions отримує роль без постійних ключів.", "tip": "OAuth 2.0 відповідає на «що дозволено», OIDC додає «хто це».", "ic": "🪪", "cap": "Паспорт від довіреної сторони: за ним тебе впускають.", "why": ""},
+ {"g": "Ідентифікація і доступ", "t": "IdP", "lit": "", "q": "IdP", "m": "Identity Provider", "d": "система, що зберігає користувачів і підтверджує, хто вони (Okta, Entra ID, Google).", "a": "щоб застосунки не перевіряли паролі самі, а довіряли одному джерелу.", "tip": "IdP відповідає «хто ти», SP відповідає «що ти тут можеш».", "ic": "🏛️", "cap": "Паспортний стіл: видає й підтверджує документи.", "why": ""},
+ {"g": "Ідентифікація і доступ", "t": "SP", "lit": "", "q": "SP", "m": "Service Provider", "d": "застосунок чи сервіс, який дає доступ, але ідентичність перевіряє не сам, а через IdP.", "a": "щоб не будувати власний вхід: SP довіряє підтвердженню від IdP.", "tip": "У SAML обов'язкова пара: IdP + SP.", "ic": "🏢", "cap": "Будівля, що пускає за довідкою від паспортного столу.", "why": ""},
+ {"g": "Ідентифікація і доступ", "t": "RBAC", "lit": "", "q": "RBAC", "m": "Role-Based Access Control", "d": "права видаються ролям (admin, reader), а користувачу призначають роль.", "a": "просто керувати: змінив права ролі, і вони змінились у всіх, хто її має.", "tip": "Role: роль. Права йдуть від ролі, а не від людини.", "ic": "👥", "cap": "Права за посадою: усі бухгалтери бачать бухгалтерію.", "why": ""},
+ {"g": "Ідентифікація і доступ", "t": "ABAC", "lit": "", "q": "ABAC", "m": "Attribute-Based Access Control", "d": "права залежать від атрибутів (тег ресурсу, відділ користувача, час, місце).", "a": "гнучко й без нескінченних ролей: «доступ, якщо тег проєкту ресурсу збігається з тегом користувача».", "tip": "В AWS це теги і умови у політиках (aws:PrincipalTag).", "ic": "🧬", "cap": "Правило за ознаками: заходь, якщо твій відділ збігається з відділом кімнати.", "why": ""},
+ {"g": "Ідентифікація і доступ", "t": "SCP", "lit": "", "q": "SCP", "m": "Service Control Policy", "d": "політика AWS Organizations, що задає стелю прав для акаунтів чи OU.", "a": "щоб навіть адмін акаунта не міг вийти за межі дозволеного (наприклад, заборонити певні регіони).", "tip": "SCP прав не дає, вона тільки обмежує.", "ic": "🧱", "cap": "Стеля будівлі: ніхто всередині не підніметься вище.", "why": ""},
+ {"g": "Ідентифікація і доступ", "t": "ACL", "lit": "", "q": "ACL", "m": "Access Control List", "d": "список, хто (principal) і які дії може виконувати з конкретним об'єктом.", "a": "простий старий спосіб дати доступ окремому ресурсу (в S3 його радять вимикати на користь політик).", "tip": "ACL прив'язаний до ресурсу, IAM-політика до тих, хто діє.", "ic": "📋", "cap": "Список гостей біля дверей кімнати.", "why": ""},
+ {"g": "Ідентифікація і доступ", "t": "OU", "lit": "", "q": "OU", "m": "Organizational Unit", "d": "група акаунтів усередині AWS Organizations (наприклад, Prod, Dev, Sandbox).", "a": "щоб одну SCP застосувати до всієї групи акаунтів одразу.", "tip": "OU можуть бути вкладеними, SCP наслідуються вниз.", "ic": "🗂️", "cap": "Відділ у компанії: політику ставлять на відділ, а не на кожного.", "why": ""},
+ {"g": "Ідентифікація і доступ", "t": "SCIM", "lit": "", "q": "SCIM", "m": "System for Cross-domain Identity Management", "d": "стандарт автоматичної синхронізації користувачів і груп з IdP у застосунки.", "a": "щоб звільнення чи новий співробітник у IdP автоматично з'являлися чи зникали в усіх сервісах.", "tip": "SSO відповідає за вхід, SCIM за створення й видалення акаунтів.", "ic": "🔄", "cap": "Автоматичний кадровий обмін між відділом кадрів і всіма відділами.", "why": ""}
+];
+
+const KEY = "identity_cards_v1";
+let store = {};
+try { store = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { store = {}; }
+if (!store.streak) store.streak = {};
+let mode = 1, group = "all", flipped = false, queue = [], cur = null;
+
+function save() { localStorage.setItem(KEY, JSON.stringify(store)); }
+function key(c) { return c.g + "|" + c.t; }
+function streak(c) { return store.streak[key(c)] || 0; }
+function pool() { return CARDS.filter(c => group === "all" || c.g === group); }
+function mastered(c) { return streak(c) >= 2; }
+
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function rebuild() { queue = shuffle(pool().filter(c => !mastered(c))); next(); }
+function next() { cur = queue.length ? queue.shift() : null; flipped = false; render(); }
+
+function setup() {
+  const sel = document.getElementById("group");
+  const groups = ["all"].concat([...new Set(CARDS.map(c => c.g))]);
+  sel.innerHTML = groups.map(g => "<option value='" + g + "'>" + (g === "all" ? "Усі групи" : gi(g)) + "</option>").join("");
+  sel.onchange = () => { group = sel.value; rebuild(); };
+  document.getElementById("m1").onclick = () => setMode(1);
+  document.getElementById("m2").onclick = () => setMode(2);
+}
+function setMode(m) {
+  mode = m;
+  document.getElementById("m1").classList.toggle("on", m === 1);
+  document.getElementById("m2").classList.toggle("on", m === 2);
+  flipped = false; render();
+}
+
+function progress() {
+  const p = pool(), n = p.filter(mastered).length;
+  document.getElementById("fill").style.width = (100 * n / p.length) + "%";
+  document.getElementById("st").textContent = "Вивчено " + n + " з " + p.length + " · у черзі " + queue.length + (cur ? " +1" : "") + ". Картка вивчена, коли ви двічі поспіль відповіли «Знаю».";
+}
+
+function esc(t) {
+  return t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function refs(c) {
+  const text = [c.t, c.q, c.d, c.m, c.a, c.ex, c.cap].filter(Boolean).join(" ");
+  const found = GLOSSARY.filter(g => new RegExp(g[0]).test(text)).slice(0, 6);
+  if (!found.length) return "";
+  return "<div class='refs'><b>🔗 Що це за слова</b><ul>" + found.map(g => "<li><b>" + g[1] + "</b>: " + g[2] + " <a href='" + g[3] + "' target='_blank' rel='noopener'>документація</a></li>").join("") + "</ul></div>";
+}
+
+function body(c) {
+  return (c.ic ? "<div class='pic'><span class='big'>" + c.ic + "</span><span class='cap'>" + c.cap + "</span></div>" : "") + (c.why ? "<p class='why'><b>Навіщо так зроблено:</b> " + c.why + "</p>" : "") + (c.d ? "<p class='def'><b>Що це:</b> " + c.d + "</p>" : "") + "<p><b>Повна назва:</b> " + c.m + "</p>" + (c.a ? "<p><b>Навіщо:</b> " + c.a + "</p>" : "") + (c.ex ? "<pre class='ex'>" + esc(c.ex) + "</pre>" : "") + refs(c);
+}
+
+function render() {
+  const app = document.getElementById("app");
+  progress();
+  if (!cur) {
+    app.innerHTML = "<div class='done'><h2>Усі картки цієї групи вивчено</h2><p>Можна обрати іншу групу або почати спочатку.</p><div class='btns'><button class='small' id='again'>Скинути прогрес групи</button></div></div>";
+    document.getElementById("again").onclick = () => { pool().forEach(c => delete store.streak[key(c)]); save(); rebuild(); };
+    return;
+  }
+  let html = "";
+  if (!flipped) {
+    html += "<div class='card' id='card'><div class='group'>" + gi(cur.g) + "</div>";
+    if (mode === 1) html += "<div class='term q'>" + (cur.q || cur.t) + "</div><div class='hint'>Згадайте відповідь, потім клацніть, щоб перевернути.</div>";
+    else html += "<div class='back'>" + body(cur) + "</div><div class='hint'>Яке питання це відповідає? Клацніть, щоб перевернути.</div>";
+    html += "</div>";
+  } else {
+    html += "<div class='card' id='card'><div class='group'>" + gi(cur.g) + "</div>";
+    html += "<div class='term q'>" + (cur.q || cur.t) + "</div>";
+    html += "<div class='back'>" + (cur.lit ? "<div class='lit'>Дослівно: " + cur.lit + "</div>" : "") + body(cur);
+    if (cur.tip) html += "<div class='tip'>Щоб запам'ятати: " + cur.tip + "</div>";
+    html += "</div></div>";
+    html += "<div class='btns'><button class='no' id='no'>Ще ні</button><button class='know' id='yes'>Знаю</button></div>";
+  }
+  app.innerHTML = html;
+  document.getElementById("card").onclick = () => { if (!flipped) { flipped = true; render(); } };
+  if (flipped) {
+    document.getElementById("yes").onclick = () => { store.streak[key(cur)] = streak(cur) + 1; save(); if (!mastered(cur)) queue.push(cur); next(); };
+    document.getElementById("no").onclick = () => { store.streak[key(cur)] = 0; save(); queue.splice(Math.min(3, queue.length), 0, cur); next(); };
+  }
+}
+
+document.addEventListener("keydown", e => {
+  if (e.code === "Space") { e.preventDefault(); if (cur && !flipped) { flipped = true; render(); } }
+  else if (flipped && e.key === "ArrowRight") document.getElementById("yes").click();
+  else if (flipped && e.key === "ArrowLeft") document.getElementById("no").click();
+});
+
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.setHeaderColor("#ffffff");
+  tg.setBackgroundColor("#f7f5f0");
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+
+setup();
+rebuild();
+</script>
+</body>
+</html>
