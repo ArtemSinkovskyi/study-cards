@@ -426,6 +426,119 @@
 </tr>
 </tbody>
 </table></div>
+<h2>Крок 8. STS: тимчасові ключі й MFA</h2>
+<p>STS видає <strong>тимчасові</strong> ключі: access key, secret і session token (плюс час закінчення). Різні виклики для різних людей:</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Виклик</th>
+<th>Для кого</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Виклик"><code>AssumeRole</code></td>
+<td data-label="Для кого">роль у своєму чи чужому акаунті</td>
+</tr>
+<tr>
+<td data-label="Виклик"><code>AssumeRoleWithSAML</code></td>
+<td data-label="Для кого">вхід через SAML (корпоративний)</td>
+</tr>
+<tr>
+<td data-label="Виклик"><code>AssumeRoleWithWebIdentity</code></td>
+<td data-label="Для кого">вхід через Google, Facebook, OIDC; AWS радить краще <strong>Cognito identity pools</strong></td>
+</tr>
+<tr>
+<td data-label="Виклик"><code>GetSessionToken</code></td>
+<td data-label="Для кого">ключі <strong>з MFA</strong></td>
+</tr>
+<tr>
+<td data-label="Виклик"><code>GetFederationToken</code></td>
+<td data-label="Для кого">ключі для федеративного користувача</td>
+</tr>
+<tr>
+<td data-label="Виклик"><code>GetCallerIdentity</code></td>
+<td data-label="Для кого">«хто я зараз?»</td>
+</tr>
+<tr>
+<td data-label="Виклик"><code>DecodeAuthorizationMessage</code></td>
+<td data-label="Для кого">розшифрувати текст помилки, коли виклик відхилили</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Скільки живуть ключі.</strong> Колега писав «15 хв - 1 год», це застаріло. Насправді: <code>AssumeRole</code> від 15 хв до максимуму сесії ролі (до 12 год), типово 1 год. <code>GetSessionToken</code> для користувача IAM від 15 хв до 36 год, типово 12 год; для root лише до 1 год.</p>
+<p><strong>Як вимагати MFA:</strong></p>
+<ol>
+<li>У політиці пишуть умову <code>aws:MultiFactorAuthPresent = true</code>.</li>
+<li>Користувач викликає <code>GetSessionToken</code> із серійним номером пристрою й кодом.</li>
+<li>Працює з отриманими ключами, і лише тоді дія дозволена.</li>
+</ol>
+<h2>Крок 9. S3: IAM-політика плюс bucket policy</h2>
+<p>Оцінюються <strong>всі</strong> політики разом: IAM-політики суб'єкта плюс bucket policy. Порядок рішення: старт із відмови; явний Deny закінчує все відмовою; якщо є Allow, дозволено; інакше відмова.</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Де суб'єкт і бакет</th>
+<th>Що потрібно</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Де суб&#x27;єкт і бакет">в одному акаунті</td>
+<td data-label="Що потрібно">Allow в IAM <strong>або</strong> у bucket policy</td>
+</tr>
+<tr>
+<td data-label="Де суб&#x27;єкт і бакет">в різних акаунтах</td>
+<td data-label="Що потрібно">Allow <strong>і</strong> в IAM, <strong>і</strong> у bucket policy</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Крок 10. Одна політика на всіх: <code>${aws:username}</code></h2>
+<p>Кожному користувачу потрібна своя тека <code>/home/&lt;ім'я&gt;</code> у бакеті. Окрема політика на кожного не масштабується. Робимо <strong>одну</strong> політику зі змінною:</p>
+<pre><code class="language-json">{
+  &quot;Action&quot;: [&quot;s3:*&quot;],
+  &quot;Effect&quot;: &quot;Allow&quot;,
+  &quot;Resource&quot;: [&quot;arn:aws:s3:::my-company/home/${aws:username}/*&quot;]
+}
+</code></pre>
+<p>Змінна підставляється ім'ям користувача, який робить запит.</p>
+<h2>Крок 11. Які бувають політики за походженням і PassRole</h2>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Тип</th>
+<th>Хто веде</th>
+<th>Особливості</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Тип">AWS managed</td>
+<td data-label="Хто веде">AWS</td>
+<td data-label="Особливості">оновлюється з новими сервісами; для адміністраторів</td>
+</tr>
+<tr>
+<td data-label="Тип">Customer managed</td>
+<td data-label="Хто веде">ви</td>
+<td data-label="Особливості">багаторазова, версії й відкат; найкраща практика</td>
+</tr>
+<tr>
+<td data-label="Тип">Inline</td>
+<td data-label="Хто веде">вбудована в одного суб'єкта</td>
+<td data-label="Особливості">зникає разом із ним</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong><code>iam:PassRole</code>.</strong> Щоб сервіс (EC2, Lambda, ECS, CodePipeline) працював з роллю, її треба йому <strong>передати</strong> при налаштуванні. Для цього потрібне право <code>iam:PassRole</code>, часто разом з <code>iam:GetRole</code>. Але передати можна лише сервісу, якого дозволяє <strong>trust policy</strong> ролі.</p>
+<h2>Крок 12. Практики безпеки</h2>
+<ul>
+<li>Не користуватися root, увімкнути для нього MFA.</li>
+<li>Найменші привілеї; ніколи не давати <code>*</code> на весь сервіс.</li>
+<li>Стежити за викликами в CloudTrail, особливо відхиленими.</li>
+<li>Ключі IAM зберігати лише на особистому комп'ютері чи on-premise сервері; на on-premise краще брати тимчасові ключі через STS.</li>
+<li>EC2, Lambda, ECS-завдання, CodeBuild мають <strong>власні ролі</strong>; окрема роль на кожен застосунок чи функцію.</li>
+</ul>
+<p>Про Active Directory див. окрему лекцію про Directory Service.</p>
 <h2>Словник</h2>
 <div class="tw"><table class="two">
 <thead>

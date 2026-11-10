@@ -349,6 +349,88 @@
 <li><strong>CloudShell:</strong> термінал у браузері.</li>
 <li><strong>AI для CI/CD</strong> (навичка 3.3.9): автоматичні перевірки, Kiro.</li>
 </ul>
+<h2>Крок 11. CodeCommit</h2>
+<p>Приватні Git-репозиторії AWS без обмеження розміру, керовані й високодоступні; код лишається в акаунті AWS. Статус: з 6 червня 2024 не приймав нових клієнтів, але 24 листопада 2025 AWS знову відкрив його для нових акаунтів.</p>
+<h2>Крок 12. CodePipeline: категорії дій і діагностика</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Категорія</th>
+<th>Що може бути</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Категорія">Source</td>
+<td data-label="Що може бути">CodeCommit, ECR, S3, Bitbucket, GitHub</td>
+</tr>
+<tr>
+<td data-label="Категорія">Build</td>
+<td data-label="Що може бути">CodeBuild, Jenkins, CloudBees, TeamCity</td>
+</tr>
+<tr>
+<td data-label="Категорія">Test</td>
+<td data-label="Що може бути">CodeBuild, Device Farm, сторонні</td>
+</tr>
+<tr>
+<td data-label="Категорія">Deploy</td>
+<td data-label="Що може бути">CodeDeploy, Beanstalk, CloudFormation, ECS, S3</td>
+</tr>
+<tr>
+<td data-label="Категорія">Invoke</td>
+<td data-label="Що може бути">Lambda, Step Functions</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>Артефакти етапу кладуться в S3 і передаються далі.</li>
+<li>Збій етапу зупиняє pipeline. Події про невдалі pipeline чи скасовані етапи йдуть в EventBridge (CloudWatch Events). CloudTrail аудитує виклики API.</li>
+</ul>
+<h2>Крок 13. CodeBuild простими словами</h2>
+<ul>
+<li>серверів нема, черги збірок нема; платите за хвилини збірки;</li>
+<li>збірка йде в Docker-контейнері (готовий чи власний образ);</li>
+<li>інструкції: <code>buildspec.yml</code> (<code>env</code>, <code>phases</code>, <code>artifacts</code>, <code>cache</code>) чи вручну в консолі;</li>
+<li>артефакти в S3 (шифруються KMS), логи в S3 і CloudWatch Logs, кеш залежностей у S3 прискорює наступні збірки.</li>
+</ul>
+<h2>Крок 14. CodeDeploy: in-place чи blue/green на EC2</h2>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>In-place</strong></th>
+<th><strong>Blue/Green</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Що</td>
+<td data-label="In-place">оновлює наявні інстанси</td>
+<td data-label="Blue/Green">створює нову ASG (налаштування копіюються), перемикає трафік</td>
+</tr>
+<tr>
+<td data-label="">Вимоги</td>
+<td data-label="In-place">CodeDeploy agent</td>
+<td data-label="Blue/Green"><strong>ELB</strong></td>
+</tr>
+<tr>
+<td data-label="">Старі інстанси</td>
+<td data-label="In-place">оновлюються</td>
+<td data-label="Blue/Green">завершити чи залишити (налаштовується)</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>Нові інстанси ASG теж отримують деплой автоматично.</li>
+<li><strong>Відкат</strong> це повторний деплой раніше розгорнутої ревізії: автоматично (збій чи CloudWatch alarm) чи вручну, або вимкнений. CodeDeploy розгортає останню робочу ревізію <strong>як новий деплой</strong>.</li>
+</ul>
+<h2>Крок 15. CodeArtifact і CodeGuru</h2>
+<ul>
+<li><strong>CodeArtifact:</strong> працює з Maven, Gradle, npm, yarn, twine, pip, NuGet. Resource policy дає іншому акаунту доступ: принципал читає або всі пакети репозиторію, або жодного.</li>
+<li><strong>CodeGuru Reviewer:</strong> автоматичне рев'ю коду (статичний аналіз, розробка). <strong>CodeGuru Profiler:</strong> рекомендації щодо продуктивності в проді (наприклад зайвий CPU на логуванні), показує heap summary.</li>
+<li>Параметри агента Profiler: <code>MaxStackDepth</code> (глибина стеків у профілі: при 2 і ланцюгу A, B, C, D оцінюються A і B), <code>MemoryUsageLimitPercent</code>, <code>MinimumTimeForReportingInMilliseconds</code>, <code>ReportingIntervalInMilliseconds</code>, <code>SamplingIntervalInMilliseconds</code>.</li>
+<li>Статус: Reviewer з 7 листопада 2025 не створює нових асоціацій репозиторіїв, CodeGuru Security закрито 20 листопада 2025; статус Profiler перевірте в актуальній документації <em>(не звірено)</em>.</li>
+</ul>
 <h2>Словник</h2>
 <div class="tw"><table class="two">
 <thead>
@@ -390,6 +472,18 @@
 <td data-label="Термін"><strong>Drift detection</strong></td>
 <td data-label="Що це">пошук ручних змін, що розійшлися з шаблоном</td>
 </tr>
+<tr>
+<td data-label="Термін"><strong>CodeCommit</strong></td>
+<td data-label="Що це">приватний Git-репозиторій AWS</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>In-place / Blue-Green (CodeDeploy)</strong></td>
+<td data-label="Що це">оновити наявні інстанси чи зробити нову ASG і перемкнути трафік</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>CodeGuru Reviewer / Profiler</strong></td>
+<td data-label="Що це">рев'ю коду в розробці / рекомендації з продуктивності в проді</td>
+</tr>
 </tbody>
 </table></div>
 <div class="remember"><h2>Що запам'ятати на іспит</h2>
@@ -401,6 +495,11 @@
 <li>Canary плюс alarm: автоматичний відкат.</li>
 <li>Конфіг без деплою, поступово, з відкатом: AppConfig.</li>
 <li>Ручне підтвердження перед продом: manual approval у CodePipeline.</li>
+<li>Blue/green на EC2 вимагає ELB; відкат CodeDeploy це новий деплой останньої робочої ревізії.</li>
+<li>Артефакти між етапами йдуть через S3; збої pipeline видно через EventBridge.</li>
+<li>CodeBuild: без серверів і черги, оплата за хвилини, кеш у S3.</li>
+<li>CodeGuru: Reviewer (розробка), Profiler (прод).</li>
+<li>CodeArtifact resource policy: читати або всі пакети репозиторію, або жодного.</li>
 </ol>
 </div><h2>Перевірте себе</h2>
 <ol>

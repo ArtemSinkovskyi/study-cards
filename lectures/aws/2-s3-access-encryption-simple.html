@@ -251,11 +251,46 @@
 </table></div>
 <h3>Інше, що треба знати</h3>
 <ul>
-<li><strong>Access Points:</strong> коли одним бакетом користуються десятки команд, кожній дають точку входу з власною політикою замість однієї гігантської bucket policy.</li>
+<li><strong>Access Points:</strong> коли одним бакетом користуються десятки команд, кожній дають точку входу з власною політикою замість однієї гігантської bucket policy. Детальніше нижче.</li>
 <li><strong>CloudFront + OAC:</strong> бакет приватний, прочитати його може лише CDN. У bucket policy <code>Principal: cloudfront.amazonaws.com</code> з умовою <code>AWS:SourceArn</code> на конкретний дистрибутив. Стара назва OAI застаріла. Питання «приватний S3 за CDN» означає CloudFront і OAC.</li>
 <li><strong>VPC gateway endpoint:</strong> безкоштовний приватний шлях до S3 з VPC. З <code>aws:SourceVpce</code> у bucket policy обмежує доступ «лише з нашої VPC».</li>
 <li><strong>Cognito Identity Pool:</strong> мобільний застосунок отримує тимчасові ключі й пише в S3 сам, у «свою» теку через policy variable <code>${cognito-identity.amazonaws.com:sub}</code>.</li>
 </ul>
+<h3>Access Points докладніше</h3>
+<p><strong>Access Point</strong> це окрема «вхідна двері» в той самий бакет з власними правилами.</p>
+<ol>
+<li>Кожна точка має <strong>власну політику</strong> і власні налаштування Block Public Access.</li>
+<li>Політика точки діє <strong>разом</strong> із bucket policy: обидві мають дозволити запит.</li>
+<li>Точку можна обмежити <strong>лише з певної VPC</strong>.</li>
+<li>Через точку роблять операції над <strong>об'єктами</strong> (<code>GetObject</code>, <code>PutObject</code>), а не над самим бакетом.</li>
+</ol>
+<p>Приклад із нотаток («Company Data Bucket»):</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Точка</th>
+<th>Хто</th>
+<th>Що можна</th>
+<th>Мережа</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Точка">analytics</td>
+<td data-label="Хто">команда аналітики</td>
+<td data-label="Що можна">лише читати префікс <code>analytics/</code></td>
+<td data-label="Мережа">будь-яка</td>
+</tr>
+<tr>
+<td data-label="Точка">upload</td>
+<td data-label="Хто">застосунок</td>
+<td data-label="Що можна">лише писати в префікс <code>upload/</code></td>
+<td data-label="Мережа">лише з VPC</td>
+</tr>
+</tbody>
+</table></div>
+<p>Навіщо: <strong>ізоляція</strong> (різні політики для різних команд), <strong>простіше керування</strong> (багато простих політик замість однієї складної), <strong>доступ лише з VPC</strong>.</p>
+<p>Доповнення про сегментацію доступу: <strong>bucket policy</strong> відкриває бакет для конкретного акаунта, <strong>IAM policy</strong> дає користувачеві доступ лише до певної «теки» (префікса). Presigned URL (з нотаток) це тимчасове посилання на приватний об'єкт: підписане IAM-ключами, діє короткий час (наприклад, 15 хвилин чи 1 годину), дозволяє скачати чи завантажити.</p>
 <h2>Крок 2. Шифрування</h2>
 <p>Два напрямки: <strong>у спокої</strong> (at rest) і <strong>під час передавання</strong> (in transit).</p>
 <h3>У спокої: варіанти</h3>
@@ -305,6 +340,39 @@
 <p><strong>Envelope encryption:</strong> KMS шифрує напряму лише до <strong>4 КБ</strong>, тому для великих об'єктів KMS генерує data key (<code>GenerateDataKey</code>), дані шифруються ним, а в сховище йде зашифрований data key поруч.</p>
 <p><strong>SSE-C.</strong> Ключ іде в заголовках лише по HTTPS (HTTP відхиляється, а ключ, надісланий по HTTP, вважається скомпрометованим). S3 ключ не зберігає: загубили ключ, дані втрачені. Керовані сервіси AWS такі об'єкти нативно не розшифрують, а консоль SSE-C не підтримує. З квітня 2026 запити з SSE-C дають <code>403 AccessDenied</code>, доки не встановити <code>BlockedEncryptionTypes = NONE</code>.</p>
 <p><strong>Client-side.</strong> Бібліотека (наприклад, AWS Encryption SDK) шифрує до відправки. Захищає навіть від AWS і від помилки в політиці, але ви самі відповідаєте за ключі.</p>
+<p><strong>Шпаргалка заголовків:</strong></p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Вид</th>
+<th>Заголовок або вимога</th>
+<th>Підказка</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Вид">SSE-S3</td>
+<td data-label="Заголовок або вимога"><code>x-amz-server-side-encryption: AES256</code></td>
+<td data-label="Підказка">AES-256, ключами керує AWS, <strong>за замовчуванням увімкнено</strong></td>
+</tr>
+<tr>
+<td data-label="Вид">SSE-KMS</td>
+<td data-label="Заголовок або вимога"><code>x-amz-server-side-encryption: aws:kms</code></td>
+<td data-label="Підказка">контроль і аудит у CloudTrail, можливі ліміти KMS</td>
+</tr>
+<tr>
+<td data-label="Вид">SSE-C</td>
+<td data-label="Заголовок або вимога">лише HTTPS, ключ у заголовках <strong>кожного</strong> запиту</td>
+<td data-label="Підказка">S3 ключ не зберігає, у консолі не вмикається</td>
+</tr>
+<tr>
+<td data-label="Вид">Client-side</td>
+<td data-label="Заголовок або вимога">заголовків нема</td>
+<td data-label="Підказка">клієнт шифрує до відправки й розшифровує після отримання</td>
+</tr>
+</tbody>
+</table></div>
+<p>Заголовок в SSE-S3 і SSE-KMS один, різниця лише в значенні: <code>AES256</code> або <code>aws:kms</code>.</p>
 <p><strong>Примусове шифрування:</strong> bucket policy з <code>Deny</code> на <code>PutObject</code>, якщо заголовок <code>x-amz-server-side-encryption</code> не відповідає потрібному, або налаштування шифрування за замовчуванням на бакеті.</p>
 <h3>Під час передавання</h3>
 <p>Це HTTPS (TLS). Вимагати його можна політикою: <code>Deny</code> на <code>s3:*</code> для бакета й об'єктів з умовою <code>aws:SecureTransport</code> рівним <code>false</code>.</p>

@@ -442,6 +442,108 @@
 </table></div>
 <h2>Крок 9. Ціни</h2>
 <p>Тарифікується: зберігання (ГБ-місяць), запити (PUT і GET окремо), вихідний трафік в інтернет, опційні функції. <strong>Вхідний трафік у S3 безкоштовний; передавання між S3 і сервісами AWS у тому самому регіоні безкоштовне.</strong></p>
+<h2>Крок 10. Приклади використання класів</h2>
+<p>Клас обирають за трьома питаннями: скільки платити за зберігання, як швидко отримати об'єкт, як часто звертаєтесь.</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Клас</th>
+<th>Для яких даних</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Клас"><strong>Standard</strong> (за замовчуванням, часті звернення, доступ миттєвий)</td>
+<td data-label="Для яких даних">фото й відео для вебзастосунків; логи застосунків у реальному часі; HTML, CSS, JS сайту; Big Data аналітика</td>
+</tr>
+<tr>
+<td data-label="Клас"><strong>Intelligent-Tiering</strong> (сам переміщує між «часто» і «рідко», невелика плата за моніторинг)</td>
+<td data-label="Для яких даних">дані з непередбачуваним доступом; бекапи й архіви, до яких іноді звертаються вручну</td>
+</tr>
+<tr>
+<td data-label="Клас"><strong>Standard-IA</strong> (рідко, але миттєво; дешевше зберігати, дорожче діставати)</td>
+<td data-label="Для яких даних">логи, бекапи, експорти; старі дані користувачів, які треба швидко відновити</td>
+</tr>
+<tr>
+<td data-label="Клас"><strong>One Zone-IA</strong> (як IA, але в одній зоні, ще дешевше)</td>
+<td data-label="Для яких даних">бекапи, втрата яких не критична; кеш і тимчасові дані</td>
+</tr>
+<tr>
+<td data-label="Клас"><strong>Glacier Flexible Retrieval</strong> (архів, хвилини або години)</td>
+<td data-label="Для яких даних">щомісячні й щоквартальні архіви; старі версії проєкту, які можна відновити за 1-2 години</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Крок 11. Приклади lifecycle-правил</h2>
+<p>Lifecycle економить гроші: правила кажуть, коли об'єкт перенести чи видалити.</p>
+<ul>
+<li><strong>Transition</strong> (перенести в інший клас): у Standard-IA через 60 днів після створення (у нотатках 60; мінімум 30), у Glacier через 6 місяців.</li>
+<li><strong>Expiration</strong> (видалити): логи через 365 днів; старі версії файлів, якщо ввімкнено версіонування.</li>
+</ul>
+<h2>Крок 12. Події: типи і дозволи</h2>
+<ol>
+<li>Основні групи: <strong>Object Created</strong>, <strong>Object Removed</strong>, <strong>Object Restored</strong>, <strong>Replication</strong> (документація додає ще lifecycle, tagging, ACL тощо).</li>
+<li>Цілі: <strong>Lambda</strong>, <strong>SQS</strong>, <strong>SNS</strong> (і EventBridge). SQS FIFO напряму не підтримується, потрібен EventBridge.</li>
+<li>S3 має право викликати ціль лише якщо <strong>на самій цілі</strong> (функції, черзі, темі) є дозвіл для S3.</li>
+<li>Приклад із нотаток: завантажили CSV-звіт, подія викликає Lambda, вона читає файл і записує дані в RDS.</li>
+</ol>
+<h2>Крок 13. Що саме пришвидшує S3: три механізми</h2>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Механізм</th>
+<th>Напрям</th>
+<th>Що робить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Механізм">Multipart upload</td>
+<td data-label="Напрям">завантаження в S3</td>
+<td data-label="Що робить">файл на частини, паралельно, S3 збирає; від 100 МБ рекомендовано, понад 5 ГБ обов'язково</td>
+</tr>
+<tr>
+<td data-label="Механізм">Byte-range fetch</td>
+<td data-label="Напрям">читання з S3</td>
+<td data-label="Що робить">береться частина об'єкта (<code>Range</code>), діапазони можна тягти паралельно</td>
+</tr>
+<tr>
+<td data-label="Механізм">Transfer Acceleration</td>
+<td data-label="Напрям">завантаження в S3</td>
+<td data-label="Що робить">файл іде на найближчий edge-вузол AWS, далі в бакет цільового регіону</td>
+</tr>
+</tbody>
+</table></div>
+<p>У нотатках byte-range описано як «розділити на частини, завантажити паралельно, S3 збере»: це насправді <strong>multipart upload</strong>. Byte-range працює на <strong>читанні</strong>.</p>
+<h2>Крок 14. Replication детальніше</h2>
+<p><strong>Replication</strong> автоматично й асинхронно копіює об'єкти з одного бакета в інший.</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>CRR</th>
+<th>SRR</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Де</td>
+<td data-label="CRR">між регіонами (eu-central-1 і us-east-1)</td>
+<td data-label="SRR">в одному регіоні</td>
+</tr>
+<tr>
+<td data-label="">Навіщо</td>
+<td data-label="CRR">захист від збою регіону, локальний доступ в іншому регіоні, менша затримка глобальним користувачам</td>
+<td data-label="SRR">резервна копія, аудит, розділення по командах, збір логів в один бакет</td>
+</tr>
+</tbody>
+</table></div>
+<p>Ще:</p>
+<ol>
+<li>Копіюються <strong>нові й змінені</strong> об'єкти після налаштування. Старі: S3 Batch Replication.</li>
+<li>Потрібне версіонування і IAM-роль.</li>
+<li>S3 Replication Time Control: 99,99% нових об'єктів за 15 хвилин (за SLA).</li>
+</ol>
 <h2>Словник</h2>
 <div class="tw"><table class="two">
 <thead>

@@ -474,6 +474,133 @@ DeadLetterQueue:
 </tbody>
 </table></div>
 <p>Типова роль має три політики: <code>AWSLambdaBasicExecutionRole</code> (керована AWS, логи), вбудована з ваших <code>Policies:</code>, вбудована <code>DeadLetterQueuePolicy</code> (<code>sqs:SendMessage</code> на DLQ), яку SAM додав сам.</p>
+<h2>Крок 10. Доповнення: sam sync, policy templates, local, середовища</h2>
+<blockquote>
+<p>Додано з чужих конспектів іспиту (2026-11-11). <code>sam sync</code> звірено з документацією SAM CLI. В AWS це не виконувалось.</p>
+</blockquote>
+<h3>Шлях від шаблону до стека</h3>
+<p>SAM це YAML, з якого виходить повний CloudFormation. Усе, що вміє CloudFormation (Outputs, Mappings, Parameters, Resources), працює й тут.</p>
+<ol>
+<li><code>sam build</code>: шаблон SAM перетворюється на CloudFormation, код збирається.</li>
+<li><code>sam deploy</code>: код пакується в zip і вантажиться в S3.</li>
+<li>CloudFormation створює й виконує change set, і виходить стек (Lambda, API Gateway, DynamoDB).</li>
+</ol>
+<p>Рядок <code>Transform: 'AWS::Serverless-2016-10-31'</code> каже, що це SAM. Типи: <code>AWS::Serverless::Function</code>, <code>Api</code>, <code>SimpleTable</code>.</p>
+<h3><code>sam sync</code> (SAM Accelerate)</h3>
+<p>Мета: швидше доставляти зміни. Код іде викликами API сервісів <strong>в обхід CloudFormation</strong>, тож за секунди.</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Команда</th>
+<th>Що</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Команда"><code>sam sync</code></td>
+<td data-label="Що">код <strong>і</strong> інфраструктура</td>
+</tr>
+<tr>
+<td data-label="Команда"><code>sam sync --code</code></td>
+<td data-label="Що">лише код</td>
+</tr>
+<tr>
+<td data-label="Команда"><code>sam sync --code --resource AWS::Serverless::Function</code></td>
+<td data-label="Що">усі функції</td>
+</tr>
+<tr>
+<td data-label="Команда"><code>sam sync --code --resource-id HelloWorldLambdaFunction</code></td>
+<td data-label="Що">один ресурс</td>
+</tr>
+<tr>
+<td data-label="Команда"><code>sam sync --watch</code></td>
+<td data-label="Що">стежить за файлами й синхронізує сам</td>
+</tr>
+</tbody>
+</table></div>
+<p>З <code>--watch</code>: змінилась конфігурація, піде повний <code>sam sync</code> (з CloudFormation); змінився лише код, піде <code>sam sync --code</code>. Для розробки, не для prod.</p>
+<h3>Policy templates</h3>
+<p>Готові набори прав, щоб не писати політику вручну:</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Шаблон</th>
+<th>Права</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Шаблон"><code>S3ReadPolicy</code></td>
+<td data-label="Права">читання об'єктів S3</td>
+</tr>
+<tr>
+<td data-label="Шаблон"><code>SQSPollerPolicy</code></td>
+<td data-label="Права">опитування черги SQS</td>
+</tr>
+<tr>
+<td data-label="Шаблон"><code>DynamoDBCrudPolicy</code></td>
+<td data-label="Права">create, read, update, delete в таблиці</td>
+</tr>
+</tbody>
+</table></div>
+<p>Підключення: у <code>Policies</code> функції пишете, наприклад, <code>SQSPollerPolicy</code> з <code>QueueName: !GetAtt MyQueue.QueueName</code>.</p>
+<h3>SAM і CodeDeploy</h3>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Ключ</th>
+<th>Що робить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Ключ"><code>AutoPublishAlias</code></td>
+<td data-label="Що робить">бачить новий код, публікує нову версію, переставляє alias</td>
+</tr>
+<tr>
+<td data-label="Ключ"><code>DeploymentPreference</code></td>
+<td data-label="Що робить">Canary, Linear чи AllAtOnce</td>
+</tr>
+<tr>
+<td data-label="Ключ"><code>Alarms</code></td>
+<td data-label="Що робить">alarms, що запускають автовідкат</td>
+</tr>
+<tr>
+<td data-label="Ключ"><code>Hooks</code></td>
+<td data-label="Що робить">Lambda-перевірки до й після зміщення трафіку (PreTraffic, PostTraffic)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Приклад значення: <code>Canary10Percent10Minutes</code>: 10% на 10 хв, потім решта.</p>
+<h3>Локально: чотири команди</h3>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Команда</th>
+<th>Що</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Команда"><code>sam local start-lambda</code></td>
+<td data-label="Що">локальний endpoint, що емулює Lambda; проти нього пишуть автотести</td>
+</tr>
+<tr>
+<td data-label="Команда"><code>sam local invoke</code></td>
+<td data-label="Що">один виклик з payload і вихід; корисно для тест-кейсів; якщо функція кличе AWS, перевірте <code>--profile</code></td>
+</tr>
+<tr>
+<td data-label="Команда"><code>sam local start-api</code></td>
+<td data-label="Що">локальний HTTP-сервер з усіма функціями; зміни підхоплюються самі</td>
+</tr>
+<tr>
+<td data-label="Команда"><code>sam local generate-event</code></td>
+<td data-label="Що">зразки payload для S3, API Gateway, SNS, Kinesis, DynamoDB</td>
+</tr>
+</tbody>
+</table></div>
+<h3>Кілька середовищ</h3>
+<p>Один шаблон, а в <code>samconfig.toml</code> блоки <code>[dev.deploy.parameters]</code> і <code>[prod.deploy.parameters]</code> з окремими <code>stack_name</code>, <code>s3_bucket</code>, <code>s3_prefix</code>, <code>region</code>, <code>parameter_overrides</code>. Команда <code>sam deploy --config-env dev</code> бере блок dev. Також є <code>[dev.sync.parameters]</code> з <code>watch = true</code> і <code>[prod.sync.parameters]</code> з <code>watch = false</code>.</p>
 <h2>Словник</h2>
 <div class="tw"><table class="two">
 <thead>
@@ -528,6 +655,8 @@ DeadLetterQueue:
 <li>REST API типово EDGE (вбудований CloudFront). Lambda@Edge: us-east-1, лише версія, без env і VPC. CloudFront Functions: 10 КБ, JS, дешево.</li>
 <li>Тригер EventBridge висить на alias, а не на <code>$LATEST</code>.</li>
 <li>Нативні залежності потребують збірки під архітектуру функції.</li>
+<li><code>sam sync --code</code> оминає CloudFormation (секунди); <code>--watch</code>: конфіг іде повним sync, код через <code>--code</code>; для розробки.</li>
+<li>Policy templates: <code>S3ReadPolicy</code>, <code>SQSPollerPolicy</code>, <code>DynamoDBCrudPolicy</code>. Локально: <code>start-lambda</code>, <code>invoke</code>, <code>start-api</code>, <code>generate-event</code>. Середовища: <code>samconfig.toml</code> і <code>--config-env</code>.</li>
 </ol>
 </div><h2>Перевірте себе</h2>
 <ol>

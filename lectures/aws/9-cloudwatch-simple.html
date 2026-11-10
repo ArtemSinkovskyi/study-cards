@@ -395,6 +395,93 @@
 <li>У невдалій події <code>AssumeRoleWithWebIdentity</code> нема <code>Resource name</code>: це ознака відхиленого виклику. Причину читають у JSON події: <code>errorCode</code>, <code>errorMessage</code>. Тимчасові ключі STS мають <code>AccessKey</code> з <code>ASIA...</code>.</li>
 <li>Для запитів над журналом: Athena або CloudTrail Lake.</li>
 </ul>
+<h2>Крок 12. Карта: хто що відповідає</h2>
+<p>Три сервіси дають три різні відповіді:</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>CloudTrail</strong></th>
+<th><strong>CloudWatch</strong></th>
+<th><strong>X-Ray</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Питання</td>
+<td data-label="CloudTrail"><strong>хто і що зробив</strong></td>
+<td data-label="CloudWatch"><strong>що відбувається зараз</strong></td>
+<td data-label="X-Ray"><strong>чому код повільний</strong></td>
+</tr>
+<tr>
+<td data-label="">Що це</td>
+<td data-label="CloudTrail">журнал усіх дій і API-викликів у акаунті</td>
+<td data-label="CloudWatch">метрики, логи, alarm у реальному часі</td>
+<td data-label="X-Ray">трасування запиту через мікросервіси</td>
+</tr>
+<tr>
+<td data-label="">Пам'ятка</td>
+<td data-label="CloudTrail">CloudWatch збирає метрики, <strong>не</strong> API-виклики</td>
+<td data-label="CloudWatch"></td>
+<td data-label="X-Ray">X-Ray це рівень застосунку, не системний і не security-лог</td>
+</tr>
+</tbody>
+</table></div>
+<p>CloudWatch складається з Metrics (метрики), Logs (логи), Events (тепер EventBridge) і Alarms (реакція в реальному часі).</p>
+<h2>Крок 13. Метрики: ще кілька цифр</h2>
+<ul>
+<li>Метрики належать <strong>namespace</strong>; <strong>dimension</strong> уточнює метрику (id екземпляра, середовище). До <strong>30 dimensions</strong> на метрику.</li>
+<li><strong>Detailed monitoring</strong> (раз на хвилину) вмикають, щоб ASG масштабувався швидше. У Free Tier 10 таких метрик <em>(не звірено)</em>.</li>
+<li>CloudWatch приймає точки даних <strong>до 2 тижнів у минулому і до 2 годин у майбутньому</strong>. Тому годинник EC2 має бути правильним.</li>
+</ul>
+<h2>Крок 14. Логи: куди їх можна вивезти</h2>
+<p>Є два шляхи, і вони різні за швидкістю:</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>Експорт у S3</th>
+<th>Subscription filter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Виклик</td>
+<td data-label="Експорт у S3"><code>CreateExportTask</code></td>
+<td data-label="Subscription filter">фільтр підписки</td>
+</tr>
+<tr>
+<td data-label="">Швидкість</td>
+<td data-label="Експорт у S3">пакетом, <strong>не реальний час</strong></td>
+<td data-label="Subscription filter">майже реальний час</td>
+</tr>
+<tr>
+<td data-label="">Куди</td>
+<td data-label="Експорт у S3">S3</td>
+<td data-label="Subscription filter">Kinesis Data Streams, Firehose, Lambda</td>
+</tr>
+</tbody>
+</table></div>
+<p>Підписка може бути <strong>cross-account</strong> (приймач в іншому акаунті). Колега писав, що дані доступні для експорту «до 12 годин». Поточна документація цього не підтверджує <em>(не звірено)</em>.</p>
+<p>Логи в CloudWatch <strong>шифруються за замовчуванням</strong>. Своїм ключем KMS шифрують <strong>на рівні log group</strong>: ключ прив'язують командою <code>associate-kms-key</code> (група вже є) або при створенні групи. Через консоль, як пишуть нотатки, не вийде <em>(не звірено)</em>. Джерела логів: SDK і агенти, Beanstalk, ECS, Lambda, VPC Flow Logs, API Gateway, CloudTrail, Route 53 (DNS-запити).</p>
+<p>Logs Insights: запит до 15 хвилин, результат можна експортувати чи додати на дашборд.</p>
+<h2>Крок 15. Alarm: цілі і composite</h2>
+<ul>
+<li>Period: для high-resolution метрик 10 с, 30 с або кратний 60 с. Period alarm не менший за роздільність метрики (EC2 basic: не менше 300 с).</li>
+<li>Що alarm може зробити: <strong>зупинити, термінувати, перезавантажити, відновити EC2</strong>; запустити <strong>Auto Scaling</strong>; надіслати в <strong>SNS</strong>.</li>
+<li><strong>Composite alarm</strong> стежить за кількома alarm разом з умовами AND чи OR. Приклад: тривога лише коли CPU <strong>і</strong> IOPS обидва в <code>ALARM</code>.</li>
+</ul>
+<h2>Крок 16. EventBridge між акаунтами</h2>
+<p>EventBridge це event bus, rules (фільтр і маршрут) і targets (Lambda, SQS, SNS, Step Functions тощо). Rule працює за розкладом (cron) або за шаблоном події.</p>
+<p>Щоб <strong>зібрати події всієї організації в одному акаунті</strong>, на центральній шині ставлять <strong>resource-based policy</strong>, що дозволяє події з інших акаунтів. Кожен акаунт має rule, що шле події в центральну шину.</p>
+<h2>Крок 17. CloudTrail: ще кілька речей</h2>
+<ul>
+<li>Увімкнений за замовчуванням, trail типово на <strong>всі регіони</strong>. Видалили ресурс? <strong>Спершу в CloudTrail.</strong></li>
+<li><strong>Management events</strong> (операції над ресурсами) логуються типово; є розділення Read і Write. <strong>Data events</strong> (об'єкти S3, виклики Lambda) <strong>типово вимкнені</strong>, бо їх дуже багато.</li>
+<li>Події зберігаються <strong>90 днів</strong>; довше означає S3 і Athena.</li>
+<li><strong>Insights</strong> знаходить незвичну активність за базовою лінією: аномальні виклики API і помилки. Подія йде в консоль, S3 і EventBridge.</li>
+<li>Реакція на дію: користувач викликає <code>DeleteTable</code>, CloudTrail логує, EventBridge ловить подію, SNS шле сповіщення.</li>
+</ul>
 <h2>Словник</h2>
 <div class="tw"><table class="two">
 <thead>

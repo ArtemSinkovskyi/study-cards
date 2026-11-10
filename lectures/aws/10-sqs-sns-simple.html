@@ -474,6 +474,193 @@
 <li>Фаза Init тарифікується.</li>
 <li>Alarm CloudWatch оцінює більше точок, ніж <code>EvaluationPeriods</code>: реальна breaching-точка тримає <code>ALARM</code>, доки не випаде з діапазону.</li>
 </ul>
+<h2>Крок 12. Доповнення: API, visibility timeout, SNS, порівняння з Kinesis</h2>
+<blockquote>
+<p>Додано з чужих конспектів іспиту й звірено з документацією AWS (2026-11-11). В AWS це не виконувалось.</p>
+</blockquote>
+<h3>SQS у двох словах</h3>
+<p>Керована черга, що <strong>розв'язує</strong> (decouple) застосунки. Затримка менше 10 мс, throughput Standard необмежений. Споживачі забирають повідомлення паралельно й <strong>самі видаляють</strong> після обробки. Хочете більше швидкості: додайте споживачів.</p>
+<p>Старі конспекти пишуть ліміт 256 КБ. <strong>Тепер 1 МіБ.</strong></p>
+<p>Безпека SQS і SNS однакова: HTTPS в дорозі, KMS у спокої, клієнтське шифрування за бажанням, IAM для API. Ще є <strong>access policies</strong> (як bucket policy): вони потрібні, щоб пустити <strong>інший акаунт</strong> або дозволити <strong>сервісу</strong> (SNS, S3) писати в чергу чи топік.</p>
+<h3>Visibility timeout: два шляхи</h3>
+<ol>
+<li>Споживач взяв повідомлення. Воно <strong>невидиме</strong> іншим 30 с (за замовчуванням).</li>
+<li><strong>Шлях 1:</strong> встиг, зробив <code>DeleteMessage</code>. Готово.</li>
+<li><strong>Шлях 2:</strong> не встиг. Через 30 с повідомлення знову видиме, його бере інший споживач, і буде <strong>дубль</strong>. Запізнілий <code>DeleteMessage</code> від першого дає помилку.</li>
+</ol>
+<p>Що робити, коли обробка довга: викликати <strong><code>ChangeMessageVisibility</code></strong>.</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Таймаут</th>
+<th>Наслідок</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Таймаут">Занадто великий (години)</td>
+<td data-label="Наслідок">Споживач упав, а повтор чекає години</td>
+</tr>
+<tr>
+<td data-label="Таймаут">Занадто малий (секунди)</td>
+<td data-label="Наслідок">Дублі, бо не встигли</td>
+</tr>
+</tbody>
+</table></div>
+<h3>DLQ і redrive</h3>
+<ul>
+<li>Не обробили за visibility timeout: повідомлення повертається в чергу. Поріг повернень: <code>maxReceiveCount</code>. Далі іде в <strong>DLQ</strong>.</li>
+<li>DLQ FIFO-черги має бути FIFO. DLQ Standard-черги має бути Standard.</li>
+<li>Retention DLQ ставте <strong>14 днів</strong>.</li>
+<li><strong>Redrive to source:</strong> після виправлення коду повертаєте повідомлення з DLQ пачками у вихідну чергу без свого коду.</li>
+</ul>
+<h3>Long polling: уточнення</h3>
+<ul>
+<li>Чекає 1-20 с (краще 20), менше API-викликів і менша затримка.</li>
+<li>Вмикається атрибутом черги <code>ReceiveMessageWaitTimeSeconds</code> <strong>або</strong> параметром виклику <strong><code>WaitTimeSeconds</code></strong>. (У чужому конспекті обидва названо однаково, це неточно.)</li>
+<li>Short polling питає лише частину серверів і при малій черзі може повернути порожньо. Тоді запит повторюють.</li>
+</ul>
+<h3>API, які треба знати</h3>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>API</th>
+<th>Що</th>
+<th>Запам'ятати</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="API"><code>CreateQueue</code></td>
+<td data-label="Що">створити</td>
+<td data-label="Запам&#x27;ятати">параметр <code>MessageRetentionPeriod</code></td>
+</tr>
+<tr>
+<td data-label="API"><code>DeleteQueue</code></td>
+<td data-label="Що">видалити чергу</td>
+<td data-label="Запам&#x27;ятати"></td>
+</tr>
+<tr>
+<td data-label="API"><code>PurgeQueue</code></td>
+<td data-label="Що">видалити <strong>всі повідомлення</strong>, чергу лишити</td>
+<td data-label="Запам&#x27;ятати">до 60 с, повторно раніше не можна, назад не повернути</td>
+</tr>
+<tr>
+<td data-label="API"><code>SendMessage</code></td>
+<td data-label="Що">надіслати</td>
+<td data-label="Запам&#x27;ятати"><code>DelaySeconds</code></td>
+</tr>
+<tr>
+<td data-label="API"><code>ReceiveMessage</code></td>
+<td data-label="Що">отримати</td>
+<td data-label="Запам&#x27;ятати"><code>MaxNumberOfMessages</code> 1-10, <strong>за замовчуванням 1</strong></td>
+</tr>
+<tr>
+<td data-label="API"><code>DeleteMessage</code></td>
+<td data-label="Що">видалити після обробки</td>
+<td data-label="Запам&#x27;ятати"></td>
+</tr>
+<tr>
+<td data-label="API"><code>ChangeMessageVisibility</code></td>
+<td data-label="Що">змінити час невидимості</td>
+<td data-label="Запам&#x27;ятати"></td>
+</tr>
+<tr>
+<td data-label="API"><code>...Batch</code></td>
+<td data-label="Що">кілька повідомлень за запит</td>
+<td data-label="Запам&#x27;ятати"><strong>дешевше</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3>FIFO: групи</h3>
+<ul>
+<li>Дедуплікація: 5 хв, або content-based (SHA-256 від тіла), або свій Deduplication ID.</li>
+<li><strong>Один <code>MessageGroupId</code> на все:</strong> один споживач, повний порядок.</li>
+<li><strong>Різні групи:</strong> порядок усередині групи, у кожної групи може бути свій споживач (паралельно), між групами порядку нема.</li>
+</ul>
+<h3>SNS</h3>
+<ul>
+<li>Продюсер шле в один топік, підписників скільки завгодно, <strong>кожен отримує все</strong> (без filter policy).</li>
+<li>Ліміти Standard: <strong>12 500 000 підписок на топік</strong>, <strong>100 000 топіків на акаунт</strong>. Для FIFO менше: 100 підписок на топік <em>(не звірено напряму)</em>.</li>
+</ul>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>Topic Publish</th>
+<th>Direct Publish (мобільні)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Кроки</td>
+<td data-label="Topic Publish">топік, підписка, publish у топік</td>
+<td data-label="Direct Publish (мобільні)">platform application, platform endpoint, publish у endpoint</td>
+</tr>
+<tr>
+<td data-label="">Кому</td>
+<td data-label="Topic Publish">усім підписникам</td>
+<td data-label="Direct Publish (мобільні)">одному пристрою</td>
+</tr>
+<tr>
+<td data-label="">Сервіси</td>
+<td data-label="Topic Publish"></td>
+<td data-label="Direct Publish (мобільні)">Google, Apple (APNs), Amazon ADM</td>
+</tr>
+</tbody>
+</table></div>
+<h3>Fan-out і filter policy</h3>
+<p>Приклад: сервіс покупок шле подію зі <code>State = Placed</code>. Топік має підписки з фільтрами <code>Placed</code>, <code>Cancelled</code> (черга і email), <code>Declined</code> та одну чергу <strong>без</strong> фільтра. Кожна отримає лише своє, а «all» отримає все.</p>
+<ul>
+<li>Публікуєте раз у SNS, копія йде в усі черги: <strong>без втрат</strong>.</li>
+<li>SQS додає зберігання, відкладену обробку, повтори; нових підписників додаєте з часом.</li>
+<li>Queue policy має дозволяти SNS писати. Працює і з чергами в інших регіонах.</li>
+<li><strong>S3 events:</strong> для того самого типу події й префікса можна лише <strong>одне правило</strong>. Хочете в багато черг: S3 → SNS → черги.</li>
+<li><strong>FIFO-топік:</strong> порядок за <code>MessageGroupId</code>, дедуплікація, підписники SQS Standard і FIFO. Потрібні fan-out, порядок і дедуплікація разом: <strong>SNS FIFO + SQS FIFO</strong>.</li>
+</ul>
+<h3>SQS, SNS і Kinesis поруч</h3>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>SQS</th>
+<th>SNS</th>
+<th>Kinesis Data Streams</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Як</td>
+<td data-label="SQS">споживач <strong>забирає</strong></td>
+<td data-label="SNS"><strong>штовхає</strong> багатьом</td>
+<td data-label="Kinesis Data Streams">Standard: забирає (2 МБ/с на шард); Enhanced fan-out: штовхає (2 МБ/с на шард <strong>на споживача</strong>)</td>
+</tr>
+<tr>
+<td data-label="">Після читання</td>
+<td data-label="SQS">видаляється</td>
+<td data-label="SNS">не зберігається</td>
+<td data-label="Kinesis Data Streams">лишається, можна перечитати</td>
+</tr>
+<tr>
+<td data-label="">Потужність</td>
+<td data-label="SQS">не резервуєте</td>
+<td data-label="SNS">не резервуєте</td>
+<td data-label="Kinesis Data Streams">provisioned або on-demand</td>
+</tr>
+<tr>
+<td data-label="">Порядок</td>
+<td data-label="SQS">лише FIFO</td>
+<td data-label="SNS">FIFO-топік</td>
+<td data-label="Kinesis Data Streams">на рівні шарда</td>
+</tr>
+<tr>
+<td data-label="">Типово</td>
+<td data-label="SQS">воркери, затримка повідомлення</td>
+<td data-label="SNS">розсилка, fan-out</td>
+<td data-label="Kinesis Data Streams">real-time big data, аналітика, ETL</td>
+</tr>
+</tbody>
+</table></div>
 <h2>Словник</h2>
 <div class="tw"><table class="two">
 <thead>
@@ -528,6 +715,8 @@
 <li>Filter policy на підписці: AND між ключами, OR між значеннями, 5 ключів, 150 комбінацій.</li>
 <li>Fan-out: топік плюс чергa на споживача, queue policy з <code>aws:SourceArn</code>, raw delivery прибирає конверт.</li>
 <li>Redrive працює лише для DLQ з SQS-джерелом.</li>
+<li><code>ReceiveMessage</code>: до 10 повідомлень, за замовчуванням 1; <code>PurgeQueue</code> чистить усе до 60 с; batch API дешевші; <code>ChangeMessageVisibility</code> для довгої обробки.</li>
+<li>DLQ FIFO-черги мусить бути FIFO, Standard: Standard. Ліміти SNS Standard: 12,5 млн підписок на топік, 100 000 топіків.</li>
 </ol>
 </div><h2>Перевірте себе</h2>
 <ol>

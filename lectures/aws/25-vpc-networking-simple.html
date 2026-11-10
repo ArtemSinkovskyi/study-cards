@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 25: VPC, своя мережа в AWS</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 25: VPC, своя мережа в AWS</h1>
+<blockquote>
+<p>Середній рівень: усі правила з повної лекції, але простими словами. Повна: ../25-vpc-networking.md. Усе звірено з документацією AWS; що не підтверджено, позначено <em>(не звірено)</em>. В AWS це не виконували.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>VPC це ваша власна ізольована мережа в AWS. Ви самі вирішуєте, що в ній видно ззовні, а що ні.</strong> На іспиті потрібно знати складові, різницю між security group і NACL та способи з'єднувати VPC із чимось іще.</p>
+<h2>Навіщо це так задумано</h2>
+<p>Без VPC усі ресурси були б у спільній мережі. VPC дає кімнату з дверима: хто заходить і виходить, вирішуєте ви. Підмережі дають кімнати всередині кімнати: публічну для сайту, приватну для бази.</p>
+<h2>Крок 1. Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>Subnet</strong></td>
+<td data-label="Суть">частина VPC, публічна чи приватна</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Route table</strong></td>
+<td data-label="Суть">вказівник «куди йде трафік»</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Internet Gateway</strong></td>
+<td data-label="Суть">двері в інтернет для публічних підмереж</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>NAT Gateway</strong></td>
+<td data-label="Суть">двері «лише назовні» для приватних підмереж</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Security group</strong></td>
+<td data-label="Суть">фаєрвол на сервері</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Network ACL</strong></td>
+<td data-label="Суть">фаєрвол на всю підмережу</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Крок 2. Складові</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Складова</th>
+<th>Що робить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Складова">Subnet</td>
+<td data-label="Що робить">ділить VPC на публічні й приватні зони</td>
+</tr>
+<tr>
+<td data-label="Складова">Route Table</td>
+<td data-label="Що робить">визначає, куди маршрутизується трафік</td>
+</tr>
+<tr>
+<td data-label="Складова">Internet Gateway</td>
+<td data-label="Що робить">доступ до інтернету для публічних підмереж</td>
+</tr>
+<tr>
+<td data-label="Складова">NAT Gateway</td>
+<td data-label="Що робить">вихід у інтернет для приватних підмереж</td>
+</tr>
+<tr>
+<td data-label="Складова">Security Group</td>
+<td data-label="Що робить">керує входом і виходом ресурсу</td>
+</tr>
+<tr>
+<td data-label="Складова">Network ACL</td>
+<td data-label="Що робить">правила на рівні підмережі</td>
+</tr>
+</tbody>
+</table></div>
+<p>Шлях запиту ззовні: <strong>IGW, потім route table, потім NACL підмережі, потім SG сервера.</strong> Lambda потрапляє у VPC лише якщо ви це налаштували, а без NAT Gateway вона не має виходу в інтернет.</p>
+<h2>Крок 3. Security group чи NACL</h2>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>Security group</th>
+<th>NACL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Де</td>
+<td data-label="Security group">на сервері</td>
+<td data-label="NACL">на підмережі</td>
+</tr>
+<tr>
+<td data-label="">Правила</td>
+<td data-label="Security group">лише дозволи</td>
+<td data-label="NACL">дозволи й заборони</td>
+</tr>
+<tr>
+<td data-label="">Пам'ять</td>
+<td data-label="Security group"><strong>stateful</strong>: відповідь дозволена сама</td>
+<td data-label="NACL"><strong>stateless</strong>: відповідь дозволяти окремо</td>
+</tr>
+<tr>
+<td data-label="">Порядок</td>
+<td data-label="Security group">усі правила разом</td>
+<td data-label="NACL">за номером, до першого збігу</td>
+</tr>
+</tbody>
+</table></div>
+<p>Правило: <strong>заблокувати конкретну IP-адресу можна лише в NACL.</strong> SG не має заборон. Стандартний NACL дозволяє все <em>(з нотаток, не звірено окремо)</em>. Документація радить спершу SG, NACL як додатковий шар.</p>
+<h2>Крок 4. NAT Gateway</h2>
+<p>Приватний сервер хоче скачати оновлення з інтернету. Без NAT він не може. NAT Gateway:</p>
+<ol>
+<li>стоїть у <strong>публічній</strong> підмережі й має Elastic IP;</li>
+<li>приймає запит від приватного сервера й виходить у інтернет від свого імені;</li>
+<li>повертає відповідь, але <strong>нових вхідних з'єднань ззовні не пускає</strong>.</li>
+</ol>
+<h2>Крок 5. П'ять способів зв'язності</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Спосіб</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Спосіб"><strong>VPC Peering</strong></td>
+<td data-label="Суть">дві VPC, можна в різних регіонах і акаунтах; приватні IP; <strong>не транзитний</strong></td>
+</tr>
+<tr>
+<td data-label="Спосіб"><strong>Gateway endpoint</strong></td>
+<td data-label="Суть">приватний шлях до S3 і DynamoDB</td>
+</tr>
+<tr>
+<td data-label="Спосіб"><strong>Interface endpoint</strong></td>
+<td data-label="Суть">приватний шлях до інших сервісів (PrivateLink)</td>
+</tr>
+<tr>
+<td data-label="Спосіб"><strong>Site-to-Site VPN</strong></td>
+<td data-label="Суть">зашифрований тунель до вашого офісу через інтернет, два тунелі</td>
+</tr>
+<tr>
+<td data-label="Спосіб"><strong>Direct Connect</strong></td>
+<td data-label="Суть">виділений фізичний канал без інтернету</td>
+</tr>
+</tbody>
+</table></div>
+<p>Peering: A з'єднано з B, B з'єднано з C, але <strong>A з C не з'єднано</strong>. Direct Connect надійний і швидкий, але потребує фізичного підключення.</p>
+<h2>Крок 6. Flow Logs</h2>
+<p>Це журнал, хто з ким спілкувався в мережі. Збирають на рівні VPC, підмережі чи окремого мережевого інтерфейсу. Допомагають знайти, чому не проходить зв'язок. Журнали можна надіслати в CloudWatch Logs, S3 або Amazon Data Firehose. На швидкість мережі вони не впливають.</p>
+<h2>Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>VPC</strong></td>
+<td data-label="Що це">ваша ізольована мережа в AWS</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>NAT Gateway</strong></td>
+<td data-label="Що це">шлюз для виходу приватних серверів в інтернет</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Stateful</strong></td>
+<td data-label="Що це">відповідь на дозволений запит дозволена автоматично</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Peering</strong></td>
+<td data-label="Що це">пряме з'єднання двох VPC</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Gateway endpoint</strong></td>
+<td data-label="Що це">приватний шлях до S3 і DynamoDB</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Interface endpoint</strong></td>
+<td data-label="Що це">приватний шлях до інших сервісів через ENI</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Direct Connect</strong></td>
+<td data-label="Що це">фізичний канал до AWS без інтернету</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Flow Logs</strong></td>
+<td data-label="Що це">журнали мережевого трафіку</td>
+</tr>
+</tbody>
+</table></div>
+<div class="remember"><h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>SG: stateful, лише allow, на сервері. NACL: stateless, allow і deny, на підмережі.</li>
+<li>Заблокувати IP можна лише в NACL.</li>
+<li>NAT Gateway у публічній підмережі з Elastic IP: тільки вихід.</li>
+<li>Peering не транзитний.</li>
+<li>S3 і DynamoDB: gateway endpoint. Інше: interface endpoint.</li>
+<li>VPN: IPsec через інтернет. Direct Connect: фізичний канал.</li>
+<li>Flow Logs: у CloudWatch Logs, S3 або Firehose.</li>
+</ol>
+</div><h2>Перевірте себе</h2>
+<ol>
+<li>Чим stateful відрізняється від stateless?</li>
+<li>Що потрібно приватному серверу, щоб скачати оновлення?</li>
+<li>Чому peering не дає A з C?</li>
+<li>Куди можна надіслати Flow Logs?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>Stateful сам дозволяє відповідь, stateless потребує окремого правила.</li>
+<li>NAT Gateway у публічній підмережі.</li>
+<li>Peering не підтримує транзитний трафік.</li>
+<li>CloudWatch Logs, S3, Amazon Data Firehose.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> ../25-vpc-networking.md.</p>
+
+<nav class="pager"><a href="24-elb-asg-simple.html">← Лекція 24</a><a href="26-route53-simple.html">Лекція 26 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 24: балансувальники (ELB) і Auto Scaling group</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 24: балансувальники (ELB) і Auto Scaling group</h1>
+<blockquote>
+<p>Середній рівень: усі правила й числа з повної лекції, але простими словами. Повна: ../24-elb-asg.md. Усе звірено з документацією AWS; що не підтверджено, позначено <em>(не звірено)</em>. В AWS це не виконували.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>Балансувальник розкидає запити по кількох серверах, а Auto Scaling group сама додає й прибирає сервери за навантаженням.</strong> Разом вони дають застосунок, що не падає від піку й не коштує зайвого вночі.</p>
+<h2>Навіщо це так задумано</h2>
+<p>Один сервер це одна точка відмови і одна межа потужності. Балансувальник дає кілька серверів за однією адресою й не шле запити на зламані. Auto Scaling прибирає ручну роботу: сам замінює нездорові й підлаштовує кількість.</p>
+<h2>Крок 1. Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>Target group</strong></td>
+<td data-label="Суть">група серверів, на які йде трафік</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Listener</strong></td>
+<td data-label="Суть">правило «на цьому порту слухай і пересилай сюди»</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Cross-zone</strong></td>
+<td data-label="Суть">розкидати запити по серверах усіх зон, не лише своєї</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Sticky session</strong></td>
+<td data-label="Суть">один клієнт завжди на одному сервері</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Deregistration delay</strong></td>
+<td data-label="Суть">час, поки сервер, який прибирають, дообробляє запити</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>ASG</strong></td>
+<td data-label="Суть">група серверів, якою керують разом</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Launch template</strong></td>
+<td data-label="Суть">опис, як запускати новий сервер</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Крок 2. Чотири балансувальники</h2>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>Що</th>
+<th>Протоколи</th>
+<th>Коли</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label=""><strong>CLB</strong></td>
+<td data-label="Що">Classic, старий</td>
+<td data-label="Протоколи">HTTP, HTTPS, TCP, SSL</td>
+<td data-label="Коли">застарів, мігрувати</td>
+</tr>
+<tr>
+<td data-label=""><strong>ALB</strong></td>
+<td data-label="Що">Application, рівень 7</td>
+<td data-label="Протоколи">HTTP, HTTPS, WebSocket</td>
+<td data-label="Коли">сайти, мікросервіси, контейнери, маршрути за запитом</td>
+</tr>
+<tr>
+<td data-label=""><strong>NLB</strong></td>
+<td data-label="Що">Network, рівень 4</td>
+<td data-label="Протоколи">TCP, TLS, UDP</td>
+<td data-label="Коли">мільйони запитів, мала затримка, статичний IP</td>
+</tr>
+<tr>
+<td data-label=""><strong>GWLB</strong></td>
+<td data-label="Що">Gateway, рівень 3</td>
+<td data-label="Протоколи">IP, GENEVE</td>
+<td data-label="Коли">фаєрволи й системи виявлення вторгнень</td>
+</tr>
+</tbody>
+</table></div>
+<p>Роки виходу: CLB 2009, ALB 2016, NLB 2017 <em>(не звірено)</em>. ALB потребує щонайменше двох зон доступності.</p>
+<h2>Крок 3. SSL, TLS і SNI</h2>
+<p>Сертифікат шифрує трафік між клієнтом і балансувальником. TLS це нова версія SSL. <strong>SNI</strong> дозволяє тримати на одному listener кілька сертифікатів для кількох сайтів: балансувальник дивиться на ім'я сайту й підставляє потрібний.</p>
+<h2>Крок 4. Cross-zone, рецепт у 3 кроки</h2>
+<p>Приклад: 2 сервери в зоні A, 8 у зоні B, кожен вузол отримує 50% запитів.</p>
+<ol>
+<li>Cross-zone <strong>увімкнено</strong>: 50% кожного вузла ділиться на всі 10 серверів. Кожен отримує 10%.</li>
+<li>Cross-zone <strong>вимкнено</strong>: вузол A ділить 50% на 2 сервери, по 25%.</li>
+<li>Вузол B ділить 50% на 8 серверів, по 6,25%.</li>
+</ol>
+<p>Типові значення:</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th></th>
+<th>Типово</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label=""><strong>ALB</strong></td>
+<td data-label="Типово">завжди увімкнено, на target group можна вимкнути</td>
+</tr>
+<tr>
+<td data-label=""><strong>NLB, GWLB</strong></td>
+<td data-label="Типово">вимкнено, при ввімкненні платять за міжзонний трафік <em>(не звірено)</em></td>
+</tr>
+</tbody>
+</table></div>
+<p>На ALB із вимкненим cross-zone <strong>sticky sessions не працюють</strong>.</p>
+<h2>Крок 5. Sticky sessions</h2>
+<p>Клієнт отримує cookie й далі потрапляє на той самий сервер. Корисно, коли стан сесії лежить на сервері. Два види:</p>
+<ul>
+<li><strong>за тривалістю:</strong> cookie <code>AWSALB</code>, від 1 секунди до 7 днів;</li>
+<li><strong>за застосунком:</strong> ваша cookie, ім'я задається в target group.</li>
+</ul>
+<p>Вмикається на рівні target group. Імена <code>AWSALB</code>, <code>AWSALBAPP</code>, <code>AWSALBTG</code> зарезервовані.</p>
+<h2>Крок 6. Connection draining</h2>
+<p>Коли сервер прибирають, балансувальник перестає слати йому нові запити, але <strong>дає дообробити поточні</strong> (форму, завантаження). Для CLB це <strong>connection draining</strong>, для ALB і NLB <strong>deregistration delay</strong>. Типово <strong>300 секунд</strong>; для CLB діапазон 1-3600 с. Якщо поточних з'єднань нема, відключення одразу.</p>
+<h2>Крок 7. Auto Scaling group</h2>
+<p>ASG тримає кількість серверів між <strong>minimum</strong> і <strong>maximum</strong>, прагнучи <strong>desired</strong>. Розкидає їх по зонах. Нездорові замінює. Нові запускає за <strong>launch template</strong>. Старі launch configurations застарілі: акаунти, створені після 1 жовтня 2024, не можуть їх створювати. Сервери з ASG самі реєструються в балансувальнику й відключаються від нього.</p>
+<h2>Крок 8. Політики масштабування</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Політика</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Політика"><strong>Target tracking</strong></td>
+<td data-label="Суть">тримає метрику на цілі, як термостат (наприклад CPU 50%)</td>
+</tr>
+<tr>
+<td data-label="Політика"><strong>Step</strong></td>
+<td data-label="Суть">сходинки за порогами alarm</td>
+</tr>
+<tr>
+<td data-label="Політика"><strong>Simple</strong></td>
+<td data-label="Суть">одна дія за одним alarm</td>
+</tr>
+<tr>
+<td data-label="Політика"><strong>Scheduled</strong></td>
+<td data-label="Суть">за розкладом, наприклад о 9:00</td>
+</tr>
+<tr>
+<td data-label="Політика"><strong>Predictive</strong></td>
+<td data-label="Суть">прогноз заздалегідь (лекція 22)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Для target tracking:</p>
+<ul>
+<li>метрики: середній CPU, мережа вхід і вихід, кількість запитів на ціль (<code>ALBRequestCountPerTarget</code>);</li>
+<li><strong>не підходять</strong> загальна кількість запитів балансувальника, затримка й довжина черги SQS, бо вони не змінюються разом із кількістю серверів;</li>
+<li>метрики EC2 приходять раз на 5 хвилин, для швидшої реакції вмикають хвилинний моніторинг;</li>
+<li>кілька політик: збільшує, якщо хоч одна просить; зменшує, лише коли всі згодні.</li>
+</ul>
+<h2>Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>ALB</strong></td>
+<td data-label="Що це">балансувальник для HTTP, шляхи й заголовки</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>NLB</strong></td>
+<td data-label="Що це">балансувальник для TCP/UDP зі статичним IP</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>GWLB</strong></td>
+<td data-label="Що це">балансувальник для віртуальних пристроїв</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>SNI</strong></td>
+<td data-label="Що це">кілька сертифікатів на одному listener</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Cross-zone</strong></td>
+<td data-label="Що це">розподіл по всіх зонах</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Sticky session</strong></td>
+<td data-label="Що це">клієнт прив'язаний до одного сервера</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Deregistration delay</strong></td>
+<td data-label="Що це">очікування завершення запитів перед відключенням, типово 300 с</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Target tracking</strong></td>
+<td data-label="Що це">політика, що тримає метрику на цілі</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Launch template</strong></td>
+<td data-label="Що це">шаблон запуску сервера</td>
+</tr>
+</tbody>
+</table></div>
+<div class="remember"><h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>ALB для HTTP і маршрутів, NLB для TCP/UDP і статичного IP, GWLB для фаєрволів, CLB застарів.</li>
+<li>Cross-zone: ALB завжди вмикнено, NLB і GWLB вимкнено.</li>
+<li>Sticky: cookie <code>AWSALB</code>, 1 с - 7 днів, на target group; не працює при вимкненому cross-zone.</li>
+<li>Draining (CLB) і deregistration delay (ALB, NLB): типово 300 с.</li>
+<li>ASG: launch template, замінює нездорові, сама реєструється в ELB.</li>
+<li>Не рахуй у target tracking <code>RequestCount</code>, затримку й довжину черги напряму.</li>
+</ol>
+</div><h2>Перевірте себе</h2>
+<ol>
+<li>Який балансувальник для UDP?</li>
+<li>4 сервери в зоні A, 1 в зоні B, cross-zone вимкнено. Скільки отримує сервер у зоні B?</li>
+<li>Як називається draining для ALB?</li>
+<li>Чому довжина SQS-черги не підходить як є?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>NLB.</li>
+<li>Усі 50% вузла B, тобто 50% загального трафіку.</li>
+<li>Deregistration delay.</li>
+<li>Вона не змінюється пропорційно кількості серверів; потрібна метрика «повідомлень на сервер».</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> ../24-elb-asg.md.</p>
+
+<nav class="pager"><a href="23-ec2-compute-storage-simple.html">← Лекція 23</a><a href="25-vpc-networking-simple.html">Лекція 25 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

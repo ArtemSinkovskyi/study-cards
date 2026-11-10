@@ -327,6 +327,199 @@
 <li>права функції: <code>GetItem</code>, <code>PutItem</code>, <code>UpdateItem</code>, <code>DeleteItem</code>.</li>
 </ul>
 <p>Важливо: ідемпотентність захищає від <strong>подвійної роботи</strong>, а не від помилок. Powertools не зберігає результат упалої функції, тож подія все одно може дійти до DLQ.</p>
+<h2>Крок 12. Умовні вирази повністю</h2>
+<p>Умова (<strong>condition expression</strong>) діє на <code>PutItem</code>, <code>UpdateItem</code>, <code>DeleteItem</code>. У нотатках у цьому списку був ще <code>BatchWriteItem</code>, але документація каже, що в ньому умов на окремі операції <strong>нема</strong>.</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Вираз</th>
+<th>Що перевіряє</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Вираз"><code>attribute_exists</code> / <code>attribute_not_exists</code></td>
+<td data-label="Що перевіряє">атрибут є / нема</td>
+</tr>
+<tr>
+<td data-label="Вираз"><code>attribute_type</code></td>
+<td data-label="Що перевіряє">тип атрибута</td>
+</tr>
+<tr>
+<td data-label="Вираз"><code>contains</code></td>
+<td data-label="Що перевіряє">містить підрядок</td>
+</tr>
+<tr>
+<td data-label="Вираз"><code>begins_with</code></td>
+<td data-label="Що перевіряє">починається з префікса</td>
+</tr>
+<tr>
+<td data-label="Вираз"><code>IN</code>, <code>between</code></td>
+<td data-label="Що перевіряє">значення в списку / діапазоні</td>
+</tr>
+<tr>
+<td data-label="Вираз"><code>size</code></td>
+<td data-label="Що перевіряє">довжина рядка</td>
+</tr>
+</tbody>
+</table></div>
+<p>Фільтр (<strong>filter expression</strong>) працює на <strong>читанні</strong>, умова (<strong>condition expression</strong>) на <strong>записі</strong>.</p>
+<p>Щоб не перезаписати item:</p>
+<ul>
+<li><code>attribute_not_exists(partition_key)</code> для простого ключа;</li>
+<li><code>attribute_not_exists(partition_key) and attribute_not_exists(sort_key)</code> для складеного.</li>
+</ul>
+<p>Приклад: видалити товар, лише якщо <code>ProductCategory</code> у списку із двох значень і <code>Price</code> між 500 і 600. Якщо ціна 650, умова хибна, item лишається, приходить <code>ConditionalCheckFailedException</code>.</p>
+<h3>Чотири види записів</h3>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Вид</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Вид">Concurrent</td>
+<td data-label="Суть">кілька клієнтів пишуть одночасно, виграє останній (last writer wins)</td>
+</tr>
+<tr>
+<td data-label="Вид">Atomic</td>
+<td data-label="Суть">операція виконується повністю або ніяк</td>
+</tr>
+<tr>
+<td data-label="Вид">Conditional</td>
+<td data-label="Суть">запис лише за умови</td>
+</tr>
+<tr>
+<td data-label="Вид">Batch</td>
+<td data-label="Суть">до 25 операцій за один виклик</td>
+</tr>
+</tbody>
+</table></div>
+<h3>Оптимістичне блокування на прикладі</h3>
+<ol>
+<li>Item має <code>Version = 1</code>.</li>
+<li>Клієнт 2 пише «Lisa, якщо Version = 1». Успіх, версія стає 2.</li>
+<li>Клієнт 1 пише «John, якщо Version = 1». Умова хибна: помилка.</li>
+<li>Клієнт 1 перечитує item (версія 2) і повторює.</li>
+</ol>
+<h2>Крок 13. Batch, транзакції, PartiQL докладніше</h2>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th><code>BatchWriteItem</code></th>
+<th><code>BatchGetItem</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Скільки</td>
+<td data-label="BatchWriteItem">до 25 <code>PutItem</code> і/або <code>DeleteItem</code></td>
+<td data-label="BatchGetItem">до 100 items</td>
+</tr>
+<tr>
+<td data-label="">Обсяг</td>
+<td data-label="BatchWriteItem">до 16 МБ, item до 400 КБ</td>
+<td data-label="BatchGetItem">до 16 МБ</td>
+</tr>
+<tr>
+<td data-label="">Чого не вміє</td>
+<td data-label="BatchWriteItem"><code>UpdateItem</code> (для цього окрема операція); умови</td>
+<td data-label="BatchGetItem">дублі ключів</td>
+</tr>
+<tr>
+<td data-label="">Невдалі</td>
+<td data-label="BatchWriteItem"><code>UnprocessedItems</code></td>
+<td data-label="BatchGetItem"><code>UnprocessedKeys</code></td>
+</tr>
+<tr>
+<td data-label="">Що робити</td>
+<td data-label="BatchWriteItem">повтор із backoff або додати WCU/RCU</td>
+<td data-label="BatchGetItem">те саме</td>
+</tr>
+</tbody>
+</table></div>
+<p>Навіщо batch: менше викликів і менша затримка. Частина пакета може не пройти: повторіть невдалі.</p>
+<h3>Транзакції і їх ціна</h3>
+<p>Транзакції дають <strong>ACID</strong>. Режими читання: eventual, strong, transactional. Режими запису: standard, transactional.</p>
+<p>DynamoDB для <strong>кожного</strong> item робить <strong>дві</strong> операції (prepare і commit), тому транзакція коштує <strong>вдвічі більше</strong>. Це часте питання на іспиті.</p>
+<p><strong>Рецепт (3 кроки):</strong></p>
+<ol>
+<li>Розмір item ÷ 1 КБ (запис) або ÷ 4 КБ (читання), округлити вгору.</li>
+<li>Помножити на кількість item за секунду.</li>
+<li>Помножити на 2.</li>
+</ol>
+<p><strong>Приклад 1.</strong> 3 транзакційні записи за секунду, item 5 КБ: 5 × 3 = 15, × 2 = <strong>30 WCU</strong>.
+<strong>Приклад 2.</strong> 5 транзакційних читань за секунду, item 5 КБ: 5 ÷ 4 вгору це 2; 2 × 5 = 10, × 2 = <strong>20 RCU</strong>.</p>
+<p>Ще: до 100 дій і 4 МБ за транзакцію; через індекси не працює; між регіонами global tables не діє.</p>
+<h3>PartiQL</h3>
+<p>SQL-сумісна мова для DynamoDB: <code>SELECT</code>, <code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>. Можна запускати з консолі, NoSQL Workbench, API, CLI, SDK. Це лише синтаксис, JOIN все одно нема.</p>
+<h3>LSI: приклад</h3>
+<p>Таблиця замовлень: PK <code>userId</code>, SK <code>orderId</code>. LSI із SK <code>orderDate</code> дозволяє відсортувати замовлення <strong>одного користувача</strong> за датою. Sort key індексу це один скалярний атрибут (String, Number або Binary). LSI бере RCU і WCU таблиці.</p>
+<h2>Крок 14. Streams докладніше</h2>
+<ul>
+<li>Впорядкований потік змін на рівні item.</li>
+<li>Читають: Lambda, застосунки на KCL; можна надіслати в Kinesis Data Streams.</li>
+<li>Зберігання до 24 годин.</li>
+<li>У записі є образи до і після (<code>NEW_AND_OLD_IMAGES</code>).</li>
+<li>Шарди <strong>не виділяєте</strong>, AWS робить сам.</li>
+<li>Записи <strong>не з'являються заднім числом</strong>: лише зміни після ввімкнення.</li>
+<li>Для Lambda потрібен event source mapping і дозволи; виклик синхронний.</li>
+<li>Використання: реакція в реальному часі (лист новому користувачу), аналітика, OpenSearch, міжрегіональна реплікація.</li>
+<li>TTL-видалення теж потрапляє в Streams і прибирає запис із LSI і GSI.</li>
+</ul>
+<h2>Крок 15. Write sharding</h2>
+<p>Голосування з двома кандидатами: partition key <code>Candidate_ID</code> дає лише два розділи, і вони перегріваються (hot partition).</p>
+<p>Рішення: додати до partition key <strong>суфікс</strong>, щоб записи розійшлись.</p>
+<ul>
+<li><strong>Random suffix</strong>: випадкове число. Читання потребує обійти всі суфікси <em>(не звірено)</em>.</li>
+<li><strong>Calculated suffix</strong>: суфікс обчислюється з даних, його можна відновити при читанні <em>(не звірено)</em>.</li>
+</ul>
+<h2>Крок 16. Великі об'єкти й індекс метаданих S3</h2>
+<ul>
+<li>item до 400 КБ. Для більших даних (картинки, документи) тримайте <strong>файл у S3</strong>, а в DynamoDB лише <strong>посилання й метадані</strong> (Large Objects Pattern).</li>
+<li>S3 не шукає за власними атрибутами. Тому метадані файлів записують у DynamoDB (Indexing S3 Metadata) і шукають там.</li>
+</ul>
+<h2>Крок 17. Безпека й інші можливості</h2>
+<ul>
+<li>VPC endpoints: доступ без інтернету.</li>
+<li>Доступ повністю керує IAM.</li>
+<li>Шифрування: в спокої через KMS, у дорозі через TLS.</li>
+<li>Backup і PITR без впливу на продуктивність.</li>
+<li>Global tables: мультирегіональні, multi-active.</li>
+<li><strong>DynamoDB Local</strong>: розробка без інтернету.</li>
+<li><strong>AWS DMS</strong>: міграція в DynamoDB з MongoDB, Oracle, MySQL, S3.</li>
+<li>Прямий доступ користувачів: клієнт логіниться в identity provider (Cognito, Google, Facebook, OIDC, SAML), отримує тимчасові ключі й IAM-роль і ходить у таблицю без власного бекенду (докладніше в лекції про Cognito).</li>
+</ul>
+<h2>Крок 18. CLI</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Параметр</th>
+<th>Що робить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Параметр"><code>--projection-expression</code></td>
+<td data-label="Що робить">які атрибути повернути</td>
+</tr>
+<tr>
+<td data-label="Параметр"><code>--filter-expression</code></td>
+<td data-label="Що робить">відфільтрувати до повернення вам (платите за все прочитане)</td>
+</tr>
+<tr>
+<td data-label="Параметр"><code>--page-size</code></td>
+<td data-label="Що робить">розмір сторінки одного API-виклику (за замовчуванням 1000)</td>
+</tr>
+<tr>
+<td data-label="Параметр"><code>--max-items</code></td>
+<td data-label="Що робить">скільки показати; повертає <code>NextToken</code></td>
+</tr>
+</tbody>
+</table></div>
 <h2>Словник</h2>
 <div class="tw"><table class="two">
 <thead>
@@ -336,6 +529,22 @@
 </tr>
 </thead>
 <tbody>
+<tr>
+<td data-label="Термін"><strong>Condition expression</strong></td>
+<td data-label="Що це">умова на запис</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Write sharding</strong></td>
+<td data-label="Що це">суфікс до partition key для розподілу записів</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>PartiQL</strong></td>
+<td data-label="Що це">SQL-подібна мова для DynamoDB</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Large Objects Pattern</strong></td>
+<td data-label="Що це">великий файл у S3, посилання в DynamoDB</td>
+</tr>
 <tr>
 <td data-label="Термін"><strong>GSI</strong></td>
 <td data-label="Що це">глобальний індекс з іншим partition key, можна додати будь-коли</td>
@@ -381,6 +590,11 @@
 <li>TTL: Number, epoch <strong>секунди</strong>, безкоштовно, протягом кількох днів.</li>
 <li>On-demand для непередбачуваного, provisioned для стабільного.</li>
 <li>Streams 24 години, чотири типи запису, читає Lambda.</li>
+<li>Умови діють на запис (у <code>BatchWriteItem</code> їх нема), фільтр на читання.</li>
+<li>Транзакція коштує 2×: 3 записи по 5 КБ це 30 WCU, 5 читань по 5 КБ це 20 RCU.</li>
+<li>Batch: 25 записів чи 100 читань, невдалі в <code>UnprocessedItems</code> і <code>UnprocessedKeys</code>.</li>
+<li>Write sharding проти hot partition. Великі об'єкти: S3 плюс посилання.</li>
+<li>Streams не заповнюються заднім числом.</li>
 </ol>
 </div><h2>Перевірте себе</h2>
 <ol>

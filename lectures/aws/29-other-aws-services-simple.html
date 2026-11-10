@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 29: Athena, OpenSearch, MSK, SES і ще кілька сервісів</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 29: Athena, OpenSearch, MSK, SES і ще кілька сервісів</h1>
+<blockquote>
+<p>Середній рівень: усі правила з повної лекції, але простими словами. Повна: ../29-other-aws-services.md. Це теорія, в AWS ми цього не виконували. Сертифікати, Macie і AppConfig тут коротко: докладніше в лекціях про KMS і CI/CD. Не звірене позначено <em>(не звірено)</em>.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>Кожен із цих сервісів вирішує одну вузьку задачу: Athena це SQL по файлах у S3, OpenSearch це пошук за будь-яким полем, MSK це Kafka, SES це пошта.</strong> На іспиті питають, який із них обрати.</p>
+<h2>Навіщо це так задумано</h2>
+<p>AWS не змушує тягти все в одну базу. Для файлів є Athena, для пошуку OpenSearch, для потоків Kinesis або Kafka. Кожен інструмент швидкий у своєму і слабкий у чужому.</p>
+<h2>Крок 1. Athena</h2>
+<p><strong>Athena</strong> це безсерверний SQL по файлах у <strong>S3</strong>. Нічого не завантажуєте в базу: пишете SQL, Athena читає файли напряму.</p>
+<ul>
+<li>Формати: CSV, JSON, ORC, Avro, Parquet.</li>
+<li>Типові задачі: звіти й аналітика, аналіз логів <strong>VPC Flow Logs</strong>, <strong>ELB Logs</strong>, <strong>CloudTrail</strong>.</li>
+<li>Підказка: «аналізувати дані в S3 безсерверним SQL» означає <strong>Athena</strong>.</li>
+</ul>
+<h3>Як зробити запити швидшими й дешевшими</h3>
+<p>Athena бере гроші за <strong>кількість просканованих даних</strong>. Тож треба сканувати менше:</p>
+<ol>
+<li><strong>Колонкові формати</strong> (Parquet, ORC): читаються лише потрібні колонки.</li>
+<li><strong>Стиснення</strong> (gzip, zstd, snappy, bzip2, lz4, zlib): менше байтів, платите за байти до розпакування.</li>
+<li><strong>Partitioning</strong>: розкладіть дані по теках S3 за ознакою (наприклад, за датою), тоді запит із фільтром по даті читає лише потрібні теки.</li>
+<li><strong>Великі файли</strong> (понад 128 МБ): менше накладних витрат. Багато малих файлів гальмує.</li>
+</ol>
+<p>У нотатках було «zlip»: це описка, правильно <strong>zlib</strong>.</p>
+<h3>Federated Query</h3>
+<p>Запит SQL одразу <strong>до кількох різних джерел</strong> (CloudWatch Logs, DynamoDB, RDS та інші, навіть поза AWS). Для цього використовують <strong>connectors</strong>, що працюють на <strong>Lambda</strong>. Результат можна покласти назад у S3.</p>
+<h2>Крок 2. OpenSearch</h2>
+<p><strong>OpenSearch</strong> це наступник Amazon Elasticsearch Service. Навіщо він, якщо є DynamoDB?</p>
+<ul>
+<li>DynamoDB шукає лише за ключем або індексом.</li>
+<li>OpenSearch шукає <strong>за будь-яким полем, навіть за частиною слова</strong>.</li>
+</ul>
+<p>Ще:</p>
+<ul>
+<li>два режими: керований кластер або serverless;</li>
+<li>безпека: Cognito, IAM, KMS, TLS;</li>
+<li>SQL нативно не основна мова, але SQL-підтримку можна ввімкнути (в нотатках «плагін») <em>(уточнено за документацією)</em>.</li>
+</ul>
+<p><strong>Схема «DynamoDB плюс OpenSearch»</strong> (складена з двох фактів нотаток, не звірена):</p>
+<ol>
+<li>Застосунок пише в DynamoDB.</li>
+<li>DynamoDB Streams віддає зміну в Lambda.</li>
+<li>Lambda кладе документ в OpenSearch.</li>
+<li>Пошук іде в OpenSearch, а за знайденим ключем дані беруть з DynamoDB.</li>
+</ol>
+<p>Фраза-підказка: «повнотекстовий пошук по даних DynamoDB» означає OpenSearch.</p>
+<h2>Крок 3. MSK</h2>
+<p><strong>MSK</strong> це керований <strong>Apache Kafka</strong>, альтернатива Kinesis.</p>
+<ul>
+<li>MSK створює й керує вузлами-брокерами Kafka та вузлами ZooKeeper. У новіших кластерах замість ZooKeeper може бути KRaft.</li>
+<li>Кластер у вашій VPC, у кількох зонах доступності (у нотатках «до 3» <em>(не звірено)</em>).</li>
+<li>Дані на EBS-томах <em>(не звірено)</em>.</li>
+<li><strong>MSK Serverless</strong>: Kafka без керування потужністю, MSK сам виділяє ресурси.</li>
+</ul>
+<h3>Kinesis проти MSK</h3>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>Kinesis Data Streams</th>
+<th>MSK</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Розмір повідомлення</td>
+<td data-label="Kinesis Data Streams">до 1 МБ</td>
+<td data-label="MSK">1 МБ за замовчуванням, можна більше (наприклад 10 МБ) <em>(не звірено)</em></td>
+</tr>
+<tr>
+<td data-label="">Структура</td>
+<td data-label="Kinesis Data Streams">шарди</td>
+<td data-label="MSK">теми з розділами (partitions)</td>
+</tr>
+<tr>
+<td data-label="">Зміна розміру</td>
+<td data-label="Kinesis Data Streams">split і merge шардів</td>
+<td data-label="MSK">розділи можна лише додавати</td>
+</tr>
+<tr>
+<td data-label="">Шифрування в дорозі</td>
+<td data-label="Kinesis Data Streams">TLS</td>
+<td data-label="MSK">PLAINTEXT або TLS</td>
+</tr>
+<tr>
+<td data-label="">Шифрування в спокої</td>
+<td data-label="Kinesis Data Streams">KMS</td>
+<td data-label="MSK">KMS</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Крок 4. SES</h2>
+<p><strong>SES</strong> це сервіс листів: надсилає <strong>й отримує</strong> пошту безпечно й у великому масштабі.</p>
+<ul>
+<li>панель репутації, показники доставки, зворотний зв'язок про спам;</li>
+<li>повідомлення про bounce і скарги йдуть через SNS;</li>
+<li>автентифікація листів: Easy DKIM;</li>
+<li>вхідні листи можна класти в S3 і запускати Lambda.</li>
+</ul>
+<h2>Крок 5. Сертифікати, Macie, AppConfig: коротко</h2>
+<h3>ACM і Private CA</h3>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>ACM (публічний)</th>
+<th>Private CA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Кому довіряють</td>
+<td data-label="ACM (публічний)">весь інтернет</td>
+<td data-label="Private CA">лише ваша організація</td>
+</tr>
+<tr>
+<td data-label="">Ціна</td>
+<td data-label="ACM (публічний)">безкоштовно</td>
+<td data-label="Private CA">платно</td>
+</tr>
+<tr>
+<td data-label="">Для чого</td>
+<td data-label="ACM (публічний)">HTTPS на сайтах</td>
+<td data-label="Private CA">внутрішні сервіси, підпис коду, IoT, власна PKI</td>
+</tr>
+</tbody>
+</table></div>
+<p>ACM підключається до Elastic Load Balancers, CloudFront і API Gateway. Private CA видає сертифікати X.509 для користувачів, комп'ютерів, API та IoT-пристроїв.</p>
+<h3>Macie</h3>
+<p>Знаходить <strong>чутливі дані (PII)</strong> в S3 за допомогою машинного навчання й шаблонів.</p>
+<h3>AppConfig</h3>
+<p>Змінює налаштування застосунку <strong>без нового деплою</strong>: feature flags, налаштування, allow/block-списки. Перед розгортанням перевіряє зміну двома способами:</p>
+<ul>
+<li><strong>JSON Schema</strong>: перевірка синтаксису;</li>
+<li><strong>Lambda</strong>: ваш код перевіряє зміст (семантику).</li>
+</ul>
+<h2>Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>Athena</strong></td>
+<td data-label="Що це">SQL по файлах у S3 без серверів</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Parquet</strong></td>
+<td data-label="Що це">колонковий формат файлів, що здешевлює запити</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Partitioning</strong></td>
+<td data-label="Що це">розкладання даних по теках за ознакою</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Federated Query</strong></td>
+<td data-label="Що це">один SQL до кількох різних джерел через Lambda</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>OpenSearch</strong></td>
+<td data-label="Що це">пошук за будь-яким полем</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>MSK</strong></td>
+<td data-label="Що це">керований Apache Kafka</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Broker</strong></td>
+<td data-label="Що це">вузол Kafka</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>SES</strong></td>
+<td data-label="Що це">сервіс надсилання й отримання листів</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>ACM / Private CA</strong></td>
+<td data-label="Що це">публічні / приватні сертифікати</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Macie</strong></td>
+<td data-label="Що це">пошук персональних даних у S3</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>AppConfig</strong></td>
+<td data-label="Що це">зміна конфігурації без деплою</td>
+</tr>
+</tbody>
+</table></div>
+<div class="remember"><h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>SQL по S3 без серверів: Athena. Дешевше з Parquet, стисненням, партиціями, великими файлами.</li>
+<li>Федеративний запит: connectors на Lambda, результат у S3.</li>
+<li>Пошук за будь-яким полем: OpenSearch.</li>
+<li>Kafka як сервіс: MSK; Serverless без керування потужністю.</li>
+<li>MSK: теми й розділи; Kinesis: шарди.</li>
+<li>ACM безкоштовний, Private CA для внутрішніх сертифікатів.</li>
+<li>PII в S3: Macie. Конфіг без деплою: AppConfig.</li>
+</ol>
+</div><h2>Перевірте себе</h2>
+<ol>
+<li>Що зменшує вартість запитів Athena?</li>
+<li>Для чого connectors у Federated Query?</li>
+<li>Який сервіс шукає за частиною слова в будь-якому полі?</li>
+<li>Чим «розділ» MSK схожий на «шард» Kinesis?</li>
+<li>Які два валідатори в AppConfig?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>Parquet або ORC, стиснення, партиції, великі файли.</li>
+<li>Вони з'єднують Athena з іншими джерелами й працюють на Lambda.</li>
+<li>OpenSearch.</li>
+<li>Це одиниця розподілу даних усередині потоку чи теми.</li>
+<li>JSON Schema (синтаксис) і Lambda (зміст).</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> ../29-other-aws-services.md.</p>
+
+<nav class="pager"><a href="28-rds-aurora-proxy-simple.html">← Лекція 28</a><a href="30-cloudformation-simple.html">Лекція 30 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

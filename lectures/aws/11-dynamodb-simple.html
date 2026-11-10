@@ -291,6 +291,95 @@
 <li>Перемкнути provisioned на on-demand можна до <strong>4 разів за 24 години</strong>, назад будь-коли.</li>
 <li>Типові квоти: 40 000 RCU і 40 000 WCU на таблицю, 80 000 на акаунт для provisioned. Піднімаються через Service Quotas.</li>
 </ul>
+<h2>Крок 8. Що таке NoSQL і які типи даних</h2>
+<ul>
+<li>NoSQL не вміє агрегацій на кшталт <code>SUM</code> і <code>AVG</code>: рахує застосунок.</li>
+<li>NoSQL масштабується горизонтально (більше розділів).</li>
+<li>Це не «краще чи гірше» за SQL, а інший спосіб думати про дані й запити.</li>
+</ul>
+<p>Типи даних атрибутів:</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Група</th>
+<th>Типи</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Група">Scalar</td>
+<td data-label="Типи">String, Number, Binary, Boolean, Null</td>
+</tr>
+<tr>
+<td data-label="Група">Document</td>
+<td data-label="Типи">List, Map</td>
+</tr>
+<tr>
+<td data-label="Група">Set</td>
+<td data-label="Типи">String Set, Number Set, Binary Set</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Крок 9. Тротлінг у provisioned</h2>
+<ol>
+<li>Потужність можна <strong>ненадовго перевищити</strong> (burst capacity).</li>
+<li>Коли burst закінчився, приходить помилка <code>ProvisionedThroughputExceededException</code>. Тоді повторіть із паузою, що росте (<strong>exponential backoff</strong>, SDK робить це сам).</li>
+<li>Причини: <strong>hot key</strong> (один ключ читають надто часто), <strong>hot partition</strong>, <strong>дуже великі записи</strong>.</li>
+<li>Що робити: розкидати partition keys рівномірно; якщо не вистачає RCU, додати <strong>DAX</strong> (лекція 15).</li>
+</ol>
+<h2>Крок 10. On-demand детальніше</h2>
+<ul>
+<li>Це режим <strong>за замовчуванням і рекомендований</strong>.</li>
+<li>Замість RCU і WCU тут <strong>RRU</strong> і <strong>WRU</strong> (рахуються так само).</li>
+<li>Платите за кожен запит, планування потужності не треба.</li>
+<li>Новий стіл одразу тягне 4 000 записів і 12 000 читань за секунду; далі швидко росте до двох попередніх піків. Якщо різко перевищити подвійний пік швидше ніж за 30 хвилин, можливий тротлінг.</li>
+<li>На on-demand можна перейти з provisioned <strong>до 4 разів за 24 години</strong>, назад <strong>будь-коли</strong>. У нотатках було «раз на 24 години»: це застаріло.</li>
+<li>Нотатки казали «у 2,5 раза дорожчий»: це <em>(не звірено)</em>, ціни змінювались. Запам'ятайте якісно: за одиницю дорожчий, але за простій не платите.</li>
+</ul>
+<h2>Крок 11. Ще приклади підрахунку</h2>
+<p>Рецепти ті самі, що в кроці 6. Нові числа:</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Умова</th>
+<th>Розрахунок</th>
+<th>Відповідь</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Умова">10 записів/с, запис 2 КБ</td>
+<td data-label="Розрахунок">10 × 2</td>
+<td data-label="Відповідь"><strong>20 WCU</strong></td>
+</tr>
+<tr>
+<td data-label="Умова">6 записів/с, запис 4,5 КБ</td>
+<td data-label="Розрахунок">4,5 вгору до 5; 6 × 5</td>
+<td data-label="Відповідь"><strong>30 WCU</strong></td>
+</tr>
+<tr>
+<td data-label="Умова">120 записів <strong>за хвилину</strong>, 2 КБ</td>
+<td data-label="Розрахунок">120 ÷ 60 = 2/с; 2 × 2</td>
+<td data-label="Відповідь"><strong>4 WCU</strong></td>
+</tr>
+<tr>
+<td data-label="Умова">10 strongly читань/с, запис 4 КБ</td>
+<td data-label="Розрахунок">10 × (4 ÷ 4)</td>
+<td data-label="Відповідь"><strong>10 RCU</strong></td>
+</tr>
+<tr>
+<td data-label="Умова">16 eventually читань/с, запис 12 КБ</td>
+<td data-label="Розрахунок">(16 ÷ 2) × (12 ÷ 4)</td>
+<td data-label="Відповідь"><strong>24 RCU</strong></td>
+</tr>
+<tr>
+<td data-label="Умова">10 strongly читань/с, запис 6 КБ</td>
+<td data-label="Розрахунок">6 вгору до 8; 10 × (8 ÷ 4)</td>
+<td data-label="Відповідь"><strong>20 RCU</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>Три пастки: округлюйте розмір вгору; якщо дано «за хвилину», спершу діліть на 60; eventually удвічі дешевше.</p>
 <h2>Словник</h2>
 <div class="tw"><table class="two">
 <thead>
@@ -300,6 +389,18 @@
 </tr>
 </thead>
 <tbody>
+<tr>
+<td data-label="Термін"><strong>RRU / WRU</strong></td>
+<td data-label="Що це">одиниці читання й запису в on-demand (рахуються як RCU і WCU)</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Burst capacity</strong></td>
+<td data-label="Що це">короткочасний запас, що дозволяє перевищити потужність</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Hot key</strong></td>
+<td data-label="Що це">ключ, до якого звертаються занадто часто</td>
+</tr>
 <tr>
 <td data-label="Термін"><strong>Partition key</strong></td>
 <td data-label="Що це">ключ, за яким DynamoDB розкладає дані по розділах</td>
@@ -342,6 +443,10 @@
 <li>Сторінки по 1 МБ, <code>LastEvaluatedKey</code> і <code>ExclusiveStartKey</code>.</li>
 <li>Strongly consistent коштує вдвічі більше й не працює на GSI та Streams.</li>
 <li>1 RCU це 4 КБ strongly, 1 WCU це 1 КБ. Завжди округлюйте вгору.</li>
+<li>NoSQL не рахує <code>SUM</code> і <code>AVG</code>. Типи даних: Scalar, Document, Set.</li>
+<li>Тротлінг: burst, потім <code>ProvisionedThroughputExceededException</code>; рішення: backoff, розкидати ключі, DAX.</li>
+<li>On-demand за замовчуванням, платить за запит (RRU, WRU); на нього можна перейти до 4 разів за 24 години.</li>
+<li>Навантаження «за хвилину» спершу переведіть у секунди.</li>
 </ol>
 </div><h2>Перевірте себе</h2>
 <ol>

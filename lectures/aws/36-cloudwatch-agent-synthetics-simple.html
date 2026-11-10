@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 36: CloudWatch Agent, експорт і підписки логів, Synthetics</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 36: CloudWatch Agent, експорт і підписки логів, Synthetics</h1>
+<blockquote>
+<p>Середній рівень: усі правила з повної лекції, але простими словами. Повна: ../36-cloudwatch-agent-synthetics.md. Теоретична лекція, в AWS не виконувалась. Що не підтверджено документацією, позначено <em>(не звірено)</em>.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>Це три доповнення до CloudWatch: агент збирає з серверів те, чого AWS сам не бачить; підписки вивозять логи на обробку; canary перевіряє сайт зовні, як це зробив би клієнт.</strong></p>
+<h2>Навіщо це так задумано</h2>
+<p>AWS бачить сервер ззовні: CPU, диск, мережу. Що робиться всередині (пам'ять, процеси), знає лише агент на самому сервері. А «сайт працює» не те саме, що «клієнт може на ньому купити»: це перевіряє canary.</p>
+<h2>Крок 1. Звідки беруться логи</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Джерело</th>
+<th>Що шле</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Джерело">SDK, агенти CloudWatch</td>
+<td data-label="Що шле">ваші застосунки й сервери</td>
+</tr>
+<tr>
+<td data-label="Джерело">Elastic Beanstalk, ECS, Lambda</td>
+<td data-label="Що шле">логи застосунків, контейнерів, функцій</td>
+</tr>
+<tr>
+<td data-label="Джерело">VPC Flow Logs</td>
+<td data-label="Що шле">мережевий трафік VPC</td>
+</tr>
+<tr>
+<td data-label="Джерело">API Gateway</td>
+<td data-label="Що шле">логи API</td>
+</tr>
+<tr>
+<td data-label="Джерело">Route 53</td>
+<td data-label="Що шле">DNS-запити</td>
+</tr>
+<tr>
+<td data-label="Джерело">CloudTrail за фільтром</td>
+<td data-label="Що шле">події API-викликів</td>
+</tr>
+</tbody>
+</table></div>
+<p>Log group це група (зазвичай один застосунок), log stream це потік у ній (сервер, файл, контейнер). Строк зберігання задають на групі: від 1 дня до 10 років або «ніколи». Логи шифруються за замовчуванням, можна свій ключ KMS.</p>
+<h2>Крок 2. Агент: старий і новий</h2>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>Logs Agent (старий)</th>
+<th>Unified Agent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Що шле</td>
+<td data-label="Logs Agent (старий)">лише логи</td>
+<td data-label="Unified Agent">логи і метрики</td>
+</tr>
+<tr>
+<td data-label="">RAM, процеси, swap</td>
+<td data-label="Logs Agent (старий)">ні</td>
+<td data-label="Unified Agent">так</td>
+</tr>
+<tr>
+<td data-label="">Налаштування</td>
+<td data-label="Logs Agent (старий)">локально</td>
+<td data-label="Unified Agent">централізовано в SSM Parameter Store</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Пастка іспиту:</strong> без Unified Agent у CloudWatch нема пам'яті й swap із EC2, лише CPU, диск і мережа зовні.</p>
+<p>Агент збирає: CPU (active, idle, system, user, steal), диск і Disk IO, RAM (free, used, cached), мережу (TCP і UDP з'єднання), процеси, swap.</p>
+<h2>Крок 3. Експорт чи підписка</h2>
+<p>Хочеш вивезти логи з CloudWatch? Є два шляхи.</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>Експорт у S3</th>
+<th>Підписка (subscription filter)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Як</td>
+<td data-label="Експорт у S3"><code>CreateExportTask</code></td>
+<td data-label="Підписка (subscription filter)">фільтр на log group</td>
+</tr>
+<tr>
+<td data-label="">Швидкість</td>
+<td data-label="Експорт у S3">пакетом, <strong>не реальний час</strong></td>
+<td data-label="Підписка (subscription filter)">майже одразу</td>
+</tr>
+<tr>
+<td data-label="">Куди</td>
+<td data-label="Експорт у S3">S3</td>
+<td data-label="Підписка (subscription filter)">Kinesis Data Streams, Firehose, Lambda</td>
+</tr>
+<tr>
+<td data-label="">Коли</td>
+<td data-label="Експорт у S3">архів за період</td>
+<td data-label="Підписка (subscription filter)">обробляти на льоту</td>
+</tr>
+</tbody>
+</table></div>
+<p>Правило: «реальний час» означає підписку, а не експорт.</p>
+<p>Про підписки:</p>
+<ol>
+<li>Фільтр вирішує, які події летять далі.</li>
+<li>Підписку можна надіслати в інший акаунт (cross-account).</li>
+<li>На одну log group до п'яти фільтрів.</li>
+<li>Доставка «щонайменше раз», дублікати можливі.</li>
+</ol>
+<p>Колега писав, що логи стають доступні для експорту «до 12 годин». Сучасна документація цього не підтверджує <em>(не звірено)</em>; пам'ятай лише, що експорт не швидкий.</p>
+<h2>Крок 4. Canary: перевірка зовні</h2>
+<p>Canary це скрипт, що за розкладом (наприклад, кожні 5 хвилин) робить те, що робить клієнт: відкриває сторінку, натискає посилання, заповнює форму. Йому допомагає <strong>headless Chrome</strong> (браузер без вікна), працює він у <strong>Lambda</strong>.</p>
+<p>Що зберігає: час відповіді, <strong>скриншоти</strong>, <strong>HAR-файли</strong> (список усіх HTTP-запитів сторінки). Якщо перевірка провалилась, спрацьовує <strong>CloudWatch Alarm</strong>.</p>
+<p>Готові шаблони (blueprints), щоб не писати з нуля:</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Blueprint</th>
+<th>Що робить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Blueprint">Heartbeat monitor</td>
+<td data-label="Що робить">відкриває URL, робить скриншот і HAR</td>
+</tr>
+<tr>
+<td data-label="Blueprint">API canary</td>
+<td data-label="Що робить">перевіряє читання й запис REST API</td>
+</tr>
+<tr>
+<td data-label="Blueprint">Broken link checker</td>
+<td data-label="Що робить">шукає мертві посилання</td>
+</tr>
+<tr>
+<td data-label="Blueprint">Visual monitoring</td>
+<td data-label="Що робить">порівнює скриншот з еталоном</td>
+</tr>
+<tr>
+<td data-label="Blueprint">Canary recorder</td>
+<td data-label="Що робить">записує ваші дії в Chrome і пише скрипт</td>
+</tr>
+<tr>
+<td data-label="Blueprint">GUI workflow builder</td>
+<td data-label="Що робить">перевіряє, що кнопки й форми працюють</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін">Unified Agent</td>
+<td data-label="Що це">агент для логів і метрик серверів</td>
+</tr>
+<tr>
+<td data-label="Термін">subscription filter</td>
+<td data-label="Що це">фільтр для живої передачі логів</td>
+</tr>
+<tr>
+<td data-label="Термін">CreateExportTask</td>
+<td data-label="Що це">пакетний експорт логів у S3</td>
+</tr>
+<tr>
+<td data-label="Термін">canary</td>
+<td data-label="Що це">скрипт, що перевіряє сайт зовні</td>
+</tr>
+<tr>
+<td data-label="Термін">blueprint</td>
+<td data-label="Що це">готовий шаблон canary</td>
+</tr>
+<tr>
+<td data-label="Термін">HAR file</td>
+<td data-label="Що це">запис усіх запитів сторінки</td>
+</tr>
+<tr>
+<td data-label="Термін">headless Chrome</td>
+<td data-label="Що це">браузер без вікна</td>
+</tr>
+</tbody>
+</table></div>
+<div class="remember"><h2>Що запам'ятати на іспит</h2>
+<ul>
+<li>RAM і swap з EC2 дає лише Unified Agent.</li>
+<li>Unified Agent шле логи й метрики, налаштовується через SSM Parameter Store; Logs Agent старий, лише логи.</li>
+<li>Експорт <code>CreateExportTask</code> не реального часу; для живих логів підписка.</li>
+<li>Підписка шле у Kinesis Data Streams, Firehose, Lambda, може бути cross-account.</li>
+<li>Canary працює на Lambda з headless Chrome, зберігає скриншоти й HAR.</li>
+<li>Broken link checker шукає мертві посилання, Visual monitoring порівнює скриншоти.</li>
+</ul>
+</div><h2>Перевірте себе</h2>
+<ol>
+<li>Як побачити пам'ять EC2 у CloudWatch?</li>
+<li>Чим підписка краща за експорт, коли логи потрібні в реальному часі?</li>
+<li>Який blueprint порівнює вигляд сторінки з еталоном?</li>
+</ol>
+
+<nav class="pager"><a href="35-cloudhsm-nitro-enclaves-simple.html">← Лекція 35</a><a href="37-cli-sdk-retries-quotas-simple.html">Лекція 37 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

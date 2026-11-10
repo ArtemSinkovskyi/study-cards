@@ -244,6 +244,131 @@
 <li>Роль завжди краща за ключі.</li>
 <li><code>AssumeRole</code> у коді повертає тимчасові ключі на 15 хв - 12 год.</li>
 </ul>
+<h2>Крок 8. Cognito чи IAM</h2>
+<p>Ключові слова іспиту: <strong>«сотні користувачів», «мобільні користувачі», «вхід через SAML»</strong> означають <strong>Cognito</strong>. IAM для тих, хто всередині вашого AWS.</p>
+<h2>Крок 9. Захист входу в user pool</h2>
+<p>Це називається <strong>threat protection</strong> (раніше advanced security), працює у <strong>Plus-плані</strong>.</p>
+<ol>
+<li>Cognito оцінює кожну спробу входу (місце, пристрій) і дає ризик: low, medium або high.</li>
+<li>Ви вирішуєте реакцію: <strong>вимагати MFA</strong>, <strong>заблокувати</strong> чи лише записати в журнал. MFA просять лише коли є ризик.</li>
+<li>Окремо <strong>compromised credentials</strong>: порівняння пароля з відомими витоками. Працює для входу логіном і паролем, <strong>не</strong> для SRP і не для федерації.</li>
+</ol>
+<p>Журнал входів і ризиків можна слати в CloudWatch Logs. Є режим «лише спостерігати» (audit only).</p>
+<h2>Крок 10. Lambda triggers (виклик синхронний, відповідь за 5 секунд)</h2>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Етап</th>
+<th>Trigger</th>
+<th>Що робить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Етап">Вхід</td>
+<td data-label="Trigger">Pre Authentication</td>
+<td data-label="Що робить">прийняти чи відхилити вхід</td>
+</tr>
+<tr>
+<td data-label="Етап"></td>
+<td data-label="Trigger">Post Authentication</td>
+<td data-label="Що робить">записати подію для аналітики</td>
+</tr>
+<tr>
+<td data-label="Етап"></td>
+<td data-label="Trigger">Pre Token Generation</td>
+<td data-label="Що робить">додати чи прибрати claims токена</td>
+</tr>
+<tr>
+<td data-label="Етап">Реєстрація</td>
+<td data-label="Trigger">Pre Sign-up</td>
+<td data-label="Що робить">прийняти чи відхилити реєстрацію</td>
+</tr>
+<tr>
+<td data-label="Етап"></td>
+<td data-label="Trigger">Post Confirmation</td>
+<td data-label="Що робить">привітання, логування</td>
+</tr>
+<tr>
+<td data-label="Етап"></td>
+<td data-label="Trigger">Migrate User</td>
+<td data-label="Що робить">перенести користувача зі старого каталогу</td>
+</tr>
+<tr>
+<td data-label="Етап">Повідомлення</td>
+<td data-label="Trigger">Custom Message</td>
+<td data-label="Що робить">змінити текст і мову листів</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Крок 11. Як user pool підключають до API Gateway і ALB</h2>
+<ul>
+<li><strong>API Gateway:</strong> клієнт входить у user pool, отримує токен, шле REST API з токеном, API Gateway перевіряє токен у Cognito.</li>
+<li><strong>ALB:</strong> вхід робить сам балансувальник. Потрібен <strong>HTTPS listener</strong> і правило <code>authenticate-cognito</code> (або <code>authenticate-oidc</code> для сторонніх IdP, потрібні Client ID і Secret).</li>
+</ul>
+<p>Поле <code>OnUnauthenticatedRequest</code>:</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Значення</th>
+<th>Що буде з невпізнаним користувачем</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Значення"><code>authenticate</code> (типово)</td>
+<td data-label="Що буде з невпізнаним користувачем">перенаправлять на вхід</td>
+</tr>
+<tr>
+<td data-label="Значення"><code>deny</code></td>
+<td data-label="Що буде з невпізнаним користувачем">401</td>
+</tr>
+<tr>
+<td data-label="Значення"><code>allow</code></td>
+<td data-label="Що буде з невпізнаним користувачем">пропустять без даних про користувача</td>
+</tr>
+</tbody>
+</table></div>
+<p>Редирект у налаштуваннях IdP: <code>https://&lt;DNS балансувальника&gt;/oauth2/idpresponse</code>. Потік такий: ALB перенаправляє на IdP, отримує код, міняє його на токени, бере claims і повертає запит на ціль. ID token до бекенда не передається, claims приходять у заголовку.</p>
+<h2>Крок 12. Identity pool: ще деталі</h2>
+<ul>
+<li>Джерела: Amazon, Facebook, Google, Apple; користувачі user pool; OIDC і SAML; власний сервер входу (<strong>Developer Authenticated Identities</strong>).</li>
+<li>Є <strong>гості</strong>.</li>
+<li>Ролі: типові для автентифікованих і гостей, плюс правила вибору ролі за ID користувача. Ключі видає <strong>STS</strong>, у ролі в trust policy стоїть Cognito identity pools.</li>
+<li>Доступ «лише своє» через змінні політики.</li>
+</ul>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>User pool</th>
+<th>Identity pool</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Відповідає за</td>
+<td data-label="User pool">автентифікацію (хто ти)</td>
+<td data-label="Identity pool">авторизацію (що можна в AWS)</td>
+</tr>
+<tr>
+<td data-label="">Видає</td>
+<td data-label="User pool">JWT</td>
+<td data-label="Identity pool">AWS-ключі</td>
+</tr>
+<tr>
+<td data-label="">Гості</td>
+<td data-label="User pool">ні</td>
+<td data-label="Identity pool">так</td>
+</tr>
+<tr>
+<td data-label="">Додатково</td>
+<td data-label="User pool">свій hosted UI з логотипом, Lambda triggers</td>
+<td data-label="Identity pool">ролі й політики IAM</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>User pool + identity pool = автентифікація + авторизація.</strong></p>
 <h2>Словник</h2>
 <div class="tw"><table class="two">
 <thead>

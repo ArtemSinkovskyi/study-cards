@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 27: CloudFront, CDN</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 27: CloudFront, CDN</h1>
+<blockquote>
+<p>Середній рівень: усі правила з повної лекції, але простими словами. Повна: ../27-cloudfront.md. Усе звірено з документацією AWS; що не підтверджено, позначено <em>(не звірено)</em>. В AWS це не виконували.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>CloudFront тримає копії ваших файлів у точках по світу, ближче до користувача.</strong> Перший запит іде до оригіналу (origin), наступні віддаються з кешу. Швидше, дешевше для origin і безпечніше.</p>
+<h2>Навіщо це так задумано</h2>
+<p>Якщо сервер в Європі, користувач в Австралії чекає довго. Копія поруч віддається миттєво. Мережа по світу ще й захищає від DDoS разом зі Shield і WAF.</p>
+<h2>Крок 1. Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>Edge location</strong></td>
+<td data-label="Суть">точка по світу, де лежить кеш</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Origin</strong></td>
+<td data-label="Суть">де лежить оригінал: S3, ALB, EC2, будь-який HTTP</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Cache key</strong></td>
+<td data-label="Суть">за чим кеш розпізнає об'єкт</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>TTL</strong></td>
+<td data-label="Суть">скільки об'єкт живе в кеші</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>OAC</strong></td>
+<td data-label="Суть">спосіб CloudFront ходити в приватний S3</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Signed URL / cookie</strong></td>
+<td data-label="Суть">підписаний доступ до платного контенту</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Крок 2. Як це працює</h2>
+<ol>
+<li>Користувач просить файл.</li>
+<li>Запит іде на найближчий edge.</li>
+<li>Є в кеші: віддають одразу. Немає: CloudFront бере з origin, кладе в кеш і віддає.</li>
+</ol>
+<h2>Крок 3. Origins</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Origin</th>
+<th>Коли</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Origin"><strong>S3 bucket</strong></td>
+<td data-label="Коли">роздавати файли, також завантажувати в S3 через CloudFront; закритий <strong>OAC</strong></td>
+</tr>
+<tr>
+<td data-label="Origin"><strong>VPC origin</strong></td>
+<td data-label="Коли">застосунок у приватній підмережі: ALB, NLB, EC2 <em>(деталі не звірено)</em></td>
+</tr>
+<tr>
+<td data-label="Origin"><strong>Custom origin</strong></td>
+<td data-label="Коли">S3 як сайт, будь-який публічний HTTP</td>
+</tr>
+</tbody>
+</table></div>
+<p>Пастка: S3 <strong>website</strong> endpoint це custom origin, <strong>OAC для нього не працює</strong>. Різні origins за шляхом: <code>/images/*</code> на S3, <code>/api/*</code> на ALB, <code>/*</code> решта.</p>
+<p>OAC краще за старий OAI: підтримує всі регіони, SSE-KMS і PUT/DELETE.</p>
+<h2>Крок 4. Cache key і політики</h2>
+<p>Ключ кешу за замовчуванням: <strong>ім'я сайту плюс шлях</strong>. Можна додати заголовки, cookie, query через <strong>cache policy</strong>. <strong>Чим менше в ключі, тим більше влучань у кеш.</strong></p>
+<ul>
+<li><strong>Cache policy:</strong> що входить у ключ і скільки живе.</li>
+<li><strong>Origin request policy:</strong> що передати на origin, <strong>не додаючи до ключа</strong>.</li>
+</ul>
+<h2>Крок 5. Скільки живе об'єкт, рецепт у 3 кроки</h2>
+<ol>
+<li>Подивись, чи origin дав <code>max-age</code> (чи <code>s-maxage</code>).</li>
+<li>Обмеж значення знизу Minimum TTL, зверху Maximum TTL.</li>
+<li>Якщо заголовка нема, бери Default TTL (24 години, якщо не змінено).</li>
+</ol>
+<p>Приклад: Min 60, Max 3600, origin дав <code>max-age=86400</code>. Результат <strong>3600</strong>.</p>
+<p>Додатково: CloudFront ігнорує <code>Cache-Control</code> у запиті користувача, тому він не може примусити взяти з origin.</p>
+<h2>Крок 6. Geo restriction</h2>
+<ul>
+<li><strong>Allowlist:</strong> пускати лише зі списку країн.</li>
+<li><strong>Blocklist:</strong> не пускати зі списку.</li>
+<li>Заборонених відсікає з кодом <strong>403</strong>. Діє на весь distribution.</li>
+</ul>
+<h2>Крок 7. Платний контент</h2>
+<ul>
+<li><strong>Signed URL:</strong> один файл.</li>
+<li><strong>Signed cookies:</strong> багато файлів, URL звичайний.</li>
+<li>Підпис містить термін, діапазон IP і хто може підписувати.</li>
+</ul>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>CloudFront signed URL</th>
+<th>S3 presigned URL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Від чийого імені</td>
+<td data-label="CloudFront signed URL">за шляхом, незалежно від origin</td>
+<td data-label="S3 presigned URL">від імені того, хто підписав</td>
+</tr>
+<tr>
+<td data-label="">Кеш</td>
+<td data-label="CloudFront signed URL">працює</td>
+<td data-label="S3 presigned URL">напряму в S3, повз кеш</td>
+</tr>
+<tr>
+<td data-label="">Ключі</td>
+<td data-label="CloudFront signed URL">trusted key group</td>
+<td data-label="S3 presigned URL">IAM-ключ</td>
+</tr>
+</tbody>
+</table></div>
+<p>У нотатках було «ключі лише root». Це застаріле: зараз рекомендують <strong>trusted key groups</strong>, root не потрібен.</p>
+<h2>Крок 8. Origin groups</h2>
+<p>Дві адреси: основна (primary) і запасна (secondary). Якщо основна повернула помилку з вибраних кодів чи не відповіла, CloudFront йде на запасну. Працює лише для методів GET, HEAD і OPTIONS. Типово чекає primary до 30 секунд (3 спроби по 10).</p>
+<h2>Крок 9. Real-time logs</h2>
+<p>Журнали запитів за секунди надходять у <strong>Kinesis Data Streams</strong>. Можна вибрати відсоток запитів (sampling rate), поля й шляхи. Це платно й за принципом best effort.</p>
+<h2>Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>CDN</strong></td>
+<td data-label="Що це">мережа точок, що віддає копії ближче до користувача</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Cache hit / miss</strong></td>
+<td data-label="Що це">знайшлося в кеші / не знайшлося</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Origin Group</strong></td>
+<td data-label="Що це">primary і secondary origin</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>OAC</strong></td>
+<td data-label="Що це">CloudFront підписує запити до приватного S3</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Trusted key group</strong></td>
+<td data-label="Що це">ключі, що можуть підписувати URL</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Geo restriction</strong></td>
+<td data-label="Що це">заборона за країною</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Real-time logs</strong></td>
+<td data-label="Що це">журнали в Kinesis за секунди</td>
+</tr>
+</tbody>
+</table></div>
+<div class="remember"><h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>Приватний S3 за CDN: OAC. S3 website лише custom origin.</li>
+<li>Cache key: ім'я плюс шлях; менше в ключі, більше hit ratio.</li>
+<li>Origin request policy передає, але не додає до ключа.</li>
+<li>TTL: Min, Default (24 год), Max разом із заголовками origin.</li>
+<li>Geo restriction: allowlist чи blocklist, 403, на весь distribution.</li>
+<li>Signed cookies для багатьох файлів. Trusted key groups, не root.</li>
+<li>Origin group: GET, HEAD, OPTIONS.</li>
+<li>Real-time logs у Kinesis Data Streams.</li>
+</ol>
+</div><h2>Перевірте себе</h2>
+<ol>
+<li>Min 0, Max 100, origin дав <code>max-age=500</code>. Який TTL?</li>
+<li>Який метод для платного відео одному користувачу?</li>
+<li>Чому OAC не працює з S3 website?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>
+<ol start="100">
+<li></li>
+</ol>
+</li>
+<li>Signed URL.</li>
+<li>Website endpoint налаштовується як custom origin.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> ../27-cloudfront.md.</p>
+
+<nav class="pager"><a href="26-route53-simple.html">← Лекція 26</a><a href="28-rds-aurora-proxy-simple.html">Лекція 28 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

@@ -279,6 +279,76 @@
 </tr>
 </tbody>
 </table></div>
+<h2>Крок 10. X-Ray: сумісність, безпека, діагностика</h2>
+<p><strong>Навіщо X-Ray.</strong> У монолітові легко зазирнути в лог. У розподіленої системи нема спільного погляду. X-Ray дає <strong>карту сервісів</strong>: на кожному вузлі середня затримка й кількість трейсів за хвилину.</p>
+<p><strong>З чим працює:</strong> Lambda, Elastic Beanstalk, ECS, ELB, API Gateway, EC2 і будь-який сервер (навіть on-premise). Трейсити можна <strong>кожен запит</strong> або <strong>вибірку</strong> (відсоток чи кількість за хвилину).</p>
+<p><strong>Безпека:</strong> IAM для прав, KMS для шифрування даних.</p>
+<p><strong>Cross-account:</strong> daemon або агент можна налаштувати слати трейси в інший акаунт (він приймає роль). Так роблять центральний акаунт для всіх трейсів.</p>
+<p><strong>Правила sampling</strong> можна змінювати <strong>без зміни коду</strong>.</p>
+<p><strong>Не працює X-Ray? Перевір:</strong></p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Де</th>
+<th>Що</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Де">EC2</td>
+<td data-label="Що">чи роль EC2 має дозволи і чи запущений X-Ray daemon</td>
+</tr>
+<tr>
+<td data-label="Де">Lambda</td>
+<td data-label="Що">роль виконання з політикою для запису в X-Ray (у нотатках <code>AWSX-RayWriteOnlyAccess</code>, точну назву перевір <em>(не звірено)</em>), X-Ray підключено в коді, увімкнено Active Tracing</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Крок 11. API X-Ray</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>API</th>
+<th>Що робить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="API"><code>PutTraceSegments</code></td>
+<td data-label="Що робить">надсилає segments</td>
+</tr>
+<tr>
+<td data-label="API"><code>PutTelemetryRecords</code></td>
+<td data-label="Що робить">daemon надсилає телеметрію (скільки segments прийнято, відхилено, помилки зв'язку)</td>
+</tr>
+<tr>
+<td data-label="API"><code>GetSamplingRules</code></td>
+<td data-label="Що робить">які правила sampling діють</td>
+</tr>
+<tr>
+<td data-label="API"><code>GetServiceGraph</code></td>
+<td data-label="Що робить">головна карта</td>
+</tr>
+<tr>
+<td data-label="API"><code>BatchGetTraces</code></td>
+<td data-label="Що робить">повні трейси за ID</td>
+</tr>
+<tr>
+<td data-label="API"><code>GetTraceSummaries</code></td>
+<td data-label="Що робить">ID й annotations трейсів за період; повні беруть через <code>BatchGetTraces</code></td>
+</tr>
+<tr>
+<td data-label="API"><code>GetTraceGraph</code></td>
+<td data-label="Що робить">граф для певних trace ID</td>
+</tr>
+</tbody>
+</table></div>
+<p>Daemon потребує IAM-політики на запис.</p>
+<h2>Крок 12. X-Ray і Beanstalk</h2>
+<p>Платформи Beanstalk уже містять X-Ray daemon. Вмикають в консолі чи файлом <code>.ebextensions/xray-daemon.config</code> з <code>XRayEnabled: true</code>. Instance profile потребує дозволів, код інструментують SDK. Для Multicontainer Docker daemon не надається <em>(не звірено)</em>.</p>
+<h2>Крок 13. ADOT і майбутнє X-Ray SDK</h2>
+<p><strong>AWS Distro for OpenTelemetry (ADOT)</strong> збирає трейси, метрики і метадані ресурсів, може інструментувати код без змін і шле дані в X-Ray, CloudWatch, Managed Prometheus і партнерські системи. Переходять на нього, коли хочуть відкритий стандарт OpenTelemetry або кілька приймачів.</p>
+<p><strong>Виправлення до нотаток:</strong> X-Ray SDK і daemon із 25 лютого 2026 у режимі maintenance, а підтримка закінчується 25 лютого 2027. AWS радить мігрувати на OpenTelemetry. Сам X-Ray як сервіс лишається, а наявні застосунки працюють далі.</p>
 <h2>Словник</h2>
 <div class="tw"><table class="two">
 <thead>

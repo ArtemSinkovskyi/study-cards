@@ -300,6 +300,274 @@
 <li>Метрики: <code>Count</code>, <code>4XXError</code>, <code>5XXError</code>, <code>Latency</code> (весь шлях), <code>IntegrationLatency</code> (лише бекенд). Різниця двох це час у самому Gateway.</li>
 <li><strong>ALB проти API Gateway:</strong> ALB це балансувальник без авторизації й usage plans, а API Gateway керує API.</li>
 </ul>
+<h2>Крок 8. Доповнення: типи endpoint, stage variables, canary, інтеграції</h2>
+<blockquote>
+<p>Додано з чужих конспектів іспиту (2026-11-11). Що не звірено, позначено <em>(не звірено)</em>. В AWS це не виконувалось.</p>
+</blockquote>
+<h3>Навіщо Lambda разом з API Gateway</h3>
+<p>Нема серверів. Є WebSocket, версії API (v1, v2), середовища (dev, test, prod), безпека, API keys і throttling.</p>
+<h3>Три типи endpoint</h3>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>Edge-optimized (типово)</th>
+<th>Regional</th>
+<th>Private</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Для кого</td>
+<td data-label="Edge-optimized (типово)">глобальні клієнти</td>
+<td data-label="Regional">клієнти з того ж регіону</td>
+<td data-label="Private">лише з вашого VPC</td>
+</tr>
+<tr>
+<td data-label="">Шлях</td>
+<td data-label="Edge-optimized (типово)">через edge-локації CloudFront</td>
+<td data-label="Regional">напряму</td>
+<td data-label="Private">через interface VPC endpoint (ENI)</td>
+</tr>
+<tr>
+<td data-label="">Де сам API</td>
+<td data-label="Edge-optimized (типово)"><strong>в одному регіоні</strong></td>
+<td data-label="Regional">в одному регіоні</td>
+<td data-label="Private">в одному регіоні</td>
+</tr>
+<tr>
+<td data-label="">Додатково</td>
+<td data-label="Edge-optimized (типово)">edge це найближча до користувача точка</td>
+<td data-label="Regional">можна вручну поставити свій CloudFront (більше контролю над кешем)</td>
+<td data-label="Private">доступ задає resource policy</td>
+</tr>
+</tbody>
+</table></div>
+<h3>Власний домен</h3>
+<ul>
+<li>HTTPS через <strong>ACM</strong>.</li>
+<li>Edge-optimized: сертифікат у <strong>us-east-1</strong>. Regional: у регіоні API <em>(не звірено в цій сесії)</em>.</li>
+<li>У DNS потрібен <strong>CNAME</strong> або <strong>A-alias</strong> (Route 53).</li>
+</ul>
+<h3>Stages і deployment</h3>
+<ol>
+<li>Змінили API: <strong>нічого не діє</strong>, доки не зробите <strong>deployment</strong>.</li>
+<li>Deployment іде на <strong>stage</strong> (їх скільки завгодно: dev, test, prod). У кожної свої параметри.</li>
+<li>Історія deployment зберігається, тож stage можна <strong>відкотити</strong>.</li>
+</ol>
+<h3>Stage variables</h3>
+<p>Це змінні середовища для API Gateway. Їх можна ставити в <strong>Lambda ARN</strong>, <strong>HTTP endpoint</strong> і <strong>parameter mapping templates</strong>. Формат <code>${stageVariables.variableName}</code>.</p>
+<p>Зв'язка зі Lambda alias: stage <code>dev</code> має <code>alias = dev</code>, stage <code>prod</code> має <code>alias = live</code>. В ARN інтеграції стоїть змінна, і API Gateway <strong>сам</strong> викликає потрібну функцію.</p>
+<h3>Canary</h3>
+<ul>
+<li>Вмикається на <strong>будь-якій stage</strong> (зазвичай prod).</li>
+<li>Ви обираєте <strong>відсоток</strong> трафіку.</li>
+<li><strong>Метрики й логи окремі</strong>.</li>
+<li>Можна <strong>перевизначити stage variables</strong> для canary.</li>
+</ul>
+<h3>Типи інтеграції</h3>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Тип</th>
+<th>Mapping template</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Тип"><strong>MOCK</strong></td>
+<td data-label="Mapping template">нема</td>
+<td data-label="Суть">API Gateway відповідає сам, бекенд не викликає</td>
+</tr>
+<tr>
+<td data-label="Тип"><strong>HTTP / AWS</strong></td>
+<td data-label="Mapping template"><strong>є</strong>, налаштовуєте integration request і integration response</td>
+<td data-label="Суть">перетворення на вході й виході</td>
+</tr>
+<tr>
+<td data-label="Тип"><strong>AWS_PROXY</strong> (Lambda proxy)</td>
+<td data-label="Mapping template">нема</td>
+<td data-label="Суть">запит клієнта цілком у Lambda, <strong>функція сама</strong> формує відповідь</td>
+</tr>
+<tr>
+<td data-label="Тип"><strong>HTTP_PROXY</strong></td>
+<td data-label="Mapping template">нема</td>
+<td data-label="Суть">запит як є на бекенд, відповідь бекенду як є; можна додати заголовки (наприклад API key)</td>
+</tr>
+</tbody>
+</table></div>
+<h3>Mapping templates</h3>
+<p>Змінюють запит чи відповідь в інтеграціях <strong>AWS</strong> і <strong>HTTP</strong>: перейменувати query-параметри, змінити тіло, додати заголовки; <code>Content-Type</code> <code>application/json</code> або <code>application/xml</code>.</p>
+<p><strong>Приклад SOAP (рецепт у 4 кроки).</strong></p>
+<ol>
+<li>Дістати дані із запиту (шлях, тіло чи заголовок).</li>
+<li>За шаблоном зібрати SOAP-повідомлення (XML).</li>
+<li>Викликати SOAP-сервіс і отримати XML.</li>
+<li>Перетворити XML у потрібний формат (наприклад JSON) і відповісти користувачеві.</li>
+</ol>
+<p>Причина: SOAP на XML, REST на JSON.</p>
+<h2>Крок 9. Доповнення: кеш, usage plans, CORS, безпека, WebSocket</h2>
+<blockquote>
+<p>Додано з чужих конспектів (хвіст аркуша про DynamoDB, насправді про API Gateway) і звірено з документацією AWS (2026-11-11). Що не звірено, позначено <em>(не звірено)</em>. В AWS це не виконувалось.</p>
+</blockquote>
+<h3>OpenAPI і валідація</h3>
+<p>OpenAPI це опис REST API як код; з нього можна згенерувати SDK. API Gateway може перевірити запит до інтеграції й одразу відхилити, якщо він хибний.</p>
+<h3>Кеш відповідей</h3>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Що</th>
+<th>Значення</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Що">TTL за замовчуванням</td>
+<td data-label="Значення"><strong>300 с</strong> (мінімум 0, максимум <strong>3600 с</strong>)</td>
+</tr>
+<tr>
+<td data-label="Що">Де задається</td>
+<td data-label="Значення">на <strong>stage</strong>; для окремого методу можна перевизначити</td>
+</tr>
+<tr>
+<td data-label="Що">Розмір</td>
+<td data-label="Значення">0,5-237 ГБ <em>(верхню межу не звірено)</em></td>
+</tr>
+<tr>
+<td data-label="Що">Ціна</td>
+<td data-label="Значення">платно щогодини, дорого: для production, у dev часто зайве</td>
+</tr>
+<tr>
+<td data-label="Що">Що кешується</td>
+<td data-label="Значення">після вмикання лише <strong>GET</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Інвалідація:</strong> клієнт шле <code>Cache-Control: max-age=0</code>, але лише з правом <code>execute-api:InvalidateCache</code>. Без політики будь-хто міг би скидати кеш і підняти затримку.</p>
+<p>Метрики кешу: <code>CacheHitCount</code> (влучання) і <code>CacheMissCount</code> (промахи).</p>
+<h3>Usage plans і API keys</h3>
+<p>Потрібні, коли API продається як послуга.</p>
+<ul>
+<li><strong>Usage plan:</strong> хто користується якими stages і методами, <strong>скільки й наскільки швидко</strong>. Throttling і квоти діють на кожного клієнта.</li>
+<li><strong>API key:</strong> рядок, який роздають клієнтам, щоб ідентифікувати їх. Throttling застосовується до ключів.</li>
+</ul>
+<p>Ключ ідентифікує, але <strong>не авторизує</strong>.</p>
+<h3>Логи, X-Ray, метрики</h3>
+<ul>
+<li>CloudWatch Logs вмикаються на рівні stage (рівні ERROR, DEBUG, INFO за конспектом, <em>не звірено</em>). Є execution logs (дії API Gateway) і access logs (хто звертався).</li>
+<li>X-Ray разом із Lambda дає повну картину.</li>
+<li>Метрики: <code>Count</code>, <code>4XXError</code>, <code>5XXError</code>, <code>Latency</code> (весь шлях, включно з API Gateway), <code>IntegrationLatency</code> (лише бекенд).</li>
+</ul>
+<h3>Throttling</h3>
+<p>Ліміт акаунта <strong>10 000 запитів на секунду</strong> на всі API. Перевищення дає <strong>429</strong> (можна повторити). Один перевантажений API без власного ліміту може «задушити» інші.</p>
+<h3>CORS</h3>
+<p>Потрібен, коли API викликають з <strong>іншого домену</strong>. Рецепт (3 кроки):</p>
+<ol>
+<li>Браузер із сайту <code>www.example.com</code> шле на <code>api.example.com</code> запит <code>OPTIONS</code> (preflight).</li>
+<li>API відповідає заголовками <code>Access-Control-Allow-Origin</code>, <code>Access-Control-Allow-Methods</code>, <code>Access-Control-Allow-Headers</code>.</li>
+<li>Якщо origin дозволено, браузер робить основний запит (наприклад <code>GET</code>).</li>
+</ol>
+<h3>Безпека: чотири способи</h3>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>IAM</th>
+<th>Cognito User Pool</th>
+<th>Lambda authorizer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Для кого</td>
+<td data-label="IAM">користувачі й ролі вашого акаунта (EC2, Lambda); resource policy для cross-account</td>
+<td data-label="Cognito User Pool">ваш власний user pool (можна через Facebook, Google)</td>
+<td data-label="Lambda authorizer"><strong>сторонні токени</strong></td>
+</tr>
+<tr>
+<td data-label="">Автентифікація</td>
+<td data-label="IAM">IAM (Sig v4)</td>
+<td data-label="Cognito User Pool">Cognito перевіряє токен сам</td>
+<td data-label="Lambda authorizer">ваша Lambda</td>
+</tr>
+<tr>
+<td data-label="">Авторизація</td>
+<td data-label="IAM">IAM-політика</td>
+<td data-label="Cognito User Pool"><strong>у бекенді</strong> або методами API Gateway</td>
+<td data-label="Lambda authorizer">ваша Lambda повертає IAM-політику</td>
+</tr>
+<tr>
+<td data-label="">Код</td>
+<td data-label="IAM">не потрібен</td>
+<td data-label="Cognito User Pool">не потрібен</td>
+<td data-label="Lambda authorizer">потрібна Lambda; платите за виклики, результат кешується</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Resource policy</strong> (як у Lambda) дозволяє cross-account доступ і доступ з VPC endpoint.</li>
+<li>Lambda authorizer буває <strong>token-based</strong> (bearer: JWT, OAuth) і <strong>request parameter-based</strong> (заголовки, query string, stage variables).</li>
+</ul>
+<h3>HTTP API проти REST API</h3>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>HTTP API</th>
+<th>REST API</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Суть</td>
+<td data-label="HTTP API">швидкий і дешевий: Lambda proxy, HTTP proxy, private integration, без перетворення даних</td>
+<td data-label="REST API">усі можливості, крім нативного OIDC/OAuth 2.0</td>
+</tr>
+<tr>
+<td data-label="">Авторизація</td>
+<td data-label="HTTP API">OIDC і OAuth 2.0, вбудований CORS</td>
+<td data-label="REST API">через Lambda authorizer чи Cognito</td>
+</tr>
+<tr>
+<td data-label="">API keys і usage plans</td>
+<td data-label="HTTP API"><strong>нема</strong></td>
+<td data-label="REST API">є</td>
+</tr>
+</tbody>
+</table></div>
+<h3>WebSocket API</h3>
+<p>Двостороннє спілкування, зокрема повідомлення <strong>від сервера до клієнта</strong> (чат, сповіщення). Адреса <code>wss://&lt;id&gt;.execute-api.&lt;region&gt;.amazonaws.com/&lt;stage&gt;</code>.</p>
+<p><strong>Як сервер пише клієнтові:</strong> Lambda бере <code>connectionId</code> (зберігає, наприклад, у DynamoDB) і шле HTTP-запит на <strong>Connection URL</strong> <code>.../@connections/&lt;connectionId&gt;</code>, підписаний IAM Sig v4.</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Операція</th>
+<th>Дія</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Операція">POST</td>
+<td data-label="Дія">надіслати повідомлення клієнтові</td>
+</tr>
+<tr>
+<td data-label="Операція">GET</td>
+<td data-label="Дія">дізнатись статус підключення</td>
+</tr>
+<tr>
+<td data-label="Операція">DELETE</td>
+<td data-label="Дія">відключити клієнта</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Маршрутизація:</strong></p>
+<ol>
+<li>Приходить JSON, наприклад <code>{&quot;service&quot;: &quot;chat&quot;, &quot;action&quot;: &quot;join&quot;, ...}</code>.</li>
+<li><strong>Route selection expression</strong> (<code>$request.body.action</code>) бере поле <code>action</code>: <code>join</code>.</li>
+<li>Значення шукають серед <strong>route keys</strong> (<code>$connect</code>, <code>$disconnect</code>, <code>$default</code>, власні <code>join</code>, <code>quit</code>, <code>delete</code>) і викликають бекенд цього маршруту.</li>
+</ol>
+<p>Якщо маршруту нема, іде <code>$default</code>. З'єднання закривається після 10 хв бездіяльності чи 2 год життя.</p>
 <h2>Словник</h2>
 <div class="tw"><table class="two">
 <thead>
@@ -352,6 +620,12 @@
 <li>API key ідентифікує, а не авторизує. 429 це ліміт.</li>
 <li>Файли йдуть через presigned URL, а не через API.</li>
 <li>Presigned живе не довше за облікові дані, що його створили.</li>
+<li>Edge-optimized: через CloudFront, але API в одному регіоні; сертифікат для edge у us-east-1 <em>(не звірено)</em>.</li>
+<li>AWS_PROXY і HTTP_PROXY без mapping template; HTTP і AWS з ним; MOCK без бекенду.</li>
+<li>Canary: окремі метрики й логи, можна перевизначити stage variables.</li>
+<li>Кеш: TTL 300 с (0-3600), на stage, дорогий, лише GET; інвалідація <code>Cache-Control: max-age=0</code> з правом <code>InvalidateCache</code>.</li>
+<li>CORS: preflight OPTIONS з Allow-Origin, Allow-Methods, Allow-Headers. Безпека: IAM, Cognito (авторизація в бекенді), Lambda authorizer (сторонні токени, кеш).</li>
+<li>HTTP API: без usage plans і API keys, з OIDC/OAuth2 і CORS. WebSocket: <code>$connect</code>, <code>$disconnect</code>, <code>$default</code>, route selection expression, <code>@connections</code> POST/GET/DELETE.</li>
 </ol>
 </div><h2>Перевірте себе</h2>
 <ol>

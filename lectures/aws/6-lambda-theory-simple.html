@@ -769,6 +769,314 @@
 <li><strong><code>Hooks</code>:</strong> <code>PreTraffic</code> і <code>PostTraffic</code> це Lambda-функції для перевірки до і після зміщення трафіку.</li>
 <li><strong><code>Alarms</code>:</strong> якщо alarm спрацював під час розгортання, CodeDeploy <strong>автоматично відкочує</strong>.</li>
 </ul>
+<h2>Крок 14. Доповнення: Function URL, edge, EFS та інше</h2>
+<blockquote>
+<p>Додано з чужих конспектів іспиту й звірено з документацією AWS (2026-11-11). Що не звірено, позначено <em>(не звірено)</em>. В AWS це не виконувалось.</p>
+</blockquote>
+<h3>Event і Context</h3>
+<ul>
+<li><strong>Event</strong> це дані для обробки: JSON від того, хто викликав. У Python він стає <code>dict</code>.</li>
+<li><strong>Context</strong> це інформація про сам виклик: <code>aws_request_id</code>, <code>function_name</code>, <code>memory_limit_in_mb</code>. Це другий аргумент handler.</li>
+</ul>
+<p>Хочете знати <code>RequestId</code>: дивіться в context, не в event.</p>
+<h3>Хто викликає синхронно</h3>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Синхронно</th>
+<th>Асинхронно</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Синхронно">ALB, API Gateway, CloudFront (Lambda@Edge), S3 Batch</td>
+<td data-label="Асинхронно">S3, SNS, EventBridge</td>
+</tr>
+<tr>
+<td data-label="Синхронно">Cognito, Step Functions</td>
+<td data-label="Асинхронно"></td>
+</tr>
+<tr>
+<td data-label="Синхронно">Lex, Alexa, Data Firehose</td>
+<td data-label="Асинхронно"></td>
+</tr>
+</tbody>
+</table></div>
+<p>Синхронно: результат одразу, а retry і помилки на клієнті. Щоб показати функцію як HTTP(S), ставлять ALB (функція в <strong>target group</strong>) або API Gateway.</p>
+<h3>S3 як async-джерело: пастки</h3>
+<ol>
+<li>Подія приходить за секунди, але іноді за хвилину й більше.</li>
+<li>Два одночасні записи в один об'єкт без versioning можуть дати <strong>одну</strong> подію.</li>
+<li>Хочете подію на кожен запис: увімкніть <strong>versioning</strong>.</li>
+<li>Retry async-виклику дає <strong>дубльовані рядки в логах</strong>. Це нормально.</li>
+</ol>
+<h3>Потоки проти черг (event source mapping)</h3>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>Потоки (Kinesis, DynamoDB Streams)</th>
+<th>Черги (SQS)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Паралелізм</td>
+<td data-label="Потоки (Kinesis, DynamoDB Streams)">один ітератор на шард</td>
+<td data-label="Черги (SQS)">Standard: скільки треба; FIFO: скільки активних груп</td>
+</tr>
+<tr>
+<td data-label="">Після обробки</td>
+<td data-label="Потоки (Kinesis, DynamoDB Streams)">запис <strong>лишається</strong> в потоці</td>
+<td data-label="Черги (SQS)">Lambda <strong>видаляє</strong> повідомлення</td>
+</tr>
+<tr>
+<td data-label="">Паралельні батчі</td>
+<td data-label="Потоки (Kinesis, DynamoDB Streams)">до 10 на шард (parallelization factor), порядок по partition key зберігається</td>
+<td data-label="Черги (SQS)">обмежується <code>Maximum concurrency</code></td>
+</tr>
+<tr>
+<td data-label="">Помилка</td>
+<td data-label="Потоки (Kinesis, DynamoDB Streams)">весь батч повторюється, <strong>шард стоїть</strong>, щоб не порушити порядок</td>
+<td data-label="Черги (SQS)">повідомлення повертається після visibility timeout</td>
+</tr>
+<tr>
+<td data-label="">Куди невдалі</td>
+<td data-label="Потоки (Kinesis, DynamoDB Streams)">on-failure destination</td>
+<td data-label="Черги (SQS)">DLQ на <strong>черзі</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>Standard-черга інколи видає те саме повідомлення двічі навіть без помилки функції. Тому потрібна ідемпотентність.</p>
+<p><strong>Рецепт масштабування SQS Standard (3 кроки).</strong></p>
+<ol>
+<li>Старт: 5 паралельних викликів.</li>
+<li>Далі до +300 на хвилину.</li>
+<li>Стеля: 1 250.</li>
+</ol>
+<p>Приклад: після 2 хвилин під навантаженням буде приблизно 5 + 600, але не більше 1 250, тож упирається у стелю після ~4 хвилин. <em>(Старі конспекти пишуть «+60 за хвилину, до 1000»: це застаріло.)</em></p>
+<h3>Готові політики для execution role</h3>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Політика</th>
+<th>Навіщо</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Політика"><code>AWSLambdaBasicExecutionRole</code></td>
+<td data-label="Навіщо">логи в CloudWatch</td>
+</tr>
+<tr>
+<td data-label="Політика"><code>AWSLambdaKinesisExecutionRole</code></td>
+<td data-label="Навіщо">читати Kinesis</td>
+</tr>
+<tr>
+<td data-label="Політика"><code>AWSLambdaDynamoDBExecutionRole</code></td>
+<td data-label="Навіщо">читати DynamoDB Streams</td>
+</tr>
+<tr>
+<td data-label="Політика"><code>AWSLambdaSQSQueueExecutionRole</code></td>
+<td data-label="Навіщо">читати SQS</td>
+</tr>
+<tr>
+<td data-label="Політика"><code>AWSLambdaVPCAccessExecutionRole</code></td>
+<td data-label="Навіщо">функція у VPC</td>
+</tr>
+<tr>
+<td data-label="Політика"><code>AWSXRayDaemonWriteAccess</code></td>
+<td data-label="Навіщо">трейси в X-Ray</td>
+</tr>
+</tbody>
+</table></div>
+<p>Event source mapping читає джерело <strong>правами execution role</strong>. Практика: одна роль на одну функцію.</p>
+<h3>X-Ray у Lambda</h3>
+<ul>
+<li>Вмикається <strong>Active tracing</strong> у налаштуваннях функції, Lambda сама запускає демон.</li>
+<li>Змінні: <code>_X_AMZN_TRACE_ID</code> (заголовок трейсу), <code>AWS_XRAY_DAEMON_ADDRESS</code> (IP:порт демона), <code>AWS_XRAY_CONTEXT_MISSING</code> (за конспектом типово <code>LOG_ERROR</code>, <em>не звірено</em>).</li>
+<li>Без Active діє режим <strong>PassThrough</strong>: Lambda лише передає заголовок далі й трейси сама не шле.</li>
+</ul>
+<h3>Edge: CloudFront Functions і Lambda@Edge</h3>
+<p>Код на краю виконується близько до користувача, щоб було менше затримки.</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>CloudFront Functions</th>
+<th>Lambda@Edge</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Мова</td>
+<td data-label="CloudFront Functions">JavaScript</td>
+<td data-label="Lambda@Edge">Node.js, Python</td>
+</tr>
+<tr>
+<td data-label="">Масштаб</td>
+<td data-label="CloudFront Functions">мільйони запитів на секунду, старт під-мілісекунда</td>
+<td data-label="Lambda@Edge">тисячі запитів на секунду</td>
+</tr>
+<tr>
+<td data-label="">Час виконання</td>
+<td data-label="CloudFront Functions">дуже короткий</td>
+<td data-label="Lambda@Edge">довший</td>
+</tr>
+<tr>
+<td data-label="">Бібліотеки, мережа, диск, тіло запиту</td>
+<td data-label="CloudFront Functions"><strong>нема</strong></td>
+<td data-label="Lambda@Edge"><strong>є</strong></td>
+</tr>
+<tr>
+<td data-label="">Для чого</td>
+<td data-label="CloudFront Functions">cache key, заголовки, URL rewrite і redirect, проста перевірка запиту</td>
+<td data-label="Lambda@Edge">важча логіка, виклики AWS-сервісів</td>
+</tr>
+</tbody>
+</table></div>
+<p>Правило: легке й масове: CloudFront Functions; потрібні бібліотеки чи мережа: Lambda@Edge. Обмеження Lambda@Edge (us-east-1, лише версія) див. <a href="7-sam-simple.html">лекцію 7</a>.</p>
+<h3>Lambda у VPC: коротко про шляхи</h3>
+<ul>
+<li>Типово функція живе у VPC AWS і не бачить ваших RDS, ElastiCache, внутрішнього ELB.</li>
+<li>Вкажіть VPC, підмережі, security groups: Lambda створить ENI.</li>
+<li>У VPC інтернету нема. Публічна підмережа його <strong>не дає</strong> (і публічної IP теж).</li>
+<li>Приватна підмережа плюс NAT Gateway дає інтернет. VPC endpoints дають AWS-сервіси без NAT.</li>
+</ul>
+<h3><code>/tmp</code> проти EFS</h3>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th><code>/tmp</code></th>
+<th>EFS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Обсяг</td>
+<td data-label="/tmp">до 10 ГБ</td>
+<td data-label="EFS">дуже великий <em>(не звірено)</em></td>
+</tr>
+<tr>
+<td data-label="">Хто бачить</td>
+<td data-label="/tmp">лише це середовище</td>
+<td data-label="EFS">усі, хто змонтував</td>
+</tr>
+<tr>
+<td data-label="">Переживає</td>
+<td data-label="/tmp">не гарантовано</td>
+<td data-label="EFS">так</td>
+</tr>
+<tr>
+<td data-label="">Вимога</td>
+<td data-label="/tmp">нема</td>
+<td data-label="EFS">функція у VPC і <strong>EFS Access Point</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3>Function URL</h3>
+<p>Окрема HTTPS-адреса функції без API Gateway. Формат <code>https://&lt;url-id&gt;.lambda-url.&lt;region&gt;.on.aws</code>, адреса <strong>не змінюється</strong>, IPv4 і IPv6. Лише публічний інтернет, <strong>PrivateLink не підтримується</strong>. Можна повісити на alias або <code>$LATEST</code>.</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th><code>NONE</code></th>
+<th><code>AWS_IAM</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Хто</td>
+<td data-label="NONE">будь-хто</td>
+<td data-label="AWS_IAM">лише автентифіковані</td>
+</tr>
+<tr>
+<td data-label="">Політика функції</td>
+<td data-label="NONE"><strong>все одно діє</strong>, має дозволяти публічний доступ</td>
+<td data-label="AWS_IAM">діє разом з identity-based</td>
+</tr>
+<tr>
+<td data-label="">Той самий акаунт</td>
+<td data-label="NONE"></td>
+<td data-label="AWS_IAM">достатньо Allow <strong>або</strong> там, <strong>або</strong> там</td>
+</tr>
+<tr>
+<td data-label="">Різні акаунти</td>
+<td data-label="NONE"></td>
+<td data-label="AWS_IAM">потрібен Allow <strong>і</strong> там, <strong>і</strong> там</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>Потрібні дозволи: <code>lambda:InvokeFunctionUrl</code>; з жовтня 2025 для нових URL ще й <code>lambda:InvokeFunction</code>.</li>
+<li>Консоль і SAM для <code>NONE</code> самі пишуть політику, CLI і CloudFormation ні. Без політики буде <code>403</code>.</li>
+<li>CORS потрібен, якщо кличете з іншого домену. Краще ставити його на Function URL, не у відповіді функції.</li>
+<li>Ліміт: reserved concurrency; запитів на секунду максимум <strong>10 × reserved concurrency</strong>; понад це <code>429</code>. Reserved <code>0</code> вимикає URL.</li>
+</ul>
+<h3>Concurrency: що додав конспект</h3>
+<ul>
+<li>Ліміт 1000 паралельних виконань, можна піднімати.</li>
+<li>Reserved concurrency це гарантія й стеля.</li>
+<li>Перевищення: sync повертає <strong>429</strong>, async повторюється й іде в DLQ.</li>
+<li>Provisioned concurrency готується наперед, тож холодного старту нема; ним керує Application Auto Scaling (за розкладом чи за навантаженням).</li>
+</ul>
+<h3>Залежності й CloudFormation</h3>
+<ul>
+<li>Бібліотеки пакують у zip разом з кодом: <code>npm</code> і <code>node_modules</code>, <code>pip --target</code>, <code>.jar</code>. До <strong>50 МБ</strong> напряму, більше через S3.</li>
+<li>У CloudFormation код задають або inline через <code>Code.ZipFile</code> (залежності <strong>не можна</strong>), або через S3: <code>S3Bucket</code>, <code>S3Key</code>, <code>S3ObjectVersion</code>.</li>
+<li><strong>Пастка:</strong> змінили zip у S3, а <code>S3Bucket</code>/<code>S3Key</code>/<code>S3ObjectVersion</code> лишили, CloudFormation функцію <strong>не оновить</strong>.</li>
+</ul>
+<p><strong>Container images</strong> (до 10 ГБ, з ECR): свій образ має реалізувати <strong>Lambda Runtime API</strong>; локально тестують через Runtime Interface Emulator. Практики: базові образи AWS, multi-stage build, стабільне зверху а змінне знизу Dockerfile, один репозиторій для функцій з великими шарами.</p>
+<h3>AppSpec для CodeDeploy (Lambda)</h3>
+<p>Чотири поля: <code>Name</code> (функція), <code>Alias</code>, <code>CurrentVersion</code> (де трафік зараз), <code>TargetVersion</code> (куди зміщується).</p>
+<h3>Ліміти в одній таблиці</h3>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Що</th>
+<th>Ліміт</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Що">Пам'ять</td>
+<td data-label="Ліміт">128 МБ - 10 ГБ</td>
+</tr>
+<tr>
+<td data-label="Що">Час</td>
+<td data-label="Ліміт">900 с</td>
+</tr>
+<tr>
+<td data-label="Що">Змінні середовища</td>
+<td data-label="Ліміт">4 КБ</td>
+</tr>
+<tr>
+<td data-label="Що"><code>/tmp</code></td>
+<td data-label="Ліміт">512 МБ - 10 ГБ</td>
+</tr>
+<tr>
+<td data-label="Що">Паралельність</td>
+<td data-label="Ліміт">1000</td>
+</tr>
+<tr>
+<td data-label="Що">Zip</td>
+<td data-label="Ліміт">50 МБ</td>
+</tr>
+<tr>
+<td data-label="Що">Розпаковано</td>
+<td data-label="Ліміт">250 МБ</td>
+</tr>
+</tbody>
+</table></div>
+<p>Пам'ять і CPU: <strong>1 vCPU при 1 769 МБ</strong> (старі конспекти пишуть 1 792, це неточно).</p>
+<h3>Кращі практики</h3>
+<ol>
+<li>Важке (з'єднання з БД, SDK, залежності) виносьте <strong>поза handler</strong>.</li>
+<li>Налаштування в змінних середовища, секрети шифруйте KMS.</li>
+<li>Пакет мінімальний; за потреби розбийте функцію; користуйтеся layers.</li>
+<li><strong>Ніколи не робіть рекурсію: функція не має викликати сама себе.</strong></li>
+</ol>
 <h2>Шпаргалка: симптом і відповідь</h2>
 <div class="tw"><table class="two">
 <thead>
@@ -913,6 +1221,22 @@
 <td data-label="Термін"><strong>Execution role</strong></td>
 <td data-label="Що це">роль, під якою функція звертається до AWS</td>
 </tr>
+<tr>
+<td data-label="Термін"><strong>Function URL</strong></td>
+<td data-label="Що це">окрема HTTPS-адреса функції без API Gateway</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Lambda@Edge / CloudFront Functions</strong></td>
+<td data-label="Що це">код на краю CloudFront: важчий / легкий</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>EFS Access Point</strong></td>
+<td data-label="Що це">точка входу до спільної файлової системи для функції у VPC</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Execution context</strong></td>
+<td data-label="Що це">теплий контекст функції: ініціалізація поза handler, <code>/tmp</code></td>
+</tr>
 </tbody>
 </table></div>
 <h2>🖼 Схема: Lambda: переваги й тригери</h2><div class="dg"><div class="dtitle">Навіщо Lambda</div><div class="drow"><div class="dbox aws">Немає серверів</div><div class="dbox aws">Коротке виконання</div><div class="dbox aws">За запитом</div><div class="dbox aws">Автомасштаб</div><div class="dbox aws">Платите за запит і час</div><div class="dbox aws">До 10 ГБ RAM (більше RAM дає більше CPU й мережі)</div></div><div class="dnote">Free tier: 1 000 000 запитів і 400 000 ГБ-с на місяць.</div><div class="dtitle">Тригери: хто викликає Lambda</div><div class="dgroup green"><b>Синхронно: клієнт чекає відповідь</b><div class="dkids"><div class="dbox green"><img class="dicon" src="../../icons/api-gateway.svg" alt="">API Gateway</div><div class="dbox green"><img class="dicon" src="../../icons/cloudfront.svg" alt="">CloudFront (Lambda@Edge)</div><div class="dbox green"><img class="dicon" src="../../icons/cognito.svg" alt="">Cognito</div></div></div><div class="dgroup yellow"><b>Асинхронно: подія стає в чергу</b><div class="dkids"><div class="dbox yellow"><img class="dicon" src="../../icons/s3.svg" alt="">S3</div><div class="dbox yellow"><img class="dicon" src="../../icons/sns.svg" alt="">SNS</div><div class="dbox yellow"><img class="dicon" src="../../icons/eventbridge.svg" alt="">EventBridge</div><div class="dbox yellow"><img class="dicon" src="../../icons/cloudwatch.svg" alt="">CloudWatch Logs</div></div></div><div class="dgroup blue"><b><img class="dicon" src="../../icons/lambda.svg" alt="">Lambda сама опитує джерело (event source mapping)</b><div class="dkids"><div class="dbox blue"><img class="dicon" src="../../icons/sqs.svg" alt="">SQS</div><div class="dbox blue"><img class="dicon" src="../../icons/kinesis.svg" alt="">Kinesis</div><div class="dbox blue"><img class="dicon" src="../../icons/dynamodb.svg" alt="">DynamoDB Streams</div></div></div><div class="dtitle">Приклади</div><div class="dflow"><div class="dbox aws">Нове фото в S3</div><div class="darrow">↓</div><div class="dbox green"><img class="dicon" src="../../icons/lambda.svg" alt="">Lambda створює мініатюру</div><div class="darrow">↓</div><div class="dbox aws">Мініатюра в S3, метадані в DynamoDB</div></div><div class="dflow"><div class="dbox yellow"><img class="dicon" src="../../icons/eventbridge.svg" alt="">EventBridge: щогодини</div><div class="darrow">↓</div><div class="dbox green"><img class="dicon" src="../../icons/lambda.svg" alt="">Lambda виконує задачу (cron без сервера)</div></div><div class="dtitle">Три способи виклику</div><div class="dcols"><div class="dcol green"><b>Synchronous</b><ul><li class="hi"><span class="dgap"></span>клієнт чекає результат</li><li class="hi"><img class="dicon" src="../../icons/elb.svg" alt="">ALB, API Gateway, CloudFront, S3 Batch, CLI, SDK, Cognito, Step Functions</li><li class="hi"><span class="dgap"></span>помилки й повтори на боці клієнта</li></ul></div><div class="dcol yellow"><b>Asynchronous</b><ul><li class="hi"><span class="dgap"></span>подія йде в чергу подій</li><li class="hi"><img class="dicon" src="../../icons/s3.svg" alt="">S3, SNS, EventBridge, CodeCommit, CodePipeline, CloudWatch Logs, SES</li><li class="hi"><img class="dicon" src="../../icons/lambda.svg" alt="">Lambda сама повторює; обробка має бути ідемпотентною</li></ul></div></div><div class="dnote">При повторах у CloudWatch Logs будуть дублікати записів.</div><div class="dtitle">Куди йде невдача (async)</div><div class="dcols"><div class="dcol red"><b>DLQ</b><ul><li class="hi"><img class="dicon" src="../../icons/sns.svg" alt="">SNS або SQS</li><li class="hi"><span class="dgap"></span>«впала: збережи подію, розберуся потім»</li></ul></div><div class="dcol green"><b>Destination</b><ul><li>успіх: далі в аналітику</li><li>помилка: запусти іншу Lambda</li><li>AWS радить саме його (з листопада 2019), можна обидва</li></ul></div></div><div class="dtitle">ALB викликає Lambda</div><div class="dflow"><div class="dbox blue">Клієнт: HTTP/HTTPS</div><div class="darrow">↓</div><div class="dbox aws"><img class="dicon" src="../../icons/elb.svg" alt="">ALB (target group) викликає Lambda синхронно</div><div class="darrow">↓</div><div class="dbox green">HTTP-запит перетворюється на JSON для функції</div></div></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
@@ -925,6 +1249,9 @@
 <li>Throttles не входять в Errors. Reserved гарантує і обмежує, provisioned прогріває і платний.</li>
 <li>Layers до 5, у <code>/opt</code>, не для container image. Понад 250 МБ: container image.</li>
 <li>502 це формат відповіді, 504 це timeout інтеграції.</li>
+<li>Function URL: <code>NONE</code> усе одно потребує політики функції; <code>AWS_IAM</code> у різних акаунтах потребує Allow з обох боків; PrivateLink нема.</li>
+<li>Потоки: шард стоїть на помилці; черги: DLQ на черзі. CloudFront Functions легкі (JS), Lambda@Edge важчі (Node, Python).</li>
+<li>EFS потребує VPC і Access Point; <code>/tmp</code> до 10 ГБ; 1 vCPU = 1 769 МБ.</li>
 </ol>
 </div><h2>Перевірте себе</h2>
 <ol>

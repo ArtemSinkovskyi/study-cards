@@ -217,6 +217,43 @@
 </ul>
 <p><strong>Не підходить:</strong> потрібні strongly consistent читання (такі запити DAX пропускає прямо в DynamoDB і не кешує; так само TransactGetItems); багато записів; мало повторних читань; не потрібні мікросекунди.</p>
 <p><strong>DAX чи ElastiCache:</strong> DAX лише для DynamoDB, без коду кешування. ElastiCache для всього іншого, але логіку кешу пишете самі.</p>
+<h3>DAX докладніше</h3>
+<ol>
+<li><strong>Читання eventually consistent</strong>: DAX шукає в кеші. Знайшов (cache hit): віддає. Не знайшов (cache miss): іде в DynamoDB, кладе відповідь у кеш і віддає.</li>
+<li><strong>Читання strongly consistent</strong>: DAX проксує прямо в DynamoDB, у кеш не кладе.</li>
+<li><strong>Запис (write-through)</strong>: дані спершу йдуть у таблицю DynamoDB, потім у DAX.</li>
+</ol>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Параметр</th>
+<th>Значення</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Параметр">TTL кешу</td>
+<td data-label="Значення"><strong>5 хвилин</strong> за замовчуванням</td>
+</tr>
+<tr>
+<td data-label="Параметр">Що кешує</td>
+<td data-label="Значення">окремі items (<code>GetItem</code>, <code>BatchGetItem</code>) і результати <code>Query</code>, <code>Scan</code> (окремий кеш запитів)</td>
+</tr>
+<tr>
+<td data-label="Параметр">Розмір кластера</td>
+<td data-label="Значення">до <strong>11</strong> вузлів: primary плюс до 10 реплік (у нотатках «до 10», документація точніша)</td>
+</tr>
+<tr>
+<td data-label="Параметр">Для production</td>
+<td data-label="Значення"><strong>мінімум 3 вузли в різних зонах доступності</strong>; 1-2 вузли лише для розробки й тестів</td>
+</tr>
+<tr>
+<td data-label="Параметр">Безпека</td>
+<td data-label="Значення">VPC, IAM, шифрування в спокої через KMS, CloudTrail</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>DAX проти ElastiCache ще раз.</strong> DAX кешує <strong>окремі items і результати Query/Scan</strong> прозоро, без зміни коду. ElastiCache береться, коли треба кешувати <strong>результат агрегації</strong> (SUM, AVG), бо DynamoDB їх не рахує. Застосунок може мати обидва.</p>
 <h2>Крок 5. ElastiCache</h2>
 <p>Рушії: <strong>Valkey</strong>, <strong>Redis OSS</strong>, <strong>Memcached</strong>.</p>
 <div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
@@ -253,6 +290,76 @@
 <p>Запам'ятайте: <strong>відмовостійкість чи рейтинг (sorted set) означає Redis/Valkey; простий розподілений кеш означає Memcached.</strong></p>
 <p>Режими: <strong>Serverless</strong> (без вузлів, оплата за ГБ і ECPU, завжди Multi-AZ) і <strong>node-based</strong> (свої вузли, оплата за годину). Працює у VPC, тож Lambda треба підключити до VPC. Типове застосування: сесії застосунку, щоб сервери були stateless.</p>
 <p>Сесії: і DynamoDB, і ElastiCache підходять. DynamoDB простіше й без VPC, ElastiCache швидше.</p>
+<h3>Доповнення з нотаток</h3>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>Redis / Valkey</th>
+<th>Memcached</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Висока доступність</td>
+<td data-label="Redis / Valkey">Multi-AZ з автоматичним failover</td>
+<td data-label="Memcached">нема</td>
+</tr>
+<tr>
+<td data-label="">Read replicas</td>
+<td data-label="Redis / Valkey">є</td>
+<td data-label="Memcached">нема</td>
+</tr>
+<tr>
+<td data-label="">Розподіл даних</td>
+<td data-label="Redis / Valkey">sharding (cluster mode)</td>
+<td data-label="Memcached">дані діляться між вузлами</td>
+</tr>
+<tr>
+<td data-label="">Збереження</td>
+<td data-label="Redis / Valkey">backup і restore</td>
+<td data-label="Memcached">не зберігає (backup лише в serverless)</td>
+</tr>
+<tr>
+<td data-label="">Роль</td>
+<td data-label="Redis / Valkey">кеш, message broker (pub/sub), тимчасове сховище</td>
+<td data-label="Memcached">лише кеш</td>
+</tr>
+<tr>
+<td data-label="">Масштабування</td>
+<td data-label="Redis / Valkey">вертикальне й sharding</td>
+<td data-label="Memcached">горизонтальне: додаєш вузли</td>
+</tr>
+</tbody>
+</table></div>
+<p>Поправка до нотаток: «довговічність через AOF» застаріла. У порівняльній таблиці ElastiCache довговічності в Redis/Valkey нема. Довговічна база в пам'яті це <strong>MemoryDB</strong>; ElastiCache це кеш. Докладніше: лекція про RDS, Aurora і RDS Proxy.</p>
+<h3>Де ще тримати сесії</h3>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Варіант</th>
+<th>Чому не підходить так добре</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Варіант">ElastiCache</td>
+<td data-label="Чому не підходить так добре">у пам'яті, швидко; але DynamoDB serverless</td>
+</tr>
+<tr>
+<td data-label="Варіант">EFS</td>
+<td data-label="Чому не підходить так добре">треба підключати до EC2 як мережевий диск</td>
+</tr>
+<tr>
+<td data-label="Варіант">EBS і Instance Store</td>
+<td data-label="Чому не підходить так добре">лише локальний кеш, не спільний між серверами</td>
+</tr>
+<tr>
+<td data-label="Варіант">S3</td>
+<td data-label="Чому не підходить так добре">більша затримка, не для дрібних об'єктів</td>
+</tr>
+</tbody>
+</table></div>
 <h2>Крок 6. CloudFront</h2>
 <p><strong>CDN</strong>: копії контенту в edge locations по світу. Origin: S3, ALB, API Gateway, будь-який HTTP.</p>
 <p><strong>Cache key</strong> <em>(не звірено)</em> визначає, чи два запити ділять один запис: за замовчуванням домен і шлях. Додавання заголовків, cookie, query збільшує кількість варіантів і <strong>знижує hit ratio</strong>. Тому в ключ лише те, від чого справді залежить відповідь.</p>
@@ -372,7 +479,7 @@
 </tr>
 </tbody>
 </table></div>
-<p><strong>RDS і Lambda:</strong> Lambda масштабується швидко, а RDS має обмежені з'єднання. Рішення <strong>RDS Proxy</strong> (пул з'єднань, навичка 4.3.1) <em>(не звірено)</em>. Для читань <strong>read replicas</strong>.</p>
+<p><strong>RDS і Lambda:</strong> Lambda масштабується швидко, а RDS має обмежені з'єднання. Рішення <strong>RDS Proxy</strong> (пул з'єднань, навичка 4.3.1) <em>(не звірено)</em>. Для читань <strong>read replicas</strong>. Докладно про RDS, Multi-AZ, Aurora і MemoryDB дивіться в окремій лекції про RDS.</p>
 <h2>Словник</h2>
 <div class="tw"><table class="two">
 <thead>
@@ -414,6 +521,14 @@
 <td data-label="Термін"><strong>Invalidation</strong></td>
 <td data-label="Що це">примусове скидання кешу CloudFront</td>
 </tr>
+<tr>
+<td data-label="Термін"><strong>Write-through у DAX</strong></td>
+<td data-label="Що це">запис спершу в таблицю, потім у кеш</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>MemoryDB</strong></td>
+<td data-label="Що це">база в пам'яті, що не губить дані</td>
+</tr>
 </tbody>
 </table></div>
 <div class="remember"><h2>Що запам'ятати на іспит</h2>
@@ -426,6 +541,9 @@
 <li>CloudFront: багато файлів signed cookies, один файл signed URL.</li>
 <li>Lambda вичерпує з'єднання з RDS: RDS Proxy.</li>
 <li>Athena для SQL по S3.</li>
+<li>DAX: TTL 5 хв, до 11 вузлів, для production мінімум 3 вузли в різних зонах, write-through.</li>
+<li>Кешувати результат агрегації: ElastiCache; окремі items і запити DynamoDB: DAX.</li>
+<li>ElastiCache кеш, MemoryDB база; довговічності через AOF в ElastiCache нема.</li>
 </ol>
 </div><h2>Перевірте себе</h2>
 <ol>
