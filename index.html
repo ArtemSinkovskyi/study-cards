@@ -9,6 +9,8 @@
   body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.5 system-ui, Segoe UI, Roboto, sans-serif; }
   main { max-width:30rem; margin:0 auto; padding:1.5rem 1rem; }
   h1 { font-size:1.2rem; margin:0 0 1rem; }
+  nav.top { margin-bottom:.6rem; font-size:.9rem; }
+  nav.top a { color:#24466b; }
   a.deck { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.9rem; padding:1.1rem 1.2rem; margin-bottom:.8rem; color:inherit; text-decoration:none; }
   a.deck b { display:block; font-size:1.1rem; }
   a.deck span { color:#6b6b70; font-size:.9rem; }
@@ -16,18 +18,9 @@
 </head>
 <body>
 <main>
-  <h1>Картки до сертифікацій</h1>
-  <a class="deck" href="aws.html"><b>☁️ AWS Developer Associate</b><span>DVA-C03, 470 карток</span></a>
-  <a class="deck" href="claude.html"><b>🤖 Claude Certified Architect</b><span>103 картки</span></a>
-  <a class="deck" href="identity.html"><b>🛂 Ідентифікація і доступ</b><span>19 карток: AuthN, AuthZ, Trust Policy, Permission Boundary, мультиакаунт, IAM, STS, ARN, SSO, SAML, OIDC, IdP, SP, RBAC, ABAC, SCP, ACL, OU, SCIM</span></a>
-  <h1 style="margin-top:1.8rem">Схеми</h1>
-  <a class="deck" href="diagrams/index.html"><b>🖼 Мої схеми</b><span>10 перемальованих схем: S3, ECS, Beanstalk, SQS/SNS/Kinesis, Lambda та інші</span></a>
-  <h1 style="margin-top:1.8rem">Тести</h1>
-  <a class="deck" href="aws-tests.html"><b>📝 AWS: тести</b><span>8 тестів по 20 питань, один англійською</span></a>
-  <a class="deck" href="claude-tests.html"><b>📝 Claude: тести</b><span>6 коротких тестів по 15-21 питання, один англійською</span></a>
-  <h1 style="margin-top:1.8rem">Лекції</h1>
-  <a class="deck" href="lectures/aws/index.html"><b>📖 AWS: лекції</b><span>37 лекцій для читання</span></a>
-  <a class="deck" href="lectures/claude/index.html"><b>📖 Claude: лекції</b><span>8 лекцій для читання</span></a>
+<h1>Картки до сертифікацій</h1>
+  <a class="deck" href="aws-hub.html"><b>☁️ AWS Developer Associate</b><span>DVA-C03: картки, тести, лекції, схеми</span></a>
+  <a class="deck" href="claude-hub.html"><b>🤖 Claude Certified Architect</b><span>картки, тести, лекції, схеми</span></a>
 </main>
 <script>
 const tg = window.Telegram && window.Telegram.WebApp;

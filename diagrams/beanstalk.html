@@ -88,7 +88,7 @@
 </head>
 <body>
 <main>
-<nav class="top"><a href="index.html">← До схем</a></nav>
+<nav class="top"><a href="aws.html">← До схем</a></nav>
 <h1>🖼 Elastic Beanstalk</h1>
 <div class="dg"><div class="dtitle">Що це</div><div class="dnote">Сервіс для легкого деплою: сам керує EC2, балансувальниками й масштабуванням. Веб-додатки й бекенди (Java, Python, Node.js, .NET).</div><div class="dtitle">Шлях</div><div class="dflow"><div class="dbox aws">Create: Application</div><div class="darrow">↓</div><div class="dbox aws">Upload: Version (свій код, приклад AWS чи збережена версія)</div><div class="darrow">↓</div><div class="dbox aws">Launch: Environment (Web server чи Worker, платформа, preset)</div><div class="darrow">↓</div><div class="dbox green">Manage: оновлювати версію</div></div><div class="dtitle">CLI</div><div class="drow"><div class="dbox gray">eb create</div><div class="dbox gray">eb events</div><div class="dbox gray">eb health</div><div class="dbox gray">eb logs</div><div class="dbox gray">eb open</div><div class="dbox gray">eb status</div></div><div class="dtitle">Розширення середовища</div><div class="dcols"><div class="dcol aws"><b>`.ebextensions/`</b><ul><li>у корені коду</li><li>YAML/JSON, файли `.config`</li><li>додати RDS, ElastiCache, DynamoDB</li><li>option_settings для змін</li></ul></div><div class="dcol yellow"><b>Версії</b><ul><li>максимум 1000 версій</li><li>не чистите: деплой стане неможливим</li><li>lifecycle policy за місцем чи за часом</li><li>використані версії не видаляються</li></ul></div></div><div class="dnote">Cloning робить копію середовища з тією самою конфігурацією (LB, RDS, env vars). Корисно для тестового середовища. Для особливої платформи беріть Docker.</div><div class="dcols"><div class="dcol green"><b>✅ коли доречно</b><ul><li>швидкий MVP</li><li>мінімум DevOps</li><li>класичні моноліти</li></ul></div><div class="dcol red"><b>❌ коли ні</b><ul><li>потрібен повний контроль над інфраструктурою</li></ul></div></div><div class="dtitle">Параметри створення</div><div class="dcols"><div class="dcol blue"><b>Платформа</b><ul><li>Node.js</li><li>Java</li><li>.NET</li><li>Docker</li><li>Tomcat</li></ul></div><div class="dcol yellow"><b>Preset</b><ul><li>Single instance (free tier)</li><li>Single instance (spot)</li><li>High availability</li></ul></div><div class="dcol aws"><b>Код</b><ul><li>AWS demo app</li><li>Існуюча версія (якщо вже завантажували)</li><li>Нова версія: свій код</li></ul></div></div></div>
 </main>
@@ -98,7 +98,7 @@ if (tg) {
   tg.ready();
   tg.expand();
   tg.BackButton.show();
-  tg.BackButton.onClick(() => { location.href = "index.html"; });
+  tg.BackButton.onClick(() => { location.href = "aws.html"; });
 }
 </script>
 </body>

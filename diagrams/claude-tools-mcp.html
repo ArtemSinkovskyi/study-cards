@@ -88,7 +88,7 @@
 </head>
 <body>
 <main>
-<nav class="top"><a href="index.html">← До схем</a></nav>
+<nav class="top"><a href="claude.html">← До схем</a></nav>
 <h1>🖼 Claude: інструменти, tool_choice, MCP</h1>
 <div class="dg"><div class="dtitle">Опис інструмента: усе, що знає модель</div><div class="drow"><div class="dbox aws">name</div><div class="dbox aws">description</div><div class="dbox aws">input_schema</div><div class="dbox aws">input_examples (за бажанням)</div></div><div class="dnote">В описі: що робить, коли використовувати й коли ні, що означає кожен параметр, чого не повертає. Мінімум 3-4 речення.</div><div class="dtitle">tool_choice</div><div class="tw"><table class="two"><thead><tr><th>Значення</th><th>Що робить</th></tr></thead><tbody><tr><td>auto</td><td>модель сама вирішує (типово, коли є інструменти)</td></tr><tr><td>any</td><td>мусить викликати якийсь інструмент</td></tr><tr><td>tool</td><td>мусить викликати саме названий</td></tr><tr><td>none</td><td>не викликає (типово, коли інструментів нема)</td></tr></tbody></table></div><div class="dnote">На Opus 5.5, Sonnet 5.5, Fable 5.1 і Mythos 5.1 значення any і tool дають 400, беріть auto зі strict. При any і tool модель не пише пояснення. Зміна tool_choice скидає кеш повідомлень.</div><div class="dtitle">Результати: три жорсткі правила (інакше 400)</div><div class="dflow"><div class="dbox gray">1. tool_result одразу після повідомлення з tool_use</div><div class="darrow">↓</div><div class="dbox gray">2. У user-повідомленні блоки tool_result першими, текст після</div><div class="darrow">↓</div><div class="dbox gray">3. Кілька результатів одного ходу в одному повідомленні</div></div><div class="dtitle">Помилки</div><div class="dcols"><div class="dcol red"><b>Інструмент упав</b><ul><li>tool_result з is_error: true</li><li>не «failed», а «Rate limit exceeded. Retry after 60 seconds»</li></ul></div><div class="dcol green"><b>Щоб не було зовсім</b><ul><li>strict: true</li><li>вхід відповідає схемі, ім&#x27;я завжди валідне</li></ul></div></div><div class="dtitle">MCP</div><div class="dgroup blue"><b>MCP (Model Context Protocol)</b><div class="dkids"><div class="dbox blue">MCP-сервер дає набір інструментів</div><div class="dbox blue">MCP connector: підключає віддалені сервери в Messages API (beta)</div></div></div><div class="dcols"><div class="dcol green"><b>Connector підтримує</b><ul><li>лише виклики інструментів</li><li>публічний HTTPS (Streamable HTTP, SSE)</li></ul></div><div class="dcol red"><b>Не підтримує</b><ul><li>ресурси й промпти</li><li>локальний STDIO</li><li>приватну мережу</li></ul></div></div><div class="dtitle">Асистент лише для читання</div><div class="dcols"><div class="dcol red"><b>Denylist</b><ul><li>вимкнути небезпечні</li><li>configs з enabled: false</li></ul></div><div class="dcol green"><b>Allowlist</b><ul><li>default_config.enabled: false</li><li>увімкнути лише потрібні</li></ul></div></div><div class="dnote">Indirect prompt injection: чужий вміст тримайте всередині tool_result. У схему інструмента не кладіть персональні дані, вона кешується до 24 годин. Tool runner у SDK веде цикл сам, ручний цикл потрібен для схвалення людиною чи власного логування.</div></div>
 </main>
@@ -98,7 +98,7 @@ if (tg) {
   tg.ready();
   tg.expand();
   tg.BackButton.show();
-  tg.BackButton.onClick(() => { location.href = "index.html"; });
+  tg.BackButton.onClick(() => { location.href = "claude.html"; });
 }
 </script>
 </body>

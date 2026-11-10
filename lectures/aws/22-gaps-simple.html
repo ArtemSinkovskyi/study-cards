@@ -153,101 +153,9 @@
 <p><strong>DynamoDB у коді.</strong> Щоб не писати типи вручну, беруть <strong>Document Client</strong> (<code>DynamoDBDocumentClient</code>) або <code>marshall</code> / <code>unmarshall</code> <em>(не звірено)</em>.</p>
 <p>Бінарні дані в JSON передають через <strong>base64</strong> (+33% розміру), тому файли не ганяють через API.</p>
 <h2>Крок 2. Elastic Beanstalk</h2>
-<p><strong>PaaS:</strong> завантажили код і отримали балансувальник, Auto Scaling і моніторинг. Зараз два варіанти: Beanstalk Standard і Beanstalk Cluster (на EKS).</p>
-<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
-<thead>
-<tr>
-<th>Політика</th>
-<th>Простій</th>
-<th>Де код</th>
-<th>Відкат</th>
-<th>Час</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td data-label="Політика"><strong>All at once</strong></td>
-<td data-label="Простій"><strong>так</strong></td>
-<td data-label="Де код">наявні інстанси</td>
-<td data-label="Відкат">ручний redeploy</td>
-<td data-label="Час">найшвидше</td>
-</tr>
-<tr>
-<td data-label="Політика"><strong>Rolling</strong></td>
-<td data-label="Простій">ні, але менше потужності</td>
-<td data-label="Де код">наявні</td>
-<td data-label="Відкат">ручний</td>
-<td data-label="Час">помірно</td>
-</tr>
-<tr>
-<td data-label="Політика"><strong>Rolling with additional batch</strong></td>
-<td data-label="Простій">ні, потужність та сама</td>
-<td data-label="Де код">нові й наявні</td>
-<td data-label="Відкат">ручний</td>
-<td data-label="Час">довше</td>
-</tr>
-<tr>
-<td data-label="Політика"><strong>Immutable</strong></td>
-<td data-label="Простій">ні</td>
-<td data-label="Де код">нові, друга ASG</td>
-<td data-label="Відкат">видалити нові</td>
-<td data-label="Час">найдовше</td>
-</tr>
-<tr>
-<td data-label="Політика"><strong>Traffic splitting</strong></td>
-<td data-label="Простій">ні</td>
-<td data-label="Де код">нові</td>
-<td data-label="Відкат">перенаправити трафік</td>
-<td data-label="Час">найдовше</td>
-</tr>
-<tr>
-<td data-label="Політика"><strong>Blue/green</strong></td>
-<td data-label="Простій">ні</td>
-<td data-label="Де код">нове середовище</td>
-<td data-label="Відкат"><strong>swap URL</strong></td>
-<td data-label="Час">найдовше</td>
-</tr>
-</tbody>
-</table></div>
-<p>Як обирати за формулюванням:</p>
-<ul>
-<li>«Найшвидше, простій прийнятний»: All at once.</li>
-<li>«Без втрати потужності»: Rolling with additional batch.</li>
-<li>«Найбезпечніше, швидкий відкат»: Immutable.</li>
-<li>«Канарковий тест частиною трафіку»: Traffic splitting.</li>
-<li>«Несумісна версія, зміна ресурсів»: Blue/green, CNAME swap. Єдиний варіант зі зміною DNS.</li>
-</ul>
-<p>Конфігурація в репозиторії: каталог <code>.ebextensions</code>.</p>
+<p>PaaS: завантажив код, отримав балансувальник, Auto Scaling і моніторинг. Шість способів оновлення, таблиця «як обирати» і <code>.ebextensions</code>: лекція 32, простою мовою <a href="32-elastic-beanstalk-simple.html">тут</a>.</p>
 <h2>Крок 3. EC2 і Auto Scaling (навичка 4.3.1)</h2>
-<p><strong>Auto Scaling group (ASG)</strong> це група інстансів, якою керують разом. Може охоплювати кілька AZ, але не регіони.</p>
-<div class="tw"><table class="two">
-<thead>
-<tr>
-<th>Політика</th>
-<th>Як</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td data-label="Політика"><strong>Target tracking</strong></td>
-<td data-label="Як">тримає метрику на цілі, як термостат</td>
-</tr>
-<tr>
-<td data-label="Політика"><strong>Step</strong></td>
-<td data-label="Як">сходинки за порогами alarm</td>
-</tr>
-<tr>
-<td data-label="Політика"><strong>Scheduled</strong></td>
-<td data-label="Як">за розкладом</td>
-</tr>
-<tr>
-<td data-label="Політика"><strong>Predictive</strong></td>
-<td data-label="Як">прогнозує навантаження заздалегідь</td>
-</tr>
-</tbody>
-</table></div>
-<p>ASG замінює інстанс, що не пройшов EC2 чи ELB health check.</p>
-<p><strong>Instance metadata:</strong> застосунок на EC2 отримує роль через IMDSv2 (<code>169.254.169.254</code>, спершу PUT-запит за токеном). Роль EC2 завжди краща за ключі.</p>
+<p>Auto Scaling group і політики масштабування: <a href="24-elb-asg-simple.html">лекція 24</a>. Типи інстансів, роль EC2 через IMDSv2, диски: <a href="23-ec2-compute-storage-simple.html">лекція 23</a>.</p>
 <h2>Крок 4. Конкурентність (навичка 4.3.1)</h2>
 <div class="tw"><table class="two">
 <thead>
@@ -277,123 +185,28 @@
 </table></div>
 <p>Головна ідея: кількість паралельних викликів має відповідати можливостям того, що позаду. 1000 Lambda × 1 з'єднання = 1000 з'єднань з RDS.</p>
 <h2>Крок 5. Бази даних</h2>
-<p><strong>RDS Proxy:</strong> керований проксі; <strong>пул з'єднань</strong>; Lambda входить через IAM-роль, облікові дані в Secrets Manager; перемикання до 66% швидше; код майже не змінюється, лише endpoint. Підтримує Aurora, RDS для PostgreSQL, MySQL, MariaDB, SQL Server.</p>
-<p><strong>RDS чи Aurora</strong> <em>(не звірено)</em>:</p>
-<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
-<thead>
-<tr>
-<th></th>
-<th>RDS</th>
-<th>Aurora</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td data-label="">Сумісність</td>
-<td data-label="RDS">кілька рушіїв</td>
-<td data-label="Aurora">MySQL, PostgreSQL</td>
-</tr>
-<tr>
-<td data-label="">Читання</td>
-<td data-label="RDS">read replicas</td>
-<td data-label="Aurora">до 15 реплік, reader endpoint</td>
-</tr>
-<tr>
-<td data-label="">Зберігання</td>
-<td data-label="RDS">EBS</td>
-<td data-label="Aurora">розподілене, три AZ, росте саме</td>
-</tr>
-<tr>
-<td data-label="">Без серверів</td>
-<td data-label="RDS">ні</td>
-<td data-label="Aurora">Aurora Serverless v2</td>
-</tr>
-</tbody>
-</table></div>
-<p>Розрізняйте: <strong>Multi-AZ</strong> це доступність (резерв для перемикання). <strong>Read replica</strong> це масштабування читань, асинхронна.</p>
-<p><strong>OpenSearch:</strong> пошук по сайту, логи, моніторинг у реальному часі; дані надходять через Firehose; zero-ETL із DynamoDB робить таблицю доступною для пошуку за секунди. «Повнотекстовий пошук по DynamoDB» означає OpenSearch.</p>
+<p>RDS чи Aurora, Multi-AZ проти read replica, RDS Proxy: <a href="28-rds-aurora-proxy-simple.html">лекція 28</a>. Лише тут: перемикання через RDS Proxy до 66% швидше.</p>
+<p>OpenSearch, Athena, zero-ETL із DynamoDB: <a href="29-other-aws-services-simple.html">лекція 29</a>. «Повнотекстовий пошук по DynamoDB» означає OpenSearch.</p>
 <h2>Крок 6. Сховище: EBS, EFS, S3</h2>
-<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
-<thead>
-<tr>
-<th></th>
-<th><strong>EBS</strong></th>
-<th><strong>EFS</strong></th>
-<th><strong>S3</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td data-label="">Тип</td>
-<td data-label="EBS">блочний диск</td>
-<td data-label="EFS">файлова система NFS</td>
-<td data-label="S3">об'єкти</td>
-</tr>
-<tr>
-<td data-label="">Підключення</td>
-<td data-label="EBS">один EC2 у своїй AZ (зазвичай)</td>
-<td data-label="EFS"><strong>багато</strong> EC2, контейнери, Lambda</td>
-<td data-label="S3">HTTP API</td>
-</tr>
-<tr>
-<td data-label="">Коли</td>
-<td data-label="EBS">диск бази на EC2</td>
-<td data-label="EFS">спільні файли</td>
-<td data-label="S3">файли застосунку</td>
-</tr>
-</tbody>
-</table></div>
-<p><em>(не звірено)</em></p>
+<p>EBS, Instance Store, EFS і порівняння з S3: <a href="23-ec2-compute-storage-simple.html">лекція 23</a>.</p>
 <h2>Крок 7. Мережа: мінімум для розробника</h2>
 <p>Проєктування мереж Exam Guide виключає, але використання лишається (1.2.1, 2.3.2).</p>
-<div class="tw"><table class="two">
-<thead>
-<tr>
-<th>Потреба</th>
-<th>Сервіс</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td data-label="Потреба">Lambda до RDS у приватній підмережі</td>
-<td data-label="Сервіс">конфігурація VPC функції</td>
-</tr>
-<tr>
-<td data-label="Потреба">приватний виклик S3, DynamoDB</td>
-<td data-label="Сервіс"><strong>gateway endpoint</strong></td>
-</tr>
-<tr>
-<td data-label="Потреба">приватний виклик Bedrock та інших</td>
-<td data-label="Сервіс"><strong>interface endpoint (PrivateLink)</strong></td>
-</tr>
-<tr>
-<td data-label="Потреба">розподіл HTTP-трафіку</td>
-<td data-label="Сервіс"><strong>ALB</strong> (L7, шляхи)</td>
-</tr>
-<tr>
-<td data-label="Потреба">TCP, статичний IP, дуже великі обсяги</td>
-<td data-label="Сервіс"><strong>NLB</strong> (L4)</td>
-</tr>
-<tr>
-<td data-label="Потреба">DNS, перемикання за здоров'ям</td>
-<td data-label="Сервіс"><strong>Route 53</strong></td>
-</tr>
-<tr>
-<td data-label="Потреба">захист від SQL injection, XSS</td>
-<td data-label="Сервіс"><strong>WAF</strong></td>
-</tr>
-</tbody>
-</table></div>
+<ul>
+<li>Lambda до RDS у приватній підмережі, gateway і interface endpoint, NAT: <a href="25-vpc-networking-simple.html">лекція 25</a>.</li>
+<li>ALB (L7) і NLB (L4): <a href="24-elb-asg-simple.html">лекція 24</a>.</li>
+<li>DNS і перемикання за здоров'ям: <a href="26-route53-simple.html">лекція 26</a>.</li>
+<li>CloudFront: <a href="27-cloudfront-simple.html">лекція 27</a>.</li>
+</ul>
 <p><strong>WAF:</strong> на CloudFront, ALB, API Gateway, AppSync. Правила в <strong>web ACL</strong>. <strong>Rate-based rule</strong> обмежує запити з одного IP за 5 хв.</p>
 <p><strong>Shield</strong> офіційно <strong>поза межами</strong> іспиту.</p>
 <p>Lambda у VPC не має виходу в інтернет без NAT Gateway.</p>
 <h2>Крок 8. Інструменти</h2>
 <ul>
 <li><strong>CodeArtifact:</strong> приватні npm, Maven, PyPI та інші формати; upstream до публічних; токен входу живе до 12 годин.</li>
-<li><strong>Amplify:</strong> хостинг фронтенду; гілка дає середовище (навичка 3.2.4).</li>
+<li><strong>Amplify:</strong> хостинг фронтенду; гілка дає середовище (навичка 3.2.4): <a href="33-appsync-amplify-simple.html">лекція 33</a>.</li>
 <li><strong>CloudShell:</strong> термінал у браузері з готовими обліковими даними.</li>
 <li><strong>AWS CLI:</strong> <code>--query</code> фільтрує вивід на клієнті (JMESPath), а серверну фільтрацію дає параметр самого сервісу (часто <code>--filters</code>); пагінація автоматична, а <code>--no-paginate</code> віддає лише першу сторінку; <code>--dry-run</code> для EC2 <em>(не звірено)</em>.</li>
-<li><strong>SDK:</strong> повтори вбудовані; регіон і облікові дані задаються ланцюжком.</li>
+<li><strong>SDK:</strong> повтори, backoff, регіон і облікові дані: <a href="37-cli-sdk-retries-quotas-simple.html">лекція 37</a>.</li>
 </ul>
 <h2>Крок 9. Що офіційно поза іспитом</h2>
 <p>Зі сторінки Out-of-Scope: <strong>Amazon Rekognition, Polly, SageMaker AI, Strands Agents, Quick Sight, Connect, Elastic Transcoder, Shield, Storage Gateway, Snow Family, Transfer Family</strong>. Якщо така назва є у варіанті відповіді, це майже напевно не те.</p>
@@ -482,7 +295,7 @@
 <hr />
 <p><em>Повна версія:</em> 22-gaps-and-skill-map.md.</p>
 
-<nav class="pager"><a href="21-ai-services-security-simple.html">← Лекція 21</a><a href="23-ec2-compute-storage-simple.html">Лекція 23 →</a></nav>
+<nav class="pager"><a href="17-xray-observability-simple.html">← Лекція 17</a><span></span></nav>
 </main>
 <script>
 const tg = window.Telegram && window.Telegram.WebApp;

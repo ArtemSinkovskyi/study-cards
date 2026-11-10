@@ -160,7 +160,7 @@
 <ul>
 <li><strong>Шаблон</strong> з рядком <code>Transform: AWS::Serverless-2016-10-31</code>. CloudFormation розгортає короткі типи <code>AWS::Serverless::*</code> у звичайні ресурси (<code>AWS::Lambda::Function</code>, <code>AWS::IAM::Role</code>, <code>AWS::Events::Rule</code>, <code>AWS::Lambda::Permission</code>).</li>
 <li><strong>CLI:</strong> <code>sam validate</code>, <code>sam build</code>, <code>sam local invoke</code>, <code>sam deploy</code>, <code>sam sync</code>, <code>sam logs</code>.</li>
-<li>Деплой: створюється <strong>change set</strong>, його виконання створює чи оновлює <strong>стек</strong>. Відкат стеку повертає все до попереднього стану.</li>
+<li>Деплой: створюється <strong>change set</strong>, його виконання створює чи оновлює <strong>стек</strong>. Відкат стеку повертає все до попереднього стану. CloudFormation докладно: <a href="30-cloudformation-simple.html">лекція 30</a>.</li>
 </ul>
 <p>Типи SAM для іспиту: <code>AWS::Serverless::Function</code>, <code>Api</code>, <code>HttpApi</code>, <code>SimpleTable</code> (DynamoDB), <code>LayerVersion</code>, <code>Application</code>, <code>StateMachine</code>, <code>Connector</code>.</p>
 <p>Docker потрібен SAM лише для <code>sam local invoke</code> і <code>sam build --use-container</code>. Для <code>sam validate</code> і <code>sam deploy</code> не потрібен.</p>
@@ -246,6 +246,7 @@ DeadLetterQueue:
 <h3>Outputs</h3>
 <p>Значення, які стек показує після деплою. Їх можна експортувати (<code>Export</code>) і використовувати в інших стеках через <code>Fn::ImportValue</code>.</p>
 <h2>Крок 4. CloudFront в SAM: де трапляється на іспиті</h2>
+<p>CloudFront загалом: <a href="27-cloudfront-simple.html">лекція 27</a>. Тут лише те, що стосується SAM.</p>
 <p><strong>1. Edge-optimized API Gateway.</strong> REST API (<code>AWS::Serverless::Api</code>) за замовчуванням має тип кінцевої точки <strong>EDGE</strong>: запити йдуть на найближчу точку CloudFront, керовану сервісом (її нема в вашій консолі CloudFront). Значення <code>EndpointConfiguration.Type</code>: <code>EDGE</code>, <code>REGIONAL</code>, <code>PRIVATE</code>. Для розкиданих клієнтів документація радить <code>REGIONAL</code> разом із <strong>власним</strong> CloudFront. Ознака EDGE: заголовки <code>Via ... CloudFront</code> і <code>X-Amz-Cf-Id</code>. HTTP API окремого edge-режиму не має, лише Regional.</p>
 <p><strong>2. Власний розподіл.</strong> <code>AWS::CloudFront::Distribution</code> пишуть поруч зі SAM-ресурсами. Origin це Regional API або S3 (приватний бакет з <strong>OAC</strong>). Сертифікат ACM для CloudFront мусить бути в <strong>us-east-1</strong>.</p>
 <p><strong>3. Lambda@Edge</strong> (функція на краю):</p>
@@ -695,7 +696,7 @@ DeadLetterQueue:
 <hr />
 <p><em>Повна версія:</em> 7-sam-template-deploy.md.</p>
 
-<nav class="pager"><a href="6-lambda-theory-simple.html">← Лекція 6</a><a href="8-ci-secrets-oidc-simple.html">Лекція 8 →</a></nav>
+<nav class="pager"><a href="31-cdk-simple.html">← Лекція 31</a><a href="19-cicd-appconfig-simple.html">Лекція 19 →</a></nav>
 </main>
 <script>
 const tg = window.Telegram && window.Telegram.WebApp;

@@ -361,53 +361,8 @@
 </tbody>
 </table></div>
 <h2>Крок 6. CloudFront</h2>
-<p><strong>CDN</strong>: копії контенту в edge locations по світу. Origin: S3, ALB, API Gateway, будь-який HTTP.</p>
-<p><strong>Cache key</strong> <em>(не звірено)</em> визначає, чи два запити ділять один запис: за замовчуванням домен і шлях. Додавання заголовків, cookie, query збільшує кількість варіантів і <strong>знижує hit ratio</strong>. Тому в ключ лише те, від чого справді залежить відповідь.</p>
-<ul>
-<li><strong>Cache policy</strong> керує ключем і TTL.</li>
-<li><strong>Origin request policy</strong> передає дані на origin, не додаючи їх у ключ.</li>
-<li>TTL за замовчуванням: min 0, default 86 400 с, max 31 536 000 с. <code>Cache-Control: max-age</code> від origin має пріоритет у межах min і max.</li>
-</ul>
-<p><strong>Скинути кеш:</strong> <strong>invalidation</strong> (<code>/images/*</code>), перші 1000 шляхів на місяць безкоштовно, далі платно; краще <strong>версіоновані імена</strong> файлів. Файли з <code>Cache-Control: public, max-age=31536000, immutable</code> потребують нового імені при зміні.</p>
-<p><strong>Захист origin:</strong> приватний S3 плюс <strong>OAC</strong>.</p>
-<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
-<thead>
-<tr>
-<th></th>
-<th>CloudFront signed URL</th>
-<th>CloudFront signed cookie</th>
-<th>S3 presigned</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td data-label="">Доступ</td>
-<td data-label="CloudFront signed URL">до одного файла</td>
-<td data-label="CloudFront signed cookie">до <strong>багатьох</strong> файлів</td>
-<td data-label="S3 presigned">до одного об'єкта</td>
-</tr>
-<tr>
-<td data-label="">Клієнт змінює URL</td>
-<td data-label="CloudFront signed URL">ні</td>
-<td data-label="CloudFront signed cookie">так, URL звичайний</td>
-<td data-label="S3 presigned">ні</td>
-</tr>
-<tr>
-<td data-label="">Через кеш</td>
-<td data-label="CloudFront signed URL">так</td>
-<td data-label="CloudFront signed cookie">так</td>
-<td data-label="S3 presigned">ні, напряму в S3</td>
-</tr>
-<tr>
-<td data-label="">Хто підписує</td>
-<td data-label="CloudFront signed URL">trusted key group</td>
-<td data-label="CloudFront signed cookie">trusted key group</td>
-<td data-label="S3 presigned">IAM-сутність</td>
-</tr>
-</tbody>
-</table></div>
-<p>Приклади: одне платне відео: signed URL. Весь розділ сайту для передплатників: signed cookies. Завантаження в S3: presigned.</p>
-<p><strong>Lambda@Edge і CloudFront Functions</strong> змінюють запит на краю.</p>
+<p>Cache key, cache policy, origin request policy, invalidation, OAC, signed URL і signed cookies проти S3 presigned: <a href="27-cloudfront-simple.html">лекція 27</a>.</p>
+<p>Лише тут: TTL за замовчуванням min 0, default 86 400 с, max 31 536 000 с; <code>Cache-Control: max-age</code> від origin має пріоритет у межах min і max. Файли з <code>Cache-Control: public, max-age=31536000, immutable</code> потребують нового імені при зміні.</p>
 <h2>Крок 7. API Gateway cache</h2>
 <ul>
 <li>лише <strong>REST API</strong>, налаштовується на <strong>stage</strong>;</li>
@@ -574,7 +529,7 @@
 <hr />
 <p><em>Повна версія:</em> 15-caching-and-data-stores.md.</p>
 
-<nav class="pager"><a href="14-api-gateway-simple.html">← Лекція 14</a><a href="16-cognito-simple.html">Лекція 16 →</a></nav>
+<nav class="pager"><a href="12-dynamodb-indexes-simple.html">← Лекція 12</a><a href="29-other-aws-services-simple.html">Лекція 29 →</a></nav>
 </main>
 <script>
 const tg = window.Telegram && window.Telegram.WebApp;

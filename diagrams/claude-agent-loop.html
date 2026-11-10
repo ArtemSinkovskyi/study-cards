@@ -88,7 +88,7 @@
 </head>
 <body>
 <main>
-<nav class="top"><a href="index.html">← До схем</a></nav>
+<nav class="top"><a href="claude.html">← До схем</a></nav>
 <h1>🖼 Claude: цикл агента і stop_reason</h1>
 <div class="dg"><div class="dtitle">Модель просить, ваш код виконує</div><div class="dflow"><div class="dbox aws">Ви: питання й описи інструментів</div><div class="darrow">↓</div><div class="dbox yellow">Модель: блок tool_use (id, ім&#x27;я, вхід)</div><div class="darrow">↓</div><div class="dbox blue">Ваш код: реально виконує інструмент</div><div class="darrow">↓</div><div class="dbox green">Ви: блок tool_result з тим самим tool_use_id</div><div class="darrow">↓</div><div class="dbox aws">Модель: відповідь користувачу (end_turn)</div></div><div class="dnote">Модель сказала, що хоче, але не виконала. Виконали ви.</div><div class="dtitle">stop_reason: що робити далі</div><div class="tw"><table class="two"><thead><tr><th>Значення</th><th>Що робите</th></tr></thead><tbody><tr><td>tool_use</td><td>виконати інструмент, надіслати результат, питати знову</td></tr><tr><td>end_turn</td><td>показати відповідь, вихід із циклу</td></tr><tr><td>max_tokens</td><td>відповідь обрізана, збільшити ліміт</td></tr><tr><td>refusal</td><td>модель відмовилась, дивитись stop_details</td></tr></tbody></table></div><div class="dnote">Цикл: поки stop_reason це tool_use, виконуємо й питаємо знову. Поставте власний ліміт кругів, наприклад 10.</div><div class="dtitle">Три правила, на яких помиляються</div><div class="dcols"><div class="dcol blue"><b>Кілька tool_use за раз</b><ul><li>виконати всі</li><li>повернути всі результати одним повідомленням</li></ul></div><div class="dcol red"><b>Інструмент упав</b><ul><li>tool_result з is_error: true</li><li>зрозумілий текст: «повтори за 60 секунд»</li></ul></div><div class="dcol yellow"><b>Ліміт кругів</b><ul><li>документація його не ставить</li><li>свій ліміт у циклі</li></ul></div></div><div class="dtitle">Хто виконує інструмент</div><div class="dgroup green"><b>Виконуєте ви</b><div class="dkids"><div class="dbox green">власні: get_weather, запит у вашу базу</div><div class="dbox green">готові від Anthropic: bash, text_editor, memory</div></div></div><div class="dgroup blue"><b>Виконує Anthropic (серверні)</b><div class="dkids"><div class="dbox blue">web_search</div><div class="dbox blue">web_fetch</div><div class="dbox blue">code_execution</div></div></div><div class="dnote">pause_turn: внутрішній цикл серверних інструментів упирається в 10 кругів, надішліть розмову знову. disable_parallel_tool_use лежить усередині tool_choice.</div></div>
 </main>
@@ -98,7 +98,7 @@ if (tg) {
   tg.ready();
   tg.expand();
   tg.BackButton.show();
-  tg.BackButton.onClick(() => { location.href = "index.html"; });
+  tg.BackButton.onClick(() => { location.href = "claude.html"; });
 }
 </script>
 </body>

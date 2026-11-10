@@ -88,7 +88,7 @@
 </head>
 <body>
 <main>
-<nav class="top"><a href="index.html">← До схем</a></nav>
+<nav class="top"><a href="aws.html">← До схем</a></nav>
 <h1>🖼 IAM: ролі, STS, облікові дані SDK</h1>
 <div class="dg"><div class="dtitle">Роль: дві політики</div><div class="dcols"><div class="dcol yellow"><b>Trust policy</b><ul><li>хто може прийняти роль</li><li>Principal + sts:AssumeRole</li></ul></div><div class="dcol green"><b>Permissions policy</b><ul><li>що можна робити після цього</li><li>звичайна політика прав</li></ul></div></div><div class="dtitle">Як роль приймають</div><div class="dflow"><div class="dbox aws">Суб&#x27;єкт кличе AssumeRole у STS</div><div class="darrow">↓</div><div class="dbox yellow">STS перевіряє trust policy</div><div class="darrow">↓</div><div class="dbox blue">Видає тимчасові ключі й session token</div><div class="darrow">↓</div><div class="dbox green">Сервіс перевіряє permissions policy ролі</div></div><div class="dnote">Ключі живуть від 15 хв до 12 год, типово 1 год. SDK оновлює їх сам.</div><div class="dtitle">Три виклики STS</div><div class="tw"><table class="two"><thead><tr><th>Виклик</th><th>Для кого</th></tr></thead><tbody><tr><td>AssumeRole</td><td>користувачі й сервіси в AWS</td></tr><tr><td>AssumeRoleWithWebIdentity</td><td>OIDC: Google, GitHub, HCP Terraform</td></tr><tr><td>AssumeRoleWithSAML</td><td>SAML</td></tr></tbody></table></div><div class="dnote">Для мобільних і веб-застосунків із соціальним входом краще Cognito, ніж прямий AssumeRoleWithWebIdentity.</div><div class="dtitle">Хто в Principal у trust policy</div><div class="tw"><table class="two"><thead><tr><th>Хто приймає</th><th>Principal</th></tr></thead><tbody><tr><td>Lambda, EC2, ECS</td><td>Service: lambda.amazonaws.com</td></tr><tr><td>Інший акаунт</td><td>AWS: arn:aws:iam::&lt;акаунт&gt;:root</td></tr><tr><td>OIDC-провайдер</td><td>Federated: ...:oidc-provider/...</td></tr><tr><td>SAML-провайдер</td><td>Federated: ...:saml-provider/...</td></tr></tbody></table></div><div class="dtitle">Два дрібні, але частих</div><div class="dcols"><div class="dcol red"><b>iam:PassRole</b><ul><li>право передати роль сервісу (Lambda, CloudFormation)</li><li>без нього не створити функцію з роллю</li></ul></div><div class="dcol blue"><b>External ID</b><ul><li>захист від confused deputy</li><li>коли сторонній сервіс заходить у ваш акаунт</li></ul></div></div><div class="dtitle">Де SDK шукає облікові дані</div><div class="dflow"><div class="dbox aws">1. Параметри, передані в коді</div><div class="darrow">↓</div><div class="dbox blue">2. Змінні середовища AWS_ACCESS_KEY_ID...</div><div class="darrow">↓</div><div class="dbox yellow">3. Файли ~/.aws/credentials і config</div><div class="darrow">↓</div><div class="dbox green">4. Контейнерні дані (ECS task role)</div><div class="darrow">↓</div><div class="dbox gray">5. Роль EC2 (instance profile, IMDS)</div></div><div class="dnote">Береться перше знайдене, тому змінні середовища вище за файл. Lambda бере дані своєї execution role зі змінних середовища.</div></div>
 </main>
@@ -98,7 +98,7 @@ if (tg) {
   tg.ready();
   tg.expand();
   tg.BackButton.show();
-  tg.BackButton.onClick(() => { location.href = "index.html"; });
+  tg.BackButton.onClick(() => { location.href = "aws.html"; });
 }
 </script>
 </body>

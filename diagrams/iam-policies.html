@@ -88,7 +88,7 @@
 </head>
 <body>
 <main>
-<nav class="top"><a href="index.html">← До схем</a></nav>
+<nav class="top"><a href="aws.html">← До схем</a></nav>
 <h1>🖼 IAM: політики, boundary, SCP</h1>
 <div class="dg"><div class="dtitle">Політика: JSON зі списком правил</div><div class="tw"><table class="two"><thead><tr><th>Елемент</th><th>Суть</th></tr></thead><tbody><tr><td>Version</td><td>завжди 2012-10-17: версія мови, не дата</td></tr><tr><td>Statement</td><td>список правил</td></tr><tr><td>Effect</td><td>Allow або Deny</td></tr><tr><td>Action</td><td>service:Operation, можна *</td></tr><tr><td>NotAction</td><td>усе, окрім цього (обережно)</td></tr><tr><td>Resource</td><td>ARN або шаблон</td></tr><tr><td>Principal</td><td>кому; лише в resource-based</td></tr><tr><td>Condition</td><td>префікс, IP, MFA, тег, час</td></tr></tbody></table></div><div class="dnote">Читати так: хто (Principal) може чи не може (Effect) що (Action) з чим (Resource) за якої умови (Condition). Без Version змінні на кшталт ${aws:username} не підставляються.</div><div class="dtitle">Класика іспиту: бакет і об&#x27;єкти</div><div class="dcols"><div class="dcol blue"><b>Дія над бакетом</b><ul><li>s3:ListBucket</li><li>Resource: arn:aws:s3:::bucket</li></ul></div><div class="dcol green"><b>Дії над об&#x27;єктами</b><ul><li>s3:GetObject, s3:PutObject</li><li>Resource: arn:aws:s3:::bucket/*</li></ul></div></div><div class="dnote">ListBucket на bucket/* дає AccessDenied, бо такого ресурсу для цієї дії нема.</div><div class="dtitle">Типи політик</div><div class="dcols"><div class="dcol green"><b>Дають права</b><ul><li>AWS managed</li><li>Customer managed</li><li>Inline: живе з ідентичністю</li><li>Resource-based: на ресурсі</li><li>Trust policy: на ролі</li></ul></div><div class="dcol red"><b>Лише обмежують</b><ul><li>Permission boundary: стеля для користувача чи ролі</li><li>SCP: стеля для акаунта чи OU</li><li>Session policy: звужує сеанс AssumeRole</li></ul></div></div><div class="dtitle">Boundary проти SCP</div><div class="tw"><table><thead><tr><th></th><th>Boundary</th><th>SCP</th></tr></thead><tbody><tr><td>Де</td><td>користувач чи роль</td><td>AWS Organizations: корінь, OU, акаунт</td></tr><tr><td>Дає права?</td><td>ні</td><td>ні</td></tr><tr><td>Ефективні права</td><td>перетин з identity policy</td><td>перетин на кожному рівні шляху</td></tr><tr><td>Не діє на</td><td>-</td><td>management-акаунт, service-linked ролі</td></tr></tbody></table></div><div class="dnote">SCP діє на member-акаунти, включно з root такого акаунта. За замовчуванням прикріплена FullAWSAccess. Deny-list (додати Deny на небажане) простіший за allow-list. Потрібні all features в Organizations.</div><div class="dtitle">Ще для іспиту</div><div class="drow"><div class="dbox gray">ABAC: права за тегами (aws:PrincipalTag, aws:ResourceTag)</div><div class="dbox gray">Policy variables: ${aws:username}</div><div class="dbox gray">MFA: умова aws:MultiFactorAuthPresent</div><div class="dbox gray">Access Analyzer: ресурси, доступні ззовні</div><div class="dbox gray">Credential report, Access Advisor: аудит</div><div class="dbox gray">RCP: стеля для ресурсів в акаунтах</div></div></div>
 </main>
@@ -98,7 +98,7 @@ if (tg) {
   tg.ready();
   tg.expand();
   tg.BackButton.show();
-  tg.BackButton.onClick(() => { location.href = "index.html"; });
+  tg.BackButton.onClick(() => { location.href = "aws.html"; });
 }
 </script>
 </body>

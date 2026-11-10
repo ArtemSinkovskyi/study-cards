@@ -88,7 +88,7 @@
 </head>
 <body>
 <main>
-<nav class="top"><a href="index.html">← До схем</a></nav>
+<nav class="top"><a href="aws.html">← До схем</a></nav>
 <h1>🖼 ECS: rolling update крок за кроком</h1>
 <div class="dg"><div class="dtitle">Rolling update: завжди 3 таски</div><div class="dstep"><div class="dlabel">Крок 1</div><div class="dpills"><span class="pill green">v1 RUNNING</span><span class="pill green">v1 RUNNING</span><span class="pill green">v1 RUNNING</span><span class="pill yellow">v2 PENDING</span></div><div class="dcap">Спершу піднімають нову v2. Старі v1 ще працюють.</div></div><div class="dstep"><div class="dlabel">Крок 2</div><div class="dpills"><span class="pill green">v1 RUNNING</span><span class="pill green">v1 RUNNING</span><span class="pill orange">v1 виводиться</span><span class="pill green">v2 RUNNING</span></div><div class="dcap">Коли v2 RUNNING, одну v1 виводять з балансувальника (draining) і зупиняють.</div></div><div class="dstep"><div class="dlabel">Крок 3</div><div class="dpills"><span class="pill green">v1 RUNNING</span><span class="pill green">v1 RUNNING</span><span class="pill red">v1 STOPPED</span><span class="pill green">v2 RUNNING</span></div><div class="dcap">Лише після вимкнення з балансувальника стара таска зупиняється, і так по колу.</div></div><div class="dnote">Одночасно можуть бути 4 таски RUNNING (3 × v1 і 1 × v2). Спочатку нова стає RUNNING, і лише потім дотунують стару. Якщо запущених стане 2 при desiredCount 3, так не можна.</div><div class="tw"><table class="two"><thead><tr><th>Параметр</th><th>Значення</th></tr></thead><tbody><tr><td>minimumHealthyPercent</td><td>100%: завжди має бути доступно 100% від числа tasks</td></tr><tr><td>maximumPercent</td><td>200%: можна піднімати до 2 × desiredCount</td></tr></tbody></table></div></div>
 </main>
@@ -98,7 +98,7 @@ if (tg) {
   tg.ready();
   tg.expand();
   tg.BackButton.show();
-  tg.BackButton.onClick(() => { location.href = "index.html"; });
+  tg.BackButton.onClick(() => { location.href = "aws.html"; });
 }
 </script>
 </body>
