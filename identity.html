@@ -45,6 +45,19 @@
   .no { background:var(--bad); }
   .small { background:#fff !important; color:var(--acc) !important; border:1px solid var(--acc) !important; flex:none !important; padding:.5rem .8rem !important; }
   .done { text-align:center; padding:2rem 1rem; background:var(--card); border:1px solid var(--line); border-radius:.9rem; }
+
+  details.code { margin:.5rem 0 0; }
+  details.code summary { cursor:pointer; color:var(--acc); font-size:.88rem; }
+  .path { background:#f4f7fb; border:1px solid #d6e0ee; border-radius:.7rem; padding:.7rem .8rem; margin:.8rem 0 0; }
+  .path h4 { margin:0 0 .5rem; font-size:1rem; color:var(--acc); }
+  .flow { display:flex; flex-wrap:wrap; align-items:center; gap:.3rem; margin-bottom:.5rem; }
+  .flow span { background:#fff; border:1px solid #c7d3e4; border-radius:.4rem; padding:.15rem .45rem; font-size:.8rem; }
+  .flow i { font-style:normal; color:var(--mut); }
+  .path ol { margin:.3rem 0; padding-left:1.2rem; font-size:.92rem; }
+  .path .sum { font-size:.9rem; font-weight:600; margin:.4rem 0 0; }
+  table.cmp { width:100%; border-collapse:collapse; margin-top:.8rem; font-size:.85rem; }
+  table.cmp th, table.cmp td { border:1px solid var(--line); padding:.3rem .45rem; text-align:left; }
+  table.cmp th { background:#eef3f9; }
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -62,11 +75,13 @@
 <main><div class="wrap" id="app"></div></main>
 
 <script>
-const GROUP_ICONS = {"Ідентифікація і доступ": "🛂"};
+const GROUP_ICONS = {"Ідентифікація і доступ": "🛂", "Мультиакаунт": "🌉"};
 function gi(g) { return (GROUP_ICONS[g] || "📌") + " " + g; }
 
 const GLOSSARY = [];
 const CARDS = [
+ {"g": "Ідентифікація і доступ", "t": "Автентифікація (AuthN)", "lit": "", "q": "Автентифікація (AuthN)", "m": "Authentication: перевірка, хто ти", "d": "перевірка особи: пароль, ключ, токен, MFA. Відповідає на питання «хто ти?».", "a": "щоб система знала, що перед нею саме той користувач чи сервіс, за кого він себе видає.", "tip": "Автентична = справжня. Н у AuthN: «Назви себе». Порядок: спершу AuthN, потім AuthZ.", "ic": "🪪", "cap": "Охоронець на вході дивиться паспорт: ти справді це ти?", "why": ""},
+ {"g": "Ідентифікація і доступ", "t": "Авторизація (AuthZ)", "lit": "", "q": "Авторизація (AuthZ)", "m": "Authorization: перевірка, що тобі можна", "d": "перевірка прав після входу: до яких ресурсів і дій ти допущений. Відповідає на питання «що тобі дозволено?».", "a": "щоб навіть упізнаний користувач міг робити лише те, що йому належить (в AWS це IAM-політики).", "tip": "Авторизувати = дозволити. Z остання літера: останній крок після AuthN. AuthN це хто, AuthZ це що можна.", "ic": "🔑", "cap": "Після паспорта тобі видають перепустку тільки до певних кімнат.", "why": ""},
  {"g": "Ідентифікація і доступ", "t": "IAM", "lit": "", "q": "IAM", "m": "Identity and Access Management", "d": "сервіс AWS, що керує користувачами, ролями й політиками.", "a": "відповідає на питання «хто що може робити з ресурсами AWS».", "tip": "У принципі: хто (identity) і що йому дозволено (access).", "ic": "🛂", "cap": "Охоронець на вході: перевіряє, хто ти, і чи є в тебе право зайти.", "why": ""},
  {"g": "Ідентифікація і доступ", "t": "STS", "lit": "", "q": "STS", "m": "Security Token Service", "d": "сервіс, що видає тимчасові облікові дані (ключ, секрет, session token).", "a": "щоб не зберігати довгі ключі: роль «приймають» через AssumeRole і отримують ключі на годину.", "tip": "Security Token: токен безпеки, тобто тимчасова перепустка.", "ic": "🎟️", "cap": "Разова перепустка замість постійного ключа.", "why": ""},
  {"g": "Ідентифікація і доступ", "t": "ARN", "lit": "", "q": "ARN", "m": "Amazon Resource Name", "d": "унікальне ім'я будь-якого ресурсу AWS, наприклад arn:aws:s3:::my-bucket.", "a": "щоб у політиках і викликах вказати саме той ресурс, який потрібен, без плутанини.", "tip": "Формат: arn:партиція:сервіс:регіон:акаунт:ресурс.", "ic": "🏷️", "cap": "Поштова адреса ресурсу: за нею його знайде будь-який сервіс.", "why": ""},
@@ -80,7 +95,10 @@ const CARDS = [
  {"g": "Ідентифікація і доступ", "t": "SCP", "lit": "", "q": "SCP", "m": "Service Control Policy", "d": "політика AWS Organizations, що задає стелю прав для акаунтів чи OU.", "a": "щоб навіть адмін акаунта не міг вийти за межі дозволеного (наприклад, заборонити певні регіони).", "tip": "SCP прав не дає, вона тільки обмежує.", "ic": "🧱", "cap": "Стеля будівлі: ніхто всередині не підніметься вище.", "why": ""},
  {"g": "Ідентифікація і доступ", "t": "ACL", "lit": "", "q": "ACL", "m": "Access Control List", "d": "список, хто (principal) і які дії може виконувати з конкретним об'єктом.", "a": "простий старий спосіб дати доступ окремому ресурсу (в S3 його радять вимикати на користь політик).", "tip": "ACL прив'язаний до ресурсу, IAM-політика до тих, хто діє.", "ic": "📋", "cap": "Список гостей біля дверей кімнати.", "why": ""},
  {"g": "Ідентифікація і доступ", "t": "OU", "lit": "", "q": "OU", "m": "Organizational Unit", "d": "група акаунтів усередині AWS Organizations (наприклад, Prod, Dev, Sandbox).", "a": "щоб одну SCP застосувати до всієї групи акаунтів одразу.", "tip": "OU можуть бути вкладеними, SCP наслідуються вниз.", "ic": "🗂️", "cap": "Відділ у компанії: політику ставлять на відділ, а не на кожного.", "why": ""},
- {"g": "Ідентифікація і доступ", "t": "SCIM", "lit": "", "q": "SCIM", "m": "System for Cross-domain Identity Management", "d": "стандарт автоматичної синхронізації користувачів і груп з IdP у застосунки.", "a": "щоб звільнення чи новий співробітник у IdP автоматично з'являлися чи зникали в усіх сервісах.", "tip": "SSO відповідає за вхід, SCIM за створення й видалення акаунтів.", "ic": "🔄", "cap": "Автоматичний кадровий обмін між відділом кадрів і всіма відділами.", "why": ""}
+ {"g": "Ідентифікація і доступ", "t": "SCIM", "lit": "", "q": "SCIM", "m": "System for Cross-domain Identity Management", "d": "стандарт автоматичної синхронізації користувачів і груп з IdP у застосунки.", "a": "щоб звільнення чи новий співробітник у IdP автоматично з'являлися чи зникали в усіх сервісах.", "tip": "SSO відповідає за вхід, SCIM за створення й видалення акаунтів.", "ic": "🔄", "cap": "Автоматичний кадровий обмін між відділом кадрів і всіма відділами.", "why": ""},
+ {"g": "Ідентифікація і доступ", "t": "Trust Policy", "lit": "", "q": "Trust Policy", "m": "Політика довіри ролі", "d": "політика на самій ролі IAM, що вказує, хто (principal) має право цю роль прийняти через sts:AssumeRole.", "a": "відповідає на питання «хто може взяти роль?». А що роль може робити, визначає Permissions Policy.", "tip": "Trust: хто входить у роль. Permissions: що вона вміє.", "ic": "🤝", "cap": "Список тих, кому роль довіряє. Без запису в Trust Policy роль не прийме ніхто.", "why": "", "code": [{"t": "Приклад: роль довіряє сервісу EC2", "x": "{\n  \"Effect\": \"Allow\",\n  \"Principal\": {\n    \"Service\": \"ec2.amazonaws.com\"\n  },\n  \"Action\": \"sts:AssumeRole\"\n}"}]},
+ {"g": "Ідентифікація і доступ", "t": "Permission Boundary", "lit": "", "q": "Permission Boundary", "m": "Межа дозволів", "d": "політика-стеля для одного користувача чи ролі IAM. Реальні права це перетин: що дозволяє Permissions Policy І що дозволяє межа.", "a": "щоб можна було віддати комусь право створювати ролі й користувачів, не боячись, що вони видадуть собі більше прав, ніж дозволено.", "tip": "Boundary сама прав не дає. SCP це стеля для акаунтів, Boundary стеля для однієї ролі чи користувача.", "ic": "🚧", "cap": "Огорожа навколо ролі: що б їй не дали, за огорожу вона не вийде.", "why": "", "code": [{"t": "Приклад: межа дозволяє тільки читати S3", "x": "{\n  \"Effect\": \"Allow\",\n  \"Action\": [\n    \"s3:GetObject\",\n    \"s3:ListBucket\"\n  ],\n  \"Resource\": \"*\"\n}"}]},
+ {"g": "Мультиакаунт", "t": "Cross-account: два шляхи", "lit": "", "q": "EC2 в акаунті A має читати S3 в акаунті B. Які є два шляхи?", "ml": "Коротко", "m": "Шлях 1: власник бакета (B) пускає вашу роль з A через Bucket Policy. Шлях 2: B створює власну роль, а EC2 з A бере її через AssumeRole.", "tip": "Шлях 1: B відчиняє двері вашій ролі. Шлях 2: B видає вам свою роль. Назва ролі довільна, важливий її ARN.", "ic": "🌉", "cap": "A це ваш акаунт (111111111111), B акаунт партнера (222222222222).", "why": "", "paths": [{"name": "Шлях 1. Двері для вашої ролі", "flow": ["EC2 (A)", "роль EC2-S3-Reader (A)", "S3 (B)"], "steps": ["В акаунті A створюють роль EC2-S3-Reader. Trust Policy пускає EC2, Permissions Policy дозволяє s3:GetObject.", "В акаунті B власник бакета пише Bucket Policy: «пускаю роль з A за її ARN».", "EC2 іде в S3 зі своєю роллю напряму, STS не потрібен."], "sum": "Дозвіл потрібен з обох боків: у ролі (A) і в бакеті (B).", "code": [{"t": "A: Trust Policy ролі", "x": "{\n  \"Effect\": \"Allow\",\n  \"Principal\": {\n    \"Service\": \"ec2.amazonaws.com\"\n  },\n  \"Action\": \"sts:AssumeRole\"\n}"}, {"t": "A: Permissions Policy ролі", "x": "{\n  \"Effect\": \"Allow\",\n  \"Action\": \"s3:GetObject\",\n  \"Resource\": \"arn:aws:s3:::my-bucket/*\"\n}"}, {"t": "B: Bucket Policy", "x": "{\n  \"Effect\": \"Allow\",\n  \"Principal\": {\n    \"AWS\": \"arn:aws:iam::111111111111:role/EC2-S3-Reader\"\n  },\n  \"Action\": \"s3:GetObject\",\n  \"Resource\": \"arn:aws:s3:::my-bucket/*\"\n}"}]}, {"name": "Шлях 2. Власна роль від B", "flow": ["EC2 (A)", "роль EC2-Caller (A)", "STS AssumeRole", "роль S3-Reader (B)", "S3 (B)"], "steps": ["В акаунті A роль EC2-Caller. Trust Policy пускає EC2, Permissions Policy дозволяє лише sts:AssumeRole на роль B. До S3 доступу ще немає.", "В акаунті B роль S3-Reader. Trust Policy довіряє ролі EC2-Caller з A, Permissions Policy дозволяє s3:GetObject.", "EC2 викликає sts:AssumeRole. STS перевіряє обидва боки: чи дозволено в A і чи довіряють у B. Тоді видає тимчасові ключі.", "EC2 читає S3 з цими ключами, тобто як роль B. Bucket Policy зазвичай не потрібна: роль і бакет в одному акаунті."], "sum": "Дозвіл на AssumeRole потрібен у A, довіра до ролі A потрібна в B.", "code": [{"t": "A: Trust Policy EC2-Caller", "x": "{\n  \"Effect\": \"Allow\",\n  \"Principal\": {\n    \"Service\": \"ec2.amazonaws.com\"\n  },\n  \"Action\": \"sts:AssumeRole\"\n}"}, {"t": "A: Permissions Policy EC2-Caller", "x": "{\n  \"Effect\": \"Allow\",\n  \"Action\": \"sts:AssumeRole\",\n  \"Resource\": \"arn:aws:iam::222222222222:role/S3-Reader\"\n}"}, {"t": "B: Trust Policy S3-Reader", "x": "{\n  \"Effect\": \"Allow\",\n  \"Principal\": {\n    \"AWS\": \"arn:aws:iam::111111111111:role/EC2-Caller\"\n  },\n  \"Action\": \"sts:AssumeRole\"\n}"}, {"t": "B: Permissions Policy S3-Reader", "x": "{\n  \"Effect\": \"Allow\",\n  \"Action\": \"s3:GetObject\",\n  \"Resource\": \"arn:aws:s3:::my-bucket/*\"\n}"}]}], "cmp": {"head": ["", "Шлях 1", "Шлях 2"], "rows": [["Ролі", "одна, в A", "дві: в A і в B"], ["Хто видає доступ", "Bucket Policy в B", "роль в B"], ["STS AssumeRole", "ні", "так"], ["Bucket Policy", "потрібна", "зазвичай ні"], ["Права на S3 має", "роль з A", "роль з B"]]}}
 ];
 
 const KEY = "identity_cards_v1";
@@ -131,8 +149,22 @@ function refs(c) {
   return "<div class='refs'><b>🔗 Що це за слова</b><ul>" + found.map(g => "<li><b>" + g[1] + "</b>: " + g[2] + " <a href='" + g[3] + "' target='_blank' rel='noopener'>документація</a></li>").join("") + "</ul></div>";
 }
 
+function codeBlocks(list) {
+  return (list || []).map(x => "<details class='code'><summary>" + esc(x.t) + "</summary><pre class='ex'>" + esc(x.x) + "</pre></details>").join("");
+}
+function extra(c) {
+  let h = codeBlocks(c.code);
+  if (c.paths) {
+    h += c.paths.map(p => "<div class='path'><h4>" + p.name + "</h4><div class='flow'>" + p.flow.map(s => "<span>" + s + "</span>").join("<i>→</i>") + "</div><ol>" + p.steps.map(s => "<li>" + s + "</li>").join("") + "</ol><p class='sum'>" + p.sum + "</p>" + codeBlocks(p.code) + "</div>").join("");
+  }
+  if (c.cmp) {
+    h += "<table class='cmp'><tr>" + c.cmp.head.map(x => "<th>" + x + "</th>").join("") + "</tr>" + c.cmp.rows.map(r => "<tr>" + r.map(x => "<td>" + x + "</td>").join("") + "</tr>").join("") + "</table>";
+  }
+  return h;
+}
+
 function body(c) {
-  return (c.ic ? "<div class='pic'><span class='big'>" + c.ic + "</span><span class='cap'>" + c.cap + "</span></div>" : "") + (c.why ? "<p class='why'><b>Навіщо так зроблено:</b> " + c.why + "</p>" : "") + (c.d ? "<p class='def'><b>Що це:</b> " + c.d + "</p>" : "") + "<p><b>Повна назва:</b> " + c.m + "</p>" + (c.a ? "<p><b>Навіщо:</b> " + c.a + "</p>" : "") + (c.ex ? "<pre class='ex'>" + esc(c.ex) + "</pre>" : "") + refs(c);
+  return (c.ic ? "<div class='pic'><span class='big'>" + c.ic + "</span><span class='cap'>" + c.cap + "</span></div>" : "") + (c.why ? "<p class='why'><b>Навіщо так зроблено:</b> " + c.why + "</p>" : "") + (c.d ? "<p class='def'><b>Що це:</b> " + c.d + "</p>" : "") + "<p><b>" + (c.ml || "Повна назва") + ":</b> " + c.m + "</p>" + (c.a ? "<p><b>Навіщо:</b> " + c.a + "</p>" : "") + (c.ex ? "<pre class='ex'>" + esc(c.ex) + "</pre>" : "") + extra(c) + refs(c);
 }
 
 function render() {
