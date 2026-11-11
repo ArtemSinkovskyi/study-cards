@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 37: що лишилось поза іншими лекціями</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 37: що лишилось поза іншими лекціями</h1>
+<blockquote>
+<p>Середній рівень: усі правила з повної лекції, але простими словами. Повна: ../37-gaps-and-skill-map.md (там ще карта всіх 72 навичок, її тут нема). Факти, які в повній лекції «з пам'яті», тут із позначкою <em>(не звірено)</em>.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>Це все, що не вмістилося в профільні лекції: серіалізація, Elastic Beanstalk, Auto Scaling, конкурентність, бази даних, сховища, мінімум мережі, інструменти і що поза іспитом.</strong> Це дрібні теми, але кожна дає окреме питання.</p>
+<h2>Навіщо це так задумано</h2>
+<p>Це дрібниці, які на іспиті трапляються поруч: формати даних, способи деплою, мережа. Різні сервіси передають дані по-різному, тому їх варто знати.</p>
+<h2>Крок 1. Серіалізація (навичка 1.1.7)</h2>
+<p>Сервіси AWS обмінюються текстом і байтами, тому дані треба перетворювати при вході й виході.</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Де</th>
+<th>Що відбувається</th>
+<th>Пастка</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Де">Lambda</td>
+<td data-label="Що відбувається">подія приходить об'єктом, відповідь серіалізується в JSON</td>
+<td data-label="Пастка"><code>Date</code>, <code>BigInt</code>, цикли не переживуть JSON</td>
+</tr>
+<tr>
+<td data-label="Де">API Gateway proxy</td>
+<td data-label="Що відбувається"><code>event.body</code> це <strong>рядок</strong></td>
+<td data-label="Пастка"><code>JSON.parse</code> на вході, <code>JSON.stringify</code> на виході, інакше 502</td>
+</tr>
+<tr>
+<td data-label="Де">SQS</td>
+<td data-label="Що відбувається"><code>Body</code> завжди рядок</td>
+<td data-label="Пастка">свій JSON кладете самі</td>
+</tr>
+<tr>
+<td data-label="Де">SNS → SQS</td>
+<td data-label="Що відбувається">конверт SNS всередині <code>Body</code></td>
+<td data-label="Пастка">подвійний <code>JSON.parse</code> або raw delivery</td>
+</tr>
+<tr>
+<td data-label="Де">Kinesis</td>
+<td data-label="Що відбувається"><code>data</code> у події Lambda в <strong>base64</strong></td>
+<td data-label="Пастка"><code>Buffer.from(data, &quot;base64&quot;).toString()</code></td>
+</tr>
+<tr>
+<td data-label="Де">Firehose</td>
+<td data-label="Що відбувається">повернути <code>data</code> теж треба в base64</td>
+<td data-label="Пастка"></td>
+</tr>
+<tr>
+<td data-label="Де">DynamoDB низького рівня</td>
+<td data-label="Що відбувається">значення з типом: <code>{&quot;S&quot;:&quot;text&quot;}</code>, <code>{&quot;N&quot;:&quot;5&quot;}</code></td>
+<td data-label="Пастка">числа передаються рядком</td>
+</tr>
+<tr>
+<td data-label="Де">S3</td>
+<td data-label="Що відбувається"><code>Body</code> це потік</td>
+<td data-label="Пастка"><code>transformToByteArray()</code> чи <code>transformToString()</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>DynamoDB у коді.</strong> Щоб не писати типи вручну, беруть <strong>Document Client</strong> (<code>DynamoDBDocumentClient</code>) або <code>marshall</code> / <code>unmarshall</code> <em>(не звірено)</em>.</p>
+<p>Бінарні дані в JSON передають через <strong>base64</strong> (+33% розміру), тому файли не ганяють через API.</p>
+<h2>Крок 2. Elastic Beanstalk</h2>
+<p>PaaS: завантажив код, отримав балансувальник, Auto Scaling і моніторинг. Шість способів оновлення, таблиця «як обирати» і <code>.ebextensions</code>: лекція 28, простою мовою <a href="28-elastic-beanstalk-simple.html">тут</a>.</p>
+<h2>Крок 3. EC2 і Auto Scaling (навичка 4.3.1)</h2>
+<p>Auto Scaling group і політики масштабування: <a href="4-elb-asg-simple.html">лекція 4</a>. Типи інстансів, роль EC2 через IMDSv2, диски: <a href="3-ec2-compute-storage-simple.html">лекція 3</a>.</p>
+<h2>Крок 4. Конкурентність (навичка 4.3.1)</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Поняття</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Поняття"><strong>Provisioned concurrency</strong></td>
+<td data-label="Суть">заздалегідь прогріті середовища Lambda</td>
+</tr>
+<tr>
+<td data-label="Поняття"><strong>Connection pooling</strong></td>
+<td data-label="Суть">перевикористання з'єднань; RDS Proxy</td>
+</tr>
+<tr>
+<td data-label="Поняття"><strong>Thread pool</strong></td>
+<td data-label="Суть">обмежена кількість робочих потоків; забагато дає тиск на базу</td>
+</tr>
+<tr>
+<td data-label="Поняття"><strong>Keep-alive в SDK</strong></td>
+<td data-label="Суть">HTTP-з'єднання перевикористовуються, менша затримка</td>
+</tr>
+</tbody>
+</table></div>
+<p>Головна ідея: кількість паралельних викликів має відповідати можливостям того, що позаду. 1000 Lambda × 1 з'єднання = 1000 з'єднань з RDS.</p>
+<h2>Крок 5. Бази даних</h2>
+<p>RDS чи Aurora, Multi-AZ проти read replica, RDS Proxy: <a href="10-rds-aurora-proxy-simple.html">лекція 10</a>. Лише тут: перемикання через RDS Proxy до 66% швидше.</p>
+<p>OpenSearch, Athena, zero-ETL із DynamoDB: <a href="14-other-aws-services-simple.html">лекція 14</a>. «Повнотекстовий пошук по DynamoDB» означає OpenSearch.</p>
+<h2>Крок 6. Сховище: EBS, EFS, S3</h2>
+<p>EBS, Instance Store, EFS і порівняння з S3: <a href="3-ec2-compute-storage-simple.html">лекція 3</a>.</p>
+<h2>Крок 7. Мережа: мінімум для розробника</h2>
+<p>Проєктування мереж Exam Guide виключає, але використання лишається (1.2.1, 2.3.2).</p>
+<ul>
+<li>Lambda до RDS у приватній підмережі, gateway і interface endpoint, NAT: <a href="5-vpc-networking-simple.html">лекція 5</a>.</li>
+<li>ALB (L7) і NLB (L4): <a href="4-elb-asg-simple.html">лекція 4</a>.</li>
+<li>DNS і перемикання за здоров'ям: <a href="6-route53-simple.html">лекція 6</a>.</li>
+<li>CloudFront: <a href="7-cloudfront-simple.html">лекція 7</a>.</li>
+</ul>
+<p><strong>WAF:</strong> на CloudFront, ALB, API Gateway, AppSync. Правила в <strong>web ACL</strong>. <strong>Rate-based rule</strong> обмежує запити з одного IP за 5 хв.</p>
+<p><strong>Shield</strong> офіційно <strong>поза межами</strong> іспиту.</p>
+<p>Lambda у VPC не має виходу в інтернет без NAT Gateway.</p>
+<h2>Крок 8. Інструменти</h2>
+<ul>
+<li><strong>CodeArtifact:</strong> приватні npm, Maven, PyPI та інші формати; upstream до публічних; токен входу живе до 12 годин.</li>
+<li><strong>Amplify:</strong> хостинг фронтенду; гілка дає середовище (навичка 3.2.4): <a href="26-appsync-amplify-simple.html">лекція 26</a>.</li>
+<li><strong>CloudShell:</strong> термінал у браузері з готовими обліковими даними.</li>
+<li><strong>AWS CLI:</strong> <code>--query</code> фільтрує вивід на клієнті (JMESPath), а серверну фільтрацію дає параметр самого сервісу (часто <code>--filters</code>); пагінація автоматична, а <code>--no-paginate</code> віддає лише першу сторінку; <code>--dry-run</code> для EC2 <em>(не звірено)</em>.</li>
+<li><strong>SDK:</strong> повтори, backoff, регіон і облікові дані: <a href="2-cli-sdk-retries-quotas-simple.html">лекція 2</a>.</li>
+</ul>
+<h2>Крок 9. Що офіційно поза іспитом</h2>
+<p>Зі сторінки Out-of-Scope: <strong>Amazon Rekognition, Polly, SageMaker AI, Strands Agents, Quick Sight, Connect, Elastic Transcoder, Shield, Storage Gateway, Snow Family, Transfer Family</strong>. Якщо така назва є у варіанті відповіді, це майже напевно не те.</p>
+<p><strong>Нове в C03 порівняно з C02:</strong> завдання 2.3 про AI-безпеку, AI-навички в 1.1, 3.2, 3.3, 4.1, 4.3, presigned URL (2.1), образи контейнерів (3.1), деплой контейнерів (3.3). Вага Troubleshooting виросла з 18% до 22%.</p>
+<h2>Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>Auto Scaling group</strong></td>
+<td data-label="Що це">група EC2, що сама змінює кількість серверів</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Target tracking</strong></td>
+<td data-label="Що це">масштабування, що тримає метрику біля цілі</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>ALB / NLB</strong></td>
+<td data-label="Що це">балансувальник рівня HTTP чи рівня TCP/UDP</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>WAF</strong></td>
+<td data-label="Що це">фільтр веб-запитів за правилами</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Shield</strong></td>
+<td data-label="Що це">захист від DDoS</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>RDS Proxy</strong></td>
+<td data-label="Що це">пул з'єднань між Lambda і базою</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Read replica</strong></td>
+<td data-label="Що це">копія бази лише для читання</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Instance metadata</strong></td>
+<td data-label="Що це">дані про інстанс, доступні зсередини (IMDS)</td>
+</tr>
+</tbody>
+</table></div>
+<h2>🖼 Схема: Elastic Beanstalk</h2><div class="dg"><div class="dtitle">Що це</div><div class="dnote">Сервіс для легкого деплою: сам керує EC2, балансувальниками й масштабуванням. Веб-додатки й бекенди (Java, Python, Node.js, .NET).</div><div class="dtitle">Шлях</div><div class="dflow"><div class="dbox aws">Create: Application</div><div class="darrow">↓</div><div class="dbox aws">Upload: Version (свій код, приклад AWS чи збережена версія)</div><div class="darrow">↓</div><div class="dbox aws">Launch: Environment (Web server чи Worker, платформа, preset)</div><div class="darrow">↓</div><div class="dbox green">Manage: оновлювати версію</div></div><div class="dtitle">CLI</div><div class="drow"><div class="dbox gray">eb create</div><div class="dbox gray">eb events</div><div class="dbox gray">eb health</div><div class="dbox gray">eb logs</div><div class="dbox gray">eb open</div><div class="dbox gray">eb status</div></div><div class="dtitle">Розширення середовища</div><div class="dcols"><div class="dcol aws"><b>`.ebextensions/`</b><ul><li>у корені коду</li><li>YAML/JSON, файли `.config`</li><li>додати RDS, ElastiCache, DynamoDB</li><li>option_settings для змін</li></ul></div><div class="dcol yellow"><b>Версії</b><ul><li>максимум 1000 версій</li><li>не чистите: деплой стане неможливим</li><li>lifecycle policy за місцем чи за часом</li><li>використані версії не видаляються</li></ul></div></div><div class="dnote">Cloning робить копію середовища з тією самою конфігурацією (LB, RDS, env vars). Корисно для тестового середовища. Для особливої платформи беріть Docker.</div><div class="dcols"><div class="dcol green"><b>✅ коли доречно</b><ul><li>швидкий MVP</li><li>мінімум DevOps</li><li>класичні моноліти</li></ul></div><div class="dcol red"><b>❌ коли ні</b><ul><li>потрібен повний контроль над інфраструктурою</li></ul></div></div></div><h2>🖼 Схема: Beanstalk: способи оновлення</h2><div class="dg"><div class="dtitle">Способи оновлення: групи</div><div class="dgroup yellow"><b>На тих самих інстансах (in-place)</b><div class="dkids"><div class="dbox yellow">All-at-once</div><div class="dbox yellow">Rolling</div><div class="dbox yellow">Rolling з додатковим batch</div></div></div><div class="dgroup blue"><b>На нових інстансах</b><div class="dkids"><div class="dbox blue">Immutable</div><div class="dbox blue">Traffic splitting</div></div></div><div class="dgroup gray"><b>Окреме середовище (ручний прийом, не політика)</b><div class="dkids"><div class="dbox gray">Blue-green: swap URL</div></div></div><div class="dtitle">Способи оновлення: крок за кроком</div><div class="dstep"><div class="dlabel">⚡ All-at-once</div><div class="dpills"><span class="pill red">v1 STOPPED</span><span class="pill red">v1 STOPPED</span><span class="pill green">v2 RUNNING</span><span class="pill green">v2 RUNNING</span></div><div class="dcap">Усе за раз: є простій (downtime).</div></div><div class="dstep"><div class="dlabel">🔄 Rolling</div><div class="dpills"><span class="pill green">v1 RUNNING</span><span class="pill green">v1 RUNNING</span><span class="pill yellow">v2 PENDING</span></div><div class="dcap">Батчами (розмір налаштовується, може бути 1): менший ризик, повільніше. Потужність на час оновлення зменшується.</div></div><div class="dstep"><div class="dlabel">🧱 Rolling з batch</div><div class="dpills"><span class="pill blue">batch = 2</span><span class="pill yellow">v2 PENDING</span><span class="pill yellow">v2 PENDING</span></div><div class="dcap">Кілька за раз: швидше, але ризик вищий.</div></div><div class="dstep"><div class="dlabel">🧊 Immutable</div><div class="dpills"><span class="pill green">v1 RUNNING</span><span class="pill yellow">v2 нові інстанси</span><span class="pill green">v2 RUNNING</span></div><div class="dcap">Нові інстанси у тимчасовому ASG, потім заміна. Схоже на blue-green, але без switch.</div></div><div class="dstep"><div class="dlabel">🔵🟢 Blue-green</div><div class="dpills"><span class="pill blue">BLUE v1</span><span class="pill green">GREEN v2</span><span class="pill yellow">switch</span></div><div class="dcap">Не вбудована політика, а ручний прийом: друге середовище, потім swap URL.</div></div><div class="dstep"><div class="dlabel">🚦 Traffic splitting</div><div class="dpills"><span class="pill blue">v1 ← 90%</span><span class="pill yellow">v2 ← 10%</span></div><div class="dcap">Піднімає повний набір нових інстансів, шле на них заданий відсоток на заданий час оцінювання. Якщо здорові, весь трафік іде на v2, інакше відкат. Потрібен ALB.</div></div><div class="dnote">Traffic splitting це ЩО ми робимо (ділимо трафік), Canary це НАВІЩО (безпечна перевірка), Weighted це ЯК (через ваги).</div></div><h2>🖼 Схема: EC2: сімейства інстансів</h2><div class="dg"><div class="dtitle">Сімейства інстансів</div><div class="tw"><table class="two"><thead><tr><th>Літера</th><th>Для чого</th></tr></thead><tbody><tr><td>T / M</td><td>T: tiny, M: medium, збалансоване, стандартна частота CPU</td></tr><tr><td>C</td><td>compute: обчислення</td></tr><tr><td>R / X / z</td><td>R: більше RAM, X: максимум RAM, z: висока частота CPU. Для RAM-інтенсивних задач, баз даних, аналітики</td></tr><tr><td>I / D / H</td><td>I: максимальний IOPS, D: dense, величезні обсяги диска, H: високий throughput для потоків даних</td></tr><tr><td>P / G / Inf / Trn</td><td>GPU й прискорювачі (ML)</td></tr></tbody></table></div><div class="dnote">Мнемоніка: I це Input/Output per sec, D це dense (густий, щільний), H це High disk throughput.</div></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>API Gateway proxy: <code>event.body</code> це рядок, <code>JSON.parse</code> на вході й <code>JSON.stringify</code> на виході.</li>
+<li>Kinesis <code>data</code> у Lambda в base64.</li>
+<li>Beanstalk: All at once швидко, але простій; Immutable найбезпечніше; Blue/green міняє DNS.</li>
+<li>Multi-AZ це доступність, read replica це масштабування читань.</li>
+<li>Lambda вичерпує з'єднання RDS: RDS Proxy.</li>
+<li>Спільні файли для багатьох EC2: EFS. Захист від SQL injection: WAF.</li>
+<li>Rekognition, Polly, SageMaker AI, Shield поза іспитом.</li>
+</ol>
+</div><h2>Перевірте себе</h2>
+<ol>
+<li>Чому Lambda в API Gateway мусить робити <code>JSON.parse(event.body)</code>?</li>
+<li>У якому вигляді Lambda отримує дані Kinesis?</li>
+<li>Як не писати <code>{&quot;S&quot;:&quot;...&quot;}</code> у DynamoDB вручну?</li>
+<li>Beanstalk: нульовий простій і без зниження потужності. Яка політика?</li>
+<li>Beanstalk: несумісна нова версія. Яка політика?</li>
+<li>Чим Multi-AZ відрізняється від read replica?</li>
+<li>1000 Lambda вичерпують з'єднання RDS. Що додати?</li>
+<li>Спільні файли для кількох EC2. Який сервіс?</li>
+<li>Захист API від SQL injection. Який сервіс?</li>
+<li>Чому Rekognition на C03 погана відповідь?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>У proxy-інтеграції <code>body</code> приходить рядком.</li>
+<li>У base64.</li>
+<li>Document Client (<code>DynamoDBDocumentClient</code>) або <code>marshall</code> / <code>unmarshall</code>.</li>
+<li>Rolling with additional batch (чи Immutable, якщо важливий швидкий відкат).</li>
+<li>Blue/green з CNAME swap.</li>
+<li>Multi-AZ це доступність (синхронний резерв), read replica це масштабування читань (асинхронна).</li>
+<li>RDS Proxy.</li>
+<li>EFS.</li>
+<li>WAF.</li>
+<li>Rekognition офіційно поза межами іспиту.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 37-gaps-and-skill-map.md.</p>
+
+<nav class="pager"><a href="36-xray-observability-simple.html">← Лекція 36</a><span></span></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

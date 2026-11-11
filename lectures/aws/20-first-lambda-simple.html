@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 20: перша Lambda, що з неї треба для іспиту</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 20: перша Lambda, що з неї треба для іспиту</h1>
+<blockquote>
+<p>Середній рівень. Повна лекція (87 КБ) здебільшого розповідь про проєкт (структура репозиторію, TypeScript, тести, збірка на Windows, проблеми), тому тут лише те, що перевіряють на іспиті. Повна: ../20-first-lambda-thumbnails.md. Теорію Lambda (моделі виклику, retries, права, версії) дивіться в <a href="21-lambda-theory-simple.html">лекції 21</a>. Ціни й cold start в повній лекції приблизні, позначка <em>(не звірено)</em>.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>Типова Lambda на іспиті: подія з S3 (через EventBridge) запускає функцію, яка читає об'єкт, обробляє і пише результат в інший префікс.</strong> Функція асинхронна, тому помилка дає повтори й DLQ. Прикладом тут була генерація зменшених копій картинок (мініатюр).</p>
+<p>Схема: завантаження у <code>images/</code> → S3 надсилає Object Created в EventBridge → правило з фільтром за префіксом → Lambda → читає <code>images/*</code>, пише <code>thumbs/*</code> → логи в CloudWatch → після повторів невдача йде в DLQ чи destination.</p>
+<h2>Навіщо це так задумано</h2>
+<p>Lambda придумали, щоб не тримати сервер заради малої роботи, яка буває рідко. Ви платите лише за час виконання, а масштабування бере на себе AWS.</p>
+<h2>Крок 1. Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>Execution environment</strong></td>
+<td data-label="Суть">ізольоване середовище: runtime, ваш код і все, ініціалізоване поза handler; <strong>один виклик за раз</strong></td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Cold start / warm start</strong></td>
+<td data-label="Суть">перший запуск нового середовища / наступні, швидші</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Handler</strong></td>
+<td data-label="Суть">функція-обробник, яку викликає Lambda</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Deployment package</strong></td>
+<td data-label="Суть">пакет коду з залежностями</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Bundle / bundler</strong></td>
+<td data-label="Суть">один зібраний JS-файл / інструмент (esbuild), що його збирає</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Tree shaking</strong></td>
+<td data-label="Суть">викидання невикористаного коду під час збірки</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Layer</strong></td>
+<td data-label="Суть">окремий архів із залежностями</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Provisioned concurrency</strong></td>
+<td data-label="Суть">заздалегідь прогріті середовища (платно)</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Reserved concurrency</strong></td>
+<td data-label="Суть">зарезервована частина ліміту акаунта і водночас стеля для функції (безкоштовно)</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Destination / DLQ</strong></td>
+<td data-label="Суть">куди йде подія після всіх невдалих спроб</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>SAM</strong></td>
+<td data-label="Суть">шаблон <code>template.yaml</code> (скорочений CloudFormation) плюс CLI (<code>sam build</code>, <code>sam deploy</code>, <code>sam local invoke</code>)</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Крок 2. Що в handler стандарт Lambda, а що вибір</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Що</th>
+<th>Чиє</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Що">Експортована функція, на яку вказує налаштування <code>handler</code> (<code>index.handler</code> = файл <code>index</code>, експорт <code>handler</code>)</td>
+<td data-label="Чиє">вимога Lambda; назва довільна</td>
+</tr>
+<tr>
+<td data-label="Що">Сигнатура <code>(event, context) =&gt; Promise</code></td>
+<td data-label="Чиє">контракт runtime Node.js (старий <code>callback</code> теж підтримується)</td>
+</tr>
+<tr>
+<td data-label="Що">Форма <code>event</code></td>
+<td data-label="Чиє">визначає джерело, не ви</td>
+</tr>
+<tr>
+<td data-label="Що">Повернене значення</td>
+<td data-label="Чиє">для sync іде викликачу (API Gateway зробить з нього HTTP-відповідь), для async ігнорується</td>
+</tr>
+<tr>
+<td data-label="Що">Кинута помилка</td>
+<td data-label="Чиє">виклик невдалий; async Lambda повторить ще двічі, потім DLQ чи destination</td>
+</tr>
+<tr>
+<td data-label="Що">Логіка окремо від handler</td>
+<td data-label="Чиє">рекомендація Lambda best practices: handler лише розбирає подію й викликає звичайні функції</td>
+</tr>
+<tr>
+<td data-label="Що">Налаштування в змінних середовища, ініціалізація поза handler</td>
+<td data-label="Чиє">рекомендація AWS</td>
+</tr>
+</tbody>
+</table></div>
+<p>Тому в async-функції помилку кидають (<code>throw</code>), а не тихо виходять: Lambda тоді повторить виклик.</p>
+<h2>Крок 3. Змінні середовища й конфігурація</h2>
+<ul>
+<li>Налаштування (префікси, ширини, якість) беруть зі змінних середовища, а не з коду. Змінити можна без зміни коду.</li>
+<li>Загальний розмір змінних до <strong>4 КБ</strong>; Lambda шифрує їх у спокої ключем KMS (за замовчуванням AWS managed). <strong>Секрети в них класти не радять</strong>: Secrets Manager чи Parameter Store.</li>
+<li>Конфігурацію читають <strong>поза handler</strong> (в Init): якщо змінну забули, функція падає одразу при cold start, а не посеред обробки.</li>
+<li><strong>Захист від рекурсії:</strong> тригер лише на <code>images/</code>, запис лише в <code>thumbs/</code>. Якщо Lambda пише в префікс, з якого її тригерить, вона викликає сама себе знову й знову. AWS має recursive loop detection, але вона спрацьовує лише після приблизно 16 ітерацій і покриває не всі сценарії. Два незалежні запобіжники: префікс у правилі EventBridge і перевірка ключа в коді.</li>
+<li>У S3 <code>GetObject</code> повертає <code>Body</code> як потік; його дочитують у пам'ять (<code>transformToByteArray()</code>). Для великих файлів потік обробляють частинами, бо пам'ять Lambda обмежена. Порожній <code>Body</code> означає кинути помилку (виклик невдалий, Lambda повторить), а не тихий вихід.</li>
+<li>Ресайз кількох розмірів можна робити паралельно (<code>Promise.all</code>); більше пам'яті (отже CPU) прискорює обробку.</li>
+<li>Імена результатів, у яких вміст за ключем ніколи не змінюється, віддають із <code>Cache-Control: public, max-age=31536000, immutable</code>; новий вміст виходить під новим ключем.</li>
+</ul>
+<h2>Крок 4. Powertools for AWS Lambda</h2>
+<p>Набір утиліт від AWS, фактичний стандарт для Lambda. Модулі ставляться окремо:</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Модуль</th>
+<th>Що робить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Модуль"><strong>Logger</strong></td>
+<td data-label="Що робить">структурований JSON-лог з контекстом виклику (<code>cold_start</code>, <code>function_name</code>, <code>function_request_id</code>)</td>
+</tr>
+<tr>
+<td data-label="Модуль"><strong>Parser</strong></td>
+<td data-label="Що робить">перевіряє форму події під час виконання (zod-схеми); готові схеми, наприклад для подій S3 через EventBridge</td>
+</tr>
+<tr>
+<td data-label="Модуль"><strong>Idempotency</strong></td>
+<td data-label="Що робить">не виконує ту саму подію двічі, стан у DynamoDB</td>
+</tr>
+<tr>
+<td data-label="Модуль"><strong>Metrics</strong></td>
+<td data-label="Що робить">метрики CloudWatch у форматі EMF, без викликів API</td>
+</tr>
+<tr>
+<td data-label="Модуль"><strong>Tracer</strong></td>
+<td data-label="Що робить">трейси X-Ray</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><code>cold_start</code> Logger визначає сам (<code>true</code> лише в першому виклику середовища); у Logs Insights можна порахувати частку холодних викликів.</li>
+<li>Налаштовується змінними середовища без коду: <code>POWERTOOLS_SERVICE_NAME</code>, <code>POWERTOOLS_LOG_LEVEL</code>.</li>
+<li>Тип <code>S3ObjectCreatedNotificationEvent</code> з <code>@types/aws-lambda</code> лише каже компілятору форму події, а під час виконання нічого не перевіряє; <strong>Parser справді перевіряє</strong> і кидає <code>ParseError</code> (виклик невдалий, retries і DLQ).</li>
+<li>middy це middleware для Lambda (як у Express), Powertools з ним сумісний.</li>
+</ul>
+<h2>Крок 5. Тести</h2>
+<ul>
+<li>Тест-раннер (наприклад vitest) плюс <strong>aws-sdk-client-mock</strong>, що підміняє <code>send</code> у класі клієнта: справжній S3 і AWS-облікові дані не потрібні.</li>
+<li><code>sdkStreamMixin</code> з <code>@smithy/util-stream</code> потрібен, щоб імітувати <code>Body</code> потоком.</li>
+<li>Тестові події беруть зі справжньої форми події (копіюють реальну).</li>
+</ul>
+<h2>Крок 6. Пакування</h2>
+<p>Lambda не бере код з git, їй завантажують готовий пакет.</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Спосіб</th>
+<th>Ліміт</th>
+<th>Коли</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Спосіб">Zip напряму (<code>update-function-code --zip-file</code>)</td>
+<td data-label="Ліміт"><strong>50 МБ</strong> стиснутого</td>
+<td data-label="Коли">звичайний випадок</td>
+</tr>
+<tr>
+<td data-label="Спосіб">Zip через S3</td>
+<td data-label="Ліміт"><strong>250 МБ</strong> розпакованого, разом з усіма layers (до 5)</td>
+<td data-label="Коли">пакет більший за 50 МБ</td>
+</tr>
+<tr>
+<td data-label="Спосіб">Container image з ECR</td>
+<td data-label="Ліміт"><strong>10 ГБ</strong></td>
+<td data-label="Коли">великі залежності: ML-модель, ffmpeg, Chromium</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Бандл:</strong> esbuild склеює наш код і код бібліотек в один файл, прибирає типи TypeScript, викидає невикористане (tree shaking). Без бандла в zip довелося б класти весь <code>node_modules</code>: сотні файлів, повільний cold start.</li>
+<li><strong>Нативні залежності</strong> (наприклад sharp, що містить libvips) esbuild не збирає: їх позначають external і кладуть поруч з бандлом, <strong>зібраними під платформу Lambda</strong> (Linux, потрібна архітектура <code>arm64</code> чи <code>x86_64</code>). Бінарники, зібрані на Windows, дадуть <code>invalid ELF header</code>.</li>
+<li>Для вправи нативну залежність можна винести в layer.</li>
+</ul>
+<p><strong>На іспиті:</strong></p>
+<ul>
+<li>«Пакет 70 МБ, пряме завантаження не проходить»: через S3.</li>
+<li>«Залежності понад 250 МБ»: container image.</li>
+<li>«Кілька функцій мають спільну бібліотеку»: layer.</li>
+<li>«Як зменшити cold start»: менший пакет (бандлінг, менше залежностей).</li>
+</ul>
+<h2>Крок 7. ECR</h2>
+<p><strong>ECR</strong> це сховище Docker-образів в AWS. Lambda у варіанті container image бере образ <strong>тільки з ECR</strong>. Для іспиту:</p>
+<ul>
+<li>логін: <code>aws ecr get-login-password | docker login ...</code>, потім <code>docker push</code>;</li>
+<li><strong>lifecycle policy</strong> видаляє старі образи;</li>
+<li><strong>image scanning</strong> перевіряє образи на вразливості.</li>
+</ul>
+<h2>Крок 8. Вибір runtime</h2>
+<p>Приблизний cold start <em>(не звірено)</em>:</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Runtime</th>
+<th>Cold start</th>
+<th>Примітка</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Runtime">Rust / Go (бінарник на <code>provided.al2023</code>)</td>
+<td data-label="Cold start">приблизно 10-50 мс</td>
+<td data-label="Примітка">найшвидший старт</td>
+</tr>
+<tr>
+<td data-label="Runtime">Node.js</td>
+<td data-label="Cold start">приблизно 100-300 мс, із sharp 200-400 мс</td>
+<td data-label="Примітка">sharp (libvips) найшвидший для ресайзу</td>
+</tr>
+<tr>
+<td data-label="Runtime">Python</td>
+<td data-label="Cold start">приблизно 150-300 мс</td>
+<td data-label="Примітка"></td>
+</tr>
+<tr>
+<td data-label="Runtime">Java / Kotlin</td>
+<td data-label="Cold start">1-5 с без SnapStart</td>
+<td data-label="Примітка"></td>
+</tr>
+</tbody>
+</table></div>
+<p>Для асинхронної обробки cold start не головне: різниця між 30 і 300 мс губиться на фоні самої обробки. Для Go і Rust кодування webp потребує нативних бібліотек. У прикладах до іспиту найчастіше Node і Python.</p>
+<h2>Крок 9. Provisioned concurrency</h2>
+<p>Тримає N середовищ уже ініціалізованими, тож перші N одночасних викликів ідуть без cold start. Платно за кожну секунду, поки увімкнено, навіть без викликів; free tier не покриває. Приклад: 1 ГБ × 2 592 000 с у місяці × приблизно 0,0000041667 USD за ГБ·с дає близько 10,80 USD (ставка за сторонніми джерелами, офіційний прайс перевірте перед розрахунком).</p>
+<p>Для асинхронних подій (результату ніхто не чекає) він не потрібен. Він має сенс для синхронних API (API Gateway → Lambda), особливо на Java.</p>
+<p>Що з цього питають:</p>
+<ul>
+<li><strong>Reserved ≠ provisioned.</strong> Reserved безкоштовна: резервує частину ліміту акаунта й обмежує функцію зверху (значення 0 вимикає функцію). Provisioned платна й тримає середовища теплими.</li>
+<li>Provisioned налаштовується на <strong>версію чи alias</strong>, не на <code>$LATEST</code>. Через <strong>Application Auto Scaling</strong> її вмикають за розкладом чи навантаженням.</li>
+<li>Ліміт concurrency акаунта: за замовчуванням 1000 на регіон; у нових акаунтів нижчий, піднімається через Service Quotas. Перевищення: синхронний виклик отримує <code>429 TooManyRequestsException</code>, асинхронний AWS повторює сам.</li>
+<li><strong>SnapStart</strong> (Java, Python, .NET): AWS відновлює середовище зі знімка вже ініціалізованого. Для Java безкоштовний. Типова відповідь на «Java Lambda повільно стартує, як дешево виправити».</li>
+</ul>
+<h2>Крок 10. CloudFront чи інший CDN</h2>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>AWS CloudFront</th>
+<th>Зовнішній CDN (наприклад Cloudflare)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Origin = S3</td>
+<td data-label="AWS CloudFront">приватний бакет через <strong>OAC</strong></td>
+<td data-label="Зовнішній CDN (наприклад Cloudflare)">публічне читання потрібних префіксів</td>
+</tr>
+<tr>
+<td data-label="">Доступ до S3</td>
+<td data-label="AWS CloudFront">bucket policy <code>Principal: cloudfront.amazonaws.com</code> з <code>AWS:SourceArn</code></td>
+<td data-label="Зовнішній CDN (наприклад Cloudflare)">bucket policy <code>Principal: *</code> лише на потрібні префікси</td>
+</tr>
+<tr>
+<td data-label="">Сертифікат</td>
+<td data-label="AWS CloudFront">ACM у <code>us-east-1</code></td>
+<td data-label="Зовнішній CDN (наприклад Cloudflare)">керує CDN</td>
+</tr>
+<tr>
+<td data-label="">Кеш</td>
+<td data-label="AWS CloudFront">TTL з <code>Cache-Control</code> або політика кешу; інвалідація платна понад ліміт</td>
+<td data-label="Зовнішній CDN (наприклад Cloudflare)">TTL з <code>Cache-Control</code>; purge вручну чи через API</td>
+</tr>
+<tr>
+<td data-label="">Підписані URL і cookie</td>
+<td data-label="AWS CloudFront">є (приватний контент)</td>
+<td data-label="Зовнішній CDN (наприклад Cloudflare)">окремі механізми</td>
+</tr>
+<tr>
+<td data-label="">Edge-код</td>
+<td data-label="AWS CloudFront">Lambda@Edge, CloudFront Functions</td>
+<td data-label="Зовнішній CDN (наприклад Cloudflare)">Workers</td>
+</tr>
+</tbody>
+</table></div>
+<p>Типова відповідь іспиту: <strong>«приватний S3 за CDN, доступ лише від CDN» означає CloudFront плюс OAC.</strong></p>
+<h2>Крок 11. Пам'ять, таймаут, вартість</h2>
+<ul>
+<li>Пам'ять 1536-2048 МБ для ресайзу обрано заради <strong>CPU</strong>, а не пам'яті (повне vCPU приблизно на 1769 МБ). Використання пам'яті видно лише в рядку <code>REPORT</code> (<code>Max Memory Used</code>).</li>
+<li><strong>Timeout</strong> дає запас на повільне читання з S3. Платять за фактичний час виклику, а не за timeout, тож великий timeout нічого не коштує, доки функція не зависає.</li>
+<li><strong>Вартість виклику</strong> це пам'ять в ГБ × тривалість у секундах. Постійний free tier: 400 000 ГБ·с на місяць (приклад: близько 1,3-1,5 ГБ·с на виклик, тобто 250-300 тис. викликів на місяць).</li>
+<li><code>Init Duration</code> (cold start) <strong>входить у</strong> <code>Billed Duration</code>.</li>
+<li>Більше пам'яті дає коротший виклик, і добуток пам'ять × час часто виходить не більшим, ніж на малій пам'яті. Підібрати допоможе <strong>AWS Lambda Power Tuning</strong>.</li>
+<li><strong>arm64 (Graviton)</strong> приблизно на 20% дешевше за x86.</li>
+<li>S3-клієнт створюйте <strong>поза handler</strong>.</li>
+<li>Імпортуйте лише потрібний модуль SDK (<code>@aws-sdk/client-s3</code>), а не весь SDK.</li>
+</ul>
+<h2>Крок 12. Безпека й витрати (чек-лист)</h2>
+<ul>
+<li>Тригер лише на <code>images/</code>, запис лише в <code>thumbs/</code>.</li>
+<li>Execution role з least privilege: <code>s3:GetObject</code> на <code>images/*</code>, <code>s3:PutObject</code> на <code>thumbs/*</code>, плюс запис логів. Більше нічого.</li>
+<li><strong>Без VPC</strong>, якщо Lambda лише читає й пише S3. Lambda у VPC втрачає вихід в інтернет; потрібен NAT Gateway (приблизно 32 USD на місяць) або VPC endpoint. Класичне питання: «Lambda в VPC не бачить інтернет чи AWS API».</li>
+<li>Retention для CloudWatch Logs (наприклад 7 днів).</li>
+<li>On-failure destination або DLQ для асинхронних викликів: Lambda повторює невдалий виклик двічі, потім подія йде туди, а не губиться.</li>
+<li>Виклики безкоштовні в межах free tier: 1 млн викликів і 400 000 ГБ·с на місяць.</li>
+</ul>
+<h2>Крок 13. Два бакети: приватний і публічний</h2>
+<p>Для прикладу з двома різними потоками файлів:</p>
+<ul>
+<li>бакет сайту: публічне читання лише потрібних префіксів, прапорець EventBridge увімкнено, Lambda запускається;</li>
+<li>бакет клієнтських файлів: приватний, доступ лише через сервіс за токеном, події немає, Lambda не запускається (і прав у неї на нього нема).</li>
+</ul>
+<p>Мініатюри публічні, а приватні файли (плани, фото) лишаються приватними.</p>
+<h2>Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>Handler</strong></td>
+<td data-label="Що це">функція, яку Lambda викликає на кожну подію</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Cold start</strong></td>
+<td data-label="Що це">перший виклик у новому середовищі: тут ще йде ініціалізація</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Execution environment</strong></td>
+<td data-label="Що це">ізольоване середовище, де живе ваш код між викликами</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Layer</strong></td>
+<td data-label="Що це">архів з бібліотеками, спільний для кількох функцій</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Reserved concurrency</strong></td>
+<td data-label="Що це">гарантована й водночас максимальна кількість одночасних викликів</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Provisioned concurrency</strong></td>
+<td data-label="Що це">заздалегідь прогріті середовища, платно навіть без викликів</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>SnapStart</strong></td>
+<td data-label="Що це">знімок ініціалізованого середовища для швидкого старту (Java та інші)</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Idempotency</strong></td>
+<td data-label="Що це">повторний виклик з тими ж даними не ламає результат</td>
+</tr>
+</tbody>
+</table></div>
+<div class="remember"><h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>Handler <code>index.handler</code>, сигнатура <code>(event, context)</code>. Async: помилку кидають, щоб Lambda повторила.</li>
+<li>Змінні середовища до 4 КБ; секрети в Secrets Manager чи Parameter Store.</li>
+<li>Ініціалізація (клієнти, конфіг) поза handler.</li>
+<li>Zip 50 МБ напряму, 250 МБ розпакованого через S3, container image 10 ГБ з ECR.</li>
+<li>Нативні залежності збирати під платформу Lambda (<code>invalid ELF header</code>).</li>
+<li>Рекурсія S3 → Lambda → S3 лікується різними префіксами.</li>
+<li>Reserved безкоштовна й обмежує, provisioned платна й прогріває; provisioned лише на версію чи alias.</li>
+<li>SnapStart для Java (дешево), provisioned concurrency для синхронних API.</li>
+<li>Lambda у VPC без NAT/endpoint не має інтернету.</li>
+<li>Приватний S3 за CDN: CloudFront плюс OAC.</li>
+<li>Пам'ять для CPU; Power Tuning; arm64 дешевше на 20%.</li>
+</ol>
+</div><h2>Перевірте себе</h2>
+<ol>
+<li>Чому в async-функції помилку кидають, а не тихо виходять?</li>
+<li>Що станеться, якщо забути змінну середовища, прочитану поза handler?</li>
+<li>Чим reserved concurrency відрізняється від provisioned?</li>
+<li>Пакет 70 МБ не завантажується напряму. Що робити? А якщо залежності понад 250 МБ?</li>
+<li>Нативна бібліотека працює локально, а в Lambda <code>invalid ELF header</code>. Чому?</li>
+<li>Чому Lambda, що пише в той самий бакет, може зациклитися і як цьому запобігти?</li>
+<li>Чим Parser з Powertools відрізняється від типу <code>@types/aws-lambda</code>?</li>
+<li>Java Lambda повільно стартує. Що дешево виправить?</li>
+<li>Lambda у VPC не бачить S3 чи інтернет. Що робити?</li>
+<li>Приватний S3-бакет має віддаватися лише через CDN. Що обрати?</li>
+<li>Чому 1536 МБ для ресайзу, хоч використано лише 176 МБ?</li>
+<li>Що входить у <code>Billed Duration</code> при cold start?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>Кинута помилка робить виклик невдалим, і Lambda повторить його (потім DLQ). Тихий вихід втратить подію.</li>
+<li>Функція впаде одразу при cold start (Init) з зрозумілою помилкою, а не посеред обробки.</li>
+<li>Reserved безкоштовна, резервує частину ліміту й обмежує функцію зверху (0 вимикає). Provisioned платна, тримає середовища теплими, лише на версії чи alias.</li>
+<li>Через S3. Залежності понад 250 МБ: container image з ECR (до 10 ГБ).</li>
+<li>Бінарник зібраний під іншу ОС чи архітектуру. Збирають під Linux і архітектуру функції.</li>
+<li>Тригер і запис в один префікс. Лікується різними префіксами (<code>images/</code> і <code>thumbs/</code>) і фільтром у правилі та в коді.</li>
+<li>Тип лише каже компілятору форму. Parser перевіряє подію під час виконання й кидає <code>ParseError</code>.</li>
+<li>SnapStart (для Java безкоштовний).</li>
+<li>NAT Gateway у приватній підмережі або VPC endpoint (gateway для S3).</li>
+<li>CloudFront з OAC.</li>
+<li>CPU росте з пам'яттю, а ресайз залежить від CPU.</li>
+<li><code>Init Duration</code> (cold start) входить у <code>Billed Duration</code>.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 20-first-lambda-thumbnails.md.</p>
+
+<nav class="pager"><a href="19-ci-secrets-oidc-simple.html">← Лекція 19</a><a href="21-lambda-theory-simple.html">Лекція 21 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

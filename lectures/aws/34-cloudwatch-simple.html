@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 34: CloudWatch і CloudTrail</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 34: CloudWatch і CloudTrail</h1>
+<blockquote>
+<p>Середній рівень: усі правила й числа з повної лекції, але простими словами й без розповіді про наш проєкт. Повна: ../34-cloudwatch.md. Ціни й ліміти в повній лекції звірено з документацією AWS на 2026-10-27; що не вдалося підтвердити, позначено <em>(не звірено)</em>. Це домен Troubleshooting and Optimization (22%) і частина Development.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>CloudWatch відповідає «як працює», CloudTrail «хто це зробив», X-Ray «де в ланцюжку».</strong> Метрики кажуть «що зламалося», логи «чому», трейс «де».</p>
+<h2>Навіщо це так задумано</h2>
+<p>У хмарі нема сервера, на який можна зайти й подивитись, тому метрики, логи й alarm збираються окремо й дивляться на систему ззовні. CloudTrail окремо, бо «хто це зробив» не те саме, що «як це працює».</p>
+<h2>Крок 1. Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>Метрика</strong></td>
+<td data-label="Суть">часовий ряд чисел (<code>Errors</code> функції за хвилину); має namespace, ім'я, dimensions</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Namespace</strong></td>
+<td data-label="Суть">контейнер метрик сервісу (<code>AWS/Lambda</code>, <code>AWS/SQS</code>)</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Dimension</strong></td>
+<td data-label="Суть">пара «ім'я = значення», що уточнює метрику (<code>FunctionName=...</code>); <strong>кожна нова комбінація dimensions це нова метрика</strong></td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Alarm</strong></td>
+<td data-label="Суть">правило, що стежить за <strong>однією</strong> метрикою й змінює стан</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Log group / log stream</strong></td>
+<td data-label="Суть">група логів (одна на функцію) і потоки в ній (по одному на середовище)</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Logs Insights</strong></td>
+<td data-label="Суть">мова запитів над логами</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Dashboard</strong></td>
+<td data-label="Суть">сторінка з віджетами</td>
+</tr>
+<tr>
+<td data-label="Термін">statistic</td>
+<td data-label="Суть">агрегація: Sum, Average, Maximum, p99</td>
+</tr>
+<tr>
+<td data-label="Термін">period</td>
+<td data-label="Суть">інтервал агрегації, секунди</td>
+</tr>
+<tr>
+<td data-label="Термін"><code>TreatMissingData</code></td>
+<td data-label="Суть">що робити, коли даних нема</td>
+</tr>
+<tr>
+<td data-label="Термін">composite alarm</td>
+<td data-label="Суть">alarm, що поєднує інші alarm</td>
+</tr>
+<tr>
+<td data-label="Термін">metric filter</td>
+<td data-label="Суть">правило, що рахує патерни в логах як метрику</td>
+</tr>
+<tr>
+<td data-label="Термін">subscription filter</td>
+<td data-label="Суть">пересилання логів в інший сервіс</td>
+</tr>
+<tr>
+<td data-label="Термін">EMF</td>
+<td data-label="Суть">Embedded Metric Format: метрики прямо з JSON-логу</td>
+</tr>
+<tr>
+<td data-label="Термін">Live Tail</td>
+<td data-label="Суть">потік логів у реальному часі</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Крок 2. Метрики Lambda без налаштування</h2>
+<p>Функція публікує в <code>AWS/Lambda</code>:</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Метрика</th>
+<th>Що означає</th>
+<th>Нюанс</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Метрика"><code>Invocations</code></td>
+<td data-label="Що означає">кількість викликів</td>
+<td data-label="Нюанс">не рахує тротлінг</td>
+</tr>
+<tr>
+<td data-label="Метрика"><code>Errors</code></td>
+<td data-label="Що означає">виклики з помилкою</td>
+<td data-label="Нюанс"><strong>не включає <code>Throttles</code></strong></td>
+</tr>
+<tr>
+<td data-label="Метрика"><code>Throttles</code></td>
+<td data-label="Що означає">відхилені через ліміт паралельності</td>
+<td data-label="Нюанс"></td>
+</tr>
+<tr>
+<td data-label="Метрика"><code>Duration</code></td>
+<td data-label="Що означає">тривалість</td>
+<td data-label="Нюанс">статистики p50, p99</td>
+</tr>
+<tr>
+<td data-label="Метрика"><code>ConcurrentExecutions</code></td>
+<td data-label="Що означає">паралельні виконання</td>
+<td data-label="Нюанс"></td>
+</tr>
+<tr>
+<td data-label="Метрика"><code>AsyncEventAge</code></td>
+<td data-label="Що означає">вік async-події на момент обробки</td>
+<td data-label="Нюанс">лише async</td>
+</tr>
+<tr>
+<td data-label="Метрика"><code>AsyncEventsDropped</code></td>
+<td data-label="Що означає">async-події, відкинуті після повторів без DLQ</td>
+<td data-label="Нюанс">лише async</td>
+</tr>
+<tr>
+<td data-label="Метрика"><code>DeadLetterErrors</code></td>
+<td data-label="Що означає">не вдалося записати в DLQ</td>
+<td data-label="Нюанс"></td>
+</tr>
+<tr>
+<td data-label="Метрика"><code>IteratorAge</code></td>
+<td data-label="Що означає">відставання потоку</td>
+<td data-label="Нюанс">лише Kinesis і DynamoDB Streams</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Пастка іспиту: Lambda не публікує метрики пам'яті.</strong> Пам'ять видно лише в рядку <code>REPORT</code> (<code>Max Memory Used</code>). Метрик EC2 «пам'ять» і «диск» теж нема без CloudWatch Agent.</p>
+<h2>Крок 3. Логи</h2>
+<p>Функція пише stdout у log group <code>/aws/lambda/&lt;назва&gt;</code>. Для запису потрібна роль виконання (<code>logs:CreateLogStream</code>, <code>logs:PutLogEvents</code>, політика <code>AWSLambdaBasicExecutionRole</code>).</p>
+<p>Кожен виклик додає <code>START</code>, <code>END</code> і <code>REPORT</code> (<code>Duration</code>, <code>Billed Duration</code>, <code>Memory Size</code>, <code>Max Memory Used</code>, <code>Init Duration</code>). <strong><code>Init Duration</code> є лише при cold start і входить у <code>Billed Duration</code>.</strong></p>
+<p><strong>Retention.</strong> Допустимі значення: 1, 3, 5, 7, 14, 30, 60, 90 днів тощо, або «ніколи». <strong>Лог-групи, які AWS створює сам, мають «Never expire»</strong>, тому групу описують у шаблоні й вказують у <code>LoggingConfig.LogGroup</code>. Видалення після retention не миттєве: до <strong>72 годин</strong> після закінчення строку.</p>
+<h2>Крок 4. Alarm</h2>
+<p>Три стани: <code>OK</code>, <code>ALARM</code>, <code>INSUFFICIENT_DATA</code>.</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Параметр</th>
+<th>Зміст</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Параметр"><code>Namespace</code>, <code>MetricName</code>, <code>Dimensions</code></td>
+<td data-label="Зміст">що міряємо</td>
+</tr>
+<tr>
+<td data-label="Параметр"><code>Statistic</code></td>
+<td data-label="Зміст">як агрегуємо в періоді (<code>Sum</code>)</td>
+</tr>
+<tr>
+<td data-label="Параметр"><code>Period</code></td>
+<td data-label="Зміст">довжина одного datapoint (60 с для Lambda); метрики SQS надходять щохвилини, але можна ставити й 300 с</td>
+</tr>
+<tr>
+<td data-label="Параметр"><code>EvaluationPeriods</code></td>
+<td data-label="Зміст">скільки періодів дивимось</td>
+</tr>
+<tr>
+<td data-label="Параметр"><code>Threshold</code> і <code>ComparisonOperator</code></td>
+<td data-label="Зміст">умова</td>
+</tr>
+<tr>
+<td data-label="Параметр"><code>TreatMissingData</code></td>
+<td data-label="Зміст"><code>breaching</code>, <code>notBreaching</code>, <code>ignore</code>, <code>missing</code> (за замовчуванням)</td>
+</tr>
+<tr>
+<td data-label="Параметр"><code>AlarmActions</code></td>
+<td data-label="Зміст">що робити в <code>ALARM</code> (SNS, Auto Scaling, EC2 stop/terminate/recover, Systems Manager)</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>Дії можна задати окремо для <code>ALARM</code>, <code>OK</code> і <code>INSUFFICIENT_DATA</code>. Якщо задано лише <code>AlarmActions</code>, листа про повернення в <code>OK</code> не буде.</li>
+<li><strong><code>TreatMissingData: notBreaching</code></strong> для рідкісних подій: без викликів метрика <code>Errors</code> не публікується, і без цього alarm пішов би в <code>INSUFFICIENT_DATA</code>.</li>
+<li>Метрики SQS публікуються лише поки <strong>черга активна</strong>, тому порожня черга дає <code>INSUFFICIENT_DATA</code>.</li>
+<li><strong>Datapoints to alarm</strong> («M з N»): спрацьовує, коли M з N останніх періодів порушують умову.</li>
+<li><strong>Composite alarm</strong> поєднує alarm логікою AND/OR і зменшує шум.</li>
+<li>Alarm на <strong>metric math</strong> рахується як кілька alarm-метрик.</li>
+<li>Alarm <code>Errors</code> може використовувати <strong>CodeDeploy</strong> під час canary для автоматичного відкату.</li>
+</ul>
+<h2>Крок 5. SNS для сповіщень</h2>
+<p>Alarm публікує в топік SNS, топік розсилає (email, SMS, HTTP, Lambda, SQS).</p>
+<ul>
+<li>Підписка за email створюється у стані <strong><code>PendingConfirmation</code></strong>: CloudFormation її не підтверджує, людина натискає <strong>Confirm subscription</strong> у листі від AWS. Доки не підтвердили, листів нема.</li>
+<li>Alarm CloudWatch <strong>не може публікувати в топік, зашифрований керованим ключем <code>alias/aws/sns</code></strong>: потрібен власний KMS-ключ із дозволом для <code>cloudwatch.amazonaws.com</code>.</li>
+<li>Типовий топік дозволяє публікувати принципалам власного акаунта.</li>
+</ul>
+<h2>Крок 6. Дашборд і зберігання метрик</h2>
+<p>Дашборд описують у шаблоні (<code>AWS::CloudWatch::Dashboard</code>, JSON, <code>!Sub</code>). Його ARN без регіону: <code>arn:aws:cloudwatch::&lt;акаунт&gt;:dashboard/...</code>.</p>
+<p><strong>Зберігання метрик:</strong> менше 60 с: 3 години; 1 хв: 15 днів; 5 хв: 63 дні; 1 год: 455 днів (приблизно 15 місяців). Тому графіки лишаються навіть після видалення ресурсів.</p>
+<h2>Крок 7. Logs Insights, metric filter, EMF</h2>
+<ul>
+<li><strong>Logs Insights:</strong> запит, наприклад <code>fields @timestamp, @message | filter @message like /ERROR/ | sort @timestamp desc | limit 20</code>. Платно за ГБ просканованих даних.</li>
+<li><strong>Metric filter:</strong> правило на патерн у логах, яке з кожного збігу робить значення власної метрики. Власні метрики поза free tier (10 безкоштовно) платні.</li>
+<li><strong>EMF:</strong> спеціальний JSON у stdout, з якого CloudWatch сам витягує метрики без <code>PutMetricData</code>. Рекомендований спосіб власних метрик у Lambda (Powertools).</li>
+<li><strong>Subscription filter:</strong> пересилає логи в Kinesis, Firehose або іншу Lambda.</li>
+</ul>
+<p><strong>Роздільна здатність:</strong> стандартна 1 хв, <strong>high-resolution</strong> до 1 с (<code>StorageResolution=1</code>, власні метрики через <code>PutMetricData</code>); high-res alarm з періодом 10 або 30 с. <code>PutMetricData</code> потребує <code>cloudwatch:PutMetricData</code>.</p>
+<h2>Крок 8. Ціни й як не потрапити на гроші</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Що</th>
+<th>Ціна</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Що">Перші 10 стандартних alarm на акаунт</td>
+<td data-label="Ціна"><strong>безкоштовно</strong> (рахується кількість alarm, не спрацювань)</td>
+</tr>
+<tr>
+<td data-label="Що">Далі</td>
+<td data-label="Ціна">близько 0,10 USD за alarm на місяць (high-res близько 0,30, composite близько 0,50)</td>
+</tr>
+<tr>
+<td data-label="Що">SNS: перші 1000 листів на місяць</td>
+<td data-label="Ціна">безкоштовно</td>
+</tr>
+<tr>
+<td data-label="Що">Дашборди</td>
+<td data-label="Ціна">3 безкоштовно (до 50 метрик кожен)</td>
+</tr>
+<tr>
+<td data-label="Що">Логи</td>
+<td data-label="Ціна">5 ГБ на місяць безкоштовно на збір, зберігання і скановані Logs Insights дані разом; далі збір 0,50 USD за ГБ</td>
+</tr>
+<tr>
+<td data-label="Що">Власні метрики</td>
+<td data-label="Ціна">перші 10 безкоштовно</td>
+</tr>
+<tr>
+<td data-label="Що">Lambda</td>
+<td data-label="Ціна">1 млн запитів і 400 000 ГБ·с безкоштовно; 0,20 USD за 1 млн; тарифікований час включає ініціалізацію поза handler</td>
+</tr>
+</tbody>
+</table></div>
+<p>Як не потрапити:</p>
+<ol>
+<li>Тримайте alarm у межах 10 на акаунт.</li>
+<li>Не вмикайте платне без потреби (Lambda Insights, Application Signals, X-Ray на всіх викликах, provisioned concurrency).</li>
+<li>Не кладіть змінні значення в dimensions власних метрик.</li>
+<li>Не лишайте <code>DEBUG</code>-логування постійно.</li>
+<li>Завжди задавайте retention для нових лог-груп.</li>
+<li>Стежте за Billing → Free Tier і бюджетами.</li>
+</ol>
+<h2>Крок 9. Перевірка ланцюга alarm → пошта</h2>
+<p><code>aws cloudwatch set-alarm-state --alarm-name ... --state-value ALARM --state-reason test</code> примусово переводить alarm у <code>ALARM</code>, не чіпаючи реальну метрику; стан за кілька хвилин повертається сам, бо CloudWatch перераховує метрику.</p>
+<h2>Крок 10. Для іспиту DVA</h2>
+<ul>
+<li><strong>Метрики за замовчуванням:</strong> EC2 раз на 5 хв (detailed monitoring раз на хвилину, платно); пам'ять і диск EC2 лише через CloudWatch Agent; Lambda пам'ять не публікує.</li>
+<li><strong>Власні метрики з Lambda:</strong> EMF (без викликів API) або <code>PutMetricData</code>.</li>
+<li><strong>CloudWatch проти CloudTrail:</strong> продуктивність і стан проти «хто викликав API» (аудит).</li>
+<li><strong>CloudWatch проти X-Ray:</strong> метрики й логи проти розподіленого трасування.</li>
+<li>Пастки: «alarm не листує» означає непідтверджена підписка SNS чи нема <code>AlarmActions</code>; «метрики пропали, alarm в <code>INSUFFICIENT_DATA</code>» означає <code>TreatMissingData</code>; «логи не пишуться» означає нема <code>logs:*</code> у ролі виконання; «логи вічні й дорожчають» означає не задано retention.</li>
+</ul>
+<h2>Крок 11. CloudTrail</h2>
+<p><strong>CloudTrail</strong> це журнал аудиту: кожен виклик API акаунта (хто, коли, з якого принципала, чи вдалося).</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Що</th>
+<th>Ціна</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Що"><strong>Event history</strong> (90 днів management-подій, вкладка в консолі)</td>
+<td data-label="Ціна">безкоштовно, увімкнено за замовчуванням</td>
+</tr>
+<tr>
+<td data-label="Що">Trail (потік подій у S3), перша копія management-подій регіону</td>
+<td data-label="Ціна">безкоштовно (платите лише за S3)</td>
+</tr>
+<tr>
+<td data-label="Що">Додаткові копії management-подій</td>
+<td data-label="Ціна">близько 2 USD за 100 000 подій</td>
+</tr>
+<tr>
+<td data-label="Що"><strong>Data events</strong> (читання об'єктів S3, виклики Lambda)</td>
+<td data-label="Ціна">близько 0,10 USD за 100 000 подій</td>
+</tr>
+<tr>
+<td data-label="Що">Insights (близько 0,35 USD за 100 000 management-подій), CloudTrail Lake</td>
+<td data-label="Ціна">платно</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Management-події</strong> це керування ресурсами (<code>CreateFunction</code>, <code>PutRolePolicy</code>, <code>AssumeRoleWithWebIdentity</code>) і пишуться завжди.</li>
+<li><strong>Data events</strong> це операції над вмістом; <strong>вимкнені за замовчуванням</strong>, бо їх дуже багато.</li>
+<li>Окремий trail потрібен, коли треба зберігати аудит <strong>довше 90 днів</strong>, є вимоги безпеки, або алерти на небезпечні дії (вхід root, зміна IAM) через EventBridge. Дешевий варіант: multi-region trail з management-подіями в приватний S3-бакет.</li>
+<li>У невдалій події <code>AssumeRoleWithWebIdentity</code> нема <code>Resource name</code>: це ознака відхиленого виклику. Причину читають у JSON події: <code>errorCode</code>, <code>errorMessage</code>. Тимчасові ключі STS мають <code>AccessKey</code> з <code>ASIA...</code>.</li>
+<li>Для запитів над журналом: Athena або CloudTrail Lake.</li>
+</ul>
+<h2>Крок 12. Карта: хто що відповідає</h2>
+<p>Три сервіси дають три різні відповіді:</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>CloudTrail</strong></th>
+<th><strong>CloudWatch</strong></th>
+<th><strong>X-Ray</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Питання</td>
+<td data-label="CloudTrail"><strong>хто і що зробив</strong></td>
+<td data-label="CloudWatch"><strong>що відбувається зараз</strong></td>
+<td data-label="X-Ray"><strong>чому код повільний</strong></td>
+</tr>
+<tr>
+<td data-label="">Що це</td>
+<td data-label="CloudTrail">журнал усіх дій і API-викликів у акаунті</td>
+<td data-label="CloudWatch">метрики, логи, alarm у реальному часі</td>
+<td data-label="X-Ray">трасування запиту через мікросервіси</td>
+</tr>
+<tr>
+<td data-label="">Пам'ятка</td>
+<td data-label="CloudTrail">CloudWatch збирає метрики, <strong>не</strong> API-виклики</td>
+<td data-label="CloudWatch"></td>
+<td data-label="X-Ray">X-Ray це рівень застосунку, не системний і не security-лог</td>
+</tr>
+</tbody>
+</table></div>
+<p>CloudWatch складається з Metrics (метрики), Logs (логи), Events (тепер EventBridge) і Alarms (реакція в реальному часі).</p>
+<h2>Крок 13. Метрики: ще кілька цифр</h2>
+<ul>
+<li>Метрики належать <strong>namespace</strong>; <strong>dimension</strong> уточнює метрику (id екземпляра, середовище). До <strong>30 dimensions</strong> на метрику.</li>
+<li><strong>Detailed monitoring</strong> (раз на хвилину) вмикають, щоб ASG масштабувався швидше. У Free Tier 10 таких метрик <em>(не звірено)</em>.</li>
+<li>CloudWatch приймає точки даних <strong>до 2 тижнів у минулому і до 2 годин у майбутньому</strong>. Тому годинник EC2 має бути правильним.</li>
+</ul>
+<h2>Крок 14. Логи: куди їх можна вивезти</h2>
+<p>Є два шляхи, і вони різні за швидкістю:</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>Експорт у S3</th>
+<th>Subscription filter</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Виклик</td>
+<td data-label="Експорт у S3"><code>CreateExportTask</code></td>
+<td data-label="Subscription filter">фільтр підписки</td>
+</tr>
+<tr>
+<td data-label="">Швидкість</td>
+<td data-label="Експорт у S3">пакетом, <strong>не реальний час</strong></td>
+<td data-label="Subscription filter">майже реальний час</td>
+</tr>
+<tr>
+<td data-label="">Куди</td>
+<td data-label="Експорт у S3">S3</td>
+<td data-label="Subscription filter">Kinesis Data Streams, Firehose, Lambda</td>
+</tr>
+</tbody>
+</table></div>
+<p>Підписка може бути <strong>cross-account</strong> (приймач в іншому акаунті). Колега писав, що дані доступні для експорту «до 12 годин». Поточна документація цього не підтверджує <em>(не звірено)</em>.</p>
+<p>Логи в CloudWatch <strong>шифруються за замовчуванням</strong>. Своїм ключем KMS шифрують <strong>на рівні log group</strong>: ключ прив'язують командою <code>associate-kms-key</code> (група вже є) або при створенні групи. Через консоль, як пишуть нотатки, не вийде <em>(не звірено)</em>. Джерела логів: SDK і агенти, Beanstalk, ECS, Lambda, VPC Flow Logs, API Gateway, CloudTrail, Route 53 (DNS-запити).</p>
+<p>Logs Insights: запит до 15 хвилин, результат можна експортувати чи додати на дашборд.</p>
+<h2>Крок 15. Alarm: цілі і composite</h2>
+<ul>
+<li>Period: для high-resolution метрик 10 с, 30 с або кратний 60 с. Period alarm не менший за роздільність метрики (EC2 basic: не менше 300 с).</li>
+<li>Що alarm може зробити: <strong>зупинити, термінувати, перезавантажити, відновити EC2</strong>; запустити <strong>Auto Scaling</strong>; надіслати в <strong>SNS</strong>.</li>
+<li><strong>Composite alarm</strong> стежить за кількома alarm разом з умовами AND чи OR. Приклад: тривога лише коли CPU <strong>і</strong> IOPS обидва в <code>ALARM</code>.</li>
+</ul>
+<h2>Крок 16. EventBridge між акаунтами</h2>
+<p>EventBridge це event bus, rules (фільтр і маршрут) і targets (Lambda, SQS, SNS, Step Functions тощо). Rule працює за розкладом (cron) або за шаблоном події.</p>
+<p>Щоб <strong>зібрати події всієї організації в одному акаунті</strong>, на центральній шині ставлять <strong>resource-based policy</strong>, що дозволяє події з інших акаунтів. Кожен акаунт має rule, що шле події в центральну шину.</p>
+<h2>Крок 17. CloudTrail: ще кілька речей</h2>
+<ul>
+<li>Увімкнений за замовчуванням, trail типово на <strong>всі регіони</strong>. Видалили ресурс? <strong>Спершу в CloudTrail.</strong></li>
+<li><strong>Management events</strong> (операції над ресурсами) логуються типово; є розділення Read і Write. <strong>Data events</strong> (об'єкти S3, виклики Lambda) <strong>типово вимкнені</strong>, бо їх дуже багато.</li>
+<li>Події зберігаються <strong>90 днів</strong>; довше означає S3 і Athena.</li>
+<li><strong>Insights</strong> знаходить незвичну активність за базовою лінією: аномальні виклики API і помилки. Подія йде в консоль, S3 і EventBridge.</li>
+<li>Реакція на дію: користувач викликає <code>DeleteTable</code>, CloudTrail логує, EventBridge ловить подію, SNS шле сповіщення.</li>
+</ul>
+<h2>Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>Metric</strong></td>
+<td data-label="Що це">ряд чисел у часі (CPU, кількість запитів)</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Namespace</strong></td>
+<td data-label="Що це">контейнер метрик (<code>AWS/Lambda</code>)</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Dimension</strong></td>
+<td data-label="Що це">атрибут, що розрізняє метрики: <code>FunctionName</code>, <code>InstanceId</code></td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Alarm</strong></td>
+<td data-label="Що це">реакція на метрику: поріг, кілька періодів, дія (SNS, Auto Scaling)</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Log group / log stream</strong></td>
+<td data-label="Що це">група логів одного застосунку і потік одного джерела в ній</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Metric filter</strong></td>
+<td data-label="Що це">перетворює збіги в логах на метрику</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Logs Insights</strong></td>
+<td data-label="Що це">запити до логів мовою CloudWatch</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>CloudTrail</strong></td>
+<td data-label="Що це">журнал викликів API: хто, що, коли зробив</td>
+</tr>
+</tbody>
+</table></div>
+<h2>🖼 Схема: CloudWatch, моніторинг, аудит</h2><div class="dg"><div class="dtitle">CloudWatch Metrics</div><div class="drow"><div class="dbox aws">Метрики є для кожного сервісу AWS</div><div class="dbox aws">Метрика належить namespace</div><div class="dbox aws">Має timestamp</div><div class="dbox aws">Dimension: атрибут метрики (instance id, середовище), до 30 на метрику</div><div class="dbox aws">Можна будувати dashboards</div><div class="dbox aws">Free Tier: 10 detailed monitoring метрик</div></div><div class="dtitle">Власні метрики</div><div class="tw"><table class="two"><thead><tr><th>Що</th><th>Суть</th></tr></thead><tbody><tr><td>API</td><td>PutMetricData</td></tr><tr><td>Dimensions</td><td>розбити метрики за атрибутами</td></tr><tr><td>Standard resolution</td><td>1 хвилина</td></tr><tr><td>High resolution</td><td>зберігається до 1 с (запит з періодом 1/5/10/30 с чи кратне 60), дорожче</td></tr></tbody></table></div><div class="dtitle">CloudWatch Logs</div><div class="dflow"><div class="dbox aws">Log group: ім&#x27;я застосунку</div><div class="darrow">↓</div><div class="dbox aws">Log stream: інстанси, файли, контейнери</div><div class="darrow">↓</div><div class="dbox yellow">Retention: від 1 дня до 10 років або ніколи</div></div><div class="dnote">Логи шифруються типово, можна свій KMS-ключ.</div><div class="dtitle">Джерела логів</div><div class="drow"><div class="dbox blue">Logs Agent (старий, лише в Logs)</div><div class="dbox blue">Unified Agent (ще RAM, CPU, диск, процеси)</div><div class="dbox blue"><img class="dicon" src="../../icons/ec2.svg" alt="">EC2, ECS, On-premises</div><div class="dbox blue"><img class="dicon" src="../../icons/lambda.svg" alt="">Lambda, API Gateway</div><div class="dbox blue"><img class="dicon" src="../../icons/vpc.svg" alt="">VPC Flow Logs</div><div class="dbox blue"><img class="dicon" src="../../icons/route53.svg" alt="">Route 53 (DNS-запити)</div><div class="dbox blue"><img class="dicon" src="../../icons/cloudtrail.svg" alt="">CloudTrail, Elastic Beanstalk</div></div><div class="dtitle">Куди відправити логи</div><div class="dcols"><div class="dcol yellow"><b>Export</b><ul><li>в S3, CreateExportTask</li><li>від секунд до кількох годин</li><li>не real-time</li></ul></div><div class="dcol green"><b>Subscription</b><ul><li class="hi"><span class="dgap"></span>майже real-time</li><li class="hi"><img class="dicon" src="../../icons/lambda.svg" alt="">Lambda, Kinesis Streams/Firehose, OpenSearch</li><li class="hi"><span class="dgap"></span>можна з кількох акаунтів</li></ul></div></div><div class="dnote">Subscription Filter не те саме, що Metric Filter: перший стримить події в інші сервіси, другий перетворює шаблон у логах на метрику.</div><div class="dtitle">Alarm</div><div class="dflow"><div class="dbox aws">Логи з EC2 (Logs Agent)</div><div class="darrow">↓</div><div class="dbox yellow">Metric Filter, наприклад [ERROR]</div><div class="darrow">↓</div><div class="dbox red"><img class="dicon" src="../../icons/cloudwatch.svg" alt="">CloudWatch Alarm: OK, INSUFFICIENT_DATA, ALARM</div><div class="darrow">↓</div><div class="dbox green"><img class="dicon" src="../../icons/sns.svg" alt="">SNS, Auto Scaling або дія з EC2 (stop, terminate, reboot, recover)</div></div><div class="dnote">Composite Alarm поєднує alarm-и через AND і OR.</div><div class="dtitle">Synthetics Canary</div><div class="dnote">Скрипт, який AWS запускає за розкладом (щохвилини, 5, 15), щоб перевіряти доступність і роботу. Під капотом це Lambda (Node.js чи Python, Puppeteer).</div></div><h2>🖼 Схема: CloudTrail, CloudWatch, X-Ray</h2><div class="dg"><div class="dtitle">Три сервіси нагляду</div><div class="dcols"><div class="dcol orange"><b><img class="dicon" src="../../icons/cloudtrail.svg" alt="">CloudTrail</b><ul><li>хто і що зробив</li><li>аудит API викликів</li><li>неавторизовані дії, причина змін</li></ul></div><div class="dcol aws"><b><img class="dicon" src="../../icons/cloudwatch.svg" alt="">CloudWatch</b><ul><li>що відбувається зараз</li><li>метрики, логи, alarm</li><li>сповіщення про відхилення</li></ul></div><div class="dcol blue"><b>X-Ray</b><ul><li>чому код повільний</li><li>трейс запиту крізь мікросервіси</li><li>latency, errors, faults</li></ul></div></div><div class="dnote">CloudWatch збирає метрики, а не API calls. X-Ray це рівень застосунку, не системний чи security лог.</div></div><h2>🖼 Схема: CloudTrail: події і реакція</h2><div class="dg"><div class="dtitle">CloudTrail: події</div><div class="dcols"><div class="dcol green"><b>Management events</b><ul><li>операції над ресурсами акаунта</li><li>AttachRolePolicy, CreateSubnet, CreateTrail</li><li>логуються за замовчуванням</li><li>можна розділити Read і Write</li></ul></div><div class="dcol yellow"><b>Data events</b><ul><li class="hi"><span class="dgap"></span>типово вимкнені (великий обсяг)</li><li class="hi"><img class="dicon" src="../../icons/s3.svg" alt="">S3: GetObject, PutObject, DeleteObject</li><li class="hi"><img class="dicon" src="../../icons/lambda.svg" alt="">Lambda: Invoke</li></ul></div></div><div class="dtitle">Реакція на подію API</div><div class="dflow"><div class="dbox blue">Користувач: DeleteTable API call</div><div class="darrow">↓</div><div class="dbox aws"><img class="dicon" src="../../icons/cloudtrail.svg" alt="">CloudTrail логує виклик (будь-який API call)</div><div class="darrow">↓</div><div class="dbox yellow"><img class="dicon" src="../../icons/eventbridge.svg" alt="">EventBridge отримує подію</div><div class="darrow">↓</div><div class="dbox green"><img class="dicon" src="../../icons/sns.svg" alt="">SNS: alert</div></div><div class="dnote">Подія зберігається 90 днів; довше: у S3 і Athena. Insights шукає незвичну активність: сплески IAM, ліміти сервісу.</div></div><h2>🖼 Схема: EventBridge: джерела, цілі, правила</h2><div class="dg"><div class="dtitle">EventBridge: від джерела до цілі</div><div class="dflow"><div class="dbox blue">Джерела: EC2, CodeBuild, S3, Trusted Advisor, CloudTrail, розклад</div><div class="darrow">↓</div><div class="dbox aws"><img class="dicon" src="../../icons/eventbridge.svg" alt="">EventBridge: подія як JSON</div><div class="darrow">↓</div><div class="dbox yellow">Правило: фільтр event pattern (необов&#x27;язковий)</div><div class="darrow">↓</div><div class="dbox green">Цілі: Lambda, Batch, ECS, SQS, SNS, Kinesis, Step Functions, CodePipeline, SSM</div></div><div class="dtitle">Два типи правил</div><div class="dcols"><div class="dcol yellow"><b>Schedule</b><ul><li>cron за розкладом</li><li>щогодини: запуск Lambda</li></ul></div><div class="dcol green"><b>Event pattern</b><ul><li>реакція на дію сервісу</li><li>вхід root: SNS на email</li></ul></div></div><div class="dnote">Подію можна архівувати. Schema Registry виводить схему подій і генерує код.</div></div><h2>🖼 Схема: EventBridge між акаунтами</h2><div class="dg"><div class="dtitle">Збір подій з кількох акаунтів</div><div class="dgroup blue"><b>Акаунти A, B, C, D</b><div class="dkids"><div class="dbox blue"><img class="dicon" src="../../icons/ec2.svg" alt="">EC2: зміна стану</div><div class="dbox blue">Event Rule в кожному акаунті</div></div></div><div class="dflow"><div class="dbox aws">Event надсилається в Event Bus центрального акаунта</div><div class="darrow">↓</div><div class="dbox yellow">Resource-based policy на шині дозволяє чужі акаунти</div><div class="darrow">↓</div><div class="dbox aws">Central Account: Event Rule</div><div class="darrow">↓</div><div class="dbox green">Trigger: SNS</div></div><div class="dnote">Так збирають події всієї AWS Organization в один акаунт чи регіон.</div></div><h2>🖼 Схема: Alarm і Composite Alarm</h2><div class="dg"><div class="dtitle">Composite Alarm</div><div class="dflow"><div class="dbox aws"><img class="dicon" src="../../icons/ec2.svg" alt="">EC2: alarm A стежить за CPU</div><div class="darrow">↓</div><div class="dbox aws"><img class="dicon" src="../../icons/ec2.svg" alt="">EC2: alarm B стежить за IOPS</div><div class="darrow">↓</div><div class="dbox red">Composite Alarm: стани інших alarm, умови AND і OR</div><div class="darrow">↓</div><div class="dbox green"><img class="dicon" src="../../icons/sns.svg" alt="">SNS: сповіщення</div></div><div class="dtitle">Alarm</div><div class="dcols"><div class="dcol blue"><b>Стани</b><ul><li>OK</li><li>INSUFFICIENT_DATA</li><li>ALARM</li></ul></div><div class="dcol green"><b>Цілі</b><ul><li class="hi"><img class="dicon" src="../../icons/ec2.svg" alt="">EC2: stop, terminate, reboot, recover</li><li class="hi"><img class="dicon" src="../../icons/ec2-auto-scaling.svg" alt="">Auto Scaling</li><li class="hi"><img class="dicon" src="../../icons/sns.svg" alt="">SNS</li></ul></div></div><div class="dnote">Тест: set-alarm-state у CLI переводить alarm у ALARM. Alarm можна будувати на Metric Filter логів.</div></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>Alarm стежить за <strong>однією</strong> метрикою; платять за кількість alarm, не за спрацювання; 10 безкоштовні.</li>
+<li>Щоб alarm був корисним, потрібні <code>AlarmActions</code> і підтверджена підписка SNS.</li>
+<li><code>TreatMissingData: notBreaching</code> для рідкісних подій.</li>
+<li>Lambda не публікує метрики пам'яті: дивіться <code>REPORT</code>.</li>
+<li><code>Errors</code> не включає <code>Throttles</code>.</li>
+<li>Власні метрики з Lambda: EMF. High-resolution: 1 с.</li>
+<li>Retention задавайте завжди: автоматичні лог-групи вічні.</li>
+<li>CloudTrail: Event history 90 днів безкоштовно, data events вимкнені за замовчуванням.</li>
+<li>Alarm не може писати в SNS-топік з <code>alias/aws/sns</code>.</li>
+</ol>
+</div><h2>Перевірте себе</h2>
+<ol>
+<li>Чим <code>INSUFFICIENT_DATA</code> відрізняється від <code>ALARM</code>?</li>
+<li>Що робить <code>TreatMissingData: notBreaching</code> і чому підходить для рідкісних викликів?</li>
+<li>Чому alarm не надсилає лист, хоча він у <code>ALARM</code>? Назвіть дві причини.</li>
+<li>Що рахується за плату: alarm чи їх спрацювання?</li>
+<li>Чому в метриках Lambda нема пам'яті і де її побачити?</li>
+<li>Як опублікувати власну метрику з Lambda без виклику API?</li>
+<li>Чим Logs Insights, metric filter і subscription filter відрізняються?</li>
+<li>Чим відрізняються CloudWatch, CloudTrail і X-Ray?</li>
+<li>Як перевірити ланцюг alarm → SNS → пошта, не ламаючи метрику?</li>
+<li>Чому лог-група Lambda, створена AWS автоматично, дорожча в довгостроці?</li>
+<li>Які події CloudTrail безкоштовні, а які платні? Чому data events вимкнені?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li><code>INSUFFICIENT_DATA</code> означає даних замало (метрика не публікується), <code>ALARM</code> означає умова порушена. Перший виникає, наприклад, коли функцію не викликають.</li>
+<li>Відсутність даних вважається «не поломкою». Без викликів метрика <code>Errors</code> не публікується.</li>
+<li>Підписка SNS не підтверджена (<code>PendingConfirmation</code>) або нема <code>AlarmActions</code>. Також топік може бути під <code>alias/aws/sns</code>.</li>
+<li>Кількість alarm (10 перших безкоштовні).</li>
+<li>Lambda їх не публікує. Дивіться <code>Max Memory Used</code> у рядку <code>REPORT</code>.</li>
+<li>EMF: структурований JSON у лог (Powertools Metrics).</li>
+<li>Insights це запити над логами, metric filter робить метрику з патерну, subscription filter пересилає логи в Kinesis, Firehose чи Lambda.</li>
+<li>CloudWatch: стан і продуктивність. CloudTrail: хто викликав API. X-Ray: шлях запиту.</li>
+<li><code>aws cloudwatch set-alarm-state ... --state-value ALARM</code>.</li>
+<li>Retention «Never expire» за замовчуванням, лог-групу створює AWS без вашого ресурсу.</li>
+<li>Безкоштовні: Event history (90 днів) і перша копія management-подій у trail. Платні: додаткові копії, data events, Insights. Data events дуже багато, тому вимкнені.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 34-cloudwatch.md.</p>
+
+<nav class="pager"><a href="33-ai-services-security-simple.html">← Лекція 33</a><a href="35-cloudwatch-agent-synthetics-simple.html">Лекція 35 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

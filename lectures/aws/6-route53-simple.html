@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 6: Route 53, DNS і routing policies</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 6: Route 53, DNS і routing policies</h1>
+<blockquote>
+<p>Середній рівень: усі правила з повної лекції, але простими словами. Повна: ../6-route53.md. Усе звірено з документацією AWS; що не підтверджено, позначено <em>(не звірено)</em>. В AWS це не виконували.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>Route 53 це телефонна книга інтернету: за іменем сайту дає адресу. Різні routing policies вирішують, яку саме адресу віддати.</strong> Іспит питає, яку політику обрати для сценарію.</p>
+<h2>Навіщо це так задумано</h2>
+<p>Люди пам'ятають імена, а комп'ютери працюють з адресами. DNS їх зв'язує. Route 53 додає розумні правила: віддавати найближчий сервер, розподіляти за вагою або обходити зламаний.</p>
+<h2>Крок 1. Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>Hosted zone</strong></td>
+<td data-label="Суть">папка з записами домену</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>A</strong></td>
+<td data-label="Суть">ім'я до IPv4</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>AAAA</strong></td>
+<td data-label="Суть">ім'я до IPv6</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>CNAME</strong></td>
+<td data-label="Суть">ім'я до іншого імені</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>NS</strong></td>
+<td data-label="Суть">сервери імен зони</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Alias</strong></td>
+<td data-label="Суть">запис Route 53 на ресурс AWS</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Health check</strong></td>
+<td data-label="Суть">перевірка, чи сервер живий</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Крок 2. Alias чи CNAME</h2>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>Alias</th>
+<th>CNAME</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Корінь домену (<code>example.com</code>)</td>
+<td data-label="Alias">можна</td>
+<td data-label="CNAME"><strong>не можна</strong></td>
+</tr>
+<tr>
+<td data-label="">Куди</td>
+<td data-label="Alias">ресурси AWS</td>
+<td data-label="CNAME">будь-яке ім'я, зовнішні теж</td>
+</tr>
+<tr>
+<td data-label="">Ціна запитів</td>
+<td data-label="Alias">безкоштовно</td>
+<td data-label="CNAME">платно</td>
+</tr>
+<tr>
+<td data-label="">Вказувати на IP</td>
+<td data-label="Alias">ні</td>
+<td data-label="CNAME">ні</td>
+</tr>
+</tbody>
+</table></div>
+<p>Alias підходить для CloudFront, ELB, S3 (лише як статичний сайт), API Gateway. На EC2 напряму Alias <strong>не можна</strong>. Lambda в списку цілей Alias нема. Зовнішній домен: CNAME.</p>
+<h2>Крок 3. Вісім політик</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Політика</th>
+<th>Коли</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Політика"><strong>Simple</strong></td>
+<td data-label="Коли">один сервер. Балансування нема: клієнт сам обирає</td>
+</tr>
+<tr>
+<td data-label="Політика"><strong>Weighted</strong></td>
+<td data-label="Коли">розділити трафік за вагою (70 і 30)</td>
+</tr>
+<tr>
+<td data-label="Політика"><strong>Latency</strong></td>
+<td data-label="Коли">сервери в різних регіонах, віддати того, з кращою затримкою</td>
+</tr>
+<tr>
+<td data-label="Політика"><strong>Failover</strong></td>
+<td data-label="Коли">є основний і резервний; перемкнути, якщо основний не відповідає</td>
+</tr>
+<tr>
+<td data-label="Політика"><strong>Geolocation</strong></td>
+<td data-label="Коли">за країною чи континентом користувача</td>
+</tr>
+<tr>
+<td data-label="Політика"><strong>Geoproximity</strong></td>
+<td data-label="Коли">за відстанню, з зсувом (bias), щоб розширити чи звузити зону</td>
+</tr>
+<tr>
+<td data-label="Політика"><strong>Multivalue</strong></td>
+<td data-label="Коли">віддати до 8 здорових адрес на вибір клієнта</td>
+</tr>
+<tr>
+<td data-label="Політика"><strong>IP-based</strong></td>
+<td data-label="Коли">за IP-діапазоном клієнта</td>
+</tr>
+</tbody>
+</table></div>
+<p>Приклади:</p>
+<ul>
+<li>«Поступово перевести 10% на нову версію» → Weighted.</li>
+<li>«Користувача з Європи на європейський сервер» → Latency (чи Geolocation, якщо за країною).</li>
+<li>«З Польщі на сервер у Німеччині» → Geolocation.</li>
+<li>«Сервер у Німеччині має обслуговувати ще й Польщу» → Geoproximity з додатним bias.</li>
+<li>«Основний впав, перейти на резервний» → Failover з health check.</li>
+</ul>
+<p>Пастки:</p>
+<ul>
+<li>Weighted: вага <strong>0</strong> припиняє трафік на цей запис, якщо не всі ваги нульові (коли нуль у всіх, трафік ділиться порівну). Ваги 1 і 255 дають 1/256 і 255/256.</li>
+<li>Geolocation без <strong>default record</strong> дає «no answer» тим, кого не розпізнано.</li>
+<li>Geoproximity: bias від <strong>-99 до +99</strong>.</li>
+<li>Multivalue не замінює балансувальник.</li>
+</ul>
+<h2>Крок 4. Домен і DNS окремо</h2>
+<p>Купівля домену це одна дія, а налаштування DNS інша. Домен можна купити в одному місці, а DNS вести в Route 53: у реєстратора вказують сервери імен із hosted zone.</p>
+<h2>Крок 5. Health checks</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Тип</th>
+<th>Що</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Тип"><strong>Endpoint</strong></td>
+<td data-label="Що">перевіряє сервер за IP чи доменом по HTTP, HTTPS чи TCP</td>
+</tr>
+<tr>
+<td data-label="Тип"><strong>CloudWatch alarm</strong></td>
+<td data-label="Що">бере дані метрики, наприклад CPU вище 90% означає нездоровий</td>
+</tr>
+<tr>
+<td data-label="Тип"><strong>Calculated</strong></td>
+<td data-label="Що">об'єднує кілька перевірок: «хоча б одна здорова»</td>
+</tr>
+</tbody>
+</table></div>
+<p>Правила:</p>
+<ul>
+<li>HTTP і HTTPS чекають відповідь <strong>2xx чи 3xx</strong>.</li>
+<li>Інтервал 30 секунд, швидкий 10 секунд платний.</li>
+<li>Приватні адреси endpoint-перевірка не бачить, для них CloudWatch alarm.</li>
+<li>Calculated: до 256 дочірніх, calculated у calculated не вкладається.</li>
+</ul>
+<h2>Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>Alias</strong></td>
+<td data-label="Що це">запис на ресурс AWS, працює на корені домену</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>CNAME</strong></td>
+<td data-label="Що це">ім'я на ім'я, не на корені домену</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Weighted</strong></td>
+<td data-label="Що це">розподіл трафіку за вагою</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Failover</strong></td>
+<td data-label="Що це">перемикання на резервний сервер</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Geolocation</strong></td>
+<td data-label="Що це">вибір за країною користувача</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Geoproximity</strong></td>
+<td data-label="Що це">вибір за відстанню з bias</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Health check</strong></td>
+<td data-label="Що це">автоматична перевірка здоров'я</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Calculated</strong></td>
+<td data-label="Що це">health check над іншими health checks</td>
+</tr>
+</tbody>
+</table></div>
+<h2>🖼 Схема: Route 53: записи, Alias проти CNAME</h2><div class="dg"><div class="dtitle">Типи записів</div><div class="tw"><table class="two"><thead><tr><th>Запис</th><th>Що робить</th></tr></thead><tbody><tr><td>A</td><td>ім&#x27;я до IPv4</td></tr><tr><td>AAAA</td><td>ім&#x27;я до IPv6</td></tr><tr><td>CNAME</td><td>ім&#x27;я до іншого імені</td></tr><tr><td>NS</td><td>сервери імен hosted zone</td></tr><tr><td>Alias</td><td>ім&#x27;я до ресурсу AWS (розширення Route 53)</td></tr></tbody></table></div><div class="dtitle">Alias проти CNAME</div><div class="dcols"><div class="dcol green"><b>Alias</b><ul><li>корінь домену можна (example.com)</li><li>запити до ресурсів AWS безкоштовні</li><li>TTL не задається</li><li>у dig виглядає як A чи AAAA</li></ul></div><div class="dcol red"><b>CNAME</b><ul><li>корінь домену не можна</li><li>на IP не можна</li><li>платні запити; якщо ціль в Route 53, це два запити</li><li>TTL задається, зовнішні домени можна</li></ul></div></div><div class="dtitle">Цілі Alias</div><div class="dgroup green"><b>Можна</b><div class="dkids"><div class="dbox green"><img class="dicon" src="../../icons/cloudfront.svg" alt="">CloudFront, ELB (ALB, NLB, CLB)</div><div class="dbox green"><img class="dicon" src="../../icons/s3.svg" alt="">S3 як статичний сайт</div><div class="dbox green"><img class="dicon" src="../../icons/api-gateway.svg" alt="">API Gateway, Elastic Beanstalk, Global Accelerator</div><div class="dbox green">інший запис тієї ж зони</div></div></div><div class="dgroup red"><b>Не можна</b><div class="dkids"><div class="dbox red"><img class="dicon" src="../../icons/ec2.svg" alt="">EC2 інстанс чи довільна IP</div><div class="dbox red"><img class="dicon" src="../../icons/lambda.svg" alt="">Lambda (ставлять за API Gateway чи CloudFront)</div></div></div><div class="dnote">Ресурс AWS: Alias. Зовнішній домен: CNAME. Корінь домену на ELB: лише Alias.</div><div class="dtitle">Реєстрація домену й DNS</div><div class="dcols"><div class="dcol gray"><b>Domain registration</b><ul><li>купівля домену</li></ul></div><div class="dcol blue"><b>DNS service</b><ul><li class="hi"><img class="dicon" src="../../icons/route53.svg" alt="">Route 53: куди йдуть запити</li><li class="hi"><span class="dgap"></span>у реєстратора ставлять NS-записи hosted zone</li></ul></div></div><div class="dnote">Купити домен в одному місці й керувати DNS в іншому можна.</div></div><h2>🖼 Схема: Route 53: вісім routing policies</h2><div class="dg"><div class="dtitle">Вісім routing policies</div><div class="tw"><table><thead><tr><th>Політика</th><th>Суть</th><th>Коли</th></tr></thead><tbody><tr><td>Simple</td><td>кілька значень, клієнт сам обирає</td><td>один сервер, без балансування</td></tr><tr><td>Weighted</td><td>частка за вагою (70 і 30)</td><td>поступове розгортання; вага 0 вимикає</td></tr><tr><td>Latency</td><td>регіон AWS з найкращою затримкою</td><td>ресурси в кількох регіонах</td></tr><tr><td>Failover</td><td>primary і secondary</td><td>перемикання за health check</td></tr><tr><td>Geolocation</td><td>країна, континент, штат США</td><td>мова, права на контент</td></tr><tr><td>Geoproximity</td><td>відстань плюс bias від -99 до +99</td><td>розширити чи звузити область</td></tr><tr><td>Multivalue</td><td>до 8 здорових записів</td><td>випадковий вибір, не заміна ALB</td></tr><tr><td>IP-based</td><td>за CIDR клієнта</td><td>відомі IP-діапазони</td></tr></tbody></table></div><div class="dtitle">Weighted: ваги 90 і 10</div><div class="dstep"><div class="dlabel">Запит до імені</div><div class="dpills"><span class="pill blue">v1 вага 90: 90%</span><span class="pill yellow">v2 вага 10: 10%</span></div><div class="dcap">Частка запису = його вага, поділена на суму ваг. Вага 0 припиняє трафік, якщо не всі ваги нульові.</div></div><div class="dtitle">Geolocation і geoproximity</div><div class="dcols"><div class="dcol blue"><b>Geolocation</b><ul><li>перемагає найменша область (Канада над Північною Америкою)</li><li>потрібен default record</li><li>без нього відповідь no answer</li></ul></div><div class="dcol yellow"><b>Geoproximity</b><ul><li>відстань × (1 − bias/100)</li><li>bias +25 розширює область</li><li>bias змінюють малими кроками</li><li>карти лише в Traffic Flow</li></ul></div></div><div class="dnote">Multivalue: без health check запис завжди здоровий; якщо нездорові всі, віддається до 8 нездорових. Failover, geolocation, geoproximity, latency, multivalue і weighted працюють і в private hosted zones.</div><div class="dtitle">Як Route 53 обирає відповідь</div><div class="dflow"><div class="dbox blue">Клієнт, потім резолвер DNS</div><div class="darrow">↓</div><div class="dbox aws"><img class="dicon" src="../../icons/route53.svg" alt="">Route 53 hosted zone</div><div class="darrow">↓</div><div class="dbox yellow">Routing policy запису</div><div class="darrow">↓</div><div class="dbox green">Відповідь клієнту (для failover і multivalue з health check)</div></div></div><h2>🖼 Схема: Route 53: health checks і failover</h2><div class="dg"><div class="dtitle">Три види health checks</div><div class="dcols"><div class="dcol blue"><b>Endpoint</b><ul><li>сервер за IP чи доменом</li><li>HTTP, HTTPS, TCP</li><li>чекає код 2xx чи 3xx</li><li>рядок у перших 5120 байтах тіла</li><li>лише публічні IP</li></ul></div><div class="dcol green"><b><img class="dicon" src="../../icons/cloudwatch.svg" alt="">CloudWatch alarm</b><ul><li>стежить за даними метрики alarm</li><li>не чекає стану ALARM</li><li>для приватних ресурсів</li><li>CPU EC2 вище 90% дає Unhealthy</li></ul></div><div class="dcol yellow"><b>Calculated</b><ul><li>об&#x27;єднує кілька перевірок</li><li>AND, OR чи хоча б x з y</li><li>до 256 дочірніх</li><li>вкладати calculated не можна</li></ul></div></div><div class="dtitle">Failover крок за кроком</div><div class="dstep"><div class="dlabel">1. Усе здорово</div><div class="dpills"><span class="pill green">Primary здоровий</span><span class="pill gray">Secondary чекає</span></div><div class="dcap">Health checkers перевіряють Primary (HTTP кожні 30 с), він відповідає 200 OK. Route 53 віддає адресу Primary.</div></div><div class="dstep"><div class="dlabel">2. Primary не відповідає</div><div class="dpills"><span class="pill red">Primary Unhealthy</span><span class="pill yellow">Secondary</span></div><div class="dcap">Після порога послідовних невдач Primary стає Unhealthy.</div></div><div class="dstep"><div class="dlabel">3. Перемикання</div><div class="dpills"><span class="pill red">Primary</span><span class="pill green">Secondary обслуговує</span></div><div class="dcap">Route 53 віддає адресу Secondary, користувач іде на нього.</div></div><div class="dnote">Інтервал 30 с (швидкий 10 с платний). Протокол і інтервал після створення не змінити. Вимкнений health check вважається Healthy: щоб зупинити трафік, його інвертують. Для EC2 радять Elastic IP.</div></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>Корінь домену на ресурс AWS: Alias. CNAME не на корені.</li>
+<li>Alias безкоштовний для ресурсів AWS, на EC2 його нема.</li>
+<li>Weighted за вагою, Latency за затримкою, Failover primary/secondary, Geolocation за країною, Geoproximity з bias, Multivalue до 8.</li>
+<li>Geolocation без default дає «no answer».</li>
+<li>Health checks: endpoint, CloudWatch alarm, calculated.</li>
+<li>Реєстрація домену й DNS незалежні.</li>
+</ol>
+</div><h2>Перевірте себе</h2>
+<ol>
+<li>Яка політика для канарки 5% на нову версію?</li>
+<li>Чому для example.com на ELB не годиться CNAME?</li>
+<li>Який health check для приватного ресурсу?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>Weighted: наприклад 95 і 5.</li>
+<li>CNAME не можна на корені домену, Alias можна.</li>
+<li>CloudWatch alarm.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> ../6-route53.md.</p>
+
+<nav class="pager"><a href="5-vpc-networking-simple.html">← Лекція 5</a><a href="7-cloudfront-simple.html">Лекція 7 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

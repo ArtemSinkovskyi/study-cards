@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 2: CLI і SDK: повтори з exponential backoff і Service Quotas</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 2: CLI і SDK: повтори з exponential backoff і Service Quotas</h1>
+<blockquote>
+<p>Середній рівень: усі правила з повної лекції, але простими словами. Повна: ../2-cli-sdk-retries-quotas.md. Теоретична лекція, в AWS окремо не виконувалась. Що не підтверджено документацією, позначено <em>(не звірено)</em>.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>Коли AWS відповідає «спробуй пізніше», SDK сам повторює запит, і кожного разу чекає довше. Це exponential backoff. А якщо ліміт справді замалий, його піднімають у Service Quotas.</strong></p>
+<h2>Навіщо це так задумано</h2>
+<p>Тимчасові збої та «забагато запитів» минають самі. Якщо тисяча клієнтів одночасно ломиться знову, збій лише збільшується. Тому пауза росте, а до неї додають випадковість (jitter), щоб клієнти повторювали запити не всі разом.</p>
+<h2>Крок 1. Що таке backoff</h2>
+<p>Образ: 🚪 двері зайняті. Ти не б'єш у них щосекунди, а чекаєш 1 с, потім 2 с, потім 4 с, і щоразу трохи випадково довше чи коротше.</p>
+<p>Усі офіційні SDK (boto3, Java та інші) роблять це самі. Власний цикл повторів зазвичай писати не треба.</p>
+<h2>Крок 2. Що SDK повторює</h2>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Тип помилки</th>
+<th>Приклади</th>
+<th>Повторює?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Тип помилки">тимчасова</td>
+<td data-label="Приклади">таймаут, HTTP 500, 502, 503, 504</td>
+<td data-label="Повторює?">так, пауза від 50 мс</td>
+</tr>
+<tr>
+<td data-label="Тип помилки">throttling</td>
+<td data-label="Приклади"><code>ThrottlingException</code>, <code>ProvisionedThroughputExceededException</code>, <code>RequestLimitExceeded</code></td>
+<td data-label="Повторює?">так, пауза від 1000 мс</td>
+</tr>
+<tr>
+<td data-label="Тип помилки">нетимчасова</td>
+<td data-label="Приклади"><code>AccessDeniedException</code>, <code>ValidationException</code>, <code>ResourceNotFoundException</code></td>
+<td data-label="Повторює?"><strong>ні</strong>, помилка йде в код</td>
+</tr>
+</tbody>
+</table></div>
+<p>Логіка проста: повторювати варто лише те, що може минути. Неправильні дані чи права від повтору не виправляться. Throttling теж буває HTTP 429, але його повторюють: SDK дивиться на код помилки.</p>
+<h2>Крок 3. Скільки спроб і де налаштувати</h2>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Що</th>
+<th>Змінна</th>
+<th>Ключ у <code>~/.aws/config</code></th>
+<th>Типово</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Що">режим</td>
+<td data-label="Змінна"><code>AWS_RETRY_MODE</code></td>
+<td data-label="Ключ у ~/.aws/config"><code>retry_mode</code></td>
+<td data-label="Типово"><code>standard</code></td>
+</tr>
+<tr>
+<td data-label="Що">всього спроб</td>
+<td data-label="Змінна"><code>AWS_MAX_ATTEMPTS</code></td>
+<td data-label="Ключ у ~/.aws/config"><code>max_attempts</code></td>
+<td data-label="Типово">3</td>
+</tr>
+</tbody>
+</table></div>
+<p>3 спроби це одна перша і два повтори. Значення 1 вимикає повтори. Для DynamoDB типово 4 спроби. Якщо значення задано в коді, воно сильніше за змінну, а змінна сильніша за файл.</p>
+<p>Три режими:</p>
+<ol>
+<li><strong>standard</strong> (типовий): backoff, jitter, ліміт повторів.</li>
+<li><strong>adaptive</strong>: як standard, але ще притримує і першу спробу, коли бачить throttling. Для одного ресурсу, який часто тротлить.</li>
+<li><strong>legacy</strong>: стара поведінка, різна в різних мовах, лише для сумісності.</li>
+</ol>
+<h3>Рецепт: скільки чекатиме SDK (3 кроки)</h3>
+<ol>
+<li>Візьми базу: 50 мс для тимчасових, 1000 мс для throttling.</li>
+<li>Помнож її на 2 в степені номера повтору (перший повтор 2⁰, другий 2¹) і візьми не більше 20 секунд.</li>
+<li>Помнож результат на випадкове число від 0 до 1: це і є пауза.</li>
+</ol>
+<p>Приклад: throttling, перший повтор: від 0 до 1000 мс. Другий: від 0 до 2000 мс.</p>
+<p>Є ще <strong>ліміт повторів</strong>: при довгому збої SDK перестає повторювати й швидко повертає помилку. Це захищає від безкінечного очікування. Нова поведінка за документацією вмикається змінною <code>AWS_NEW_RETRIES_2026=true</code>; без неї діє попередня, трохи інша за часом пауз.</p>
+<h2>Крок 4. Service Quotas</h2>
+<p>Це інструмент, що показує <strong>ліміти</strong> акаунта, скільки вже використано, і дозволяє <strong>попросити підвищення</strong>.</p>
+<ul>
+<li><strong>Регульовані</strong> ліміти можна підняти запитом.</li>
+<li><strong>Жорсткі</strong> AWS не змінює.</li>
+</ul>
+<p>Приклад з Lambda: <code>aws service-quotas get-service-quota --service-code lambda --quota-code L-B99A9384</code> показує ліміт паралельності та чи він регульований. Запит на підняття: консоль або <code>aws service-quotas request-service-quota-increase</code> (з <code>--service-code</code>, <code>--quota-code</code>, <code>--desired-value</code>).</p>
+<p>Сценарій іспиту: Lambda повертає 429, бо досягла ліміту паралельності акаунта. Рішення: підняти квоту в Service Quotas. Backoff на клієнті лише згладить, але не усуне причину.</p>
+<h2>Крок 5. Профілі в одному реченні</h2>
+<p>Облікові дані й налаштування CLI/SDK лежать у <code>~/.aws/credentials</code> і <code>~/.aws/config</code>, згруповані в профілі; профіль обирають <code>--profile</code> чи <code>AWS_PROFILE</code>. Порядок пошуку облікових даних розібрано в лекції про IAM.</p>
+<h2>Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін">exponential backoff</td>
+<td data-label="Що це">повтор із паузою, що росте вдвічі</td>
+</tr>
+<tr>
+<td data-label="Термін">jitter</td>
+<td data-label="Що це">випадкова добавка до паузи</td>
+</tr>
+<tr>
+<td data-label="Термін">throttling</td>
+<td data-label="Що це">відмова, бо запитів забагато</td>
+</tr>
+<tr>
+<td data-label="Термін">retry mode</td>
+<td data-label="Що це">режим повторів: standard, adaptive, legacy</td>
+</tr>
+<tr>
+<td data-label="Термін">max attempts</td>
+<td data-label="Що це">скільки всього спроб, включно з першою</td>
+</tr>
+<tr>
+<td data-label="Термін">Service Quotas</td>
+<td data-label="Що це">ліміти акаунта й запити на їх підняття</td>
+</tr>
+<tr>
+<td data-label="Термін">регульований ліміт</td>
+<td data-label="Що це">такий, що AWS підніме на прохання</td>
+</tr>
+<tr>
+<td data-label="Термін">профіль</td>
+<td data-label="Що це">іменований набір облікових даних</td>
+</tr>
+</tbody>
+</table></div>
+<h2>🖼 Схема: SDK: повтори з backoff і jitter</h2><div class="dg"><div class="dtitle">Що SDK робить із запитом</div><div class="dflow"><div class="dbox aws">Запит до AWS</div><div class="darrow">↓</div><div class="dbox green">Успіх: результат одразу в коді</div><div class="darrow">↓</div><div class="dbox yellow">Помилка: що далі, залежить від її типу</div></div><div class="dcols"><div class="dcol yellow"><b>Тимчасові</b><ul><li>5xx, timeout</li><li>база паузи 50 мс</li><li>повторюються</li></ul></div><div class="dcol orange"><b>Throttling</b><ul><li>ThrottlingException</li><li>SlowDown</li><li>база паузи 1000 мс</li><li>повторюються</li></ul></div><div class="dcol red"><b>Нетимчасові</b><ul><li>AccessDenied</li><li>ValidationException</li><li>не повторюються</li></ul></div></div><div class="dtitle">Пауза між спробами</div><div class="dflow"><div class="dbox yellow">Пауза росте: база x 2 в степені повтору</div><div class="darrow">↓</div><div class="dbox blue">Jitter: випадково від 0 до 1 цієї паузи</div><div class="darrow">↓</div><div class="dbox gray">Стеля 20 секунд</div></div><div class="dnote">Throttling з базою 1000 мс: перший повтор чекає 0-1000 мс, другий 0-2000 мс. Типово 3 спроби (перша і два повтори), режим standard. Квота повторів швидко повертає помилку при тривалому збої. Бази 50 і 1000 мс описано за оновленою поведінкою 2026 (вмикається AWS_NEW_RETRIES_2026=true), у старіших SDK значення відрізняються.</div></div><h2>🖼 Схема: SDK: режими й налаштування повторів</h2><div class="dg"><div class="dtitle">Режими повторів</div><div class="dcols"><div class="dcol green"><b>standard</b><ul><li>типовий</li><li>backoff і jitter</li><li>є квота повторів</li></ul></div><div class="dcol yellow"><b>adaptive</b><ul><li>як standard</li><li>плюс обмежувач швидкості</li><li>може затримати першу спробу</li></ul></div><div class="dcol gray"><b>legacy</b><ul><li>стара поведінка SDK</li><li>різна між мовами</li></ul></div></div><div class="dtitle">Де налаштувати</div><div class="tw"><table><thead><tr><th>Що</th><th>Змінна</th><th>Типово</th></tr></thead><tbody><tr><td>режим</td><td>AWS_RETRY_MODE</td><td>standard</td></tr><tr><td>всього спроб</td><td>AWS_MAX_ATTEMPTS</td><td>3</td></tr></tbody></table></div><div class="dnote">Те саме ключами retry_mode і max_attempts у ~/.aws/config. Пріоритет: код, змінна середовища, config. Значення 1 вимикає повтори. DynamoDB: 4 спроби. Прямий HTTP без SDK: backoff пишете самі.</div></div><h2>🖼 Схема: Service Quotas і throttling</h2><div class="dg"><div class="dtitle">Service Quotas</div><div class="dflow"><div class="dbox aws">Показує ліміти акаунта і скільки вже використано</div><div class="darrow">↓</div><div class="dbox yellow">Регульований ліміт: можна подати запит на підвищення</div><div class="darrow">↓</div><div class="dbox gray">Жорсткий ліміт: AWS його не змінює</div></div><div class="dtitle">Приклад: Lambda отримує 429</div><div class="dflow"><div class="dbox red">Досягнуто ліміт паралельності акаунта</div><div class="darrow">↓</div><div class="dbox yellow">Backoff на клієнті лише згладжує піки</div><div class="darrow">↓</div><div class="dbox green">Причину усуває підняття квоти в Service Quotas</div></div><div class="dnote">Постійний throttling повторами не лікується: піднімайте квоту або зменшуйте частоту.</div></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
+<ul>
+<li>Backoff: пауза росте, jitter додає випадковість; SDK робить це сам.</li>
+<li>Повторюються тимчасові помилки й throttling, а помилки валідації й прав ні.</li>
+<li>Типово 3 спроби, режим standard; змінюється в коді, змінною, у config.</li>
+<li>Service Quotas: бачити ліміти й підіймати регульовані.</li>
+<li>Постійний throttling лікують квотою, а не повторами.</li>
+</ul>
+</div><h2>Перевірте себе</h2>
+<ol>
+<li>Для чого додають jitter?</li>
+<li>Чи повторить SDK <code>AccessDeniedException</code>?</li>
+<li>Де в акаунті підняти ліміт паралельності Lambda?</li>
+</ol>
+
+<nav class="pager"><a href="1-iam-simple.html">← Лекція 1</a><a href="3-ec2-compute-storage-simple.html">Лекція 3 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

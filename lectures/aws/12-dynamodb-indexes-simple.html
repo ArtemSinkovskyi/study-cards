@@ -311,7 +311,7 @@
 <p>Для зберігання до <strong>365 днів</strong> є Kinesis Data Streams for DynamoDB, але там нема гарантій порядку й дедуплікації. Читання зі стріму завжди eventually consistent. Одночасно з одного шарда читають до двох процесів.</p>
 <h2>Крок 10. Інше коротко</h2>
 <ul>
-<li><strong>DAX</strong> це кеш перед DynamoDB (лекція 15).</li>
+<li><strong>DAX</strong> це кеш перед DynamoDB (лекція 13).</li>
 <li><strong>PITR</strong> це відновлення на будь-яку мить за останні 35 днів; період можна скоротити (<code>RecoveryPeriodInDays</code> від 1 до 35).</li>
 <li><strong>Global tables</strong> це мультирегіональна multi-active таблиця, 99,999% доступності. Режими <strong>MREC</strong> (eventual) і <strong>MRSC</strong> (strong).</li>
 <li><strong>PartiQL</strong> це SQL-подібний синтаксис, але без JOIN.</li>
@@ -623,7 +623,7 @@
 <hr />
 <p><em>Повна версія:</em> 12-dynamodb-indexes-idempotency.md.</p>
 
-<nav class="pager"><a href="11-dynamodb-simple.html">← Лекція 11</a><a href="15-caching-simple.html">Лекція 15 →</a></nav>
+<nav class="pager"><a href="11-dynamodb-simple.html">← Лекція 11</a><a href="13-caching-simple.html">Лекція 13 →</a></nav>
 </main>
 <script>
 const tg = window.Telegram && window.Telegram.WebApp;

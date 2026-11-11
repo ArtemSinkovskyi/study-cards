@@ -325,7 +325,7 @@
 <li>Потужність можна <strong>ненадовго перевищити</strong> (burst capacity).</li>
 <li>Коли burst закінчився, приходить помилка <code>ProvisionedThroughputExceededException</code>. Тоді повторіть із паузою, що росте (<strong>exponential backoff</strong>, SDK робить це сам).</li>
 <li>Причини: <strong>hot key</strong> (один ключ читають надто часто), <strong>hot partition</strong>, <strong>дуже великі item</strong>.</li>
-<li>Що робити: розкидати partition keys рівномірно; якщо не вистачає RCU, додати <strong>DAX</strong> (лекція 15).</li>
+<li>Що робити: розкидати partition keys рівномірно; якщо не вистачає RCU, додати <strong>DAX</strong> (лекція 13).</li>
 </ol>
 <h2>Крок 10. On-demand детальніше</h2>
 <ul>
@@ -471,7 +471,7 @@
 <hr />
 <p><em>Повна версія:</em> 11-dynamodb.md.</p>
 
-<nav class="pager"><a href="28-rds-aurora-proxy-simple.html">← Лекція 28</a><a href="12-dynamodb-indexes-simple.html">Лекція 12 →</a></nav>
+<nav class="pager"><a href="10-rds-aurora-proxy-simple.html">← Лекція 10</a><a href="12-dynamodb-indexes-simple.html">Лекція 12 →</a></nav>
 </main>
 <script>
 const tg = window.Telegram && window.Telegram.WebApp;

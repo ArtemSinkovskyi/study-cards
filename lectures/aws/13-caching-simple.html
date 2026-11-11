@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 13: кешування і вибір сховища</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 13: кешування і вибір сховища</h1>
+<blockquote>
+<p>Середній рівень: усі правила з повної лекції, але простими словами й без розповіді про наш проєкт. Повна: ../13-caching-and-data-stores.md. Факти, які в повній лекції «з пам'яті», тут із позначкою <em>(не звірено)</em>.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>На іспиті тут питають «що обрати»: важливіше розрізняти варіанти, ніж знати налаштування.</strong> Навички: 1.3.2 (обрати сховище), 1.3.3 (обрати кеш), 4.3.4 (ElastiCache, DAX, CloudFront).</p>
+<p>Кеш можна поставити на кожному кроці шляху: браузер (<code>Cache-Control</code>) → CloudFront → API Gateway cache → Lambda (змінні поза handler, <code>/tmp</code>) → ElastiCache або DAX → база. Правило: <strong>чим ближче до користувача, тим дешевше й швидше, але тим важче скинути.</strong></p>
+<h2>Навіщо це так задумано</h2>
+<p>Кеш потрібен, бо база повільна й дорога, а більшість запитів повторюється. Чим ближче кеш до користувача, тим швидше й дешевше, але тим важче його скинути.</p>
+<h2>Крок 1. Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін">cache hit / miss</td>
+<td data-label="Суть">знайшли в кеші / не знайшли</td>
+</tr>
+<tr>
+<td data-label="Термін">TTL</td>
+<td data-label="Суть">скільки живе запис у кеші</td>
+</tr>
+<tr>
+<td data-label="Термін">invalidation</td>
+<td data-label="Суть">примусове скидання</td>
+</tr>
+<tr>
+<td data-label="Термін">stale data</td>
+<td data-label="Суть">застарілі дані</td>
+</tr>
+<tr>
+<td data-label="Термін">thundering herd</td>
+<td data-label="Суть">натовп запитів у базу, коли кеш порожній</td>
+</tr>
+<tr>
+<td data-label="Термін">origin</td>
+<td data-label="Суть">джерело для CloudFront</td>
+</tr>
+<tr>
+<td data-label="Термін">edge location</td>
+<td data-label="Суть">точка присутності CloudFront</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Крок 2. Стратегії кешування</h2>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Стратегія</th>
+<th>Як</th>
+<th>Плюс</th>
+<th>Мінус</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Стратегія"><strong>Lazy loading (cache-aside)</strong></td>
+<td data-label="Як">читаємо кеш; промах: база, потім запис у кеш</td>
+<td data-label="Плюс">у кеші лише потрібне; збій кешу не фатальний</td>
+<td data-label="Мінус">перший запит повільний; дані старіють</td>
+</tr>
+<tr>
+<td data-label="Стратегія"><strong>Write-through</strong></td>
+<td data-label="Як">пишемо в базу і кеш одночасно</td>
+<td data-label="Плюс">дані свіжі</td>
+<td data-label="Мінус">у кеші зайве; запис повільніший</td>
+</tr>
+<tr>
+<td data-label="Стратегія"><strong>TTL</strong></td>
+<td data-label="Як">будь-яка стратегія плюс час життя</td>
+<td data-label="Плюс">застарілі дані зникають самі</td>
+<td data-label="Мінус"></td>
+</tr>
+<tr>
+<td data-label="Стратегія">Write-behind</td>
+<td data-label="Як">запис спершу в кеш, у базу потім</td>
+<td data-label="Плюс"></td>
+<td data-label="Мінус"></td>
+</tr>
+</tbody>
+</table></div>
+<p>Найчастіша комбінація: <strong>lazy loading плюс TTL</strong>. Питання «кеш містить застарілі дані» означає write-through або коротший TTL. «Кеш забитий непотрібним» означає lazy loading.</p>
+<h2>Крок 3. Який кеш обрати</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Сценарій</th>
+<th>Вибір</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Сценарій">читання DynamoDB, мікросекунди, без зміни коду</td>
+<td data-label="Вибір"><strong>DAX</strong></td>
+</tr>
+<tr>
+<td data-label="Сценарій">сесії, рейтинги, складні обчислення, RDS</td>
+<td data-label="Вибір"><strong>ElastiCache</strong></td>
+</tr>
+<tr>
+<td data-label="Сценарій">статика й контент для людей по світу</td>
+<td data-label="Вибір"><strong>CloudFront</strong></td>
+</tr>
+<tr>
+<td data-label="Сценарій">відповіді REST API на рівні API</td>
+<td data-label="Вибір"><strong>API Gateway cache</strong></td>
+</tr>
+<tr>
+<td data-label="Сценарій">дані між викликами однієї Lambda</td>
+<td data-label="Вибір">змінні поза handler, <code>/tmp</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2>Крок 4. DAX</h2>
+<p>Кеш в пам'яті, сумісний з API DynamoDB:</p>
+<ul>
+<li>читання з мілісекунд до <strong>мікросекунд</strong> (eventually consistent);</li>
+<li>мінімальні зміни коду: інший клієнт, той самий API;</li>
+<li>живе <strong>у VPC</strong>;</li>
+<li>корисний для <strong>гарячих ключів</strong> (розвантажує hot partition);</li>
+<li>найкраще, коли cache hit більше 90%.</li>
+</ul>
+<p><strong>Не підходить:</strong> потрібні strongly consistent читання (такі запити DAX пропускає прямо в DynamoDB і не кешує; так само TransactGetItems); багато записів; мало повторних читань; не потрібні мікросекунди.</p>
+<p><strong>DAX чи ElastiCache:</strong> DAX лише для DynamoDB, без коду кешування. ElastiCache для всього іншого, але логіку кешу пишете самі.</p>
+<h3>DAX докладніше</h3>
+<ol>
+<li><strong>Читання eventually consistent</strong>: DAX шукає в кеші. Знайшов (cache hit): віддає. Не знайшов (cache miss): іде в DynamoDB, кладе відповідь у кеш і віддає.</li>
+<li><strong>Читання strongly consistent</strong>: DAX проксує прямо в DynamoDB, у кеш не кладе.</li>
+<li><strong>Запис (write-through)</strong>: дані спершу йдуть у таблицю DynamoDB, потім у DAX.</li>
+</ol>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Параметр</th>
+<th>Значення</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Параметр">TTL кешу</td>
+<td data-label="Значення"><strong>5 хвилин</strong> за замовчуванням</td>
+</tr>
+<tr>
+<td data-label="Параметр">Що кешує</td>
+<td data-label="Значення">окремі items (<code>GetItem</code>, <code>BatchGetItem</code>) і результати <code>Query</code>, <code>Scan</code> (окремий кеш запитів)</td>
+</tr>
+<tr>
+<td data-label="Параметр">Розмір кластера</td>
+<td data-label="Значення">до <strong>11</strong> вузлів: primary плюс до 10 реплік (у нотатках «до 10», документація точніша)</td>
+</tr>
+<tr>
+<td data-label="Параметр">Для production</td>
+<td data-label="Значення"><strong>мінімум 3 вузли в різних зонах доступності</strong>; 1-2 вузли лише для розробки й тестів</td>
+</tr>
+<tr>
+<td data-label="Параметр">Безпека</td>
+<td data-label="Значення">VPC, IAM, шифрування в спокої через KMS, CloudTrail</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>DAX проти ElastiCache ще раз.</strong> DAX кешує <strong>окремі items і результати Query/Scan</strong> прозоро, без зміни коду. ElastiCache береться, коли треба кешувати <strong>результат агрегації</strong> (SUM, AVG), бо DynamoDB їх не рахує. Застосунок може мати обидва.</p>
+<h2>Крок 5. ElastiCache</h2>
+<p>Рушії: <strong>Valkey</strong>, <strong>Redis OSS</strong>, <strong>Memcached</strong>.</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>Valkey / Redis OSS</th>
+<th>Memcached</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Реплікація, Multi-AZ</td>
+<td data-label="Valkey / Redis OSS">так, до 5 реплік на primary</td>
+<td data-label="Memcached">ні</td>
+</tr>
+<tr>
+<td data-label="">Персистентність, бекапи</td>
+<td data-label="Valkey / Redis OSS">так</td>
+<td data-label="Memcached">ні</td>
+</tr>
+<tr>
+<td data-label="">Структури даних, pub/sub, sorted sets</td>
+<td data-label="Valkey / Redis OSS">так</td>
+<td data-label="Memcached">лише ключ-значення</td>
+</tr>
+<tr>
+<td data-label="">Багатопотоковість</td>
+<td data-label="Valkey / Redis OSS"></td>
+<td data-label="Memcached">так</td>
+</tr>
+</tbody>
+</table></div>
+<p>Запам'ятайте: <strong>відмовостійкість чи рейтинг (sorted set) означає Redis/Valkey; простий розподілений кеш означає Memcached.</strong></p>
+<p>Режими: <strong>Serverless</strong> (без вузлів, оплата за ГБ і ECPU, завжди Multi-AZ) і <strong>node-based</strong> (свої вузли, оплата за годину). Працює у VPC, тож Lambda треба підключити до VPC. Типове застосування: сесії застосунку, щоб сервери були stateless.</p>
+<p>Сесії: і DynamoDB, і ElastiCache підходять. DynamoDB простіше й без VPC, ElastiCache швидше.</p>
+<h3>Доповнення з нотаток</h3>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>Redis / Valkey</th>
+<th>Memcached</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Висока доступність</td>
+<td data-label="Redis / Valkey">Multi-AZ з автоматичним failover</td>
+<td data-label="Memcached">нема</td>
+</tr>
+<tr>
+<td data-label="">Read replicas</td>
+<td data-label="Redis / Valkey">є</td>
+<td data-label="Memcached">нема</td>
+</tr>
+<tr>
+<td data-label="">Розподіл даних</td>
+<td data-label="Redis / Valkey">sharding (cluster mode)</td>
+<td data-label="Memcached">дані діляться між вузлами</td>
+</tr>
+<tr>
+<td data-label="">Збереження</td>
+<td data-label="Redis / Valkey">backup і restore</td>
+<td data-label="Memcached">не зберігає (backup лише в serverless)</td>
+</tr>
+<tr>
+<td data-label="">Роль</td>
+<td data-label="Redis / Valkey">кеш, message broker (pub/sub), тимчасове сховище</td>
+<td data-label="Memcached">лише кеш</td>
+</tr>
+<tr>
+<td data-label="">Масштабування</td>
+<td data-label="Redis / Valkey">вертикальне й sharding</td>
+<td data-label="Memcached">горизонтальне: додаєш вузли</td>
+</tr>
+</tbody>
+</table></div>
+<p>Поправка до нотаток: «довговічність через AOF» застаріла. У порівняльній таблиці ElastiCache довговічності в Redis/Valkey нема. Довговічна база в пам'яті це <strong>MemoryDB</strong>; ElastiCache це кеш. Докладніше: лекція про RDS, Aurora і RDS Proxy.</p>
+<h3>Де ще тримати сесії</h3>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Варіант</th>
+<th>Чому не підходить так добре</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Варіант">ElastiCache</td>
+<td data-label="Чому не підходить так добре">у пам'яті, швидко; але DynamoDB serverless</td>
+</tr>
+<tr>
+<td data-label="Варіант">EFS</td>
+<td data-label="Чому не підходить так добре">треба підключати до EC2 як мережевий диск</td>
+</tr>
+<tr>
+<td data-label="Варіант">EBS і Instance Store</td>
+<td data-label="Чому не підходить так добре">лише локальний кеш, не спільний між серверами</td>
+</tr>
+<tr>
+<td data-label="Варіант">S3</td>
+<td data-label="Чому не підходить так добре">більша затримка, не для дрібних об'єктів</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Крок 6. CloudFront</h2>
+<p>Cache key, cache policy, origin request policy, invalidation, OAC, signed URL і signed cookies проти S3 presigned: <a href="7-cloudfront-simple.html">лекція 7</a>.</p>
+<p>Лише тут: TTL за замовчуванням min 0, default 86 400 с, max 31 536 000 с; <code>Cache-Control: max-age</code> від origin має пріоритет у межах min і max. Файли з <code>Cache-Control: public, max-age=31536000, immutable</code> потребують нового імені при зміні.</p>
+<h2>Крок 7. API Gateway cache</h2>
+<ul>
+<li>лише <strong>REST API</strong>, налаштовується на <strong>stage</strong>;</li>
+<li>TTL за замовчуванням <strong>300 с</strong>, максимум <strong>3600 с</strong>, 0 вимикає;</li>
+<li>кешує <strong>лише <code>GET</code></strong> за замовчуванням;</li>
+<li>відповідь до 1 МБ; створення кешу до 4 хв;</li>
+<li>оплачується щогодини, <strong>без Free Tier</strong>;</li>
+<li>клієнт скидає запис заголовком <code>Cache-Control: max-age=0</code>; потрібен дозвіл <code>execute-api:InvalidateCache</code>, інакше будь-хто зможе скидати кеш;</li>
+<li>для параметрів запиту треба увімкнути <strong>cache keys</strong>, інакше різні запити отримають одну відповідь;</li>
+<li>метрики <code>CacheHitCount</code>, <code>CacheMissCount</code>;</li>
+<li>чутливі дані: увімкнути шифрування кешу.</li>
+</ul>
+<p>Пастка: <code>/users?type=admin</code> без cache key поверне кешований результат для <code>type=regular</code>.</p>
+<h2>Крок 8. Кеш у самій Lambda</h2>
+<ul>
+<li>об'єкти <strong>поза handler</strong> живуть між викликами (клієнт S3, конфіг);</li>
+<li><code>/tmp</code> теж лишається, поки середовище живе;</li>
+<li>покладатися не можна: середовище зникає, у кожного своя копія;</li>
+<li>Parameter Store і Secrets Manager кешують через <strong>Lambda-розширення Parameters and Secrets</strong>: воно піднімає локальний HTTP-сервер на порту 2773 і тримає значення в пам'яті, тож функція не ходить в API на кожен виклик.</li>
+</ul>
+<h2>Крок 9. Як обрати сховище</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Потрібно</th>
+<th>Вибір</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Потрібно">файли, зображення, дешево</td>
+<td data-label="Вибір"><strong>S3</strong></td>
+</tr>
+<tr>
+<td data-label="Потрібно">ключ-значення, мілісекунди, серверлес</td>
+<td data-label="Вибір"><strong>DynamoDB</strong></td>
+</tr>
+<tr>
+<td data-label="Потрібно">SQL, <code>JOIN</code>, транзакції</td>
+<td data-label="Вибір"><strong>RDS</strong></td>
+</tr>
+<tr>
+<td data-label="Потрібно">SQL з більшою швидкістю й реплікацією</td>
+<td data-label="Вибір"><strong>Aurora</strong></td>
+</tr>
+<tr>
+<td data-label="Потрібно">кеш, сесії в пам'яті</td>
+<td data-label="Вибір"><strong>ElastiCache</strong></td>
+</tr>
+<tr>
+<td data-label="Потрібно">повнотекстовий пошук, логи</td>
+<td data-label="Вибір"><strong>OpenSearch</strong></td>
+</tr>
+<tr>
+<td data-label="Потрібно">SQL-запити по файлах S3</td>
+<td data-label="Вибір"><strong>Athena</strong></td>
+</tr>
+<tr>
+<td data-label="Потрібно">спільна файлова система для багатьох EC2</td>
+<td data-label="Вибір"><strong>EFS</strong></td>
+</tr>
+<tr>
+<td data-label="Потрібно">блочний диск одного EC2</td>
+<td data-label="Вибір"><strong>EBS</strong></td>
+</tr>
+<tr>
+<td data-label="Потрібно">архів</td>
+<td data-label="Вибір"><strong>S3 Glacier</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>RDS і Lambda:</strong> Lambda масштабується швидко, а RDS має обмежені з'єднання. Рішення <strong>RDS Proxy</strong> (пул з'єднань, навичка 4.3.1) <em>(не звірено)</em>. Для читань <strong>read replicas</strong>. Докладно про RDS, Multi-AZ, Aurora і MemoryDB дивіться в окремій лекції про RDS.</p>
+<h2>Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>Cache hit / miss</strong></td>
+<td data-label="Що це">дані знайшлися в кеші чи довелося йти в джерело</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>TTL</strong></td>
+<td data-label="Що це">час життя запису в кеші</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Lazy loading</strong></td>
+<td data-label="Що це">кладемо в кеш лише те, що вже запитали</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Write-through</strong></td>
+<td data-label="Що це">пишемо в кеш одразу при кожному записі в базу</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>CloudFront</strong></td>
+<td data-label="Що це">CDN: кеш на edge-вузлах поруч з користувачем</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Cache key</strong></td>
+<td data-label="Що це">що визначає, чи два запити ділять один запис кешу</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>ElastiCache</strong></td>
+<td data-label="Що це">керовані Redis/Valkey та Memcached</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Invalidation</strong></td>
+<td data-label="Що це">примусове скидання кешу CloudFront</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Write-through у DAX</strong></td>
+<td data-label="Що це">запис спершу в таблицю, потім у кеш</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>MemoryDB</strong></td>
+<td data-label="Що це">база в пам'яті, що не губить дані</td>
+</tr>
+</tbody>
+</table></div>
+<h2>🖼 Схема: DAX і ElastiCache</h2><div class="dg"><div class="dtitle">DAX між застосунком і DynamoDB</div><div class="dflow"><div class="dbox blue">Застосунок з DAX-клієнтом</div><div class="darrow">↓</div><div class="dbox aws">DAX cluster: вузли з кешем</div><div class="darrow">↓</div><div class="dbox aws"><img class="dicon" src="../../icons/dynamodb.svg" alt="">DynamoDB: таблиці</div></div><div class="dcols"><div class="dcol green"><b>Eventually consistent</b><ul><li>cache hit: відповідь із кешу</li><li>cache miss: читає DynamoDB й кладе в кеш</li></ul></div><div class="dcol yellow"><b>Strongly consistent</b><ul><li>DAX проксує в DynamoDB без кешу</li></ul></div></div><div class="dnote">Запис: write-through, спершу таблиця, потім кеш. Читання з кешу: мікросекунди, код застосунку не змінюється, розв&#x27;язує hot key.</div><div class="dtitle">Параметри</div><div class="tw"><table class="two"><thead><tr><th>Параметр</th><th>Значення</th></tr></thead><tbody><tr><td>TTL кешу</td><td>5 хвилин типово</td></tr><tr><td>Кеш items</td><td>GetItem, BatchGetItem</td></tr><tr><td>Кеш запитів</td><td>Query, Scan</td></tr><tr><td>Кластер</td><td>до 11 вузлів</td></tr><tr><td>Production</td><td>мінімум 3 вузли в різних AZ</td></tr><tr><td>Eviction</td><td>LRU</td></tr></tbody></table></div><div class="dcols"><div class="dcol red"><b>Не підходить</b><ul><li>потрібні strongly consistent читання</li><li>багато записів</li><li>мало повторних читань</li></ul></div><div class="dcol green"><b>Добре працює</b><ul><li>cache hit понад 90%</li><li>гарячі ключі</li></ul></div></div><div class="dtitle">DAX чи ElastiCache</div><div class="dcols"><div class="dcol blue"><b>DAX</b><ul><li>окремі items</li><li>кеш Query і Scan</li><li>прозорий, логіку не пишете</li><li>лише DynamoDB</li></ul></div><div class="dcol yellow"><b><img class="dicon" src="../../icons/elasticache.svg" alt="">ElastiCache</b><ul><li>результат агрегації (SUM, AVG)</li><li>будь-які обчислені дані</li><li>логіку пишете самі</li><li>будь-яке джерело</li></ul></div></div><div class="dnote">Застосунок може мати обидва.</div></div><h2>🖼 Схема: Кешування: шари й стратегії</h2><div class="dg"><div class="dtitle">Де може стояти кеш</div><div class="dflow"><div class="dbox blue">Браузер: Cache-Control</div><div class="darrow">↓</div><div class="dbox aws"><img class="dicon" src="../../icons/cloudfront.svg" alt="">CloudFront</div><div class="darrow">↓</div><div class="dbox aws"><img class="dicon" src="../../icons/api-gateway.svg" alt="">API Gateway cache</div><div class="darrow">↓</div><div class="dbox green"><img class="dicon" src="../../icons/lambda.svg" alt="">Lambda: змінні поза handler, /tmp</div><div class="darrow">↓</div><div class="dbox yellow"><img class="dicon" src="../../icons/elasticache.svg" alt="">ElastiCache або DAX</div><div class="darrow">↓</div><div class="dbox aws"><img class="dicon" src="../../icons/rds.svg" alt="">RDS або DynamoDB</div></div><div class="dnote">Чим ближче до користувача, тим дешевше й швидше, але тим важче скинути.</div><div class="dtitle">Стратегії</div><div class="dcols"><div class="dcol green"><b>Lazy loading</b><ul><li>промах: база, потім у кеш</li><li>у кеші лише потрібне</li><li>перший запит повільний, дані старіють</li></ul></div><div class="dcol yellow"><b>Write-through</b><ul><li>пишемо в базу і кеш разом</li><li>дані свіжі</li><li>у кеші зайве, запис повільніший</li></ul></div></div><div class="dnote">Типова комбінація: lazy loading плюс TTL. Кеш застарів: write-through чи коротший TTL. Кеш забитий непотрібним: lazy loading.</div><div class="dtitle">Який кеш обрати</div><div class="tw"><table class="two"><thead><tr><th>Сценарій</th><th>Вибір</th></tr></thead><tbody><tr><td>Читання DynamoDB, мікросекунди</td><td>DAX</td></tr><tr><td>Сесії, рейтинги, обчислення, RDS</td><td>ElastiCache</td></tr><tr><td>Статика для людей по світу</td><td>CloudFront</td></tr><tr><td>Відповіді REST API</td><td>API Gateway cache</td></tr><tr><td>Дані між викликами Lambda</td><td>змінні поза handler, /tmp</td></tr></tbody></table></div><div class="dtitle">API Gateway cache</div><div class="drow"><div class="dbox gray">Лише REST API, на stage</div><div class="dbox gray">TTL 300 с, максимум 3600 с</div><div class="dbox gray">Кешує лише GET</div><div class="dbox gray">Без Free Tier</div></div><div class="dnote">Без cache keys різні query дадуть одну відповідь. Клієнт скидає кеш заголовком Cache-Control: max-age=0, потрібен дозвіл execute-api:InvalidateCache.</div></div><h2>🖼 Схема: Як обрати сховище</h2><div class="dg"><div class="dtitle">Як обрати сховище</div><div class="tw"><table class="two"><thead><tr><th>Потрібно</th><th>Вибір</th></tr></thead><tbody><tr><td>Файли, зображення, дешево</td><td>S3</td></tr><tr><td>Ключ-значення, мілісекунди, серверлес</td><td>DynamoDB</td></tr><tr><td>SQL, JOIN, транзакції</td><td>RDS</td></tr><tr><td>SQL швидше, з реплікацією</td><td>Aurora</td></tr><tr><td>Кеш, сесії в пам&#x27;яті</td><td>ElastiCache</td></tr><tr><td>Повнотекстовий пошук, логи</td><td>OpenSearch</td></tr><tr><td>SQL по файлах S3</td><td>Athena</td></tr><tr><td>Спільна файлова система для багатьох EC2</td><td>EFS</td></tr><tr><td>Блочний диск одного EC2</td><td>EBS</td></tr><tr><td>Архів</td><td>S3 Glacier</td></tr></tbody></table></div><div class="dtitle">Де тримати сесії</div><div class="dcols"><div class="dcol green"><b>Підходять</b><ul><li class="hi"><img class="dicon" src="../../icons/dynamodb.svg" alt="">DynamoDB: serverless, без VPC</li><li class="hi"><img class="dicon" src="../../icons/elasticache.svg" alt="">ElastiCache: в пам&#x27;яті, швидше</li></ul></div><div class="dcol red"><b>Не підходять</b><ul><li class="hi"><img class="dicon" src="../../icons/efs.svg" alt="">EFS: мережевий диск до EC2</li><li class="hi"><img class="dicon" src="../../icons/ebs.svg" alt="">EBS, Instance Store: лише локально</li><li class="hi"><img class="dicon" src="../../icons/s3.svg" alt="">S3: висока затримка</li></ul></div></div><div class="dnote">Lambda вичерпує з&#x27;єднання з RDS: RDS Proxy. Для читань: read replicas.</div></div><h2>🖼 Схема: ElastiCache, Memcached, MemoryDB</h2><div class="dg"><div class="dtitle">Кеш чи база</div><div class="dcols"><div class="dcol yellow"><b><img class="dicon" src="../../icons/elasticache.svg" alt="">ElastiCache: кеш перед базою</b><ul><li>Valkey, Redis OSS, Memcached</li><li>збереження як кеш не гарантує</li><li>читання: мікросекунди</li><li>прискорює іншу базу</li></ul></div><div class="dcol green"><b>MemoryDB: основна база</b><ul><li>Valkey, Redis OSS</li><li>дані в Multi-AZ транзакційному журналі</li><li>читання: мікросекунди, запис: мілісекунди</li><li>не треба тримати окремо кеш і базу</li></ul></div></div><div class="dtitle">ElastiCache: Redis чи Memcached</div><div class="tw"><table><thead><tr><th></th><th>Redis / Valkey</th><th>Memcached</th></tr></thead><tbody><tr><td>Висока доступність</td><td>Multi-AZ з автоматичним failover</td><td>нема</td></tr><tr><td>Читання</td><td>read replicas</td><td>нема</td></tr><tr><td>Розподіл даних</td><td>sharding (cluster mode)</td><td>multi-node: дані ділять вузли</td></tr><tr><td>Збереження</td><td>є backup і restore</td><td>не зберігає</td></tr><tr><td>Роль</td><td>кеш, pub/sub, sorted sets</td><td>лише кеш</td></tr><tr><td>Потоки</td><td>один потік</td><td>багатопотоковий</td></tr></tbody></table></div><div class="dnote">Потрібна відмовостійкість чи рейтинг (sorted set): Redis або Valkey. Простий розподілений кеш: Memcached. Довговічна база в пам&#x27;яті: MemoryDB.</div><div class="dtitle">Що обрати</div><div class="tw"><table class="two"><thead><tr><th>Потрібно</th><th>Вибір</th></tr></thead><tbody><tr><td>Кеш для SQL або сесії</td><td>ElastiCache</td></tr><tr><td>Швидка in-memory база, що не губить дані</td><td>MemoryDB</td></tr><tr><td>Не-SQL, ключ-значення, серверлес</td><td>DynamoDB</td></tr><tr><td>SQL, JOIN, транзакції</td><td>RDS або Aurora</td></tr></tbody></table></div></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>Кеш ближче до користувача дешевший, але важче скинути.</li>
+<li>Lazy loading плюс TTL типова комбінація. Свіжі дані: write-through.</li>
+<li>DAX лише DynamoDB, мікросекунди, без strongly consistent.</li>
+<li>Redis/Valkey для відмовостійкості й sorted sets, Memcached для простого кешу.</li>
+<li>API Gateway cache: REST, stage, 300 с, лише GET, потрібні cache keys.</li>
+<li>CloudFront: багато файлів signed cookies, один файл signed URL.</li>
+<li>Lambda вичерпує з'єднання з RDS: RDS Proxy.</li>
+<li>Athena для SQL по S3.</li>
+<li>DAX: TTL 5 хв, до 11 вузлів, для production мінімум 3 вузли в різних зонах, write-through.</li>
+<li>Кешувати результат агрегації: ElastiCache; окремі items і запити DynamoDB: DAX.</li>
+<li>ElastiCache кеш, MemoryDB база; довговічності через AOF в ElastiCache нема.</li>
+</ol>
+</div><h2>Перевірте себе</h2>
+<ol>
+<li>Чим lazy loading відрізняється від write-through? Що обрати, якщо кеш застаріває?</li>
+<li>Де DAX не допоможе?</li>
+<li>Коли ElastiCache, а коли DAX?</li>
+<li>Потрібна відмовостійкість кешу: Memcached чи Redis?</li>
+<li>Чому API Gateway повертає однакову відповідь на різні query?</li>
+<li>Як клієнту скинути кеш API Gateway і чому це небезпечно?</li>
+<li>Передплатники дивляться весь розділ сайту. Що обрати?</li>
+<li>Lambda вичерпує з'єднання з RDS. Що додати?</li>
+<li>Який сервіс для SQL-запитів по логах у S3?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>Lazy loading заповнює при першому читанні, write-through при записі. Якщо кеш застаріває, write-through або коротший TTL.</li>
+<li>Strongly consistent читання, багато записів, мало повторних читань, мікросекунди не потрібні.</li>
+<li>DAX лише для DynamoDB і без коду. ElastiCache для решти (сесії, RDS, складні обчислення).</li>
+<li>Redis/Valkey.</li>
+<li>Не ввімкнено cache keys для параметрів запиту.</li>
+<li>Заголовок <code>Cache-Control: max-age=0</code> з дозволом <code>execute-api:InvalidateCache</code>. Без обмеження будь-хто скине кеш.</li>
+<li>CloudFront signed cookies.</li>
+<li>RDS Proxy.</li>
+<li>Athena.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 13-caching-and-data-stores.md.</p>
+
+<nav class="pager"><a href="12-dynamodb-indexes-simple.html">← Лекція 12</a><a href="14-other-aws-services-simple.html">Лекція 14 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

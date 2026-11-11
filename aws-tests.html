@@ -68,41 +68,41 @@ const TESTS = [
     { q:"Політика дає s3:ListBucket з Resource arn:aws:s3:::my-bucket/*. Що станеться при спробі показати вміст бакета?", o:["Спрацює, зірочка охоплює все","Спрацює лише для кореня бакета","Спрацює, якщо додати Principal","AccessDenied: ListBucket діє на ARN бакета без /*"], a:3,
       e:["Зірочка охоплює об'єкти, а не сам бакет.","ListBucket не діє на об'єкти.","Principal нема в identity-based політиках і не допоможе.","Дії над бакетом потребують ARN бакета, а над об'єктами ARN із /*."], w:"(лекція 1)" },
     { q:"GitHub Actions має розгортати стек в AWS без довгоживучих ключів. Який виклик STS і яка умова критична в trust policy?", o:["AssumeRoleWithWebIdentity, умова на sub","AssumeRole, умова на aws:username","GetSessionToken, умова на MFA","AssumeRoleWithSAML, умова на aud"], a:0,
-      e:["Так: OIDC-токен обмінюється через AssumeRoleWithWebIdentity, а sub обмежує репозиторій і гілку.","AssumeRole для користувачів і сервісів AWS, не для OIDC GitHub.","GetSessionToken для користувача з MFA, не для CI.","SAML для корпоративного входу, а не GitHub Actions."], w:"(лекції 1, 8)" },
+      e:["Так: OIDC-токен обмінюється через AssumeRoleWithWebIdentity, а sub обмежує репозиторій і гілку.","AssumeRole для користувачів і сервісів AWS, не для OIDC GitHub.","GetSessionToken для користувача з MFA, не для CI.","SAML для корпоративного входу, а не GitHub Actions."], w:"(лекції 1, 19)" },
     { q:"Lambda не може створити функцію через CloudFormation з вказаною роллю: AccessDenied на iam:PassRole. Яке рішення найправильніше?", o:["Дати iam:PassRole з Resource *","Дати AdministratorAccess ролі CI","iam:PassRole на конкретну роль функції","Прибрати роль і використовувати root"], a:2,
-      e:["Resource * дозволяє передати будь-яку роль, зокрема адмінську.","Це порушує принцип найменших привілеїв.","Так: звужений iam:PassRole на потрібну роль.","Root не використовують для щоденних дій."], w:"(лекції 1, 7)" },
+      e:["Resource * дозволяє передати будь-яку роль, зокрема адмінську.","Це порушує принцип найменших привілеїв.","Так: звужений iam:PassRole на потрібну роль.","Root не використовують для щоденних дій."], w:"(лекції 1, 17)" },
     { q:"SCP на OU забороняє s3:DeleteBucket. Адміністратор акаунта в цій OU має IAM-політику з s3:*. Що буде?", o:["Видалить, IAM-політика сильніша","Видалить, якщо він root","Не видалить: SCP обмежує навіть s3:* в IAM","Видалить, якщо додати permission boundary"], a:2,
       e:["Ефективні права це перетин, SCP сильніший за дозвіл в IAM.","SCP діє і на root-користувача member-акаунта.","Так: SCP задає стелю прав для акаунта.","Boundary лише обмежує ще більше, права не додає."], w:"(лекція 1)" },
     { s:"S3", q:"Публічна bucket policy на GetObject є, але об'єкт не відкривається анонімно. Що перевірити першим?", o:["Block Public Access (block_public_policy, restrict_public_buckets)","Класи зберігання","Версіонування","Lifecycle правила"], a:0,
-      e:["Так: BPA сильніший за політику і блокує публічний доступ.","Клас не впливає на анонімний доступ.","Версіонування не блокує доступ.","Lifecycle видаляє об'єкти за терміном, а не блокує читання."], w:"(лекція 2)" },
+      e:["Так: BPA сильніший за політику і блокує публічний доступ.","Клас не впливає на анонімний доступ.","Версіонування не блокує доступ.","Lifecycle видаляє об'єкти за терміном, а не блокує читання."], w:"(лекція 8)" },
     { q:"У користувача є s3:GetObject, а читання об'єкта з SSE-KMS дає AccessDenied. Чого бракує?", o:["s3:ListBucket","kms:GenerateDataKey","s3:PutObject","kms:Decrypt на ключ"], a:3,
-      e:["ListBucket потрібен для списку, а не для читання об'єкта.","GenerateDataKey потрібен для запису.","PutObject для запису.","Для читання SSE-KMS потрібен kms:Decrypt."], w:"(лекції 2, 13)" },
+      e:["ListBucket потрібен для списку, а не для читання об'єкта.","GenerateDataKey потрібен для запису.","PutObject для запису.","Для читання SSE-KMS потрібен kms:Decrypt."], w:"(лекції 8, 29)" },
     { q:"Потрібно віддавати приватні файли з S3 лише через CDN, а прямий доступ до бакета закрити. Що обрати?", o:["Публічний бакет і довгі ключі","CloudFront з Origin Access Control","Presigned URL на 7 днів для всіх","VPC gateway endpoint"], a:1,
-      e:["Публічний бакет не закриває прямий доступ.","Так: приватний бакет, доступ лише для CloudFront (OAC).","Presigned URL не робить доступ лише через CDN.","Endpoint обмежує мережу, але не про CDN."], w:"(лекція 2)" },
+      e:["Публічний бакет не закриває прямий доступ.","Так: приватний бакет, доступ лише для CloudFront (OAC).","Presigned URL не робить доступ лише через CDN.","Endpoint обмежує мережу, але не про CDN."], w:"(лекція 8)" },
     { q:"Presigned URL створив IAM-користувач. Потім у нього забрали право s3:GetObject. Що з посиланням?", o:["Працюватиме до кінця терміну","Працює, бо підписане раніше","Перестане працювати: права не більші за права підписанта","Працює, але лише для PUT"], a:2,
-      e:["Термін не дає прав сам по собі.","Права перевіряються у момент запиту.","Так: посилання має права підписанта.","Метод не змінює правило."], w:"(лекція 2)" },
+      e:["Термін не дає прав сам по собі.","Права перевіряються у момент запиту.","Так: посилання має права підписанта.","Метод не змінює правило."], w:"(лекція 8)" },
     { q:"Яка політика змусить усіх завантажувати об'єкти лише з SSE-KMS?", o:["Allow на PutObject для всіх","Deny на PutObject, якщо x-amz-server-side-encryption не aws:kms","Block Public Access","Lifecycle для шифрування"], a:1,
-      e:["Allow нічого не примушує.","Так: Deny з умовою на заголовок шифрування.","BPA про публічність, а не шифрування.","Lifecycle не шифрує."], w:"(лекція 2)" },
+      e:["Allow нічого не примушує.","Так: Deny з умовою на заголовок шифрування.","BPA про публічність, а не шифрування.","Lifecycle не шифрує."], w:"(лекція 8)" },
     { s:"Cognito", q:"Мобільний застосунок має сам вантажити файли в S3 у свою папку. Що потрібно?", o:["Лише user pool","Identity pool, а в політиці ролі ${cognito-identity.amazonaws.com:sub}","API key","Access key у застосунку"], a:1,
-      e:["User pool дає JWT, але не ключі AWS.","Так: identity pool видає тимчасові ключі, змінна обмежує папку.","API key ідентифікує клієнта API, а не дає доступ до S3.","Довгі ключі в застосунку небезпечні."], w:"(лекція 16)" },
+      e:["User pool дає JWT, але не ключі AWS.","Так: identity pool видає тимчасові ключі, змінна обмежує папку.","API key ідентифікує клієнта API, а не дає доступ до S3.","Довгі ключі в застосунку небезпечні."], w:"(лекція 31)" },
     { q:"API Gateway REST має пускати лише користувачів з Cognito user pool без власного коду. Що обрати?", o:["Lambda authorizer","IAM-авторизація","Cognito authorizer","API key"], a:2,
-      e:["Lambda authorizer це власний код.","IAM SigV4 для клієнтів з ключами AWS.","Так: Cognito authorizer перевіряє токен user pool.","API key не авторизує."], w:"(лекції 14, 16)" },
+      e:["Lambda authorizer це власний код.","IAM SigV4 для клієнтів з ключами AWS.","Так: Cognito authorizer перевіряє токен user pool.","API key не авторизує."], w:"(лекції 25, 31)" },
     { s:"KMS і секрети", q:"Пароль до RDS має автоматично змінюватися. Що обрати?", o:["Змінна середовища Lambda","Parameter Store String","Файл у S3","Secrets Manager"], a:3,
-      e:["Змінна не ротується.","Parameter Store не має вбудованої ротації.","S3 не для секретів.","Secrets Manager має нативну ротацію для RDS."], w:"(лекції 8, 13)" },
+      e:["Змінна не ротується.","Parameter Store не має вбудованої ротації.","S3 не для секретів.","Secrets Manager має нативну ротацію для RDS."], w:"(лекції 19, 29)" },
     { q:"Потрібно зашифрувати файл 1 ГБ ключем KMS. Як правильно?", o:["Encrypt напряму","Зберігати ключ у змінній","GenerateDataKey і envelope encryption","Лише TLS"], a:2,
-      e:["Encrypt напряму лише до 4 КБ.","Це не шифрування.","Так: data key шифрує дані, KMS шифрує data key.","TLS захищає передачу, а не зберігання."], w:"(лекція 13)" },
+      e:["Encrypt напряму лише до 4 КБ.","Це не шифрування.","Так: data key шифрує дані, KMS шифрує data key.","TLS захищає передачу, а не зберігання."], w:"(лекція 29)" },
     { q:"Для CloudFront потрібен публічний сертифікат ACM. В якому регіоні його створити?", o:["В регіоні дистрибуції","eu-central-1","Де розташований S3","us-east-1"], a:3,
-      e:["CloudFront глобальний, регіону дистрибуції нема.","Не обов'язково.","Не залежить від S3.","Так: для CloudFront лише us-east-1."], w:"(лекція 13)" },
+      e:["CloudFront глобальний, регіону дистрибуції нема.","Не обов'язково.","Не залежить від S3.","Так: для CloudFront лише us-east-1."], w:"(лекція 29)" },
     { s:"API Gateway", q:"Lambda за proxy-інтеграцією повертає body як JavaScript-об'єкт. Що отримає клієнт?", o:["200 з JSON","502 Bad Gateway","403","429"], a:1,
-      e:["body має бути рядком.","Так: неправильний формат відповіді дає 502.","403 про заборону.","429 про ліміт."], w:"(лекція 14)" },
+      e:["body має бути рядком.","Так: неправильний формат відповіді дає 502.","403 про заборону.","429 про ліміт."], w:"(лекція 25)" },
     { q:"Яка функція доступна в REST API, але недоступна в HTTP API?", o:["Лише Lambda-інтеграція","Cognito","Lambda authorizer","Usage plans і API keys"], a:3,
-      e:["Є в обох.","Є в обох (HTTP API має JWT).","Є в обох.","Так: usage plans і API keys лише REST."], w:"(лекція 14)" },
+      e:["Є в обох.","Є в обох (HTTP API має JWT).","Є в обох.","Так: usage plans і API keys лише REST."], w:"(лекція 25)" },
     { s:"AI", q:"Дані до Amazon Bedrock не повинні йти через публічний інтернет. Що налаштувати?", o:["Interface VPC endpoint (PrivateLink)","Gateway endpoint","NAT Gateway","Internet Gateway"], a:0,
-      e:["Так: PrivateLink для Bedrock.","Gateway endpoint лише для S3 і DynamoDB.","NAT виводить в інтернет.","Це вихід в інтернет."], w:"(лекція 21)" },
+      e:["Так: PrivateLink для Bedrock.","Gateway endpoint лише для S3 і DynamoDB.","NAT виводить в інтернет.","Це вихід в інтернет."], w:"(лекція 33)" },
     { q:"Потрібно маскувати номери карток у відповідях моделі Bedrock. Який фільтр Guardrails?", o:["Denied topics","Word filter","Sensitive information filter","Contextual grounding"], a:2,
-      e:["Denied topics про заборонені теми.","Word filter про слова й фрази.","Так: PII маскують або блокують.","Grounding про вигадки."], w:"(лекція 21)" },
+      e:["Denied topics про заборонені теми.","Word filter про слова й фрази.","Так: PII маскують або блокують.","Grounding про вигадки."], w:"(лекція 33)" },
     { q:"Як застосувати Guardrails до відповіді моделі, яка не викликається через Bedrock?", o:["Неможливо","Через ApplyGuardrail","Через CloudTrail","Через Macie"], a:1,
-      e:["Можливо.","Так: ApplyGuardrail працює без виклику моделі.","CloudTrail це аудит.","Macie шукає PII в S3."], w:"(лекція 21)" }
+      e:["Можливо.","Так: ApplyGuardrail працює без виклику моделі.","CloudTrail це аудит.","Macie шукає PII в S3."], w:"(лекція 33)" }
   ]
 },
 {
@@ -112,23 +112,23 @@ const TESTS = [
   intro: "Домени Development, Deployment, Troubleshooting. Відповіді зберігаються. Після перевірки з'являються пояснення до кожного варіанта.",
   qs: [
     { s:"Lambda", q:"S3 запускає Lambda, функція кидає виняток. Скільки всього спроб і що з подією далі, якщо DLQ нема?", o:["1 спроба, подія зникає","2 спроби, подія в SQS","3 спроби, потім подія зникає","3 спроби, потім у S3"], a:2,
-      e:["Async-виклик повторюється.","Повторів два, але без DLQ подія не потрапляє в SQS.","Так: 1 основна й 2 повтори, без DLQ чи destination подія зникає.","Без налаштування нікуди не потрапляє."], w:"(лекція 6)" },
+      e:["Async-виклик повторюється.","Повторів два, але без DLQ подія не потрапляє в SQS.","Так: 1 основна й 2 повтори, без DLQ чи destination подія зникає.","Без налаштування нікуди не потрапляє."], w:"(лекція 21)" },
     { q:"Lambda читає з SQS, але не отримує повідомлень, помилка доступу. Що виправити?", o:["Права в execution role","Resource-based policy на функції","Права користувача","Політику бакета"], a:0,
-      e:["Так: poll-джерело читає сама Lambda, потрібні sqs:ReceiveMessage, DeleteMessage, GetQueueAttributes в ролі.","Resource-based policy потрібна для push-джерел.","Не користувач читає.","Бакет не при чому."], w:"(лекція 6)" },
+      e:["Так: poll-джерело читає сама Lambda, потрібні sqs:ReceiveMessage, DeleteMessage, GetQueueAttributes в ролі.","Resource-based policy потрібна для push-джерел.","Не користувач читає.","Бакет не при чому."], w:"(лекція 21)" },
     { q:"Яке співвідношення visibility timeout черги SQS і timeout функції рекомендується?", o:["Однакові","Менше за timeout функції","У 2 рази більше","Не менше 6 × timeout функції"], a:3,
-      e:["Тоді повторне доставлення може відбутися під час обробки.","Тоді повідомлення повернеться в чергу під час роботи функції.","Недостатньо для повторів.","Так: щонайменше шість разів."], w:"(лекції 6, 10)" },
+      e:["Тоді повторне доставлення може відбутися під час обробки.","Тоді повідомлення повернеться в чергу під час роботи функції.","Недостатньо для повторів.","Так: щонайменше шість разів."], w:"(лекції 21, 23)" },
     { q:"Де налаштувати DLQ для Lambda, яку тригерить SQS?", o:["На функції","На самій черзі (redrive policy)","На alias","В CloudWatch"], a:1,
-      e:["DLQ на функції для SQS-тригера не працює.","Так: maxReceiveCount у redrive policy на черзі.","Alias не має DLQ.","CloudWatch не маршрутизує повідомлення."], w:"(лекція 10)" },
+      e:["DLQ на функції для SQS-тригера не працює.","Так: maxReceiveCount у redrive policy на черзі.","Alias не має DLQ.","CloudWatch не маршрутизує повідомлення."], w:"(лекція 23)" },
     { q:"Потрібно прогріті середовища для синхронного API з мінімальним cold start. Що обрати?", o:["Reserved concurrency","Layer","Більший timeout","Provisioned concurrency на alias"], a:3,
-      e:["Reserved гарантує й обмежує, але не прогріває.","Layer про залежності.","Timeout не прискорює старт.","Так: provisioned concurrency на версії чи alias."], w:"(лекція 6)" },
+      e:["Reserved гарантує й обмежує, але не прогріває.","Layer про залежності.","Timeout не прискорює старт.","Так: provisioned concurrency на версії чи alias."], w:"(лекція 21)" },
     { q:"Пакет Lambda 70 МБ. Як розгорнути?", o:["Zip напряму","Через S3","Лише container image","Неможливо"], a:1,
-      e:["Напряму до 50 МБ.","Так: через S3 (до 250 МБ розпакованого).","Image потрібен понад 250 МБ.","Можливо."], w:"(лекція 6)" },
+      e:["Напряму до 50 МБ.","Так: через S3 (до 250 МБ розпакованого).","Image потрібен понад 250 МБ.","Можливо."], w:"(лекція 21)" },
     { s:"SQS і SNS", q:"Функція отримує пачку з 10 повідомлень SQS, 1 невдале. Як повернути в чергу лише його?", o:["ReportBatchItemFailures","Збільшити batch size","FIFO","Зменшити timeout"], a:0,
-      e:["Так: функція повертає batchItemFailures з itemIdentifier.","Не вирішує.","FIFO не про часткові відповіді.","Не вирішує."], w:"(лекція 10)" },
+      e:["Так: функція повертає batchItemFailures з itemIdentifier.","Не вирішує.","FIFO не про часткові відповіді.","Не вирішує."], w:"(лекція 23)" },
     { q:"Одне повідомлення SNS має піти в три незалежні черги SQS. Яка схема?", o:["Лямбда викликає SQS тричі","Три публікації в SNS","SNS топік і три підписані черги (fan-out)","EventBridge Scheduler"], a:2,
-      e:["Зайвий код і зв'язність.","Дублювання.","Так: fan-out, кожна черга має власні повтори й DLQ.","Scheduler про розклад."], w:"(лекція 10)" },
+      e:["Зайвий код і зв'язність.","Дублювання.","Так: fan-out, кожна черга має власні повтори й DLQ.","Scheduler про розклад."], w:"(лекція 23)" },
     { q:"Яке обмеження filter policy SNS?", o:["10 ключів","Лише один ключ","Немає обмежень","5 ключів і 150 комбінацій значень"], a:3,
-      e:["Ліміт 5.","Можна кілька.","Обмеження є.","Так: 5 ключів і 150 комбінацій."], w:"(лекція 10)" },
+      e:["Ліміт 5.","Можна кілька.","Обмеження є.","Так: 5 ключів і 150 комбінацій."], w:"(лекція 23)" },
     { s:"DynamoDB", q:"Скільки RCU потрібно: запис 5 КБ, 20 читань/с, eventually consistent?", o:["10","20","40","80"], a:1,
       e:["Забули округлити 5 КБ вгору до 2 одиниць.","Так: 5÷4 вгору = 2, ×20 = 40, eventually ÷2 = 20.","Це strongly consistent.","Забагато."], w:"(лекція 11)" },
     { q:"Запит за атрибутом, який не є ключем. Додати можна будь-коли, значення лише eventually. Що це?", o:["LSI","Scan","GSI","Streams"], a:2,
@@ -138,19 +138,19 @@ const TESTS = [
     { q:"Який формат атрибута TTL у DynamoDB?", o:["String ISO-дата","Number, Unix epoch у секундах","Number, мілісекунди","Boolean"], a:1,
       e:["Інший тип ігнорується.","Так: Number, epoch у секундах.","Мілісекунди не працюють.","Не підходить."], w:"(лекція 12)" },
     { s:"Розгортання", q:"Під час canary-деплою Lambda спрацював CloudWatch alarm. Що зробить CodeDeploy?", o:["Нічого","Дочекається кінця","Зупинить функцію","Автоматично відкотить alias"], a:3,
-      e:["Alarm прив'язаний до деплою.","Не чекає.","Функція не зупиняється.","Так: автовідкат на попередню версію."], w:"(лекції 7, 19)" },
+      e:["Alarm прив'язаний до деплою.","Не чекає.","Функція не зупиняється.","Так: автовідкат на попередню версію."], w:"(лекції 17, 18)" },
     { q:"Яка фаза buildspec виконується останньою?", o:["install","build","post_build","pre_build"], a:2,
-      e:["Перша.","Третя.","Так: порядок install, pre_build, build, post_build.","Друга."], w:"(лекція 19)" },
+      e:["Перша.","Третя.","Так: порядок install, pre_build, build, post_build.","Друга."], w:"(лекція 18)" },
     { q:"Потрібно вимкнути функцію в проді без деплою коду, поступово й з відкатом за alarm. Що обрати?", o:["Змінна Lambda","Parameter Store","Secrets Manager","AppConfig feature flag"], a:3,
-      e:["Потрібен новий деплой.","Немає поступового розгортання.","Для секретів.","Так: AppConfig."], w:"(лекція 19)" },
+      e:["Потрібен новий деплой.","Немає поступового розгортання.","Для секретів.","Так: AppConfig."], w:"(лекція 18)" },
     { s:"Діагностика", q:"Alarm у стані ALARM, але листа нема. Назвіть правдоподібну причину.", o:["Метрика порожня","Підписка SNS не підтверджена","Лише Period замалий","Alarm стежить за двома метриками"], a:1,
-      e:["Тоді був би INSUFFICIENT_DATA.","Так: PendingConfirmation, листи не надходять.","Не причина.","Один alarm стежить за однією метрикою."], w:"(лекція 9)" },
+      e:["Тоді був би INSUFFICIENT_DATA.","Так: PendingConfirmation, листи не надходять.","Не причина.","Один alarm стежить за однією метрикою."], w:"(лекція 34)" },
     { q:"Потрібно знайти всі трейси конкретного користувача в X-Ray. Що використати?", o:["Metadata","Annotation","Segment","Sampling"], a:1,
-      e:["Не індексується.","Так: лише annotations індексуються.","Segment не про пошук.","Sampling про частку запитів."], w:"(лекція 17)" },
+      e:["Не індексується.","Так: лише annotations індексуються.","Segment не про пошук.","Sampling про частку запитів."], w:"(лекція 36)" },
     { q:"Метрика Errors для Lambda дорівнює 0, але частина запитів відхилена. Що дивитися?", o:["Duration","Invocations","IteratorAge","Throttles"], a:3,
-      e:["Тривалість.","Не покаже відмови.","Для потоків.","Так: Throttles не входять в Errors."], w:"(лекції 6, 9)" },
+      e:["Тривалість.","Не покаже відмови.","Для потоків.","Так: Throttles не входять в Errors."], w:"(лекції 21, 34)" },
     { q:"Яким інструментом дізнатися, хто видалив S3-бакет?", o:["CloudTrail","CloudWatch Logs","X-Ray","AWS Config лише метрики"], a:0,
-      e:["Так: журнал викликів API.","Це логи застосунку.","Трасування запитів.","Не журнал API."], w:"(лекція 9)" }
+      e:["Так: журнал викликів API.","Це логи застосунку.","Трасування запитів.","Не журнал API."], w:"(лекція 34)" }
   ]
 },
 {
@@ -175,7 +175,7 @@ const TESTS = [
         "An alarm only tells you that errors happened. The original events would still be gone.",
         "Reserved concurrency of 0 stops the function from running at all, so every event would be throttled."
       ],
-      "w": "(lecture 6)"
+      "w": "(lecture 21)"
     },
     {
       "q": "An application uses an AWS Lambda function with an Amazon SQS standard queue as the event source. The function timeout is 30 seconds, and the queue visibility timeout is 30 seconds. Some messages are processed twice even though the function does not fail. What is the MOST likely fix?",
@@ -192,7 +192,7 @@ const TESTS = [
         "Correct. If the visibility timeout is too short, the message becomes visible again while the function is still working on it. AWS recommends at least six times the function timeout.",
         "A shorter function timeout would make timeouts more likely and does not solve the early reappearance of messages."
       ],
-      "w": "(lectures 6, 10)"
+      "w": "(lectures 21, 23)"
     },
     {
       "q": "A REST API in Amazon API Gateway uses a Lambda proxy integration. Clients receive a 502 Bad Gateway response. The function returns the object {\"statusCode\": 200, \"body\": {\"ok\": true}}. What is the cause?",
@@ -209,7 +209,7 @@ const TESTS = [
         "A timeout would return 504 Gateway Timeout, not 502.",
         "Missing CORS headers cause browser errors, not a 502 from API Gateway."
       ],
-      "w": "(lecture 14)"
+      "w": "(lecture 25)"
     },
     {
       "q": "A DynamoDB table contains items of about 5 KB. An application performs 100 strongly consistent reads per second. How many read capacity units (RCUs) must be provisioned?",
@@ -244,7 +244,7 @@ const TESTS = [
         "Versioning does not block reads of the current version.",
         "Lifecycle rules move or delete objects. They do not deny reads."
       ],
-      "w": "(lecture 2)"
+      "w": "(lecture 8)"
     },
     {
       "q": "A user has an IAM policy that allows s3:GetObject on a bucket. Reading an object encrypted with SSE-KMS (a customer managed key) fails with AccessDenied. What is missing?",
@@ -261,7 +261,7 @@ const TESTS = [
         "PutObject is a write permission.",
         "Correct. To read an object encrypted with SSE-KMS, the caller must be allowed to use the key with kms:Decrypt, and the key policy must allow it."
       ],
-      "w": "(lectures 2, 13)"
+      "w": "(lectures 8, 29)"
     },
     {
       "q": "A team deploys to AWS from GitHub Actions and wants to avoid storing long-term AWS access keys in GitHub. Which solution meets this requirement?",
@@ -278,7 +278,7 @@ const TESTS = [
         "A shared IAM user is still a long-term credential, and MFA cannot be used non-interactively.",
         "Instance profiles apply to EC2 instances. A GitHub-hosted runner is not an EC2 instance of yours."
       ],
-      "w": "(lecture 8)"
+      "w": "(lecture 19)"
     },
     {
       "q": "An application needs to store a database password that must be rotated automatically every 30 days. Which service should the developer use?",
@@ -295,7 +295,7 @@ const TESTS = [
         "Correct. Secrets Manager has built-in rotation, with native support for RDS.",
         "S3 has no rotation feature and is not meant for secrets."
       ],
-      "w": "(lecture 13)"
+      "w": "(lecture 29)"
     },
     {
       "s": "Deployment",
@@ -313,7 +313,7 @@ const TESTS = [
         "This would add a second function and DNS complexity, and DNS weights are not tied to alarms.",
         "sam sync is for fast development updates. It is not a deployment strategy for production."
       ],
-      "w": "(lectures 7, 19)"
+      "w": "(lectures 17, 18)"
     },
     {
       "q": "A Lambda function is attached to a VPC and must read objects from Amazon S3. It currently times out when calling S3. The company wants the LOWEST cost. What should be done?",
@@ -330,7 +330,7 @@ const TESTS = [
         "An interface endpoint is charged. For S3 the free gateway endpoint is the cheaper option.",
         "An internet gateway alone does not give a Lambda function in a VPC internet access, and removing the VPC does not fit the stated requirement."
       ],
-      "w": "(lecture 6)"
+      "w": "(lecture 21)"
     },
     {
       "q": "A mobile application must let each signed-in user upload files directly to Amazon S3, and each user may access only their own prefix. Which approach is MOST appropriate?",
@@ -347,7 +347,7 @@ const TESTS = [
         "A public bucket gives everyone access to everything.",
         "Correct. The identity pool issues temporary credentials. The policy variable restricts each user to a prefix named after their identity ID."
       ],
-      "w": "(lecture 16)"
+      "w": "(lecture 31)"
     },
     {
       "s": "Development",
@@ -382,7 +382,7 @@ const TESTS = [
         "Consumers of one queue compete for messages. Each message is delivered to only one of them.",
         "This adds code to maintain and still needs filtering logic."
       ],
-      "w": "(lecture 10)"
+      "w": "(lecture 23)"
     },
     {
       "s": "Troubleshooting",
@@ -400,7 +400,7 @@ const TESTS = [
         "Sampling rules choose how many requests are traced. They do not make traces searchable by value.",
         "Correct. Annotations are indexed key-value pairs that can be used in filter expressions."
       ],
-      "w": "(lecture 17)"
+      "w": "(lecture 36)"
     },
     {
       "q": "A Lambda function reads from an Amazon Kinesis data stream. A single malformed record causes the function to fail repeatedly, and the shard stops making progress. Which configuration helps resolve this?",
@@ -417,7 +417,7 @@ const TESTS = [
         "Enhanced fan-out improves read throughput and does not handle failing records.",
         "More memory does not fix an invalid record."
       ],
-      "w": "(lectures 6, 20)"
+      "w": "(lectures 21, 24)"
     },
     {
       "s": "Deployment",
@@ -435,7 +435,7 @@ const TESTS = [
         "Correct. Standard workflows can run for up to a year, and the task token pattern pauses the execution until an external system sends the token back.",
         "The maximum visibility timeout is 12 hours, and a queue does not orchestrate steps."
       ],
-      "w": "(lecture 20)"
+      "w": "(lecture 24)"
     },
     {
       "s": "Troubleshooting",
@@ -453,7 +453,7 @@ const TESTS = [
         "Correct. The execution role is used by the ECS agent to pull images and write logs. Network access to ECR must also be available.",
         "The desired count changes how many tasks run, not whether an image can be pulled."
       ],
-      "w": "(lecture 18)"
+      "w": "(lecture 27)"
     },
     {
       "q": "A Java Lambda function has slow cold starts. The team wants to improve startup latency at no additional cost for the feature itself. What should the team do?",
@@ -470,7 +470,7 @@ const TESTS = [
         "Ephemeral storage does not speed up initialization.",
         "A VPC does not reduce cold start time."
       ],
-      "w": "(lecture 6)"
+      "w": "(lecture 21)"
     },
     {
       "s": "Security",
@@ -488,7 +488,7 @@ const TESTS = [
         "The Prompt Attack filter detects jailbreak and prompt injection attempts.",
         "Correct. Sensitive information filters detect PII, including card numbers, and can mask or block it in inputs and outputs."
       ],
-      "w": "(lecture 21)"
+      "w": "(lecture 33)"
     },
     {
       "s": "Troubleshooting",
@@ -506,7 +506,7 @@ const TESTS = [
         "Memory does not influence notification delivery.",
         "Email subscriptions use the email protocol. HTTPS is for endpoints."
       ],
-      "w": "(lecture 9)"
+      "w": "(lecture 34)"
     },
     {
       "q": "A developer sees that the Errors metric of a Lambda function is zero, yet some invocations are not executed at all and clients receive 429 errors. Which metric should the developer check?",
@@ -523,7 +523,7 @@ const TESTS = [
         "IteratorAge applies to stream sources such as Kinesis.",
         "Invocations does not count throttled requests."
       ],
-      "w": "(lectures 6, 9)"
+      "w": "(lectures 21, 34)"
     }
   ]
 },
@@ -549,7 +549,7 @@ const TESTS = [
     "Spot можуть відібрати, для тестування з вимогою стабільності це ризик.",
     "Це цілий фізичний сервер для ліцензій, а не вибір для гнучкого тесту."
    ],
-   "w": "(лекція 23)"
+   "w": "(лекція 3)"
   },
   {
    "q": "Витрати на compute стабільні, але команда планує змінювати сімейства інстансів і регіони. Потрібна знижка без прив'язки до конкретної конфігурації. Що обрати?",
@@ -566,7 +566,7 @@ const TESTS = [
     "Це окреме залізо з оплатою за годину, не знижка.",
     "Так: зобов'язання на суму USD за годину, діє на EC2 будь-якого сімейства, розміру й регіону, ще Fargate й Lambda."
    ],
-   "w": "(лекція 23)"
+   "w": "(лекція 3)"
   },
   {
    "q": "Spot Instance скоро відберуть. Як застосунок може дізнатися про це заздалегідь?",
@@ -583,7 +583,7 @@ const TESTS = [
     "Попередження є, хіба що при hibernate воно не за 2 хвилини.",
     "Метрика CPU про відбір нічого не каже."
    ],
-   "w": "(лекція 23)"
+   "w": "(лекція 3)"
   },
   {
    "q": "Корпоративна ліцензія на ПЗ прив'язана до фізичних сокетів сервера. Який режим EC2 дозволить використати наявні ліцензії?",
@@ -600,7 +600,7 @@ const TESTS = [
     "Так: фізичний сервер ваш, підходить для ліцензій per-socket, per-core, per-VM.",
     "Spot можуть відібрати і не прив'язують до фізичного сервера."
    ],
-   "w": "(лекція 23)"
+   "w": "(лекція 3)"
   },
   {
    "s": "EBS",
@@ -618,7 +618,7 @@ const TESTS = [
     "HDD-тип не підтримує Multi-Attach.",
     "HDD-тип не підтримує Multi-Attach."
    ],
-   "w": "(лекція 23)"
+   "w": "(лекція 3)"
   },
   {
    "q": "Архів логів лежить на найдешевшому EBS-томі sc1. Команда хоче використати цей тип як boot-том. Що відповісти?",
@@ -635,7 +635,7 @@ const TESTS = [
     "Так: boot підтримують gp2, gp3, io1, io2.",
     "Це мінімальний розмір, а boot усе одно не підтримується."
    ],
-   "w": "(лекція 23)"
+   "w": "(лекція 3)"
   },
   {
    "q": "Застосунок кешує дані на Instance Store. Адміністратор зупиняє інстанс (stop), а потім запускає знову. Що з кешем?",
@@ -652,7 +652,7 @@ const TESTS = [
     "Snapshot створюється лише для EBS, і не автоматично.",
     "Так: Instance Store втрачається при stop, hibernate, terminate і відмові диска."
    ],
-   "w": "(лекція 23)"
+   "w": "(лекція 3)"
   },
   {
    "q": "Кілька Linux-інстансів у різних AZ мають бачити одні й ті самі файли. Що обрати?",
@@ -669,7 +669,7 @@ const TESTS = [
     "Прив'язаний до одного хоста й втрачається.",
     "Звичайний том підключається до одного інстансу в одній AZ."
    ],
-   "w": "(лекція 23)"
+   "w": "(лекція 3)"
   },
   {
    "q": "Розробник випадково видалив EBS snapshot. У регіоні було налаштовано retention rule для Recycle Bin. Як повернути snapshot?",
@@ -686,7 +686,7 @@ const TESTS = [
     "Можливо, поки не минув retention period.",
     "Так: видалений snapshot лежить у кошику заданий час."
    ],
-   "w": "(лекція 23)"
+   "w": "(лекція 3)"
   },
   {
    "s": "ELB",
@@ -704,7 +704,7 @@ const TESTS = [
     "Так: L4, TCP, UDP, TLS, статичний IP на AZ, ультранизька затримка.",
     "Призначений для віртуальних пристроїв, а не для гри."
    ],
-   "w": "(лекція 24)"
+   "w": "(лекція 4)"
   },
   {
    "q": "Потрібно пропустити весь трафік через флот віртуальних фаєрволів і систем виявлення вторгнень. Що обрати?",
@@ -721,7 +721,7 @@ const TESTS = [
     "Працює на рівні HTTP, це не для пристроїв.",
     "Застарілий і не для цього."
    ],
-   "w": "(лекція 24)"
+   "w": "(лекція 4)"
   },
   {
    "q": "Network Load Balancer має типові налаштування. У AZ-A 2 цілі, у AZ-B 8 цілей. Кожен вузол отримує 50% трафіку. Яку частку отримує кожна ціль у AZ-B?",
@@ -738,7 +738,7 @@ const TESTS = [
     "Це 100% на 8 цілей, але вузол отримує лише половину трафіку.",
     "Стільки отримує ціль в AZ-A, де лише 2 цілі."
    ],
-   "w": "(лекція 24)"
+   "w": "(лекція 4)"
   },
   {
    "q": "Команда хоче ввімкнути sticky sessions для target group ALB, де cross-zone load balancing вимкнено. Що станеться?",
@@ -755,7 +755,7 @@ const TESTS = [
     "Так: це обмеження з документації.",
     "Cookie не знімає обмеження."
    ],
-   "w": "(лекція 24)"
+   "w": "(лекція 4)"
   },
   {
    "s": "Auto Scaling",
@@ -773,7 +773,7 @@ const TESTS = [
     "Змінюється не обов'язково пропорційно.",
     "Так: метрика має змінюватися пропорційно кількості інстансів."
    ],
-   "w": "(лекція 24)"
+   "w": "(лекція 4)"
   },
   {
    "s": "VPC",
@@ -791,7 +791,7 @@ const TESTS = [
     "Route table маршрутизує, а не фільтрує за IP.",
     "Це заблокує весь інтернет, не одну адресу."
    ],
-   "w": "(лекція 25)"
+   "w": "(лекція 5)"
   },
   {
    "q": "Інстанси в приватній підмережі мають завантажувати оновлення з інтернету, але ззовні до них ніхто не повинен підключатися. Що налаштувати?",
@@ -808,7 +808,7 @@ const TESTS = [
     "Peering не дає виходу в інтернет.",
     "Дає доступ лише до S3 і DynamoDB."
    ],
-   "w": "(лекція 25)"
+   "w": "(лекція 5)"
   },
   {
    "s": "Route 53",
@@ -826,7 +826,7 @@ const TESTS = [
     "Так: Alias можна на корені домену, запити безкоштовні.",
     "NS вказує на сервери імен, а не на ресурс."
    ],
-   "w": "(лекція 26)"
+   "w": "(лекція 6)"
   },
   {
    "q": "Ресурс у приватній підмережі не має публічної IP-адреси, і потрібен Route 53 failover. Який тип health check використати?",
@@ -843,7 +843,7 @@ const TESTS = [
     "Потрібен публічний endpoint, а імена records дають непередбачувані результати.",
     "Так: Route 53 бере дані метрики, а не лізе на приватну IP."
    ],
-   "w": "(лекція 26)"
+   "w": "(лекція 6)"
   },
   {
    "s": "CloudFront",
@@ -861,7 +861,7 @@ const TESTS = [
     "Клас зберігання тут ні до чого.",
     "OAC підтримує всі регіони."
    ],
-   "w": "(лекція 27)"
+   "w": "(лекція 7)"
   },
   {
    "q": "У cache behavior Minimum TTL 60 с, Maximum TTL 3600 с. Origin повертає Cache-Control: max-age=86400. На який час CloudFront закешує об'єкт?",
@@ -878,7 +878,7 @@ const TESTS = [
     "Мінімум діє лише коли max-age менший за нього.",
     "Default TTL береться лише коли origin не дав заголовків."
    ],
-   "w": "(лекція 27)"
+   "w": "(лекція 7)"
   }
  ]
 },
@@ -904,7 +904,7 @@ const TESTS = [
     "Proxy керує з'єднаннями, а не переживає збій зони.",
     "Міграція в інший тип бази не відповідає вимозі й зайва."
    ],
-   "w": "(лекція 28)"
+   "w": "(лекція 10)"
   },
   {
    "q": "Звітні запити аналітиків (лише SELECT) сповільнюють основну базу RDS. Що найкраще розвантажить її?",
@@ -921,7 +921,7 @@ const TESTS = [
     "DAX призначений для DynamoDB, а не для RDS.",
     "Item це термін DynamoDB і до RDS не стосується."
    ],
-   "w": "(лекція 28)"
+   "w": "(лекція 10)"
   },
   {
    "q": "Тисячі одночасних викликів Lambda відкривають з'єднання з базою на RDS, і база вичерпує ліміт з'єднань. Яке рішення найпряміше?",
@@ -938,7 +938,7 @@ const TESTS = [
     "Так: RDS Proxy тримає пул з'єднань і розподіляє їх між викликами, ще дає IAM і Secrets Manager.",
     "Transfer Acceleration стосується S3."
    ],
-   "w": "(лекції 15 і 28)"
+   "w": "(лекції 13 і 10)"
   },
   {
    "q": "Компанія мігрує застосунок на Oracle Database і хоче керовану базу з автоматичними бекапами й патчами. Що обрати?",
@@ -955,7 +955,7 @@ const TESTS = [
     "Те саме: Aurora не підтримує Oracle.",
     "Так: Oracle серед рушіїв RDS."
    ],
-   "w": "(лекція 28)"
+   "w": "(лекція 10)"
   },
   {
    "q": "Потрібна швидка in-memory база з Redis-сумісним API як основне сховище, де дані не можна втрачати при збої. Що обрати?",
@@ -972,7 +972,7 @@ const TESTS = [
     "DAX кешує DynamoDB, а не є основним сховищем.",
     "Кеш без реплікації втрачає дані при збої."
    ],
-   "w": "(лекція 28)"
+   "w": "(лекція 10)"
   },
   {
    "q": "Команді потрібна MySQL-сумісна керована база, що масштабує читання на максимальну кількість реплік і має розподілене сховище в трьох зонах. Який сервіс підходить?",
@@ -989,7 +989,7 @@ const TESTS = [
     "DynamoDB не MySQL-сумісна.",
     "ElastiCache це кеш, а не реляційна база."
    ],
-   "w": "(лекція 28)"
+   "w": "(лекція 10)"
   },
   {
    "q": "У provisioned-таблиці DynamoDB потрібно записувати 6 items за секунду, кожен розміром 4,5 КБ. Скільки WCU потрібно?",
@@ -1108,7 +1108,7 @@ const TESTS = [
     "Усі вузли в одній зоні: збій зони вимкне кластер.",
     "Два вузли теж не fault-tolerant."
    ],
-   "w": "(лекція 15)"
+   "w": "(лекція 13)"
   },
   {
    "q": "Застосунок часто обчислює складну агрегацію (середнє по мільйонах записів DynamoDB) і хоче кешувати саме результат. Що підходить найкраще?",
@@ -1125,7 +1125,7 @@ const TESTS = [
     "Streams це журнал змін, а не кеш.",
     "Transfer Acceleration стосується S3."
    ],
-   "w": "(лекція 15)"
+   "w": "(лекція 13)"
   },
   {
    "s": "S3",
@@ -1143,7 +1143,7 @@ const TESTS = [
     "Так: окремі точки доступу з простими політиками, одна лише з VPC.",
     "Окремі акаунти надмірні для цієї задачі."
    ],
-   "w": "(лекція 2)"
+   "w": "(лекція 8)"
   },
   {
    "q": "Політика безпеки вимагає, щоб використання ключа шифрування об'єктів S3 можна було проаудитувати через CloudTrail. Який заголовок вказує клієнт під час PutObject?",
@@ -1160,7 +1160,7 @@ const TESTS = [
     "Режим шифрування задається, і аудит вимагає KMS.",
     "Так: SSE-KMS (aws:kms) дає контроль ключа й аудит через CloudTrail."
    ],
-   "w": "(лекція 2)"
+   "w": "(лекція 8)"
   },
   {
    "q": "Реплікацію S3 між двома бакетами вже налаштовано, але в початковому бакеті лежать мільйони об'єктів, створених раніше. Як скопіювати і їх?",
@@ -1177,7 +1177,7 @@ const TESTS = [
     "Перемикання версіонування не запускає копіювання.",
     "SRR чи CRR однаково копіюють лише нове."
    ],
-   "w": "(лекція 3)"
+   "w": "(лекція 9)"
   },
   {
    "q": "Події створення об'єктів потрібно надсилати у FIFO-чергу SQS. Як це налаштувати?",
@@ -1194,7 +1194,7 @@ const TESTS = [
     "Transfer Acceleration стосується швидкості завантаження.",
     "Версіонування не надсилає подій у чергу."
    ],
-   "w": "(лекція 3)"
+   "w": "(лекція 9)"
   },
   {
    "s": "Аналітика",
@@ -1212,7 +1212,7 @@ const TESTS = [
     "Так: Athena платить за просканований обсяг, колонкові формати, стиснення й партиції його зменшують.",
     "Частіші запити лише збільшать рахунок."
    ],
-   "w": "(лекція 29)"
+   "w": "(лекція 14)"
   },
   {
    "q": "Каталог товарів у DynamoDB потрібно шукати за будь-яким полем і за частиною слова. Яке доповнення найвдаліше?",
@@ -1229,7 +1229,7 @@ const TESTS = [
     "Strongly consistent не змінює можливості запитів.",
     "Так: OpenSearch шукає за будь-яким полем, а Streams з Lambda передають у нього зміни."
    ],
-   "w": "(лекції 29 і 12)"
+   "w": "(лекції 14 і 12)"
   }
  ]
 },
@@ -1255,7 +1255,7 @@ const TESTS = [
     "Для event source mapping невдалі записи йдуть в on-failure destination, а не в DLQ функції.",
     "Кожен шард має свій ітератор, зупиняється лише уражений."
    ],
-   "w": "(лекції 6, розділ 17.4, і 20)"
+   "w": "(лекції 21, розділ 17.4, і 24)"
   },
   {
    "s": "Lambda",
@@ -1273,7 +1273,7 @@ const TESTS = [
     "Регіон не змінює правил оцінки політик.",
     "CORS стосується браузерів, а не авторизації."
    ],
-   "w": "(лекція 6, розділ 17.10)"
+   "w": "(лекція 21, розділ 17.10)"
   },
   {
    "s": "Lambda",
@@ -1291,7 +1291,7 @@ const TESTS = [
     "Так: приватна підмережа з NAT дає вихід в інтернет.",
     "Gateway endpoint не відкриє довільний інтернет для API партнера."
    ],
-   "w": "(лекція 6, розділи 11 і 17.8)"
+   "w": "(лекція 21, розділи 11 і 17.8)"
   },
   {
    "s": "CloudFormation",
@@ -1309,7 +1309,7 @@ const TESTS = [
     "ZipFile підходить лише для малого inline-коду без залежностей.",
     "Так: CloudFormation порівнює значення в шаблоні, а не вміст файла."
    ],
-   "w": "(лекція 6, розділ 17.12)"
+   "w": "(лекція 21, розділ 17.12)"
   },
   {
    "s": "SQS",
@@ -1327,7 +1327,7 @@ const TESTS = [
     "Тип опитування не змінює невидимість.",
     "Кількість повідомлень за виклик не змінює час обробки."
    ],
-   "w": "(лекція 10, розділ 15.1)"
+   "w": "(лекція 23, розділ 15.1)"
   },
   {
    "s": "SQS",
@@ -1345,7 +1345,7 @@ const TESTS = [
     "Так: WaitTimeSeconds у виклику (або атрибут черги ReceiveMessageWaitTimeSeconds).",
     "Retention стосується терміну зберігання."
    ],
-   "w": "(лекція 10, розділ 15.3)"
+   "w": "(лекція 23, розділ 15.3)"
   },
   {
    "s": "SNS",
@@ -1363,7 +1363,7 @@ const TESTS = [
     "Versioning не знімає обмеження.",
     "Так: S3 → SNS → багато SQS."
    ],
-   "w": "(лекція 10, розділ 15.7)"
+   "w": "(лекція 23, розділ 15.7)"
   },
   {
    "s": "Kinesis",
@@ -1381,7 +1381,7 @@ const TESTS = [
     "SQS видаляє повідомлення після обробки.",
     "Firehose не має replay."
    ],
-   "w": "(лекції 10, розділ 15.8, і 20, розділ 6)"
+   "w": "(лекції 23, розділ 15.8, і 24, розділ 6)"
   },
   {
    "s": "Kinesis",
@@ -1399,7 +1399,7 @@ const TESTS = [
     "Так: керований, майже реальний час, Lambda-трансформація.",
     "SQS не доставляє в S3."
    ],
-   "w": "(лекція 20, розділ 6.2)"
+   "w": "(лекція 24, розділ 6.2)"
   },
   {
    "s": "Kinesis",
@@ -1417,7 +1417,7 @@ const TESTS = [
     "Відхилені запити можна повторити, дані не губляться, якщо продюсер повторює.",
     "Так: зростання більше ніж удвічі за 15 хв може дати виключення, треба retry."
    ],
-   "w": "(лекція 20, розділ 6.1)"
+   "w": "(лекція 24, розділ 6.1)"
   },
   {
    "s": "Step Functions",
@@ -1435,7 +1435,7 @@ const TESTS = [
     "Wait чекає за часом, а не за подією.",
     "Це дорого і складно, Step Functions робить це без коду."
    ],
-   "w": "(лекція 20, розділ 6.4)"
+   "w": "(лекція 24, розділ 6.4)"
   },
   {
    "s": "Step Functions",
@@ -1453,7 +1453,7 @@ const TESTS = [
     "Без ResultPath входом буде лише помилка, початкові дані втрачаються.",
     "Pass не обробляє помилки."
    ],
-   "w": "(лекція 20, розділ 6.4)"
+   "w": "(лекція 24, розділ 6.4)"
   },
   {
    "s": "Step Functions",
@@ -1471,7 +1471,7 @@ const TESTS = [
     "Retry лише збільшує ймовірність повторення.",
     "Так: Standard дає exactly-once для не ідемпотентних дій."
    ],
-   "w": "(лекція 20, розділ 6.4)"
+   "w": "(лекція 24, розділ 6.4)"
   },
   {
    "s": "AppSync",
@@ -1489,7 +1489,7 @@ const TESTS = [
     "ALB не дає GraphQL і синхронізації.",
     "Function URL лише публічна HTTPS-адреса."
    ],
-   "w": "(лекція 33)"
+   "w": "(лекція 26)"
   },
   {
    "s": "API Gateway",
@@ -1507,7 +1507,7 @@ const TESTS = [
     "Canary розподіляє трафік, а не вибирає alias за stage.",
     "Authorizer для авторизації, не для вибору alias."
    ],
-   "w": "(лекція 14, розділи 3 і 9.4)"
+   "w": "(лекція 25, розділи 3 і 9.4)"
   },
   {
    "s": "API Gateway",
@@ -1525,7 +1525,7 @@ const TESTS = [
     "Так: ці три CORS-заголовки дозволяють origin, методи й заголовки.",
     "API key ідентифікує клієнта, а не вирішує CORS."
    ],
-   "w": "(лекція 14, розділ 10.6)"
+   "w": "(лекція 25, розділ 10.6)"
   },
   {
    "s": "SAM",
@@ -1543,7 +1543,7 @@ const TESTS = [
     "Це локальний запуск.",
     "Так: код оновлюється викликами API сервісів в обхід CloudFormation."
    ],
-   "w": "(лекція 7, розділ 9.2)"
+   "w": "(лекція 17, розділ 9.2)"
   },
   {
    "s": "API Gateway",
@@ -1561,7 +1561,7 @@ const TESTS = [
     "Кеш є в REST API, HTTP API його не має.",
     "Usage plan не керує інвалідацією кешу."
    ],
-   "w": "(лекція 14, розділ 10.2)"
+   "w": "(лекція 25, розділ 10.2)"
   },
   {
    "s": "Lambda",
@@ -1579,7 +1579,7 @@ const TESTS = [
     "Layer не призначений для великих змінних даних і має ліміт 250 МБ разом з кодом.",
     "Змінні середовища обмежені 4 КБ."
    ],
-   "w": "(лекція 6, розділ 17.9)"
+   "w": "(лекція 21, розділ 17.9)"
   },
   {
    "s": "Lambda",
@@ -1597,7 +1597,7 @@ const TESTS = [
     "Так: без Active Lambda лише передає заголовок і трейси не шле.",
     "Пам'ять не вимикає трасування."
    ],
-   "w": "(лекція 6, розділ 17.6)"
+   "w": "(лекція 21, розділ 17.6)"
   }
  ]
 },
@@ -1622,7 +1622,7 @@ const TESTS = [
     "Root не використовують для щоденних дій.",
     "Termination Protection захищає стек від видалення, а не дає права."
    ],
-   "w": "(лекція 30)",
+   "w": "(лекція 15)",
    "s": "CloudFormation"
   },
   {
@@ -1640,7 +1640,7 @@ const TESTS = [
     "DeletionPolicy керує видаленням, а не згодою на IAM.",
     "Для IAM-ресурсів з власними іменами потрібна саме ця згода."
    ],
-   "w": "(лекція 30)",
+   "w": "(лекція 15)",
    "s": "CloudFormation"
   },
   {
@@ -1658,7 +1658,7 @@ const TESTS = [
     "Custom resource з ServiceToken викликає Lambda, що спершу видаляє об'єкти.",
     "Ця capability стосується макросів, а не очищення bucket."
    ],
-   "w": "(лекція 30)",
+   "w": "(лекція 15)",
    "s": "CloudFormation"
   },
   {
@@ -1676,7 +1676,7 @@ const TESTS = [
     "Вона діє під час оновлення.",
     "Stack policy видалити не можна, лише змінити."
    ],
-   "w": "(лекція 30)",
+   "w": "(лекція 15)",
    "s": "CloudFormation"
   },
   {
@@ -1694,7 +1694,7 @@ const TESTS = [
     "FindInMap читає mapping всередині шаблону, а не чужий стек.",
     "Base64 лише кодує рядок."
    ],
-   "w": "(лекція 30)",
+   "w": "(лекція 15)",
    "s": "CloudFormation"
   },
   {
@@ -1712,7 +1712,7 @@ const TESTS = [
     "Це не одна операція.",
     "Bootstrap готує environment для CDK, а не розгортає ролі."
    ],
-   "w": "(лекція 30)",
+   "w": "(лекція 15)",
    "s": "CloudFormation"
   },
   {
@@ -1730,7 +1730,7 @@ const TESTS = [
     "Помилка через непорожнє є для S3, не для RDS.",
     "Для DBCluster типовим є Snapshot, а не Delete."
    ],
-   "w": "(лекція 30)",
+   "w": "(лекція 15)",
    "s": "CloudFormation"
   },
   {
@@ -1748,7 +1748,7 @@ const TESTS = [
     "L2 дає типові значення й зручні методи.",
     "Це механізм CloudFormation, а не рівень construct."
    ],
-   "w": "(лекція 31)",
+   "w": "(лекція 16)",
    "s": "CDK"
   },
   {
@@ -1766,7 +1766,7 @@ const TESTS = [
     "Кожен environment потребує власного bootstrap-стеку CDKToolkit.",
     "Це параметр CloudFormation, помилка тут через відсутні bootstrap-ресурси."
    ],
-   "w": "(лекція 31)",
+   "w": "(лекція 16)",
    "s": "CDK"
   },
   {
@@ -1784,7 +1784,7 @@ const TESTS = [
     "Це спосіб імпортувати шаблон, а не вид тесту.",
     "Diff порівнює з розгорнутим стеком, а не з еталоном тестів."
    ],
-   "w": "(лекція 31)",
+   "w": "(лекція 16)",
    "s": "CDK"
   },
   {
@@ -1802,7 +1802,7 @@ const TESTS = [
     "Потужність знижується на розмір пачки.",
     "Створює повну нову ASG: висока вартість."
    ],
-   "w": "(лекція 32)",
+   "w": "(лекція 28)",
    "s": "Beanstalk"
   },
   {
@@ -1820,7 +1820,7 @@ const TESTS = [
     "Це очищення старих версій.",
     "Нове окреме середовище перевіряють і перемикають обміном URL."
    ],
-   "w": "(лекція 32)",
+   "w": "(лекція 28)",
    "s": "Beanstalk"
   },
   {
@@ -1838,7 +1838,7 @@ const TESTS = [
     "Це конфігурація, а не квота версій.",
     "Lifecycle policy видаляє старі версії; використані не видаляються."
    ],
-   "w": "(лекція 32)",
+   "w": "(лекція 28)",
    "s": "Beanstalk"
   },
   {
@@ -1856,7 +1856,7 @@ const TESTS = [
     "Beanstalk використовує CloudFormation і створює описані ресурси.",
     "Це політика деплою."
    ],
-   "w": "(лекція 32)",
+   "w": "(лекція 28)",
    "s": "Beanstalk"
   },
   {
@@ -1874,7 +1874,7 @@ const TESTS = [
     "Не оптимізує.",
     "Це constraint, що вимагає різних інстансів: навпаки."
    ],
-   "w": "(лекція 18)",
+   "w": "(лекція 27)",
    "s": "Контейнери"
   },
   {
@@ -1892,7 +1892,7 @@ const TESTS = [
     "Dynamic Host Port Mapping це EC2 launch type.",
     "SSH не потрібен для трафіку застосунку."
    ],
-   "w": "(лекція 18)",
+   "w": "(лекція 27)",
    "s": "Контейнери"
   },
   {
@@ -1910,7 +1910,7 @@ const TESTS = [
     "Не пов'язано з EC2 launch type.",
     "Це обмеження розміщення, а не додавання інстансів."
    ],
-   "w": "(лекція 18)",
+   "w": "(лекція 27)",
    "s": "Контейнери"
   },
   {
@@ -1928,7 +1928,7 @@ const TESTS = [
     "Він для CodeBuild.",
     "Для blue/green на EC2 потрібен ELB; новий ASG створюється з копією налаштувань."
    ],
-   "w": "(лекція 19)",
+   "w": "(лекція 18)",
    "s": "CI/CD"
   },
   {
@@ -1946,7 +1946,7 @@ const TESTS = [
     "Відкат це повторний деплой.",
     "Це blue/green, а не загальна властивість відкату."
    ],
-   "w": "(лекція 19)",
+   "w": "(лекція 18)",
    "s": "CI/CD"
   },
   {
@@ -1964,7 +1964,7 @@ const TESTS = [
     "Не підтримується таким чином.",
     "Не підтримується."
    ],
-   "w": "(лекція 19)",
+   "w": "(лекція 18)",
    "s": "CI/CD"
   }
  ]
@@ -1991,7 +1991,7 @@ const TESTS = [
     "GenerateRandom лише повертає випадкові байти, це не шифрування KMS.",
     "Decrypt розшифровує, а не шифрує, і теж до 4 КБ."
    ],
-   "w": "(лекція 13)"
+   "w": "(лекція 29)"
   },
   {
    "s": "KMS",
@@ -2009,7 +2009,7 @@ const TESTS = [
     "Це порушує вимоги безпеки.",
     "Так: кеш зменшує кількість викликів, backoff згладжує пікові відмови."
    ],
-   "w": "(лекції 13 і 37)"
+   "w": "(лекції 29 і 2)"
   },
   {
    "s": "CloudHSM",
@@ -2027,7 +2027,7 @@ const TESTS = [
     "Ключами керує S3, апаратних модулів нема.",
     "Це сховище секретів, а не HSM."
    ],
-   "w": "(лекція 35)"
+   "w": "(лекція 30)"
   },
   {
    "s": "Nitro",
@@ -2045,7 +2045,7 @@ const TESTS = [
     "Так: enclave без мережі й SSH, доступний лише дозволеному коду.",
     "Адміністратор із root усе одно бачитиме процеси на сервері."
    ],
-   "w": "(лекція 35)"
+   "w": "(лекція 30)"
   },
   {
    "s": "KMS",
@@ -2063,7 +2063,7 @@ const TESTS = [
     "Без доступу до ключа одержувач не розшифрує знімок.",
     "Ротація не дає доступ іншому акаунту."
    ],
-   "w": "(лекція 13)"
+   "w": "(лекція 29)"
   },
   {
    "s": "Parameter Store",
@@ -2081,7 +2081,7 @@ const TESTS = [
     "Це не те саме: ротація не видаляє параметр і не попереджає про видалення.",
     "Параметр не має такої метрики."
    ],
-   "w": "(лекція 13)"
+   "w": "(лекція 29)"
   },
   {
    "s": "Secrets",
@@ -2099,7 +2099,7 @@ const TESTS = [
     "Так: RDS сам створює секрет у Secrets Manager і ротує його, типово кожні 7 днів.",
     "Пароль лишається відкритим у шаблоні, а ротації нема."
    ],
-   "w": "(лекція 13)"
+   "w": "(лекція 29)"
   },
   {
    "s": "IAM",
@@ -2171,7 +2171,7 @@ const TESTS = [
     "Це був би окремий каталог із копією користувачів.",
     "Це для користувачів застосунків, а не для корпоративного AD."
    ],
-   "w": "(лекція 34)"
+   "w": "(лекція 32)"
   },
   {
    "s": "Directory Service",
@@ -2189,7 +2189,7 @@ const TESTS = [
     "Це не каталог AD.",
     "Так: лише він сумісний з RDS SQL Server."
    ],
-   "w": "(лекція 34)"
+   "w": "(лекція 32)"
   },
   {
    "s": "Cognito",
@@ -2207,7 +2207,7 @@ const TESTS = [
     "Так: ALB додасть claims, якщо користувач увійшов, і пропустить інших без них.",
     "Це дає AWS-ключі, а не персоналізацію на ALB."
    ],
-   "w": "(лекція 16)"
+   "w": "(лекція 31)"
   },
   {
    "s": "Cognito",
@@ -2225,7 +2225,7 @@ const TESTS = [
     "Вона про доступ до AWS, а не про захист входу.",
     "WAF не знає про скомпрометовані паролі користувачів."
    ],
-   "w": "(лекція 16)"
+   "w": "(лекція 31)"
   },
   {
    "s": "CloudWatch",
@@ -2243,7 +2243,7 @@ const TESTS = [
     "Такої метрики AWS сам не публікує.",
     "X-Ray трасує запити, а не міряє RAM."
    ],
-   "w": "(лекції 9 і 36)"
+   "w": "(лекції 34 і 35)"
   },
   {
    "s": "CloudWatch",
@@ -2261,7 +2261,7 @@ const TESTS = [
     "Вона дає число, а не події.",
     "Так: підписка шле події майже одразу."
    ],
-   "w": "(лекції 9 і 36)"
+   "w": "(лекції 34 і 35)"
   },
   {
    "s": "CloudTrail",
@@ -2279,7 +2279,7 @@ const TESTS = [
     "X-Ray не логує адміністративні API-виклики акаунта.",
     "Не реального часу і це не журнал API."
    ],
-   "w": "(лекція 9)"
+   "w": "(лекція 34)"
   },
   {
    "s": "Synthetics",
@@ -2297,7 +2297,7 @@ const TESTS = [
     "Так: canary за розкладом, є скриншоти.",
     "Це про трасування запитів."
    ],
-   "w": "(лекція 36)"
+   "w": "(лекція 35)"
   },
   {
    "s": "X-Ray",
@@ -2315,7 +2315,7 @@ const TESTS = [
     "Не стосується трасування.",
     "Не стосується трасування."
    ],
-   "w": "(лекція 17)"
+   "w": "(лекція 36)"
   },
   {
    "s": "SDK",
@@ -2333,7 +2333,7 @@ const TESTS = [
     "Навпаки.",
     "Так: повторюються тимчасові помилки й throttling, нетимчасові ні."
    ],
-   "w": "(лекція 37)"
+   "w": "(лекція 2)"
   }
  ]
 }

@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 9: S3 детально</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Лекція 9: S3 детально</h1>
+<blockquote>
+<p>Середній рівень: усі правила й числа з повної лекції, але простими словами й без розповіді про наш проєкт. Повна: ../9-s3-in-depth.md. Числа й ціни в повній лекції дані з пам'яті, позначка <em>(не звірено)</em> означає те саме тут.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>S3 це об'єктне сховище.</strong> Для іспиту треба знати модель даних, класи зберігання, lifecycle, версіонування, події, завантаження великих файлів, CORS і ціни. Доступ і шифрування окремо в <a href="8-s3-access-encryption-simple.html">лекції 8</a>.</p>
+<h2>Навіщо це так задумано</h2>
+<p>S3 задумано як дешеве майже безмежне сховище. Тому є класи зберігання (компроміс між ціною й швидкістю) і lifecycle, що прибирає старе автоматично, щоб ви не платили за забуті файли.</p>
+<h2>Крок 1. Модель даних</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>Bucket</strong></td>
+<td data-label="Суть">контейнер верхнього рівня; ім'я <strong>глобально унікальне</strong>, бакет живе в <strong>одному регіоні</strong>; вкладених бакетів нема; типово 100 на акаунт (можна збільшити)</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Object</strong></td>
+<td data-label="Суть">файл плюс метадані; від 0 байт до <strong>48,8 ТіБ</strong>; одним PUT до <strong>5 ГБ</strong></td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Key</strong></td>
+<td data-label="Суть">повне ім'я об'єкта, до 1024 байт; S3 плоский, <code>/</code> лише символ у ключі, а «теки» в консолі це <strong>prefix</strong></td>
+</tr>
+<tr>
+<td data-label="Термін">Метадані</td>
+<td data-label="Суть">системні (<code>Content-Type</code>, <code>Content-Length</code>, <code>ETag</code>, <code>Last-Modified</code>) і користувацькі <code>x-amz-meta-*</code></td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Теги</strong></td>
+<td data-label="Суть">до <strong>10</strong> пар; можна змінювати, годяться для прав і lifecycle</td>
+</tr>
+<tr>
+<td data-label="Термін"><code>versionId</code></td>
+<td data-label="Суть">ідентифікатор версії</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>Об'єкти <strong>незмінні</strong>: оновлення це запис нового об'єкта з тим самим ключем.</li>
+<li><strong>Метадані</strong> задаються під час завантаження й не змінюються, <strong>теги</strong> можна змінювати.</li>
+<li>З грудня 2020 S3 дає <strong>сильну read-after-write консистентність</strong> для всіх операцій (PUT, DELETE, LIST). Старі матеріали про «eventual consistency» застаріли.</li>
+<li>Адреса: <code>https://&lt;bucket&gt;.s3.&lt;region&gt;.amazonaws.com/&lt;key&gt;</code> (virtual-hosted, сучасний) або <code>https://s3.&lt;region&gt;.amazonaws.com/&lt;bucket&gt;/&lt;key&gt;</code> (path style, застарілий).</li>
+<li>Префікси слугують межами прав і подій. Для LocalStack у тестах потрібен path style.</li>
+</ul>
+<h2>Крок 2. Класи зберігання</h2>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Клас</th>
+<th>Для чого</th>
+<th>Доступ</th>
+<th>Мін. зберігання</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Клас"><strong>Standard</strong></td>
+<td data-label="Для чого">часто потрібні дані</td>
+<td data-label="Доступ">миттєво</td>
+<td data-label="Мін. зберігання">нема</td>
+</tr>
+<tr>
+<td data-label="Клас"><strong>Express One Zone</strong></td>
+<td data-label="Для чого">дуже низька затримка (одиниці мс), одна AZ</td>
+<td data-label="Доступ">миттєво</td>
+<td data-label="Мін. зберігання">нема</td>
+</tr>
+<tr>
+<td data-label="Клас"><strong>Intelligent-Tiering</strong></td>
+<td data-label="Для чого">невідомий патерн доступу</td>
+<td data-label="Доступ">миттєво, автоматично переміщає (30 днів без доступу: Infrequent, 90: Archive Instant Access; архівні рівні опційні; об'єкти менше 128 КБ не моніторяться)</td>
+<td data-label="Мін. зберігання">нема (є плата за моніторинг)</td>
+</tr>
+<tr>
+<td data-label="Клас"><strong>Standard-IA</strong></td>
+<td data-label="Для чого">рідко, але швидко</td>
+<td data-label="Доступ">миттєво</td>
+<td data-label="Мін. зберігання">30 днів</td>
+</tr>
+<tr>
+<td data-label="Клас"><strong>One Zone-IA</strong></td>
+<td data-label="Для чого">рідко, відтворювані дані</td>
+<td data-label="Доступ">миттєво, одна AZ</td>
+<td data-label="Мін. зберігання">30 днів</td>
+</tr>
+<tr>
+<td data-label="Клас"><strong>Glacier Instant Retrieval</strong></td>
+<td data-label="Для чого">архів з миттєвим доступом</td>
+<td data-label="Доступ">мілісекунди</td>
+<td data-label="Мін. зберігання">90 днів</td>
+</tr>
+<tr>
+<td data-label="Клас"><strong>Glacier Flexible Retrieval</strong></td>
+<td data-label="Для чого">архів</td>
+<td data-label="Доступ">хвилини-години</td>
+<td data-label="Мін. зберігання">90 днів</td>
+</tr>
+<tr>
+<td data-label="Клас"><strong>Glacier Deep Archive</strong></td>
+<td data-label="Для чого">найдешевший архів</td>
+<td data-label="Доступ">до 12-48 год</td>
+<td data-label="Мін. зберігання">180 днів</td>
+</tr>
+</tbody>
+</table></div>
+<p>Standard і Standard-IA розкладають дані щонайменше на 3 зони (11 дев'яток довговічності), One Zone-IA лише на одну.</p>
+<h3>Ціни й умови (за сторонніми джерелами, us-east-1)</h3>
+<p>Орієнтовно (us-east-1, за ГБ на місяць). Важливе співвідношення, а не цифри.</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Клас</th>
+<th>Зберігання</th>
+<th>Читання</th>
+<th>Мін. термін</th>
+<th>Мін. розмір рахунку</th>
+<th>Як отримати</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Клас">Standard</td>
+<td data-label="Зберігання">~0,023</td>
+<td data-label="Читання">безкоштовно (лише запити)</td>
+<td data-label="Мін. термін">нема</td>
+<td data-label="Мін. розмір рахунку">нема</td>
+<td data-label="Як отримати"><code>GetObject</code></td>
+</tr>
+<tr>
+<td data-label="Клас">Standard-IA</td>
+<td data-label="Зберігання">~0,0125</td>
+<td data-label="Читання">плата за ГБ</td>
+<td data-label="Мін. термін">30 днів</td>
+<td data-label="Мін. розмір рахунку">128 КБ</td>
+<td data-label="Як отримати"><code>GetObject</code></td>
+</tr>
+<tr>
+<td data-label="Клас">One Zone-IA</td>
+<td data-label="Зберігання">~0,01</td>
+<td data-label="Читання">плата за ГБ</td>
+<td data-label="Мін. термін">30 днів</td>
+<td data-label="Мін. розмір рахунку">128 КБ</td>
+<td data-label="Як отримати"><code>GetObject</code></td>
+</tr>
+<tr>
+<td data-label="Клас">Glacier Instant</td>
+<td data-label="Зберігання">~0,004</td>
+<td data-label="Читання">висока плата за ГБ</td>
+<td data-label="Мін. термін">90 днів</td>
+<td data-label="Мін. розмір рахунку">128 КБ</td>
+<td data-label="Як отримати"><code>GetObject</code> (мс)</td>
+</tr>
+<tr>
+<td data-label="Клас">Glacier Flexible</td>
+<td data-label="Зберігання">~0,0036</td>
+<td data-label="Читання">залежить від швидкості</td>
+<td data-label="Мін. термін">90 днів</td>
+<td data-label="Мін. розмір рахунку">нема</td>
+<td data-label="Як отримати">спершу <strong>restore</strong>, потім <code>GetObject</code></td>
+</tr>
+<tr>
+<td data-label="Клас">Deep Archive</td>
+<td data-label="Зберігання">~0,001</td>
+<td data-label="Читання">залежить від швидкості</td>
+<td data-label="Мін. термін">180 днів</td>
+<td data-label="Мін. розмір рахунку">нема</td>
+<td data-label="Як отримати">спершу <strong>restore</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Правило ціни:</strong> чим дешевше зберігання, тим дорожче читання, довший мінімальний термін і повільніший доступ.</p>
+<p><strong>Мінімальний термін.</strong> Якщо видалити чи перенести об'єкт раніше, платите за залишок днів (early deletion charge). Об'єкт на 7 днів у Glacier Instant коштує як 90.</p>
+<p><strong>Restore для Flexible і Deep Archive.</strong> <code>GetObject</code> повертає <code>InvalidObjectState</code>. Треба <code>RestoreObject</code> (<code>s3:RestoreObject</code>): S3 створює <strong>тимчасову копію</strong> в Standard на N днів, оригінал лишається в архіві. Швидкості для Flexible: Expedited (хвилини), Standard (години), Bulk (найдешевше, години). Для Deep Archive: Standard (до 12 год), Bulk (до 48 год).</p>
+<p><strong>Як об'єкт потрапляє в клас:</strong> клієнт указує <code>StorageClass</code> у <code>PutObject</code>; lifecycle Transition; Intelligent-Tiering сам. Lifecycle рухає лише «вниз» (Standard → IA → Glacier → Deep Archive), назад не повертає, перехід в IA можливий не раніше ніж через 30 днів після створення.</p>
+<p><strong>Політики:</strong> заборонити писати в дорогий клас: <code>Deny</code> на <code>s3:PutObject</code> з умовою <code>StringEquals</code> на <code>s3:x-amz-storage-class</code>. Дозволити restore: <code>s3:RestoreObject</code>. Керувати lifecycle: <code>s3:PutLifecycleConfiguration</code>.</p>
+<h3>Як вибрати</h3>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Умова в задачі</th>
+<th>Клас</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Умова в задачі">часто читають</td>
+<td data-label="Клас">Standard</td>
+</tr>
+<tr>
+<td data-label="Умова в задачі">невідомо, як читатимуть</td>
+<td data-label="Клас">Intelligent-Tiering</td>
+</tr>
+<tr>
+<td data-label="Умова в задачі">рідко, але потрібно відразу</td>
+<td data-label="Клас">Standard-IA (відтворювані: One Zone-IA)</td>
+</tr>
+<tr>
+<td data-label="Умова в задачі">архів, але потрібні мілісекунди</td>
+<td data-label="Клас">Glacier Instant</td>
+</tr>
+<tr>
+<td data-label="Умова в задачі">архів, години чекати можна</td>
+<td data-label="Клас">Glacier Flexible</td>
+</tr>
+<tr>
+<td data-label="Умова в задачі">архів на роки, найдешевше</td>
+<td data-label="Клас">Deep Archive</td>
+</tr>
+</tbody>
+</table></div>
+<p>Малі файли (менше 128 КБ) у IA і Glacier Instant коштують як 128 КБ, тож економії нема. Сервіс, який робить <code>GetObject</code> і не вміє чекати restore, впаде на архівному об'єкті.</p>
+<h2>Крок 3. Lifecycle</h2>
+<p>Правила на префікс, тег чи розмір:</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Правило</th>
+<th>Що робить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Правило"><strong>Transition</strong></td>
+<td data-label="Що робить">перенести в інший клас через N днів; об'єкти менше 128 КБ за замовчуванням не переходять (з вересня 2024), дозволити можна фільтром за розміром</td>
+</tr>
+<tr>
+<td data-label="Правило"><strong>Expiration</strong></td>
+<td data-label="Що робить">видалити через N днів (у версійованому бакеті створює delete marker)</td>
+</tr>
+<tr>
+<td data-label="Правило"><strong>NoncurrentVersionExpiration</strong></td>
+<td data-label="Що робить">видалити старі версії</td>
+</tr>
+<tr>
+<td data-label="Правило"><strong>AbortIncompleteMultipartUpload</strong></td>
+<td data-label="Що робить">прибрати недозавантажені частини (вони коштують грошей, поки лежать)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Класична пара: <strong>теги плюс lifecycle</strong> (файл із тегом <code>status=temp</code> видаляється через 7 днів, після підтвердження тег знімають). Тому в політиці сервісу потрібні <code>PutObjectTagging</code> і <code>GetObjectTagging</code>.</p>
+<h2>Крок 4. Версіонування</h2>
+<ul>
+<li>Вмикається на бакеті, потім його можна лише <strong>призупинити</strong>, не вимкнути.</li>
+<li>Видалення без <code>versionId</code> лише ставить <strong>delete marker</strong>; об'єкт відновлюється видаленням маркера.</li>
+<li>Видалення з <code>versionId</code> стирає назавжди (за потреби потрібен MFA Delete).</li>
+<li>Платите за всі версії.</li>
+</ul>
+<h2>Крок 5. Події</h2>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Куди</th>
+<th>Конфіг</th>
+<th>Коли обирати</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Куди">Lambda, SQS, SNS</td>
+<td data-label="Конфіг"><code>NotificationConfiguration</code> на бакеті</td>
+<td data-label="Коли обирати">простий випадок, один споживач, фільтри префікс і суфікс</td>
+</tr>
+<tr>
+<td data-label="Куди"><strong>EventBridge</strong></td>
+<td data-label="Конфіг">вмикається прапорцем на бакеті</td>
+<td data-label="Коли обирати">багато споживачів, фільтр за будь-якими полями, архів і replay, кілька цілей</td>
+</tr>
+</tbody>
+</table></div>
+<p>Особливості:</p>
+<ul>
+<li>Події S3 доставляються <strong>принаймні один раз</strong> (можливі дублікати).</li>
+<li>Для Lambda, SQS, SNS не можна кілька <strong>перетинних префіксів</strong> на одну подію; в EventBridge цього обмеження нема.</li>
+<li><strong>Рекурсія:</strong> якщо Lambda пише в той самий бакет, що її запускає, можна зациклитися. Захист: різні префікси (<code>images/</code> → <code>thumbs/</code>) і правило, що слухає лише <code>images/</code>.</li>
+<li>З Terraform: <code>aws_s3_bucket_notification</code> із <code>eventbridge = true</code> лише вмикає надсилання подій на default-шину; саме правило створює SAM разом із функцією.</li>
+</ul>
+<h2>Крок 6. Завантаження й швидкість</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Механізм</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Механізм">Single PUT</td>
+<td data-label="Суть">до 5 ГБ за запит</td>
+</tr>
+<tr>
+<td data-label="Механізм"><strong>Multipart upload</strong></td>
+<td data-label="Суть">рекомендовано від 100 МБ, <strong>обов'язково понад 5 ГБ</strong>; частини 5 МБ - 5 ГБ, до <strong>10 000</strong> частин; паралельно, повтор лише невдалих частин</td>
+</tr>
+<tr>
+<td data-label="Механізм"><strong>Transfer Acceleration</strong></td>
+<td data-label="Суть">вхід через найближчий edge-вузол CloudFront (додаткова плата)</td>
+</tr>
+<tr>
+<td data-label="Механізм"><strong>Byte-range fetch</strong></td>
+<td data-label="Суть">читання частини об'єкта (<code>Range</code>), паралельне завантаження</td>
+</tr>
+<tr>
+<td data-label="Механізм"><strong>S3 Select / Glacier Select</strong></td>
+<td data-label="Суть">вибірка рядків з CSV, JSON, Parquet на боці S3 (нові клієнти не підключаються)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Швидкість на префікс: щонайменше <strong>3500</strong> запитів на запис і <strong>5500</strong> на читання в секунду <strong>на префікс</strong>; префіксів може бути скільки завгодно.</p>
+<h2>Крок 7. CORS</h2>
+<p>Потрібен, коли <strong>браузер</strong> ходить у S3 з іншого домену (наприклад, JS завантажує на presigned PUT). Налаштовується на бакеті: <code>AllowedOrigins</code>, <code>AllowedMethods</code>, <code>AllowedHeaders</code>. Якщо запис робить бекенд, CORS не потрібен.</p>
+<h2>Крок 8. Інше для іспиту</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Тема</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Тема">Replication (CRR, SRR)</td>
+<td data-label="Суть">асинхронне копіювання нових об'єктів в інший бакет між регіонами чи в межах регіону; потрібне версіонування</td>
+</tr>
+<tr>
+<td data-label="Тема">Requester Pays</td>
+<td data-label="Суть">платить той, хто читає (спільні дані)</td>
+</tr>
+<tr>
+<td data-label="Тема">Inventory, Storage Lens</td>
+<td data-label="Суть">звіти про вміст і метрики</td>
+</tr>
+<tr>
+<td data-label="Тема">Static website hosting</td>
+<td data-label="Суть">сайт із бакета (HTTP; для HTTPS потрібен CloudFront)</td>
+</tr>
+<tr>
+<td data-label="Тема">Batch Operations</td>
+<td data-label="Суть">масові дії над мільйонами об'єктів</td>
+</tr>
+<tr>
+<td data-label="Тема">Outposts, Object Lambda, Multi-Region Access Points</td>
+<td data-label="Суть">рідкісні, лише теорія</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Крок 9. Ціни</h2>
+<p>Тарифікується: зберігання (ГБ-місяць), запити (PUT і GET окремо), вихідний трафік в інтернет, опційні функції. <strong>Вхідний трафік у S3 безкоштовний; передавання між S3 і сервісами AWS у тому самому регіоні безкоштовне.</strong></p>
+<h2>Крок 10. Приклади використання класів</h2>
+<p>Клас обирають за трьома питаннями: скільки платити за зберігання, як швидко отримати об'єкт, як часто звертаєтесь.</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Клас</th>
+<th>Для яких даних</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Клас"><strong>Standard</strong> (за замовчуванням, часті звернення, доступ миттєвий)</td>
+<td data-label="Для яких даних">фото й відео для вебзастосунків; логи застосунків у реальному часі; HTML, CSS, JS сайту; Big Data аналітика</td>
+</tr>
+<tr>
+<td data-label="Клас"><strong>Intelligent-Tiering</strong> (сам переміщує між «часто» і «рідко», невелика плата за моніторинг)</td>
+<td data-label="Для яких даних">дані з непередбачуваним доступом; бекапи й архіви, до яких іноді звертаються вручну</td>
+</tr>
+<tr>
+<td data-label="Клас"><strong>Standard-IA</strong> (рідко, але миттєво; дешевше зберігати, дорожче діставати)</td>
+<td data-label="Для яких даних">логи, бекапи, експорти; старі дані користувачів, які треба швидко відновити</td>
+</tr>
+<tr>
+<td data-label="Клас"><strong>One Zone-IA</strong> (як IA, але в одній зоні, ще дешевше)</td>
+<td data-label="Для яких даних">бекапи, втрата яких не критична; кеш і тимчасові дані</td>
+</tr>
+<tr>
+<td data-label="Клас"><strong>Glacier Flexible Retrieval</strong> (архів, хвилини або години)</td>
+<td data-label="Для яких даних">щомісячні й щоквартальні архіви; старі версії проєкту, які можна відновити за кілька годин (Expedited 1-5 хв, Standard 3-5 год, Bulk 5-12 год)</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Крок 11. Приклади lifecycle-правил</h2>
+<p>Lifecycle економить гроші: правила кажуть, коли об'єкт перенести чи видалити.</p>
+<ul>
+<li><strong>Transition</strong> (перенести в інший клас): у Standard-IA через 60 днів після створення (у нотатках 60; мінімум 30), у Glacier через 6 місяців.</li>
+<li><strong>Expiration</strong> (видалити): логи через 365 днів; старі версії файлів, якщо ввімкнено версіонування.</li>
+</ul>
+<h2>Крок 12. Події: типи і дозволи</h2>
+<ol>
+<li>Основні групи: <strong>Object Created</strong>, <strong>Object Removed</strong>, <strong>Object Restored</strong>, <strong>Replication</strong> (документація додає ще lifecycle, tagging, ACL тощо).</li>
+<li>Цілі: <strong>Lambda</strong>, <strong>SQS</strong>, <strong>SNS</strong> (і EventBridge). SQS FIFO напряму не підтримується, потрібен EventBridge.</li>
+<li>S3 має право викликати ціль лише якщо <strong>на самій цілі</strong> (функції, черзі, темі) є дозвіл для S3.</li>
+<li>Приклад із нотаток: завантажили CSV-звіт, подія викликає Lambda, вона читає файл і записує дані в RDS.</li>
+</ol>
+<h2>Крок 13. Що саме пришвидшує S3: три механізми</h2>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Механізм</th>
+<th>Напрям</th>
+<th>Що робить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Механізм">Multipart upload</td>
+<td data-label="Напрям">завантаження в S3</td>
+<td data-label="Що робить">файл на частини, паралельно, S3 збирає; від 100 МБ рекомендовано, понад 5 ГБ обов'язково</td>
+</tr>
+<tr>
+<td data-label="Механізм">Byte-range fetch</td>
+<td data-label="Напрям">читання з S3</td>
+<td data-label="Що робить">береться частина об'єкта (<code>Range</code>), діапазони можна тягти паралельно</td>
+</tr>
+<tr>
+<td data-label="Механізм">Transfer Acceleration</td>
+<td data-label="Напрям">завантаження в S3</td>
+<td data-label="Що робить">файл іде на найближчий edge-вузол AWS, далі в бакет цільового регіону</td>
+</tr>
+</tbody>
+</table></div>
+<p>У нотатках byte-range описано як «розділити на частини, завантажити паралельно, S3 збере»: це насправді <strong>multipart upload</strong>. Byte-range працює на <strong>читанні</strong>.</p>
+<h2>Крок 14. Replication детальніше</h2>
+<p><strong>Replication</strong> автоматично й асинхронно копіює об'єкти з одного бакета в інший.</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>CRR</th>
+<th>SRR</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Де</td>
+<td data-label="CRR">між регіонами (eu-central-1 і us-east-1)</td>
+<td data-label="SRR">в одному регіоні</td>
+</tr>
+<tr>
+<td data-label="">Навіщо</td>
+<td data-label="CRR">захист від збою регіону, локальний доступ в іншому регіоні, менша затримка глобальним користувачам</td>
+<td data-label="SRR">резервна копія, аудит, розділення по командах, збір логів в один бакет</td>
+</tr>
+</tbody>
+</table></div>
+<p>Ще:</p>
+<ol>
+<li>Копіюються <strong>нові й змінені</strong> об'єкти після налаштування. Старі: S3 Batch Replication.</li>
+<li>Потрібне версіонування і IAM-роль.</li>
+<li>S3 Replication Time Control: 99,99% нових об'єктів за 15 хвилин (за SLA).</li>
+</ol>
+<h2>Словник</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Термін</th>
+<th>Що це</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Термін"><strong>Bucket / Object / Key</strong></td>
+<td data-label="Що це">контейнер, файл у ньому і його повне ім'я-шлях</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Prefix</strong></td>
+<td data-label="Що це">початок ключа, схожий на «папку» (<code>images/2025/</code>)</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Storage class</strong></td>
+<td data-label="Що це">клас зберігання: чим рідше доступ, тим дешевше</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Lifecycle rule</strong></td>
+<td data-label="Що це">правило: перенести об'єкт в інший клас чи видалити через N днів</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Versioning</strong></td>
+<td data-label="Що це">зберігання всіх версій об'єкта, видалення лише ставить delete marker</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Multipart upload</strong></td>
+<td data-label="Що це">завантаження великого файла частинами, обов'язково понад 5 ГБ</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Byte-range fetch</strong></td>
+<td data-label="Що це">читання лише частини об'єкта за діапазоном байтів</td>
+</tr>
+<tr>
+<td data-label="Термін"><strong>Transfer Acceleration</strong></td>
+<td data-label="Що це">прискорене завантаження через найближчий edge-вузол</td>
+</tr>
+</tbody>
+</table></div>
+<h2>🖼 Схема: S3: імена, класи зберігання</h2><div class="dg"><div class="dtitle">Ім&#x27;я бакета</div><div class="dcols"><div class="dcol green"><b>✅ можна</b><ul><li>глобально унікальне</li><li>3-63 символи</li><li>починається з малої літери чи цифри</li></ul></div><div class="dcol red"><b>❌ не можна</b><ul><li>великі літери й `_`</li><li>формат IP (192.168.1.1)</li><li>префікс xn--</li><li>суфікс -s3alias</li></ul></div></div><div class="dtitle">Класи зберігання</div><div class="dgroup green"><b><img class="dicon" src="../../icons/s3.svg" alt="">S3 Standard: частий доступ, продакшн, веб-додатки</b></div><div class="dgroup yellow"><b>Infrequent Access (IA): рідко, але швидко</b><div class="dkids"><div class="dbox yellow">Standard-IA: кілька AZ</div><div class="dbox yellow">One Zone-IA: одна AZ, менш критичні дані, AZ можна втратити</div></div></div><div class="dgroup blue"><b><img class="dicon" src="../../icons/glacier.svg" alt="">Glacier: архів</b><div class="dkids"><div class="dbox blue">Instant Retrieval: мілісекунди</div><div class="dbox blue">Flexible Retrieval: хвилини-години</div><div class="dbox blue">Deep Archive: найдешевше, години</div></div></div><div class="dnote">Intelligent-Tiering сам переміщає об&#x27;єкти між рівнями залежно від частоти доступу. Автоматично: Frequent, Infrequent (30 днів без доступу), Archive Instant (90 днів). Необов&#x27;язкові, їх вмикають окремо: Archive Access і Deep Archive Access.</div><div class="dtitle">Ключ і префікс</div><div class="dnote">Ключ це повний шлях: префікс (папки) плюс ім&#x27;я файла.<br>s3://my-bucket/folder/sub/file.txt</div><div class="dtitle">Події</div><div class="dflow"><div class="dbox aws"><img class="dicon" src="../../icons/s3.svg" alt="">S3 bucket: подія ObjectCreated</div><div class="darrow">↓</div><div class="dbox yellow"><img class="dicon" src="../../icons/eventbridge.svg" alt="">EventBridge (типово вимкнено, вмикається на бакеті)</div><div class="darrow">↓</div><div class="dbox blue">Rule: source aws.s3, prefix images/, suffix .json</div><div class="darrow">↓</div><div class="dbox green">Цілі: Lambda, SNS, SQS</div></div><div class="dnote">Доставка: near-real-time (зазвичай за секунди), at-least-once. Можна вмикати разом із класичними сповіщеннями.</div><div class="dtitle">Ліміти</div><div class="tw"><table class="two"><thead><tr><th>Що</th><th>Значення</th></tr></thead><tbody><tr><td>PUT, COPY, POST, DELETE</td><td>~3 500 запитів/с на префікс</td></tr><tr><td>GET, HEAD</td><td>~5 500 запитів/с на префікс</td></tr><tr><td>Більше 5 ГБ</td><td>обов&#x27;язково multi-part (кожна частина окремий паралельний PUT)</td></tr><tr><td>Макс. об&#x27;єкт</td><td>50 ТБ (з грудня 2025; раніше 5 ТБ, на іспиті можуть питати 5 ТБ). Реальна межа 48,8 ТіБ через multipart</td></tr></tbody></table></div><div class="dtitle">Інше</div><div class="dcols"><div class="dcol aws"><b>Lifecycle</b><ul><li>Expiration: видалити через N днів</li><li>Transition: перенести в інший клас</li></ul></div><div class="dcol aws"><b>Версіонування й реплікація</b><ul><li>Versioning вмикається на бакеті</li><li>CRR: інший регіон; SRR: той самий</li><li>реплікуються лише нові об&#x27;єкти</li><li>MFA Delete: MFA для видалення</li></ul></div></div></div><h2>🖼 Схема: S3: класи, умови й restore</h2><div class="dg"><div class="dtitle">Класи зберігання: умови</div><div class="tw"><table><thead><tr><th>Клас</th><th>Доступ</th><th>Мін. термін</th><th>Мін. розмір</th></tr></thead><tbody><tr><td>Standard</td><td>миттєво</td><td>нема</td><td>нема</td></tr><tr><td>Standard-IA</td><td>миттєво</td><td>30 днів</td><td>128 КБ</td></tr><tr><td>One Zone-IA</td><td>миттєво, одна AZ</td><td>30 днів</td><td>128 КБ</td></tr><tr><td>Glacier Instant</td><td>мілісекунди</td><td>90 днів</td><td>128 КБ</td></tr><tr><td>Glacier Flexible</td><td>хвилини-години (restore)</td><td>90 днів</td><td>нема</td></tr><tr><td>Deep Archive</td><td>години (restore)</td><td>180 днів</td><td>нема</td></tr></tbody></table></div><div class="dnote">Чим дешевше зберігання, тим дорожче читання, довший мінімальний термін і повільніший доступ. Видалили раніше мінімуму: платите за залишок днів.</div><div class="dtitle">Restore для Flexible і Deep Archive</div><div class="dflow"><div class="dbox red">GetObject на архівний об&#x27;єкт: InvalidObjectState</div><div class="darrow">↓</div><div class="dbox yellow">RestoreObject: Expedited (лише Flexible), Standard чи Bulk</div><div class="darrow">↓</div><div class="dbox green">Тимчасова копія в Standard на N днів</div><div class="darrow">↓</div><div class="dbox gray">Оригінал лишається в архіві</div></div><div class="dnote">Flexible: Expedited 1-5 хв, Standard 3-5 год, Bulk 5-12 год. Deep Archive: Expedited немає, Standard до ~12 год, Bulk до ~48 год.</div><div class="dtitle">Приклади даних</div><div class="dcols"><div class="dcol green"><b>Standard</b><ul><li>фото й відео для вебзастосунків</li><li>логи в реальному часі</li><li>HTML, CSS, JS сайту</li></ul></div><div class="dcol yellow"><b>Standard-IA</b><ul><li>рідкі бекапи й експорти</li><li>старі дані, що треба швидко відновити</li></ul></div><div class="dcol yellow"><b>One Zone-IA</b><ul><li>бекапи, втрата яких не критична</li><li>дані, які можна відтворити, в одній зоні</li></ul></div><div class="dcol blue"><b><img class="dicon" src="../../icons/glacier.svg" alt="">Glacier Flexible</b><ul><li>щомісячні й щоквартальні архіви</li><li>відновлення за хвилини (Expedited) чи години (Standard)</li></ul></div></div></div><h2>🖼 Схема: S3: lifecycle, версії, вибір класу</h2><div class="dg"><div class="dtitle">Lifecycle: правила на префікс, тег, розмір</div><div class="dcols"><div class="dcol blue"><b>Transition</b><ul><li>перенести в інший клас через N днів</li><li>в IA не раніше ніж через 30 днів</li><li>рухає лише вниз, назад не повертає</li></ul></div><div class="dcol red"><b>Expiration</b><ul><li>видалити через N днів</li><li>у версійованому бакеті ставить delete marker</li></ul></div></div><div class="drow"><div class="dbox gray">NoncurrentVersionExpiration: старі версії</div><div class="dbox gray">AbortIncompleteMultipartUpload: недозавантажені частини</div></div><div class="dnote">Приклади: в Standard-IA через 60 днів, в Glacier через 6 місяців, видаляти логи через 365 днів. Теги плюс lifecycle: тимчасові файли зникають самі.</div><div class="dtitle">Версіонування</div><div class="dflow"><div class="dbox blue">Увімкнули: можна лише призупинити</div><div class="darrow">↓</div><div class="dbox yellow">DELETE без versionId: ставить delete marker</div><div class="darrow">↓</div><div class="dbox green">Видалили маркер: об&#x27;єкт відновлено</div><div class="darrow">↓</div><div class="dbox red">DELETE з versionId: стирає назавжди</div></div><div class="dtitle">Як вибрати клас</div><div class="tw"><table class="two"><thead><tr><th>Умова в задачі</th><th>Клас</th></tr></thead><tbody><tr><td>Часто читають</td><td>Standard</td></tr><tr><td>Невідомо, як читатимуть</td><td>Intelligent-Tiering</td></tr><tr><td>Рідко, але потрібно відразу</td><td>Standard-IA (відтворювані: One Zone-IA)</td></tr><tr><td>Архів, але потрібні мілісекунди</td><td>Glacier Instant</td></tr><tr><td>Архів, години чекати можна</td><td>Glacier Flexible</td></tr><tr><td>Архів на роки, найдешевше</td><td>Deep Archive</td></tr></tbody></table></div></div><h2>🖼 Схема: S3: події й Lambda</h2><div class="dg"><div class="dtitle">Подія S3 запускає Lambda</div><div class="dflow"><div class="dbox blue">Адмінка: PutObject images/photo.jpg</div><div class="darrow">↓</div><div class="dbox aws"><img class="dicon" src="../../icons/s3.svg" alt="">S3 homeeho-site-media</div><div class="darrow">↓</div><div class="dbox yellow"><img class="dicon" src="../../icons/eventbridge.svg" alt="">EventBridge: Object Created</div><div class="darrow">↓</div><div class="dbox blue">Rule: префікс images/</div><div class="darrow">↓</div><div class="dbox green"><img class="dicon" src="../../icons/lambda.svg" alt="">Lambda thumbnails: GetObject images/photo.jpg</div><div class="darrow">↓</div><div class="dbox aws"><img class="dicon" src="../../icons/s3.svg" alt="">S3: PutObject thumbs/photo.webp</div></div><div class="dnote">Різні префікси (images/ і thumbs/) і правило лише на images/ не дають зациклитися. thumbs/ читається публічно.</div><div class="dtitle">Приклад: CSV у базу</div><div class="dflow"><div class="dbox blue">Користувач: PutObject report.csv</div><div class="darrow">↓</div><div class="dbox aws"><img class="dicon" src="../../icons/s3.svg" alt="">S3: подія Object Created</div><div class="darrow">↓</div><div class="dbox green"><img class="dicon" src="../../icons/lambda.svg" alt="">Lambda: читає файл, пише рядки в RDS</div></div><div class="dnote">Потрібен дозвіл для S3 на виклик Lambda: політика на самій цілі.</div><div class="dtitle">Куди слати події</div><div class="dcols"><div class="dcol yellow"><b><img class="dicon" src="../../icons/lambda.svg" alt="">Lambda, SQS, SNS</b><ul><li>сповіщення на бакеті</li><li>простий випадок, один споживач</li><li>фільтри prefix і suffix</li><li>FIFO-черга SQS напряму не підтримується</li></ul></div><div class="dcol green"><b><img class="dicon" src="../../icons/eventbridge.svg" alt="">EventBridge</b><ul><li>вмикається прапорцем на бакеті</li><li>багато споживачів</li><li>фільтр за будь-якими полями</li><li>архів і повтор</li></ul></div></div><div class="dnote">Доставка щонайменше раз, зазвичай за секунди: можливі дублікати.</div></div><h2>🖼 Схема: S3: швидкість завантаження й читання</h2><div class="dg"><div class="dtitle">Три механізми: не плутати напрям</div><div class="dcols"><div class="dcol green"><b>Multipart upload</b><ul><li>завантаження в S3</li><li>частини 5 МБ-5 ГБ, до 10 000</li><li>йдуть паралельно, S3 збирає</li><li>рекомендовано від 100 МБ</li><li>обов&#x27;язково понад 5 ГБ</li></ul></div><div class="dcol blue"><b>Transfer Acceleration</b><ul><li>завантаження в S3</li><li>файл іде в найближчий edge-вузол</li><li>далі по мережі AWS у бакет</li><li>додаткова плата</li></ul></div><div class="dcol yellow"><b>Byte-range fetch</b><ul><li>читання з S3</li><li>читається частина об&#x27;єкта (Range)</li><li>діапазони паралельно</li><li>або лише початок файла</li></ul></div></div><div class="dnote">Single PUT до 5 ГБ. Швидкість на префікс: щонайменше 3500 запитів на запис і 5500 на читання за секунду.</div></div><h2>🖼 Схема: S3: реплікація CRR і SRR</h2><div class="dg"><div class="dtitle">S3 Replication: асинхронне копіювання</div><div class="dcols"><div class="dcol blue"><b>CRR: між регіонами</b><ul><li>eu-central-1 до us-east-1</li><li>захист від збою регіону</li><li>менша затримка для глобальних користувачів</li><li>compliance</li></ul></div><div class="dcol green"><b>SRR: в межах регіону</b><ul><li>backup і audit</li><li>розділення по командах</li><li>логи в один бакет</li><li>production і test акаунти</li></ul></div></div><div class="dtitle">Правила</div><div class="drow"><div class="dbox gray">Копіюються нові й змінені об&#x27;єкти після налаштування</div><div class="dbox gray">Наявні: S3 Batch Replication</div><div class="dbox gray">Потрібне версіонування на обох бакетах</div><div class="dbox gray">Потрібна IAM-роль для S3</div></div><div class="dnote">Replication Time Control: 99,99% нових об&#x27;єктів за 15 хвилин (за SLA). Метадані зберігаються.</div></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
+<ol>
+<li>S3 плоский: ключ плюс префікси. Префікси задають межі прав, подій і lifecycle.</li>
+<li>Сильна консистентність з 2020 року.</li>
+<li>Клас обирають за патерном доступу: часто Standard, невідомо Intelligent-Tiering, рідко IA, архів Glacier.</li>
+<li>Мінімальні терміни 30 / 90 / 180 днів, мінімальний розмір 128 КБ для IA і Glacier Instant.</li>
+<li>Flexible і Deep Archive потребують restore перед читанням.</li>
+<li>Lifecycle рухає лише вниз; не забувайте <code>AbortIncompleteMultipartUpload</code>.</li>
+<li>Версіонування можна лише призупинити; delete без <code>versionId</code> ставить delete marker.</li>
+<li>EventBridge не має обмеження про перетинні префікси. Рекурсія лікується різними префіксами.</li>
+<li>Multipart обов'язковий понад 5 ГБ, до 10 000 частин.</li>
+<li>3500 записів і 5500 читань на секунду на префікс.</li>
+</ol>
+</div><h2>Перевірте себе</h2>
+<ol>
+<li>Чому S3 називають плоским, хоча в консолі є «теки»?</li>
+<li>Який клас для даних, що читаються раз на квартал, але мають віддаватися миттєво?</li>
+<li>Навіщо <code>AbortIncompleteMultipartUpload</code>?</li>
+<li>Що станеться з версійованим об'єктом після звичайного <code>DELETE</code>?</li>
+<li>Чому Lambda не зациклюється, хоч пише в той самий бакет?</li>
+<li>Чим EventBridge кращий за пряме сповіщення S3 у Lambda?</li>
+<li>З якого розміру потрібен multipart?</li>
+<li>Для чого CORS?</li>
+<li>Чому <code>GetObject</code> повертає <code>InvalidObjectState</code>?</li>
+<li>Що потрібно для реплікації?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>Ключ це один рядок, <code>/</code> лише символ, консоль показує «теки» за префіксом.</li>
+<li>Standard-IA.</li>
+<li>Недозавантажені частини коштують грошей, поки лежать.</li>
+<li>Ставиться delete marker, об'єкт відновлюється видаленням маркера.</li>
+<li>Правило слухає лише <code>images/</code>, а Lambda пише в <code>thumbs/</code>.</li>
+<li>Багато споживачів, фільтр за будь-якими полями, архів, replay, нема обмеження про перетинні префікси.</li>
+<li>Обов'язково понад 5 ГБ, рекомендовано від 100 МБ.</li>
+<li>Коли браузер ходить у S3 з іншого домену.</li>
+<li>Об'єкт у Flexible чи Deep Archive: спершу <code>RestoreObject</code>.</li>
+<li>Увімкнене версіонування.</li>
+</ol>
+</details>
+<hr />
+<p><em>Повна версія:</em> 9-s3-in-depth.md.</p>
+
+<nav class="pager"><a href="8-s3-access-encryption-simple.html">← Лекція 8</a><a href="10-rds-aurora-proxy-simple.html">Лекція 10 →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>
