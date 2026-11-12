@@ -95,7 +95,7 @@
 Джерело: Anthropic, «Choosing a Claude model for knowledge workers» (7 хв). Плани, типові моделі й ліміти змінюються; звіряйте в продукті.</p>
 </blockquote>
 <blockquote>
-<p><strong>Дві схеми, не змішуйте.</strong> <a href="3-claude-platform-and-model-foundations-uk.html">Тема 3</a> навчає <strong>триярусну</strong> схему (Haiku, Sonnet, Opus), яку фіксує сертифікація, і вважає Sonnet звичайним стартом. Ця тема описує <strong>чотири моделі</strong> (Fable, Opus, Sonnet, Haiku) і радить починати з <strong>Opus</strong>. Для питань іспиту про рівні користуйтесь триярусною схемою; для щоденного вибору ця тема.</p>
+<p><strong>Звірено з офіційною документацією в розділі 8.</strong> Сама документація каже: якщо не певні, починайте з Opus. <strong>Дві схеми, не змішуйте.</strong> <a href="3-claude-platform-and-model-foundations-uk.html">Тема 3</a> навчає <strong>триярусну</strong> схему (Haiku, Sonnet, Opus), яку фіксує сертифікація, і вважає Sonnet звичайним стартом. Ця тема описує <strong>чотири моделі</strong> (Fable, Opus, Sonnet, Haiku) і радить починати з <strong>Opus</strong>. Для питань іспиту про рівні користуйтесь триярусною схемою; для щоденного вибору ця тема.</p>
 </blockquote>
 <h2>1. Що означає вибір моделі</h2>
 <ul>
@@ -150,11 +150,11 @@
 </tbody>
 </table></div>
 <h2>3. Коли міняти модель чи effort</h2>
-<p><strong>З чого починати.</strong> Opus типовий на планах <strong>Pro, Max, Ultra і Team</strong>. Деякі плани чи організації стартують із Sonnet; тоді починайте з нього, підхід той самий: <strong>спершу підніміть effort</strong>, потім переходьте на потужнішу модель, якщо все ще не вистачає.</p>
+<p><strong>З чого починати.</strong> Курс каже, що Opus типовий на планах <strong>Pro, Max, Ultra і Team</strong> (у Help Center не підтверджено, див. розділ 8). Деякі плани чи організації стартують із Sonnet; тоді починайте з нього, підхід той самий: <strong>спершу підніміть effort</strong>, потім переходьте на потужнішу модель, якщо все ще не вистачає.</p>
 <p><strong>Що можна налаштувати</strong> (обидва в меню моделі біля кнопки надсилання):</p>
 <ul>
 <li><strong>Model</strong>: наскільки <strong>потужна</strong>. Вгору (Opus, Fable) чи вниз (Sonnet).</li>
-<li><strong>Effort</strong>: наскільки <strong>ґрунтовна</strong>. Вищий: Claude думає довше, частіше викликає інструменти, більше перевіряє свою роботу. Нижчий: швидший, прямий прохід.</li>
+<li><strong>Effort</strong>: наскільки <strong>ґрунтовна</strong> (рівні: Low, Medium, High, Extra high, Max; наявність залежить від моделі). Вищий: Claude думає довше, частіше викликає інструменти, більше перевіряє свою роботу. Нижчий: швидший, прямий прохід.</li>
 </ul>
 <p><strong>Як налаштовувати.</strong> Почніть із типового. Якщо результат хибний, спершу перевірте, чи ваш промпт і файли дали Claude все потрібне. Далі міняйте <strong>один параметр за раз, спершу effort</strong>, щоб бачити, що саме допомогло.</p>
 <div class="tw"><table class="two">
@@ -218,6 +218,101 @@
 <li>Яка модель «не рекомендована як типова» і чому?</li>
 <li>У чому різниця між триярусною схемою з Теми 3 і чотирма моделями тут?</li>
 </ol>
+<h2>8. Звірено з офіційними джерелами (2026-11-13)</h2>
+<p>Джерела: Claude API docs «Models overview» і Claude Help Center «Change the model, effort and thinking settings» та «Usage and length limits».</p>
+<p><strong>Поточна лінійка (документація):</strong></p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Модель</th>
+<th>API ID</th>
+<th>Опис у документації</th>
+<th>Затримка</th>
+<th>Ціна за MTok (вхід / вихід)</th>
+<th>Типовий effort (API)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Модель"><strong>Fable 5.2</strong></td>
+<td data-label="API ID"><code>claude-fable-5-2</code></td>
+<td data-label="Опис у документації">вимогливі міркування, довготривала агентна робота</td>
+<td data-label="Затримка">Помірна</td>
+<td data-label="Ціна за MTok (вхід / вихід)">$8 / $40</td>
+<td data-label="Типовий effort (API)">high</td>
+</tr>
+<tr>
+<td data-label="Модель"><strong>Opus 5.5</strong></td>
+<td data-label="API ID"><code>claude-opus-5-5</code></td>
+<td data-label="Опис у документації">довготривале агентне кодування й робота зі знаннями</td>
+<td data-label="Затримка">Помірна</td>
+<td data-label="Ціна за MTok (вхід / вихід)">$4 / $20</td>
+<td data-label="Типовий effort (API)">medium</td>
+</tr>
+<tr>
+<td data-label="Модель"><strong>Sonnet 5.5</strong></td>
+<td data-label="API ID"><code>claude-sonnet-5-5</code></td>
+<td data-label="Опис у документації">найкраще поєднання швидкості й інтелекту</td>
+<td data-label="Затримка">Швидка</td>
+<td data-label="Ціна за MTok (вхід / вихід)">$2 / $10</td>
+<td data-label="Типовий effort (API)">high</td>
+</tr>
+<tr>
+<td data-label="Модель"><strong>Haiku 5.5</strong></td>
+<td data-label="API ID"><code>claude-haiku-5-5</code></td>
+<td data-label="Опис у документації">великі обсяги, чутливі до затримки: класифікація, витяг, маршрутизація</td>
+<td data-label="Затримка">Найшвидша</td>
+<td data-label="Ціна за MTok (вхід / вихід)">від $0.10 / $0.50</td>
+<td data-label="Типовий effort (API)">medium</td>
+</tr>
+</tbody>
+</table></div>
+<p>Усі чотири: контекст 1M токенів, макс. вивід 128K, надійний cutoff знань червень 2026.</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Твердження в курсі</th>
+<th>Статус</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Твердження в курсі">Якщо не певні, починайте з Opus; Fable, коли Opus на вищому effort не дотягує</td>
+<td data-label="Статус"><strong>Підтверджено</strong> майже дослівно документацією («if you're unsure which model to use, start with Claude Opus 5.5 ... Fable 5.2 for demanding reasoning ... or when your evals on Opus 5.5 at higher effort still fall short»)</td>
+</tr>
+<tr>
+<td data-label="Твердження в курсі">Чотири моделі, порядок Fable, Opus, Sonnet, Haiku</td>
+<td data-label="Статус"><strong>Підтверджено</strong> як поточна лінійка (у меню чату є й старіші моделі в «More models»)</td>
+</tr>
+<tr>
+<td data-label="Твердження в курсі">Два параметри: модель і effort; спершу effort</td>
+<td data-label="Статус"><strong>Підтверджено</strong>: рівні effort Low, Medium, High, Extra high (xhigh, Opus 4.7 і новіші) та Max; вищий effort дає ґрунтовніші відповіді, повільніше, більше токенів, ліміти швидше. Help Center каже, що кожна модель має рекомендований типовий рівень, позначений «Default» у меню</td>
+</tr>
+<tr>
+<td data-label="Твердження в курсі">Opus типовий на Pro, Max, Ultra, Team</td>
+<td data-label="Статус"><strong>Не підтверджено</strong>: стаття Help Center не називає типової моделі за планом; адміни Enterprise можуть задати стартову модель і effort</td>
+</tr>
+<tr>
+<td data-label="Твердження в курсі">Free має Haiku і Sonnet; платні додають Opus</td>
+<td data-label="Статус"><strong>Не підтверджено</strong> на прочитаних сторінках; перевірте свій план</td>
+</tr>
+<tr>
+<td data-label="Твердження в курсі">Haiku «зроблена переважно для тих, хто розробляє власні продукти», «не рекомендована як типова»</td>
+<td data-label="Статус"><strong>Не підтверджено</strong> в офіційному тексті; документація лише описує Haiku як швидку модель для великих обсягів. Узгоджується з порадою документації «починайте з Opus»</td>
+</tr>
+<tr>
+<td data-label="Твердження в курсі">Позначки використання (Найважче, Важко, Помірно, Найлегше)</td>
+<td data-label="Статус">Позначки курсу, не офіційні. Офіційне співвідношення цін за токен: Fable вдвічі дорожча за Opus, Opus вдвічі дорожча за Sonnet</td>
+</tr>
+<tr>
+<td data-label="Твердження в курсі">«Потужніша може коштувати менше за завдання»</td>
+<td data-label="Статус">Узгоджується з порадою документації, але числа 1 / 6 / 2 ходи це <strong>ілюстрація</strong> курсу, а не вимірювання</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>Єдине правило для цього шляху:</strong> починайте з <strong>Opus</strong>; знижуйте effort або переходьте на <strong>Sonnet</strong> для повсякденної й простішої роботи; <strong>Haiku</strong> для великих обсягів із чутливістю до затримки; <strong>Fable</strong>, коли Opus на вищому effort усе ще не дотягує. Триярусна схема Haiku/Sonnet/Opus із Теми 3 це схема іспиту за словами курсу, яку я не зміг звірити з офіційним посібником.</p>
+</blockquote>
 
 <nav class="pager"><a href="4-choosing-the-right-claude-model-en.html">← Topic 4 of 11: Choosing the Right Claude Model (English)</a><span></span></nav>
 </main>

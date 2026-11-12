@@ -272,11 +272,11 @@ Source: Anthropic Associate course, Module 1 &quot;Claude Platform &amp; Model F
 </tr>
 <tr>
 <td data-label="Task profile">Most professional drafting, synthesis, analysis</td>
-<td data-label="Model"><strong>Sonnet</strong>: balanced; the starting point for most knowledge work</td>
+<td data-label="Model"><strong>Sonnet</strong>: best combination of speed and intelligence (docs); everyday and simpler work</td>
 </tr>
 <tr>
 <td data-label="Task profile">Complex judgment, high-stakes output, ambiguous or multi-layered inputs</td>
-<td data-label="Model"><strong>Opus</strong>: higher capability, slower; client deliverables, strategy, multi-source synthesis</td>
+<td data-label="Model"><strong>Opus</strong>: higher capability, latency moderate (docs); client deliverables, strategy, multi-source synthesis</td>
 </tr>
 </tbody>
 </table></div>
@@ -284,7 +284,7 @@ Source: Anthropic Associate course, Module 1 &quot;Claude Platform &amp; Model F
 <li>If quality falls short on a complex task, move up to Opus; if the task is structured and speed and volume matter, consider Haiku.</li>
 <li>On metered or usage-budgeted plans (including API) a more capable tier also costs more per call. On the claude.ai subscription, treat speed and usage headroom as the proxy for cost.</li>
 <li>The model picker, default model and auto-switching vary by plan and change over time.</li>
-<li><strong>Note from the course:</strong> by June 2026 the family also has a fourth tier above Opus (Claude Fable 5), and Opus latency is described as moderate. <strong>The certification pins the three-tier Haiku/Sonnet/Opus frame</strong>, so learn that frame; Fable is marked not exam-relevant. See <a href="4-choosing-the-right-claude-model-en.html">Topic 4</a> for the four-model view.</li>
+<li><strong>Note from the course, checked in section 11:</strong> by June 2026 the family also has a fourth tier above Opus (Fable). The course says the certification pins the three-tier Haiku/Sonnet/Opus frame and Fable is not exam-relevant; I could not verify that against an official exam guide. <strong>Where to start:</strong> the course here says Sonnet, but the official docs say <em>if unsure, start with Opus</em>; this path follows the docs (standard rule in section 11). See <a href="4-choosing-the-right-claude-model-en.html">Topic 4</a> for the four-model view.</li>
 </ul>
 <h2>6. Context limits and conversation hygiene</h2>
 <ul>
@@ -318,7 +318,7 @@ Source: Anthropic Associate course, Module 1 &quot;Claude Platform &amp; Model F
 </tbody>
 </table></div>
 <ul>
-<li><strong>Usage limits</strong> run on several windows: a short rolling session window plus weekly limits on paid plans across models (a separate weekly pool for the top tier). Plan ahead: split big tasks, save interim progress to the knowledge base, restart from a summary instead of extending one session forever.</li>
+<li><strong>Usage limits</strong> run on several windows: a short rolling session window plus weekly limits on paid plans across models (on some plans a separate weekly pool for Fable); the session window resets every five hours. Plan ahead: split big tasks, save interim progress to the knowledge base, restart from a summary instead of extending one session forever.</li>
 </ul>
 <h2>7. Exercise: pick the right configuration</h2>
 <div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
@@ -423,6 +423,63 @@ Source: Anthropic Associate course, Module 1 &quot;Claude Platform &amp; Model F
 <li>Restart, summarize, persist: when each?</li>
 <li>Which model for 800 routine classifications? For a board analysis?</li>
 </ol>
+<h2>11. Checked against official sources (2026-11-13)</h2>
+<p>Sources: Claude API docs &quot;Models overview&quot;; Claude Help Center (usage and length limits; change the model, effort and thinking settings; memory; skills). The official exam guide was <strong>not</strong> found: exam facts below are from the course text only.</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Claim in the course</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Claim in the course">Automatic summarization of earlier messages near the limit, full history kept, needs code execution enabled</td>
+<td data-label="Status"><strong>Confirmed</strong> (Help Center, usage and length limits)</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Paid plans: short session window plus weekly limits across all models, a separate weekly pool for the top tier on some plans</td>
+<td data-label="Status"><strong>Confirmed</strong>, with a correction: the session window <strong>resets every five hours</strong> (from your first message), and the separate pool is for <strong>Fable</strong> on some plans</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Incognito keeps a chat out of memory and search; separate Project memory</td>
+<td data-label="Status"><strong>Confirmed</strong>: incognito exists on every plan; each Project has its own memory (you can also turn off &quot;Use account memory&quot; in the Project)</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Memory import from other AI providers (course: experimental, Free/Pro/Max/Team, not Enterprise)</td>
+<td data-label="Status"><strong>Partly confirmed</strong>: the feature exists; plan list <strong>not confirmed</strong> in official text, sources disagree. Verify in your account</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Memory availability</td>
+<td data-label="Status">Official page: on by default for Free, Pro, Max; on Team and Enterprise off by default, an owner can enable it</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Skills: reusable, invoked automatically when relevant</td>
+<td data-label="Status"><strong>Confirmed</strong>; Free/Pro/Max enable them in Customize &gt; Skills. Docs list custom skills for Pro, Max, Team, Enterprise with code execution; on Team and Enterprise an admin must enable Skills first</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Skills live at account level, not inside a Project</td>
+<td data-label="Status"><strong>Not confirmed</strong>: no official text found about Skills inside Projects. Test it in your account</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">&quot;Opus is slower&quot;</td>
+<td data-label="Status"><strong>Outdated</strong>: the docs list latency as Fable moderate, Opus moderate, Sonnet fast, Haiku fastest</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Sonnet as the usual starting model</td>
+<td data-label="Status"><strong>Differs from the official guidance</strong>: docs say &quot;if unsure, start with Opus 5.5&quot;. See Topic 4</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">&quot;The certification pins the three-tier frame; Fable is not exam-relevant&quot;</td>
+<td data-label="Status"><strong>Could not verify</strong> (no official exam guide found; third-party sites list only five domains and weights). Treat as the course's own statement</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Quiz and exercise answers</td>
+<td data-label="Status">The source prints no key; answers are derived and consistent with the checked facts above (for example Q5 matches the separate Project memory)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Standard rule used across this path:</strong> start with <strong>Opus</strong>; go down to <strong>Sonnet</strong> for everyday or simpler work and to <strong>Haiku</strong> for high-volume, latency-sensitive work (classification, extraction, routing); go up to <strong>Fable</strong> when Opus at higher effort still falls short.</p>
 
 <nav class="pager"><a href="2-ai-fluency-for-builders-uk.html">← Тема 2 з 11: AI Fluency для builders (українською)</a><a href="3-claude-platform-and-model-foundations-uk.html">Тема 3 з 11: Claude Platform &amp; Model Foundations (українською) →</a></nav>
 </main>

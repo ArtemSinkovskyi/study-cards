@@ -95,7 +95,7 @@
 Source: Anthropic, &quot;Choosing a Claude model for knowledge workers&quot; (7 min). Plans, defaults and limits change; verify in the product.</p>
 </blockquote>
 <blockquote>
-<p><strong>Two frames, do not mix them.</strong> <a href="3-claude-platform-and-model-foundations-en.html">Topic 3</a> teaches the <strong>three-tier</strong> frame (Haiku, Sonnet, Opus) that the certification pins, and treats Sonnet as the usual start. This topic describes the <strong>four-model</strong> lineup (Fable, Opus, Sonnet, Haiku) and recommends starting with <strong>Opus</strong>. Use the three-tier frame for exam questions about tiers; use this topic for real day-to-day choices.</p>
+<p><strong>Checked against the official docs in section 8.</strong> The docs themselves say: if unsure, start with Opus. <strong>Two frames, do not mix them.</strong> <a href="3-claude-platform-and-model-foundations-en.html">Topic 3</a> teaches the <strong>three-tier</strong> frame (Haiku, Sonnet, Opus) that the certification pins, and treats Sonnet as the usual start. This topic describes the <strong>four-model</strong> lineup (Fable, Opus, Sonnet, Haiku) and recommends starting with <strong>Opus</strong>. Use the three-tier frame for exam questions about tiers; use this topic for real day-to-day choices.</p>
 </blockquote>
 <h2>1. What a model choice means</h2>
 <ul>
@@ -150,11 +150,11 @@ Source: Anthropic, &quot;Choosing a Claude model for knowledge workers&quot; (7 
 </tbody>
 </table></div>
 <h2>3. When to adjust model or effort</h2>
-<p><strong>Where to start.</strong> Opus is the default on <strong>Pro, Max, Ultra and Team</strong>. Some plans or organizations start you on Sonnet; then start there, same approach: <strong>raise effort first</strong>, then switch to a more capable model if it still falls short.</p>
+<p><strong>Where to start.</strong> The course says Opus is the default on <strong>Pro, Max, Ultra and Team</strong> (not confirmed in the Help Center, see section 8). Some plans or organizations start you on Sonnet; then start there, same approach: <strong>raise effort first</strong>, then switch to a more capable model if it still falls short.</p>
 <p><strong>What you can adjust</strong> (both in the model menu next to the send button):</p>
 <ul>
 <li><strong>Model</strong>: how <strong>capable</strong>. Switch up (Opus, Fable) or down (Sonnet).</li>
-<li><strong>Effort</strong>: how <strong>thorough</strong>. Higher: Claude thinks longer, makes more tool calls, checks more of its work. Lower: a quicker, more direct pass.</li>
+<li><strong>Effort</strong>: how <strong>thorough</strong> (levels: Low, Medium, High, Extra high, Max; availability varies by model). Higher: Claude thinks longer, makes more tool calls, checks more of its work. Lower: a quicker, more direct pass.</li>
 </ul>
 <p><strong>How to adjust.</strong> Start at the default. If the result is wrong, first check that your prompt and files gave Claude what it needed. Then change <strong>one setting at a time, effort first</strong>, so you can tell what made the difference.</p>
 <div class="tw"><table class="two">
@@ -218,6 +218,101 @@ Source: Anthropic, &quot;Choosing a Claude model for knowledge workers&quot; (7 
 <li>Which model is &quot;not recommended as a default&quot; and why?</li>
 <li>What is the difference between the three-tier frame of Topic 3 and the four-model view here?</li>
 </ol>
+<h2>8. Checked against official sources (2026-11-13)</h2>
+<p>Sources: Claude API docs &quot;Models overview&quot; and Claude Help Center &quot;Change the model, effort and thinking settings&quot; and &quot;Usage and length limits&quot;.</p>
+<p><strong>Current lineup (docs):</strong></p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Model</th>
+<th>API ID</th>
+<th>Docs description</th>
+<th>Latency</th>
+<th>Price per MTok (in / out)</th>
+<th>Default effort (API)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Model"><strong>Fable 5.2</strong></td>
+<td data-label="API ID"><code>claude-fable-5-2</code></td>
+<td data-label="Docs description">demanding reasoning, long-horizon agentic work</td>
+<td data-label="Latency">Moderate</td>
+<td data-label="Price per MTok (in / out)">$8 / $40</td>
+<td data-label="Default effort (API)">high</td>
+</tr>
+<tr>
+<td data-label="Model"><strong>Opus 5.5</strong></td>
+<td data-label="API ID"><code>claude-opus-5-5</code></td>
+<td data-label="Docs description">long-running agentic coding and knowledge work</td>
+<td data-label="Latency">Moderate</td>
+<td data-label="Price per MTok (in / out)">$4 / $20</td>
+<td data-label="Default effort (API)">medium</td>
+</tr>
+<tr>
+<td data-label="Model"><strong>Sonnet 5.5</strong></td>
+<td data-label="API ID"><code>claude-sonnet-5-5</code></td>
+<td data-label="Docs description">the best combination of speed and intelligence</td>
+<td data-label="Latency">Fast</td>
+<td data-label="Price per MTok (in / out)">$2 / $10</td>
+<td data-label="Default effort (API)">high</td>
+</tr>
+<tr>
+<td data-label="Model"><strong>Haiku 5.5</strong></td>
+<td data-label="API ID"><code>claude-haiku-5-5</code></td>
+<td data-label="Docs description">high-volume, latency-sensitive tasks: classification, extraction, routing</td>
+<td data-label="Latency">Fastest</td>
+<td data-label="Price per MTok (in / out)">from $0.10 / $0.50</td>
+<td data-label="Default effort (API)">medium</td>
+</tr>
+</tbody>
+</table></div>
+<p>All four: 1M-token context window, 128K max output, reliable knowledge cutoff June 2026.</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Claim in the course</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Claim in the course">Start with Opus when unsure; use Fable when Opus at higher effort still falls short</td>
+<td data-label="Status"><strong>Confirmed</strong> word for word by the docs (&quot;if you're unsure which model to use, start with Claude Opus 5.5 ... Fable 5.2 for demanding reasoning ... or when your evals on Opus 5.5 at higher effort still fall short&quot;)</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Four models, order Fable, Opus, Sonnet, Haiku</td>
+<td data-label="Status"><strong>Confirmed</strong> as the current lineup (the chat menu also offers older models under &quot;More models&quot;)</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Effort and model are the two settings; effort first</td>
+<td data-label="Status"><strong>Confirmed</strong>: effort levels are Low, Medium, High, Extra high (xhigh, Opus 4.7 and newer) and Max; higher effort means more thorough answers, slower, more tokens, limits reached sooner. The Help Center says each model has a recommended default level shown as &quot;Default&quot; in the menu</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Opus default on Pro, Max, Ultra, Team</td>
+<td data-label="Status"><strong>Not confirmed</strong>: the Help Center article lists no default model per plan; Enterprise admins can set the starting model and effort</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Free has Haiku and Sonnet; paid plans add Opus</td>
+<td data-label="Status"><strong>Not confirmed</strong> in the pages I read; check your plan</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Haiku &quot;built mainly for people developing their own products&quot;, &quot;not recommended as a default&quot;</td>
+<td data-label="Status"><strong>Not confirmed</strong> in official text; the docs only describe Haiku as the fast, high-volume model. Consistent with the docs' &quot;start with Opus&quot;</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Usage labels (Heaviest, Heavy, Moderate, Lightest)</td>
+<td data-label="Status">Course labels, not official. Official price ratios per token: Fable 2x Opus, Opus 2x Sonnet</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">&quot;More capable can cost less per task&quot;</td>
+<td data-label="Status">Consistent with the docs' advice, but the 1-turn / 6-turn / 2-turn numbers are the course's <strong>illustration</strong>, not measurements</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>Standard rule for this path:</strong> start with <strong>Opus</strong>; lower effort or move to <strong>Sonnet</strong> for everyday and simpler work; <strong>Haiku</strong> for high-volume, latency-sensitive work; <strong>Fable</strong> when Opus at higher effort still falls short. The three-tier Haiku/Sonnet/Opus frame of Topic 3 is the course's exam frame, which I could not verify against an official exam guide.</p>
+</blockquote>
 
 <nav class="pager"><a href="3-claude-platform-and-model-foundations-uk.html">← Тема 3 з 11: Claude Platform &amp; Model Foundations (українською)</a><a href="4-choosing-the-right-claude-model-uk.html">Тема 4 з 11: вибір правильної моделі Claude (українською) →</a></nav>
 </main>
