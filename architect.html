@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Architect: English words</title>
+<style>
+  :root { --bg:#f7f5f0; --card:#fff; --ink:#1d1d1f; --mut:#6b6b70; --line:#e3dfd6; --acc:#24466b; --ok:#1e7a46; --bad:#b3261e; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui, Segoe UI, Roboto, sans-serif; }
+  header { background:var(--card); border-bottom:1px solid var(--line); padding:.75rem 1rem; }
+  .wrap { max-width:40rem; margin:0 auto; padding:0 1rem; }
+  header .wrap { padding:0; }
+  h1 { font-size:1.05rem; margin:0 0 .5rem; }
+  .row { display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; }
+  select, .chip { font:inherit; padding:.35rem .6rem; border:1px solid var(--line); border-radius:.5rem; background:var(--bg); }
+  .chip { cursor:pointer; }
+  .chip.on { background:var(--acc); color:#fff; border-color:var(--acc); }
+  .bar { height:.4rem; background:var(--line); border-radius:1rem; margin-top:.6rem; overflow:hidden; }
+  .bar i { display:block; height:100%; background:var(--ok); width:0; transition:width .2s; }
+  .st { font-size:.85rem; color:var(--mut); margin-top:.3rem; }
+  main { padding:1.2rem 0 3rem; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:.9rem; min-height:15rem; padding:1.4rem; cursor:pointer; display:flex; flex-direction:column; justify-content:center; text-align:center; user-select:none; }
+  .term.q { font:600 1.2rem/1.4 system-ui, Segoe UI, Roboto, sans-serif; }
+  .def { background:#f1f6ee; border-radius:.5rem; padding:.5rem .7rem; }
+  .term { font:600 1.7rem/1.3 ui-monospace, Consolas, monospace; word-break:break-word; }
+  .hint { color:var(--mut); font-size:.85rem; margin-top:1rem; }
+  .group { color:var(--acc); font-size:.8rem; text-transform:uppercase; letter-spacing:.05em; margin-bottom:.8rem; }
+  .back { text-align:left; }
+  .back .lit { color:var(--mut); font-size:.95rem; }
+  .back p { margin:.7rem 0 0; }
+  .back b { color:var(--acc); }
+  .ex { background:#1d1d1f; color:#f4f1ea; border-radius:.5rem; padding:.6rem .8rem; font:.82rem/1.45 ui-monospace, Consolas, monospace; overflow-x:auto; white-space:pre; margin:.7rem 0 0; }
+  .pic { display:flex; align-items:center; gap:.8rem; background:#fff7e6; border:1px dashed #e3c987; border-radius:.6rem; padding:.5rem .8rem; margin:.2rem 0 .6rem; }
+  .pic .big { font-size:2rem; line-height:1; }
+  .pic .cap { font-size:.92rem; color:#5a4a1f; }
+  .refs { margin-top:.8rem; padding-top:.6rem; border-top:1px dashed var(--line); font-size:.85rem; color:var(--mut); }
+  .refs ul { margin:.3rem 0 0; padding-left:1.1rem; }
+  .refs a { color:var(--acc); }
+  .why { background:#fff6e0; border-radius:.5rem; padding:.5rem .7rem; }
+  .tip { margin-top:.9rem; padding:.55rem .7rem; background:#eef3f9; border-radius:.5rem; font-size:.92rem; }
+  .btns { display:flex; gap:.7rem; margin-top:1rem; }
+  .btns button { flex:1; padding:.8rem; font:inherit; border-radius:.6rem; border:0; cursor:pointer; color:#fff; }
+  .know { background:var(--ok); }
+  .no { background:var(--bad); }
+  .small { background:#fff !important; color:var(--acc) !important; border:1px solid var(--acc) !important; flex:none !important; padding:.5rem .8rem !important; }
+  .done { text-align:center; padding:2rem 1rem; background:var(--card); border:1px solid var(--line); border-radius:.9rem; }
+</style>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>Claude Architect: English words</h1>
+  <div class="row">
+    <select id="group"></select>
+    <span class="chip on" id="m1">Термін → значення</span>
+    <span class="chip" id="m2">Значення → термін</span>
+  </div>
+  <div class="bar"><i id="fill"></i></div>
+  <div class="st" id="st"></div>
+</div></header>
+<main><div class="wrap" id="app"></div></main>
+
+<script>
+const GROUP_ICONS = {"4D і курс": "🧭", "Властивості AI": "🧠", "Знання і межі": "📚", "Навчання і вдача": "🎭", "Контекст і пам'ять": "🪟", "Керованість і збої": "🎛", "Загальна лексика": "💬"};
+function gi(g) { return (GROUP_ICONS[g] || "📌") + " " + g; }
+
+const GLOSSARY = [];
+
+const CARDS = [
+ { "g": "4D і курс", "t": "Delegation", "q": "Delegation", "lit": "іменник", "m": "делегування", "d": "Deciding which tasks to hand to AI and which need human control.", "a": "Good delegation starts with knowing where the model is strong." },
+ { "g": "4D і курс", "t": "Description", "q": "Description", "lit": "іменник", "m": "опис (завдання)", "d": "Telling the AI clearly what you want: goal, context, constraints, format.", "a": "A clear description beats a clever trick." },
+ { "g": "4D і курс", "t": "Discernment", "q": "Discernment", "lit": "іменник", "m": "розрізнення, критична оцінка", "d": "The ability to judge what is good and what is wrong in an output.", "a": "Discernment helps you notice a hallucinated source." },
+ { "g": "4D і курс", "t": "Diligence", "q": "Diligence", "lit": "іменник", "m": "сумлінність, ретельність", "d": "Careful, responsible checking and use of AI results. (В твоєму списку було Diligent: прикметник «сумлінний».)", "a": "Diligence matters most when the result affects a real decision." },
+ { "g": "4D і курс", "t": "Diligent", "q": "Diligent", "lit": "прикметник", "m": "сумлінний, старанний", "d": "Showing careful and persistent effort.", "a": "A diligent reviewer checks every citation." },
+ { "g": "4D і курс", "t": "roadmap", "q": "roadmap", "lit": "іменник", "m": "дорожня карта, план курсу", "d": "A plan that shows the steps of a course or project.", "a": "The course roadmap has five parts." },
+ { "g": "4D і курс", "t": "discern", "q": "discern", "lit": "дієслово", "m": "розрізняти, помічати", "d": "To notice or recognize something that is hard to see.", "a": "It is hard to discern a true fact from a plausible one." },
+ { "g": "4D і курс", "t": "actionable", "q": "actionable", "lit": "прикметник", "m": "такий, що можна застосувати на практиці", "d": "Giving you something you can act on right away.", "a": "The lesson ends with one actionable change." },
+ { "g": "4D і курс", "t": "durable mental model", "q": "durable mental model", "lit": "фраза", "m": "стійка ментальна модель", "d": "A simple picture in your head that stays useful even when details change.", "a": "The goal is a durable mental model of the machine." },
+ { "g": "4D і курс", "t": "rise of generative AI", "q": "rise of generative AI", "lit": "фраза", "m": "зростання генеративного AI", "d": "The fast growth in popularity and use of AI that creates new content.", "a": "The rise of generative AI changed how people write." },
+ { "g": "4D і курс", "t": "enormously useful", "q": "enormously useful", "lit": "фраза", "m": "надзвичайно корисний", "d": "Very, very helpful.", "a": "AI is enormously useful for summaries." },
+ { "g": "4D і курс", "t": "usable and useful", "q": "usable and useful", "lit": "фраза", "m": "придатний до використання і корисний", "d": "Easy to work with, and gives real value.", "a": "Fine-tuning makes a model usable and useful." },
+ { "g": "4D і курс", "t": "niche topic", "q": "niche topic", "lit": "фраза", "m": "вузька, нішева тема", "d": "A topic that interests only a small group of people.", "a": "The model is weaker on a niche topic." },
+ { "g": "4D і курс", "t": "broad term", "q": "broad term", "lit": "фраза", "m": "широкий термін", "d": "A word that covers many different things.", "a": "\"AI\" is a broad term." },
+ { "g": "Властивості AI", "t": "Next Token Prediction", "q": "Next Token Prediction", "lit": "іменник", "m": "передбачення наступного токена", "d": "Writing an answer one token at a time, based on what usually comes next.", "a": "Next Token Prediction explains both fluency and fabrication." },
+ { "g": "Властивості AI", "t": "Working Memory", "q": "Working Memory", "lit": "іменник", "m": "робоча пам'ять (вікно контексту)", "d": "What the model can pay attention to right now, inside the context window.", "a": "Working Memory has a hard limit." },
+ { "g": "Властивості AI", "t": "Steerability", "q": "Steerability", "lit": "іменник", "m": "керованість", "d": "How well you can control the model with instructions.", "a": "High steerability: it follows short, clear instructions." },
+ { "g": "Властивості AI", "t": "continuum", "q": "continuum", "lit": "іменник", "m": "континуум, суцільний спектр", "d": "A range with no sharp borders, from one end to the other.", "a": "Each property is a continuum from capability to limitation." },
+ { "g": "Властивості AI", "t": "spectrum", "q": "spectrum", "lit": "іменник", "m": "спектр", "d": "A range of different positions between two extremes.", "a": "Your task sits somewhere on the spectrum." },
+ { "g": "Властивості AI", "t": "capability zone", "q": "capability zone", "lit": "фраза", "m": "зона можливостей", "d": "The part of the continuum where AI works reliably.", "a": "Summarizing a common topic is in the capability zone." },
+ { "g": "Властивості AI", "t": "limitation zone", "q": "limitation zone", "lit": "фраза", "m": "зона обмежень", "d": "The part where AI is likely to fail, so you must verify.", "a": "Exact dates are in the limitation zone." },
+ { "g": "Властивості AI", "t": "uniformly capable", "q": "uniformly capable", "lit": "фраза", "m": "однаково здатний у всьому", "d": "Equally good at everything.", "a": "AI is not uniformly capable." },
+ { "g": "Властивості AI", "t": "uniform", "q": "uniform", "lit": "прикметник", "m": "однорідний, однаковий", "d": "The same everywhere, without differences.", "a": "Trust should not be uniform across tasks." },
+ { "g": "Властивості AI", "t": "axes", "q": "axes", "lit": "іменник (мн.)", "m": "осі", "d": "Lines along which something is measured. Plural of axis.", "a": "The four axes are Next Token Prediction, Knowledge, Working Memory, Steerability." },
+ { "g": "Властивості AI", "t": "dimensions", "q": "dimensions", "lit": "іменник (мн.)", "m": "виміри", "d": "Separate directions or aspects used to describe something.", "a": "An embedding has about a thousand dimensions." },
+ { "g": "Властивості AI", "t": "varies", "q": "varies", "lit": "дієслово", "m": "змінюється, різниться", "d": "Is different in different cases.", "a": "Accuracy varies by topic." },
+ { "g": "Властивості AI", "t": "shape of these properties", "q": "shape of these properties", "lit": "фраза", "m": "обриси, «форма» цих властивостей", "d": "How the properties behave in general, even if exact limits move.", "a": "The shape of these properties stays useful." },
+ { "g": "Властивості AI", "t": "interconnect", "q": "interconnect", "lit": "дієслово", "m": "взаємопов'язуватися", "d": "To be connected with each other.", "a": "The four properties interconnect." },
+ { "g": "Властивості AI", "t": "fit together", "q": "fit together", "lit": "фраза", "m": "добре поєднуватися", "d": "To join into one whole picture.", "a": "The ideas fit together as one system." },
+ { "g": "Властивості AI", "t": "colliding", "q": "colliding", "lit": "дієслово", "m": "стикатися, зіткнення", "d": "Meeting with force. Here: two properties causing one failure.", "a": "Failures happen when properties are colliding." },
+ { "g": "Властивості AI", "t": "feel out", "q": "feel out", "lit": "фраза", "m": "відчути, «промацати»", "d": "To explore carefully to understand something.", "a": "Feel out where the model gets shaky." },
+ { "g": "Властивості AI", "t": "recognize", "q": "recognize", "lit": "дієслово", "m": "розпізнавати", "d": "To know something because you have seen it before.", "a": "Recognize product features that reduce a limitation." },
+ { "g": "Властивості AI", "t": "coherent continuation", "q": "coherent continuation", "lit": "фраза", "m": "зв'язне продовження", "d": "Text that logically follows what came before.", "a": "The model produces a coherent continuation of your prompt." },
+ { "g": "Властивості AI", "t": "coherence", "q": "coherence", "lit": "іменник", "m": "зв'язність", "d": "Being logical and consistent as a whole.", "a": "Long chats can lose coherence." },
+ { "g": "Властивості AI", "t": "frontier labs", "q": "frontier labs", "lit": "фраза", "m": "провідні лабораторії (які розвивають найсильніші моделі)", "d": "Research companies building the most advanced AI models.", "a": "Frontier labs release new models often." },
+ { "g": "Знання і межі", "t": "knowledge cutoff", "q": "knowledge cutoff", "lit": "іменник", "m": "дата відсікання знань", "d": "The date after which the model saw no training data.", "a": "Without search, it does not know events after its cutoff." },
+ { "g": "Знання і межі", "t": "cutoff", "q": "cutoff", "lit": "іменник", "m": "межа, дата відсікання", "d": "A point after which something stops.", "a": "The cutoff is frozen at training time." },
+ { "g": "Знання і межі", "t": "edge", "q": "edge", "lit": "іменник", "m": "край, межа", "d": "The border between where something works and where it does not.", "a": "Rare topics sit at the edge of the model's knowledge." },
+ { "g": "Знання і межі", "t": "mainstream science", "q": "mainstream science", "lit": "фраза", "m": "загальноприйнята наука", "d": "Science that most experts accept and document widely.", "a": "Mainstream science is well covered." },
+ { "g": "Знання і межі", "t": "popular programming languages", "q": "popular programming languages", "lit": "фраза", "m": "популярні мови програмування", "d": "Languages used by many people, so the model saw a lot of them.", "a": "Popular programming languages get better answers." },
+ { "g": "Знання і межі", "t": "rare topics", "q": "rare topics", "lit": "фраза", "m": "рідкісні теми", "d": "Topics that appear seldom in training data.", "a": "Rare topics invite fabrication." },
+ { "g": "Знання і межі", "t": "obscure topics", "q": "obscure topics", "lit": "фраза", "m": "маловідомі теми", "d": "Topics that few people know about.", "a": "Obscure topics have sparse patterns." },
+ { "g": "Знання і межі", "t": "post cutoff events", "q": "post cutoff events", "lit": "фраза", "m": "події після дати відсікання", "d": "Things that happened after the training data ended.", "a": "Post-cutoff events are invisible to the model." },
+ { "g": "Знання і межі", "t": "niche domains", "q": "niche domains", "lit": "фраза", "m": "вузькі галузі", "d": "Small specialized fields.", "a": "Niche domains need your own context." },
+ { "g": "Знання і межі", "t": "local knowledge", "q": "local knowledge", "lit": "фраза", "m": "місцеві знання", "d": "Facts that matter only in one place or community.", "a": "Local knowledge is often missing." },
+ { "g": "Знання і межі", "t": "deeply competent", "q": "deeply competent", "lit": "фраза", "m": "глибоко компетентний", "d": "Very skilled and knowledgeable.", "a": "It is deeply competent on mainstream topics." },
+ { "g": "Знання і межі", "t": "uneven coverage", "q": "uneven coverage", "lit": "фраза", "m": "нерівномірне покриття", "d": "Some topics are well covered, others barely.", "a": "Uneven coverage causes uneven quality." },
+ { "g": "Знання і межі", "t": "inherited bias", "q": "inherited bias", "lit": "фраза", "m": "успадкована упередженість", "d": "Bias that came from the training data.", "a": "Inherited bias decides what looks \"normal\"." },
+ { "g": "Знання і межі", "t": "source amnesia", "q": "source amnesia", "lit": "фраза", "m": "амнезія джерела", "d": "Remembering a fact but not where it came from.", "a": "Source amnesia is why it cannot name a real source." },
+ { "g": "Знання і межі", "t": "staleness", "q": "staleness", "lit": "іменник", "m": "застарілість", "d": "Information that was true once but is now out of date.", "a": "Staleness is a knowledge failure." },
+ { "g": "Знання і межі", "t": "citations", "q": "citations", "lit": "іменник (мн.)", "m": "цитати, посилання на джерела", "d": "References to the sources of a claim.", "a": "Citations let you check the answer." },
+ { "g": "Знання і межі", "t": "citation-shaped text", "q": "citation-shaped text", "lit": "фраза", "m": "текст, схожий на цитату (але може бути вигаданим)", "d": "Text that looks like a reference, whether or not the source exists.", "a": "Beware citation-shaped text." },
+ { "g": "Знання і межі", "t": "source", "q": "source", "lit": "іменник", "m": "джерело", "d": "Where information comes from.", "a": "Always ask for the source." },
+ { "g": "Знання і межі", "t": "came from", "q": "came from", "lit": "фраза", "m": "походив з, узявся з", "d": "Had its origin in.", "a": "Where did the answer come from?" },
+ { "g": "Знання і межі", "t": "comes from", "q": "comes from", "lit": "фраза", "m": "походить з", "d": "Has its origin in.", "a": "Knowledge comes from training data." },
+ { "g": "Знання і межі", "t": "decades", "q": "decades", "lit": "іменник (мн.)", "m": "десятиліття", "d": "Periods of ten years.", "a": "Search worked by string match for decades." },
+ { "g": "Знання і межі", "t": "embedding", "q": "embedding", "lit": "іменник", "m": "ембединг (числове представлення змісту)", "d": "A list of numbers that stands for the meaning of a text.", "a": "An embedding puts similar texts close together." },
+ { "g": "Знання і межі", "t": "cosine similarity", "q": "cosine similarity", "lit": "іменник", "m": "косинусна подібність", "d": "A score from -1 to 1 that shows how close two vectors point in direction.", "a": "Cosine similarity of 1 means identical direction." },
+ { "g": "Знання і межі", "t": "retrieval", "q": "retrieval", "lit": "іменник", "m": "пошук і підвантаження інформації", "d": "Finding relevant material and giving it to the model. RAG = Retrieval-Augmented Generation.", "a": "Retrieval fixes stale knowledge." },
+ { "g": "Знання і межі", "t": "semantic space", "q": "semantic space", "lit": "фраза", "m": "семантичний простір", "d": "A space where texts with similar meaning are close together.", "a": "Embeddings map text into semantic space." },
+ { "g": "Навчання і вдача", "t": "pre-training", "q": "pre-training", "lit": "іменник", "m": "попереднє навчання", "d": "First stage: learning patterns from massive amounts of data.", "a": "Pre-training makes a document completer." },
+ { "g": "Навчання і вдача", "t": "fine-tuning", "q": "fine-tuning", "lit": "іменник", "m": "донавчання", "d": "Second stage: refining behavior to be safe, ethical and helpful.", "a": "Fine-tuning teaches instruction following." },
+ { "g": "Навчання і вдача", "t": "fingerprint", "q": "fingerprint", "lit": "іменник", "m": "відбиток пальця (слід навчання)", "d": "A distinctive mark left by training on the model's behavior.", "a": "Fine-tuning leaves fingerprints." },
+ { "g": "Навчання і вдача", "t": "disposition", "q": "disposition", "lit": "іменник", "m": "вдача, схильність", "d": "A natural tendency in how someone behaves.", "a": "The model has a helpful disposition." },
+ { "g": "Навчання і вдача", "t": "trait", "q": "trait", "lit": "іменник", "m": "риса", "d": "A particular quality in someone's character.", "a": "Sycophancy is a trait of tuned models." },
+ { "g": "Навчання і вдача", "t": "reward", "q": "reward", "lit": "іменник", "m": "винагорода", "d": "A signal that says an answer was good; training pushes toward it.", "a": "Reward shapes the model's habits." },
+ { "g": "Навчання і вдача", "t": "behave", "q": "behave", "lit": "дієслово", "m": "поводитися", "d": "To act in a certain way.", "a": "How does the model behave under pressure?" },
+ { "g": "Навчання і вдача", "t": "refine", "q": "refine", "lit": "дієслово", "m": "удосконалювати, доводити", "d": "To improve something by small changes.", "a": "Fine-tuning refines behavior." },
+ { "g": "Навчання і вдача", "t": "broadly shape", "q": "broadly shape", "lit": "фраза", "m": "загалом формувати", "d": "To influence something in a general way.", "a": "Training broadly shapes the model's character." },
+ { "g": "Навчання і вдача", "t": "sycophancy", "q": "sycophancy", "lit": "іменник", "m": "підлабузництво, надмірна згода з користувачем", "d": "Agreeing too easily, even when the user is wrong.", "a": "Sycophancy flips a right answer after pushback." },
+ { "g": "Навчання і вдача", "t": "verbosity", "q": "verbosity", "lit": "іменник", "m": "багатослівність", "d": "Using more words than needed.", "a": "Verbosity makes answers long." },
+ { "g": "Навчання і вдача", "t": "overcaution", "q": "overcaution", "lit": "іменник", "m": "надмірна обережність", "d": "Being too careful, for example refusing safe requests.", "a": "Overcaution blocks harmless tasks." },
+ { "g": "Навчання і вдача", "t": "loose confidence calibration", "q": "loose confidence calibration", "lit": "фраза", "m": "нечітка калібровка впевненості", "d": "Sounding equally sure whether right or wrong.", "a": "Loose confidence calibration hides weak answers." },
+ { "g": "Навчання і вдача", "t": "confident tone", "q": "confident tone", "lit": "фраза", "m": "впевнений тон", "d": "Sounding sure about what is said.", "a": "A confident tone is not proof." },
+ { "g": "Навчання і вдача", "t": "fluency", "q": "fluency", "lit": "іменник", "m": "вільність, гладкість мовлення", "d": "Smooth, natural-sounding language.", "a": "Fluency is not accuracy." },
+ { "g": "Навчання і вдача", "t": "compelling", "q": "compelling", "lit": "прикметник", "m": "переконливий. (У списку було «complaining piece», ймовірно «compelling piece»)", "d": "Strong enough to convince you.", "a": "A compelling piece of text can still be wrong." },
+ { "g": "Навчання і вдача", "t": "compellingly", "q": "compellingly", "lit": "прислівник", "m": "переконливо", "d": "In a way that convinces you.", "a": "It writes compellingly about things it invented." },
+ { "g": "Навчання і вдача", "t": "both fluency and hallucination", "q": "both fluency and hallucination", "lit": "фраза", "m": "і плавність, і галюцинація", "d": "The same mechanism gives smooth language and made-up facts.", "a": "Next token prediction gives both fluency and hallucination." },
+ { "g": "Навчання і вдача", "t": "vastly sophisticated", "q": "vastly sophisticated", "lit": "фраза", "m": "надзвичайно складний", "d": "Much more complex than it looks.", "a": "A vastly sophisticated model still predicts tokens." },
+ { "g": "Навчання і вдача", "t": "delivered", "q": "delivered", "lit": "дієслово (мин.)", "m": "доставив, видав", "d": "Gave or produced a result.", "a": "The model delivered a polished answer." },
+ { "g": "Контекст і пам'ять", "t": "context window", "q": "context window", "lit": "іменник", "m": "вікно контексту", "d": "The fixed amount of text the model can consider at once.", "a": "Anything outside the context window is invisible." },
+ { "g": "Контекст і пам'ять", "t": "cliff", "q": "cliff", "lit": "іменник", "m": "урвище (різкий обрив)", "d": "A sudden drop: it works, and then it does not.", "a": "Working memory has a cliff, not a slope." },
+ { "g": "Контекст і пам'ять", "t": "gradually", "q": "gradually", "lit": "прислівник", "m": "поступово", "d": "Slowly, a little at a time.", "a": "Humans degrade gradually; context loss can be sudden." },
+ { "g": "Контекст і пам'ять", "t": "ceiling", "q": "ceiling", "lit": "іменник", "m": "стеля (верхня межа)", "d": "The upper limit.", "a": "The context window is a hard ceiling." },
+ { "g": "Контекст і пам'ять", "t": "giant", "q": "giant", "lit": "прикметник", "m": "гігантський", "d": "Very big.", "a": "A giant document may not fit." },
+ { "g": "Контекст і пам'ять", "t": "slip", "q": "slip", "lit": "дієслово", "m": "вислизати, зісковзувати", "d": "To move out of place by accident.", "a": "Instructions slip into the dead zone." },
+ { "g": "Контекст і пам'ять", "t": "slippage", "q": "slippage", "lit": "іменник", "m": "зсув, поступова втрата", "d": "A slow loss of position or quality.", "a": "Slippage grows in long conversations." },
+ { "g": "Контекст і пам'ять", "t": "fade", "q": "fade", "lit": "дієслово", "m": "зникати, тьмяніти", "d": "To slowly become weaker.", "a": "Early details fade in long chats." },
+ { "g": "Контекст і пам'ять", "t": "resupply", "q": "resupply", "lit": "дієслово", "m": "знову надати", "d": "To give again what was lost.", "a": "Resupply the key context." },
+ { "g": "Контекст і пам'ять", "t": "reliably", "q": "reliably", "lit": "прислівник", "m": "надійно", "d": "In a way you can depend on.", "a": "It does not reliably follow buried rules." },
+ { "g": "Контекст і пам'ять", "t": "reliable", "q": "reliable", "lit": "прикметник", "m": "надійний", "d": "Can be trusted to work correctly.", "a": "Short instructions are more reliable." },
+ { "g": "Контекст і пам'ять", "t": "primacy", "q": "primacy", "lit": "іменник", "m": "ефект первинності (початок запам'ятовується добре)", "d": "Items at the start are remembered better.", "a": "Primacy: put key rules first." },
+ { "g": "Контекст і пам'ять", "t": "recency", "q": "recency", "lit": "іменник", "m": "ефект новизни (кінець запам'ятовується добре)", "d": "Items at the end are remembered better.", "a": "Recency: repeat the rule at the end." },
+ { "g": "Контекст і пам'ять", "t": "lost in the middle", "q": "lost in the middle", "lit": "фраза", "m": "загублено посередині", "d": "Facts in the middle of a long context are recalled worse.", "a": "Lost in the middle: accuracy fell by over 30%." },
+ { "g": "Контекст і пам'ять", "t": "front-load", "q": "front-load", "lit": "дієслово", "m": "ставити важливе на початок", "d": "To put the most important material first.", "a": "Front-load your constraints." },
+ { "g": "Контекст і пам'ять", "t": "habit", "q": "habit", "lit": "іменник", "m": "звичка", "d": "Something you do regularly.", "a": "Make a habit of restating the goal." },
+ { "g": "Керованість і збої", "t": "tight control", "q": "tight control", "lit": "фраза", "m": "жорсткий контроль", "d": "Strong, precise influence over the result.", "a": "Short instructions give tight control." },
+ { "g": "Керованість і збої", "t": "punchy", "q": "punchy", "lit": "прикметник", "m": "різкий, лаконічний", "d": "Short and strong in style.", "a": "Make it punchy." },
+ { "g": "Керованість і збої", "t": "be concise", "q": "be concise", "lit": "фраза", "m": "будь стислим", "d": "Use few words.", "a": "Be concise: under 100 words." },
+ { "g": "Керованість і збої", "t": "glance", "q": "glance", "lit": "іменник", "m": "побіжний погляд", "d": "A very quick look.", "a": "A table lets you grasp it at a glance." },
+ { "g": "Керованість і збої", "t": "nuance", "q": "nuance", "lit": "іменник", "m": "нюанс, тонкість", "d": "A small but important difference.", "a": "Letter over spirit loses nuance." },
+ { "g": "Керованість і збої", "t": "refinement", "q": "refinement", "lit": "іменник", "m": "уточнення, доопрацювання", "d": "A small improvement.", "a": "Ask for one refinement at a time." },
+ { "g": "Керованість і збої", "t": "letter over spirit", "q": "letter over spirit", "lit": "фраза", "m": "буква замість духу (виконано дослівно, не за наміром)", "d": "Following the exact words of an instruction but missing its real goal.", "a": "\"Shorter\" deleted the key finding: letter over spirit." },
+ { "g": "Керованість і збої", "t": "reasoning drift", "q": "reasoning drift", "lit": "фраза", "m": "дрейф міркувань", "d": "Small early errors that grow through a long chain of reasoning.", "a": "Add checkpoints to stop reasoning drift." },
+ { "g": "Керованість і збої", "t": "hallucination", "q": "hallucination", "lit": "іменник", "m": "галюцинація (переконлива вигадка)", "d": "A false statement that sounds convincing.", "a": "A fake URL is a classic hallucination." },
+ { "g": "Керованість і збої", "t": "fabrication", "q": "fabrication", "lit": "іменник", "m": "вигадка, фабрикація", "d": "Making up facts, names or sources.", "a": "Fabrication concentrates in specifics." },
+ { "g": "Керованість і збої", "t": "specificity", "q": "specificity", "lit": "іменник", "m": "конкретика, точність деталей", "d": "Exact details such as names, dates, numbers.", "a": "More specificity means more checking." },
+ { "g": "Керованість і збої", "t": "accuracy", "q": "accuracy", "lit": "іменник", "m": "точність", "d": "Being correct.", "a": "Accuracy drops for buried facts." },
+ { "g": "Керованість і збої", "t": "plausible", "q": "plausible", "lit": "прикметник", "m": "правдоподібний", "d": "Seems likely to be true.", "a": "A plausible answer is not always true." },
+ { "g": "Керованість і збої", "t": "obvious", "q": "obvious", "lit": "прикметник", "m": "очевидний", "d": "Easy to see or understand.", "a": "The error was not obvious." },
+ { "g": "Керованість і збої", "t": "entirely", "q": "entirely", "lit": "прислівник", "m": "повністю", "d": "Completely.", "a": "Do not rely entirely on AI." },
+ { "g": "Керованість і збої", "t": "meanwhile", "q": "meanwhile", "lit": "прислівник", "m": "тим часом", "d": "At the same time.", "a": "Meanwhile, the context fills up." },
+ { "g": "Керованість і збої", "t": "sharp edges", "q": "sharp edges", "lit": "фраза", "m": "гострі кути (небезпечні місця)", "d": "Hidden dangers or places where a tool fails badly.", "a": "Know the sharp edges of the tool." },
+ { "g": "Керованість і збої", "t": "treat outputs", "q": "treat outputs", "lit": "фраза", "m": "ставитися до результатів", "d": "How you handle what the model returns.", "a": "Treat outputs as drafts." },
+ { "g": "Керованість і збої", "t": "deserve", "q": "deserve", "lit": "дієслово", "m": "заслуговувати", "d": "To have earned something.", "a": "Precise claims deserve checking." },
+ { "g": "Керованість і збої", "t": "surface", "q": "surface", "lit": "дієслово", "m": "виявляти, виводити на поверхню", "d": "To bring a hidden thing into view.", "a": "Probes surface hidden failures." },
+ { "g": "Керованість і збої", "t": "shakiness", "q": "shakiness", "lit": "іменник", "m": "хиткість, ненадійність", "d": "A weak, uncertain state.", "a": "Notice the shakiness of rare topics." },
+ { "g": "Керованість і збої", "t": "narrow the space", "q": "narrow the space", "lit": "фраза", "m": "звузити простір варіантів", "d": "To reduce the number of possible answers.", "a": "Constraints narrow the space." },
+ { "g": "Керованість і збої", "t": "uncertainty signaling", "q": "uncertainty signaling", "lit": "фраза", "m": "сигналізація невпевненості", "d": "The model says when it is not sure.", "a": "Uncertainty signaling warns you." },
+ { "g": "Керованість і збої", "t": "constrained generation", "q": "constrained generation", "lit": "фраза", "m": "обмежена генерація (за схемою чи форматом)", "d": "Forcing output to match a format or schema.", "a": "Constrained generation keeps JSON valid." },
+ { "g": "Керованість і збої", "t": "generator-verifier pattern", "q": "generator-verifier pattern", "lit": "фраза", "m": "патерн «генератор + перевіряльник»", "d": "One step creates an answer, another checks it.", "a": "The generator-verifier pattern catches errors." },
+ { "g": "Керованість і збої", "t": "explicit", "q": "explicit", "lit": "прикметник", "m": "явний, прямо висловлений", "d": "Stated clearly, nothing hidden.", "a": "Give explicit instructions." },
+ { "g": "Керованість і збої", "t": "explicitly", "q": "explicitly", "lit": "прислівник", "m": "явно, прямо", "d": "In a clear and direct way.", "a": "State the goal explicitly." },
+ { "g": "Керованість і збої", "t": "implicit", "q": "implicit", "lit": "прикметник", "m": "неявний, прихований", "d": "Not said directly, only implied.", "a": "Implicit intent is easy to miss." },
+ { "g": "Керованість і збої", "t": "summarizing", "q": "summarizing", "lit": "дієслово (-ing)", "m": "стиснення, резюмування", "d": "Making a long text short, keeping main points.", "a": "Summarizing is a capability-zone task." },
+ { "g": "Керованість і збої", "t": "reformatting", "q": "reformatting", "lit": "дієслово (-ing)", "m": "переформатування", "d": "Changing how text is arranged, not its meaning.", "a": "Reformatting is a safe task." },
+ { "g": "Керованість і збої", "t": "common concepts", "q": "common concepts", "lit": "фраза", "m": "поширені поняття", "d": "Ideas that many people know.", "a": "Explaining common concepts works well." },
+ { "g": "Керованість і збої", "t": "drafting in a familiar style", "q": "drafting in a familiar style", "lit": "фраза", "m": "складання чернетки у знайомому стилі", "d": "Writing a first version in a style the model has seen a lot.", "a": "Drafting in a familiar style is a strength." },
+ { "g": "Керованість і збої", "t": "well-worn path vs. novel territory", "q": "well-worn path vs. novel territory", "lit": "фраза", "m": "протоптана стежка проти нової території", "d": "Common tasks vs. new, rare ones.", "a": "On a well-worn path, trust more; in novel territory, verify." },
+ { "g": "Керованість і збої", "t": "rapid", "q": "rapid", "lit": "прикметник", "m": "швидкий", "d": "Very fast.", "a": "Rapid changes move the boundaries." },
+ { "g": "Керованість і збої", "t": "recognize product features", "q": "recognize product features", "lit": "фраза", "m": "розпізнавати функції продукту", "d": "Knowing which tool features reduce a limitation.", "a": "Recognize product features like search and citations." },
+ { "g": "Загальна лексика", "t": "remain", "q": "remain", "lit": "дієслово", "m": "залишатися", "d": "To stay the same, not to leave.", "a": "Some limits remain even in new models." },
+ { "g": "Загальна лексика", "t": "shift", "q": "shift", "lit": "дієслово", "m": "зсуватися, зміщуватися", "d": "To move or change position.", "a": "The boundaries will shift." }
+];
+
+const KEY = "cca_words_v1";
+let store = {};
+try { store = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { store = {}; }
+if (!store.streak) store.streak = {};
+let mode = 1, group = "all", flipped = false, queue = [], cur = null;
+
+function save() { localStorage.setItem(KEY, JSON.stringify(store)); }
+function key(c) { return c.g + "|" + c.t; }
+function streak(c) { return store.streak[key(c)] || 0; }
+function pool() { return CARDS.filter(c => group === "all" || c.g === group); }
+function mastered(c) { return streak(c) >= 2; }
+
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function rebuild() { queue = shuffle(pool().filter(c => !mastered(c))); next(); }
+function next() { cur = queue.length ? queue.shift() : null; flipped = false; render(); }
+
+function setup() {
+  const sel = document.getElementById("group");
+  const groups = ["all"].concat([...new Set(CARDS.map(c => c.g))]);
+  sel.innerHTML = groups.map(g => "<option value='" + g + "'>" + (g === "all" ? "Усі групи" : gi(g)) + "</option>").join("");
+  sel.onchange = () => { group = sel.value; rebuild(); };
+  document.getElementById("m1").onclick = () => setMode(1);
+  document.getElementById("m2").onclick = () => setMode(2);
+}
+function setMode(m) {
+  mode = m;
+  document.getElementById("m1").classList.toggle("on", m === 1);
+  document.getElementById("m2").classList.toggle("on", m === 2);
+  flipped = false; render();
+}
+
+function progress() {
+  const p = pool(), n = p.filter(mastered).length;
+  document.getElementById("fill").style.width = (100 * n / p.length) + "%";
+  document.getElementById("st").textContent = "Вивчено " + n + " з " + p.length + " · у черзі " + queue.length + (cur ? " +1" : "") + ". Картка вивчена, коли ви двічі поспіль відповіли «Знаю».";
+}
+
+function esc(t) {
+  return t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function refs(c) {
+  const text = [c.t, c.q, c.d, c.m, c.a, c.ex, c.cap].filter(Boolean).join(" ");
+  const found = GLOSSARY.filter(g => new RegExp(g[0]).test(text)).slice(0, 6);
+  if (!found.length) return "";
+  return "<div class='refs'><b>🔗 Що це за слова</b><ul>" + found.map(g => "<li><b>" + g[1] + "</b>: " + g[2] + " <a href='" + g[3] + "' target='_blank' rel='noopener'>документація</a></li>").join("") + "</ul></div>";
+}
+
+function body(c) {
+  return (c.ic ? "<div class='pic'><span class='big'>" + c.ic + "</span><span class='cap'>" + c.cap + "</span></div>" : "") + (c.why ? "<p class='why'><b>Навіщо так зроблено:</b> " + c.why + "</p>" : "") + (c.d ? "<p class='def'><b>Meaning:</b> " + c.d + "</p>" : "") + "<p><b>Переклад:</b> " + c.m + "</p>" + (c.a ? "<p><b>Example:</b> " + c.a + "</p>" : "") + (c.ex ? "<pre class='ex'>" + esc(c.ex) + "</pre>" : "") + refs(c);
+}
+
+function render() {
+  const app = document.getElementById("app");
+  progress();
+  if (!cur) {
+    app.innerHTML = "<div class='done'><h2>Усі картки цієї групи вивчено</h2><p>Можна обрати іншу групу або почати спочатку.</p><div class='btns'><button class='small' id='again'>Скинути прогрес групи</button></div></div>";
+    document.getElementById("again").onclick = () => { pool().forEach(c => delete store.streak[key(c)]); save(); rebuild(); };
+    return;
+  }
+  let html = "";
+  if (!flipped) {
+    html += "<div class='card' id='card'><div class='group'>" + gi(cur.g) + "</div>";
+    if (mode === 1) html += "<div class='term q'>" + (cur.q || cur.t) + "</div><div class='hint'>Згадайте відповідь, потім клацніть, щоб перевернути.</div>";
+    else html += "<div class='back'>" + body(cur) + "</div><div class='hint'>Яке питання це відповідає? Клацніть, щоб перевернути.</div>";
+    html += "</div>";
+  } else {
+    html += "<div class='card' id='card'><div class='group'>" + gi(cur.g) + "</div>";
+    html += "<div class='term q'>" + (cur.q || cur.t) + "</div>";
+    html += "<div class='back'>" + (cur.lit ? "<div class='lit'>Частина мови: " + cur.lit + "</div>" : "") + body(cur);
+    if (cur.tip) html += "<div class='tip'>Щоб запам'ятати: " + cur.tip + "</div>";
+    html += "</div></div>";
+    html += "<div class='btns'><button class='no' id='no'>Ще ні</button><button class='know' id='yes'>Знаю</button></div>";
+  }
+  app.innerHTML = html;
+  document.getElementById("card").onclick = () => { if (!flipped) { flipped = true; render(); } };
+  if (flipped) {
+    document.getElementById("yes").onclick = () => { store.streak[key(cur)] = streak(cur) + 1; save(); if (!mastered(cur)) queue.push(cur); next(); };
+    document.getElementById("no").onclick = () => { store.streak[key(cur)] = 0; save(); queue.splice(Math.min(3, queue.length), 0, cur); next(); };
+  }
+}
+
+document.addEventListener("keydown", e => {
+  if (e.code === "Space") { e.preventDefault(); if (cur && !flipped) { flipped = true; render(); } }
+  else if (flipped && e.key === "ArrowRight") document.getElementById("yes").click();
+  else if (flipped && e.key === "ArrowLeft") document.getElementById("no").click();
+});
+
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.setHeaderColor("#ffffff");
+  tg.setBackgroundColor("#f7f5f0");
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "architect-hub.html"; });
+}
+
+setup();
+rebuild();
+</script>
+</body>
+</html>
