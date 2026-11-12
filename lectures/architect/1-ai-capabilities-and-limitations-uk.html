@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тема 1 з 11: можливості й обмеження AI (українською)</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Тема 1 з 11: можливості й обмеження AI (українською)</h1>
+<blockquote>
+<p><strong>Шлях Claude Certified Architect.</strong> Тема 1: як насправді поводиться генеративний AI. Незнайомі слова є в картках: <strong>English words</strong>. <a href="1-ai-capabilities-and-limitations-en.html">Read in English</a>
+Джерело: курс Anthropic «AI Capabilities &amp; Limitations», © 2026 Anthropic, CC BY-NC-SA 4.0, на основі AI Fluency Framework (проф. Rick Dakan, проф. Joseph Feller).</p>
+</blockquote>
+<h3>1. Загальна картина</h3>
+<p>Курс має п'ять частин: <strong>що ми називаємо AI</strong> (що таке генеративний AI), <strong>як навчають AI</strong> (pretraining, fine-tuning), <strong>властивості AI</strong> (чотири), <strong>усе разом</strong> (що буває, коли властивості «стикаються») і <strong>наступні кроки</strong> (як користуватись безпечно, ефективно й етично).</p>
+<ul>
+<li><strong>Генеративний AI створює новий вміст.</strong> Інший AI сортує, ранжує й класифікує наявний (спам-фільтр, рекомендації відео).</li>
+<li>AI <strong>не однаково здатний і не однаково ненадійний</strong>. Він сильний і слабкий уздовж <strong>чотирьох передбачуваних осей</strong>.</li>
+<li>Кожна вісь це <strong>спектр</strong> від <em>зони можливостей</em> до <em>зони обмежень</em>. Один і той самий механізм дає і можливість, і обмеження.</li>
+<li><strong>Відкалібрована довіра</strong> це визначити, де саме на спектрі лежить ваше завдання, а не довіряти чи не довіряти всьому підряд.</li>
+</ul>
+<blockquote>
+<p><strong>Запам'ятайте:</strong> чотири властивості = як поводиться машина. 4D = що робите <em>ви</em>.</p>
+</blockquote>
+<h3>2. Звідки в AI «характер»: навчання</h3>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Етап</th>
+<th>Що відбувається</th>
+<th>Результат</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Етап"><strong>Pretraining</strong> (попереднє навчання)</td>
+<td data-label="Що відбувається">Величезний обсяг тексту, модель вчить закономірності й передбачає наступний токен</td>
+<td data-label="Результат"><em>Продовжувач тексту</em>, ще не корисний помічник</td>
+</tr>
+<tr>
+<td data-label="Етап"><strong>Fine-tuning</strong> (донавчання)</td>
+<td data-label="Що відбувається">Доводять до безпечної, етичної, корисної поведінки, вчать слухати інструкції</td>
+<td data-label="Результат">Помічник зі своєю <em>вдачею</em></td>
+</tr>
+</tbody>
+</table></div>
+<p>Донавчання залишає <strong>«відбитки пальців»</strong> у всьому: модель ввічлива й корисна, але має риси: <strong>sycophancy</strong> (надто легко погоджується), <strong>verbosity</strong> (багатослівність), <strong>overcaution</strong> (надмірна обережність), <strong>нечітка калібровка впевненості</strong>. Ці риси формує «винагорода» під час навчання.</p>
+<h3>3. Чотири властивості</h3>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Властивість</th>
+<th>Питання</th>
+<th>Зона можливостей</th>
+<th>Зона обмежень</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Властивість"><strong>Next Token Prediction</strong> (передбачення наступного токена)</td>
+<td data-label="Питання">Звідки беруться відповіді?</td>
+<td data-label="Зона можливостей">Протоптані стежки: стиснути, переформатувати, пояснити поширене, написати у знайомому стилі</td>
+<td data-label="Зона обмежень">Нова територія, рідкісні шаблони, «правда» проти «схоже на правду»</td>
+</tr>
+<tr>
+<td data-label="Властивість"><strong>Knowledge</strong> (знання)</td>
+<td data-label="Питання">Що AI насправді знає?</td>
+<td data-label="Зона можливостей">Часте, свіже для навчання, узгоджене: основна наука, популярні мови програмування</td>
+<td data-label="Зона обмежень">Рідкісне, після cutoff, нішеве, локальне, спірне</td>
+</tr>
+<tr>
+<td data-label="Властивість"><strong>Working Memory</strong> (робоча пам'ять)</td>
+<td data-label="Питання">На що він дивиться зараз?</td>
+<td data-label="Зона можливостей">Матеріал вміщується у вікно, сесія актуальна, ви даєте контекст</td>
+<td data-label="Зона обмежень">Дуже довгі документи й розмови, очікування пам'яті між сесіями («урвище»)</td>
+</tr>
+<tr>
+<td data-label="Властивість"><strong>Steerability</strong> (керованість)</td>
+<td data-label="Питання">Наскільки я керую?</td>
+<td data-label="Зона можливостей">Короткі, конкретні, перевірні інструкції («таблицею», «до 100 слів»)</td>
+<td data-label="Зона обмежень">Довгі ланцюги міркувань, абстрактні запити, точна арифметика</td>
+</tr>
+</tbody>
+</table></div>
+<h4>3.1 Next Token Prediction</h4>
+<ul>
+<li>Модель пише <strong>слово за словом (токен за токеном)</strong>, виходячи з того, що зазвичай іде далі. Вона не шукає відповідь у базі.</li>
+<li>Вибір наступного токена з розподілу ймовірностей називається <strong>sampling</strong> (вибірка). Той самий запит може дати різні відповіді (температура, top-k та інші «ручки»).</li>
+<li>Стара ідея, новий масштаб: <strong>ланцюг Маркова</strong> (1906) це таблиця частот пар слів; LLM робить прохід крізь мільярди параметрів, але вихід той самий: розподіл ймовірностей наступного токена.</li>
+<li><strong>Вигадки концентруються в конкретиці</strong>: імена, дати, статистика, цитати, URL, дослівні слова. Чим точніше твердження, тим більше воно потребує перевірки.</li>
+<li>Функції продукту, що відсувають межу: <strong>citations</strong> (посилання), <strong>uncertainty signaling</strong> (сигнал невпевненості), <strong>constrained generation</strong> (обмежена генерація), <strong>generator-verifier</strong> (генератор + перевіряльник).</li>
+<li>Зв'язок з 4D: це основа <strong>Discernment</strong>. Знати, що текст <em>згенеровано</em>, означає знати, яку перевірку застосувати.</li>
+</ul>
+<h4>3.2 Knowledge</h4>
+<ul>
+<li>Знання беруться <strong>лише з навчальних даних</strong> і заморожені на <strong>knowledge cutoff</strong>. Без інструментів моделі недоступне щось у реальному часі.</li>
+<li>Корисне питання не «чи знає вона це?», а «<strong>наскільки добре це було представлено в тому, що вона читала?</strong>»</li>
+<li>Типові збої: <strong>застарілість</strong>, <strong>нерівномірне покриття</strong>, <strong>успадкована упередженість</strong> (що вважати «типовим»), <strong>source amnesia</strong> (не може сказати, звідки знає).</li>
+<li>Ліки: вебпошук, <strong>retrieval / RAG</strong>, MCP, інструменти: дати моделі те, чого вона не бачила.</li>
+<li><strong>Embeddings</strong> (як пошук знаходить зміст): модель ембедингів перетворює будь-який текст на список чисел фіксованої довжини (наприклад, 1024). Схожий зміст означає близькі точки. Близькість міряють <strong>косинусною подібністю</strong> (напрям векторів): -1 протилежні, 0 не пов'язані, 1 однакові. Осі <strong>виникають самі</strong> під час навчання: ніхто не скаже, що означає вимір 847.</li>
+<li>Зв'язок з 4D: нерівність знань це суть <strong>Delegation</strong>: коли передати, а коли принести контекст самому.</li>
+</ul>
+<h4>3.3 Working Memory</h4>
+<ul>
+<li>Усе, на що дивиться модель, живе в <strong>вікні контексту</strong> фіксованого розміру. Те, що поза ним, вона не бачить.</li>
+<li>Це <strong>урвище, а не поступове погіршення</strong>: працює, доки не перестане, а <strong>тиха обрізка</strong> може не попередити.</li>
+<li>Модель <strong>не вчиться на ваших виправленнях</strong>: новий чат починається з нуля. Вона реагує лише на те, що зараз у контексті.</li>
+<li><strong>Lost in the middle</strong> («загублено посередині»): як людський <em>ефект серійної позиції</em> (<strong>primacy</strong> + <strong>recency</strong>), модель найкраще пам'ятає початок і кінець; дослідження Stanford 2023 показало падіння точності понад 30% для фактів у середині.</li>
+<li>Практика: важливу інструкцію ставте <strong>на початок</strong>, повторюйте <strong>наприкінці</strong>, відбирайте контекст (більше не значить краще), за потреби починайте з чистого аркуша.</li>
+<li>Що відсуває урвище: пам'ять, <strong>compaction</strong> (ущільнення), проєкти, більші вікна, мультиагентні процеси.</li>
+<li>Зв'язок з 4D: Working Memory це те, на що діє <strong>Description</strong>.</li>
+</ul>
+<h4>3.4 Steerability</h4>
+<ul>
+<li>Модель виконує інструкції так само, як усе інше: <strong>продовжуючи шаблон</strong> (донавчання вчило її слухати інструкції). Тому завжди є розрив між наміром і результатом.</li>
+<li>Типові збої: <strong>reasoning drift</strong> (малі ранні помилки накопичуються), <strong>letter over spirit</strong> (букву виконано, мету ні), <strong>крихка арифметика</strong> (рахує погано).</li>
+<li>Ліки: повторіть <strong>мету</strong>, а не лише формат («Скороти. Моя мета: втримати увагу керівника»). Повторити інструкцію голосніше не допоможе. Вставляйте контрольні точки. Системні промпти, виконання коду, видиме міркування, структурований вихід.</li>
+<li>Зв'язок з 4D: Steerability робить <strong>Description</strong> потужним і водночас обмежує його.</li>
+</ul>
+<h3>4. Коли властивості стикаються</h3>
+<p>Більшість реальних збоїв це <strong>дві властивості одночасно</strong>:</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Збій</th>
+<th>Властивості</th>
+<th>Точне лікування</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Збій">Вигадане посилання чи факт</td>
+<td data-label="Властивості">Next Token Prediction + Knowledge</td>
+<td data-label="Точне лікування">Перевірити конкретику, пошук чи retrieval, citations</td>
+</tr>
+<tr>
+<td data-label="Збій">Дрейф у довгій розмові</td>
+<td data-label="Властивості">Working Memory + Steerability</td>
+<td data-label="Точне лікування">Знову дати контекст, повторити мету, почати з нуля</td>
+</tr>
+<tr>
+<td data-label="Збій">Впевнено хибна математика</td>
+<td data-label="Властивості">Next Token Prediction + Steerability (збій названо в курсі; пара моя)</td>
+<td data-label="Точне лікування">Віддати рахунок коду</td>
+</tr>
+<tr>
+<td data-label="Збій">Згода з хибною передумовою (sycophancy)</td>
+<td data-label="Властивості">Steerability + Knowledge (моє тлумачення; курс пару не називає)</td>
+<td data-label="Точне лікування">Запросити заперечення, попросити контраргумент</td>
+</tr>
+</tbody>
+</table></div>
+<p>Назвати дві властивості означає одразу побачити лікування. Це і є <strong>Discernment</strong> у дії.</p>
+<h3>5. 4D Framework</h3>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>D</th>
+<th>Значення</th>
+<th>Спирається на</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="D"><strong>Delegation</strong> (делегування)</td>
+<td data-label="Значення">Що віддати AI, а що лишити під контролем людини</td>
+<td data-label="Спирається на">Knowledge</td>
+</tr>
+<tr>
+<td data-label="D"><strong>Description</strong> (опис)</td>
+<td data-label="Значення">Як описати завдання: мета, контекст, обмеження, формат</td>
+<td data-label="Спирається на">Working Memory, Steerability</td>
+</tr>
+<tr>
+<td data-label="D"><strong>Discernment</strong> (розрізнення)</td>
+<td data-label="Значення">Як оцінити відповідь, помітити помилки й галюцинації</td>
+<td data-label="Спирається на">Next Token Prediction</td>
+</tr>
+<tr>
+<td data-label="D"><strong>Diligence</strong> (сумлінність)</td>
+<td data-label="Значення">Як перевіряти й відповідально користуватись</td>
+<td data-label="Спирається на">курс не прив'язує до однієї властивості</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>4D це те, що ви робите; властивості це те, на що ви реагуєте, коли це робите.</strong></p>
+</blockquote>
+<p>Калібрована довіра за завданням: загальні пояснення, довіряти більше; дати, цитати, посилання, перевіряти; архітектурні рішення, перевіряти глибоко; критичні рішення з безпеки, незалежна перевірка обов'язкова. Моделі змінюватимуться, але <em>форма</em> цих властивостей лишається корисною.</p>
+<h3>6. Перевірте себе</h3>
+<ol>
+<li>Чому LLM може вигадати переконливий URL? (Next Token Prediction + Knowledge)</li>
+<li>Knowledge cutoff і context window: у чому різниця?</li>
+<li>Чому «урвище», а не «поступове погіршення»?</li>
+<li>Що таке letter over spirit і яке лікування?</li>
+<li>Яка D підходить кожному збою з розділу 4?</li>
+</ol>
+
+<nav class="pager"><a href="1-ai-capabilities-and-limitations-en.html">← Topic 1 of 11: AI Capabilities &amp; Limitations (English)</a><span></span></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

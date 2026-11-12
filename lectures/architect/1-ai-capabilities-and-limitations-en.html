@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Topic 1 of 11: AI Capabilities &amp; Limitations (English)</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Topic 1 of 11: AI Capabilities &amp; Limitations (English)</h1>
+<blockquote>
+<p><strong>Claude Certified Architect path.</strong> Topic 1: how generative AI actually behaves. Unknown words are in the cards: <strong>English words</strong>. <a href="1-ai-capabilities-and-limitations-uk.html">Читати українською</a>
+Source: Anthropic course &quot;AI Capabilities &amp; Limitations&quot;, © 2026 Anthropic, CC BY-NC-SA 4.0, built on the AI Fluency Framework (Prof. Rick Dakan, Prof. Joseph Feller).</p>
+</blockquote>
+<h3>1. The big picture</h3>
+<p>The course has five parts: <strong>What we mean by AI</strong> (what is generative AI), <strong>How AI is trained</strong> (pretraining, fine-tuning), <strong>Properties of AI</strong> (four of them), <strong>Putting it all together</strong> (what happens when properties collide) and <strong>Next steps</strong> (using this safely, effectively, ethically).</p>
+<ul>
+<li><strong>Generative AI produces new content.</strong> Other AI sorts, ranks and classifies existing content (spam filter, video recommendations).</li>
+<li>AI is <strong>not uniformly capable and not uniformly unreliable</strong>. It is strong and weak along <strong>four predictable axes</strong>.</li>
+<li>Each axis is a <strong>continuum</strong>: from <em>capability zone</em> to <em>limitation zone</em>. The same mechanism gives you both the capability and the limitation.</li>
+<li><strong>Calibrated trust</strong> means locating your task on the continuum, not trusting or distrusting everything.</li>
+</ul>
+<blockquote>
+<p><strong>Remember:</strong> four properties = how the machine behaves. 4D = what <em>you</em> do about it.</p>
+</blockquote>
+<h3>2. How AI gets its &quot;character&quot;: training</h3>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>What happens</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Stage"><strong>Pretraining</strong></td>
+<td data-label="What happens">Trained on a massive amount of text to learn patterns and predict the next token</td>
+<td data-label="Result">A <em>document completer</em>, not yet a helpful assistant</td>
+</tr>
+<tr>
+<td data-label="Stage"><strong>Fine-tuning</strong></td>
+<td data-label="What happens">Refined to be broadly safe, ethical and helpful, to follow instructions</td>
+<td data-label="Result">An assistant with a <em>disposition</em></td>
+</tr>
+</tbody>
+</table></div>
+<p>Fine-tuning leaves <strong>fingerprints</strong> on everything: the model is polite and helpful, but also shows traits such as <strong>sycophancy</strong> (agrees too easily), <strong>verbosity</strong>, <strong>overcaution</strong> and <strong>loose confidence calibration</strong>. Reward during training shapes these traits.</p>
+<h3>3. The four properties</h3>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Question</th>
+<th>Capability zone</th>
+<th>Limitation zone</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Property"><strong>Next Token Prediction</strong></td>
+<td data-label="Question">Where do answers come from?</td>
+<td data-label="Capability zone">Well-worn paths: summarize, reformat, explain common concepts, draft in a familiar style</td>
+<td data-label="Limitation zone">Novel territory, sparse patterns, &quot;true vs. sounds true&quot;</td>
+</tr>
+<tr>
+<td data-label="Property"><strong>Knowledge</strong></td>
+<td data-label="Question">What does AI actually know?</td>
+<td data-label="Capability zone">Frequent, recent-in-training, consistent: mainstream science, popular programming languages</td>
+<td data-label="Limitation zone">Rare, post-cutoff, niche, local or contested topics</td>
+</tr>
+<tr>
+<td data-label="Property"><strong>Working Memory</strong></td>
+<td data-label="Question">What is it paying attention to now?</td>
+<td data-label="Capability zone">Material fits the window, session is current, you supply context</td>
+<td data-label="Limitation zone">Very long documents or chats, expecting memory across sessions (the <strong>cliff</strong>)</td>
+</tr>
+<tr>
+<td data-label="Property"><strong>Steerability</strong></td>
+<td data-label="Question">How much am I in control?</td>
+<td data-label="Capability zone">Short, concrete, verifiable instructions (&quot;as a table&quot;, &quot;under 100 words&quot;)</td>
+<td data-label="Limitation zone">Long reasoning chains, abstract asks, native numerical precision</td>
+</tr>
+</tbody>
+</table></div>
+<h4>3.1 Next Token Prediction</h4>
+<ul>
+<li>The model writes <strong>word by word (token by token)</strong> based on what tends to follow what. It does not look an answer up in a database.</li>
+<li>Picking the next token from a probability distribution is called <strong>sampling</strong>. The same request can give different answers (temperature, top-k and similar knobs control sampling).</li>
+<li>Old idea, new scale: a <strong>Markov chain</strong> (1906) is a frequency table of word pairs; an LLM does a forward pass through billions of parameters, but the output is still a probability distribution over the next token.</li>
+<li><strong>Fabrication concentrates in specifics</strong>: names, dates, statistics, citations, URLs, quotes. The more precise the claim, the more it needs checking.</li>
+<li>Product features that push the limit outward: <strong>citations, uncertainty signaling, constrained generation, generator-verifier loops</strong>.</li>
+<li>4D link: this is the foundation of <strong>Discernment</strong>. Knowing the text was <em>generated</em> tells you what scrutiny to apply.</li>
+</ul>
+<h4>3.2 Knowledge</h4>
+<ul>
+<li>Knowledge comes <strong>only from training data</strong> and is frozen at the <strong>knowledge cutoff</strong>. Without tools there is no real-time browsing.</li>
+<li>The useful question is not &quot;does it know this?&quot; but &quot;<strong>how well represented was this in what it read?</strong>&quot;</li>
+<li>Characteristic failures: <strong>staleness</strong>, <strong>uneven coverage</strong>, <strong>inherited bias</strong> (what counts as &quot;default&quot; or &quot;normal&quot;), <strong>source amnesia</strong> (cannot say where it learned something).</li>
+<li>Fixes: web search, <strong>retrieval / RAG</strong>, MCP, tool use: give the model information it never saw.</li>
+<li><strong>Embeddings</strong> (how retrieval finds meaning): an embedding model turns any text into a fixed-length list of numbers (for example 1,024). Similar meaning means nearby points. Closeness is measured by <strong>cosine similarity</strong> (direction of vectors): -1 opposite, 0 unrelated, 1 identical. The axes are <strong>emergent</strong>: nobody can say what dimension 847 means.</li>
+<li>4D link: uneven knowledge is core to <strong>Delegation</strong>: when to hand off, when to bring context yourself.</li>
+</ul>
+<h4>3.3 Working Memory</h4>
+<ul>
+<li>Everything the model attends to lives in a fixed-size <strong>context window</strong>. It cannot attend to what is outside it.</li>
+<li>It is a <strong>cliff, not a gradient</strong>: it works until it does not, and <strong>silent truncation</strong> may give no warning.</li>
+<li>The model <strong>does not learn from your corrections</strong>: a new chat starts from zero. It only reacts to what is in context.</li>
+<li><strong>Lost in the middle</strong>: like the human <em>serial position effect</em> (<strong>primacy</strong> + <strong>recency</strong>), models recall the start and end best; a 2023 Stanford study saw accuracy drop by more than 30% for facts buried in the middle.</li>
+<li>Practice: put the key instruction <strong>first</strong>, repeat it <strong>at the end</strong>, curate context (more context is not better), start fresh when needed.</li>
+<li>Features that move the cliff: memory, <strong>compaction</strong>, projects, larger windows, multi-agent workflows.</li>
+<li>4D link: Working Memory is what <strong>Description</strong> acts on.</li>
+</ul>
+<h4>3.4 Steerability</h4>
+<ul>
+<li>The model follows instructions the same way it does everything else: by <strong>continuing a pattern</strong> (fine-tuning taught it instruction-following). So there is always a gap between intent and result.</li>
+<li>Characteristic failures: <strong>reasoning drift</strong> (small early errors compound), <strong>letter over spirit</strong> (instruction honored, intent missed), <strong>brittle arithmetic</strong> (native math is unreliable).</li>
+<li>Fixes: restate the <strong>goal</strong>, not only the format (&quot;Make this shorter. My goal is to keep the executive's attention&quot;). Repeating an instruction louder does not close the gap. Insert checkpoints. Use system prompts, code execution, visible reasoning, structured outputs.</li>
+<li>4D link: Steerability makes <strong>Description</strong> powerful and bounds it.</li>
+</ul>
+<h3>4. When properties collide</h3>
+<p>Most real failures are <strong>two properties at once</strong>:</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Failure</th>
+<th>Properties</th>
+<th>Targeted fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Failure">Hallucinated citation or fact</td>
+<td data-label="Properties">Next Token Prediction + Knowledge</td>
+<td data-label="Targeted fix">Verify specifics, use search or retrieval, citations</td>
+</tr>
+<tr>
+<td data-label="Failure">Long-conversation drift</td>
+<td data-label="Properties">Working Memory + Steerability</td>
+<td data-label="Targeted fix">Re-supply context, restate the goal, start fresh</td>
+</tr>
+<tr>
+<td data-label="Failure">Confidently wrong math</td>
+<td data-label="Properties">Next Token Prediction + Steerability (the course names this failure; the pair is my reading)</td>
+<td data-label="Targeted fix">Offload to code execution</td>
+</tr>
+<tr>
+<td data-label="Failure">Agreeable bad premise (sycophancy)</td>
+<td data-label="Properties">Steerability + Knowledge (my reading; the course does not name the pair)</td>
+<td data-label="Targeted fix">Invite pushback, ask for the counter-argument</td>
+</tr>
+</tbody>
+</table></div>
+<p>Naming the two properties points you straight to the fix. That is <strong>Discernment</strong> in action.</p>
+<h3>5. The 4D Framework</h3>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>D</th>
+<th>Meaning</th>
+<th>Driven by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="D"><strong>Delegation</strong></td>
+<td data-label="Meaning">What to hand to AI and what needs human control</td>
+<td data-label="Driven by">Knowledge</td>
+</tr>
+<tr>
+<td data-label="D"><strong>Description</strong></td>
+<td data-label="Meaning">How to describe the task: goal, context, constraints, format</td>
+<td data-label="Driven by">Working Memory, Steerability</td>
+</tr>
+<tr>
+<td data-label="D"><strong>Discernment</strong></td>
+<td data-label="Meaning">How to judge what comes back, spotting errors and hallucinations</td>
+<td data-label="Driven by">Next Token Prediction</td>
+</tr>
+<tr>
+<td data-label="D"><strong>Diligence</strong></td>
+<td data-label="Meaning">How to verify and use AI responsibly</td>
+<td data-label="Driven by">the course does not tie it to one property</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>The 4Ds are what you do; the properties are what you are responding to when you do them.</strong></p>
+</blockquote>
+<p>Calibrated trust by task: general explanations, trust more; dates, quotes, links, verify; architecture decisions, validate deeply; critical security decisions, independent review is mandatory. Models will keep changing, but the <em>shape</em> of these properties stays useful.</p>
+<h3>6. Check yourself</h3>
+<ol>
+<li>Why can an LLM invent a convincing URL? (Next Token Prediction + Knowledge)</li>
+<li>Knowledge cutoff vs. context window: what is the difference?</li>
+<li>Why &quot;cliff&quot; and not &quot;gradual decline&quot;?</li>
+<li>What is letter over spirit and what is the fix?</li>
+<li>Which D fits each failure in section 4?</li>
+</ol>
+
+<nav class="pager"><span></span><a href="1-ai-capabilities-and-limitations-uk.html">Тема 1 з 11: можливості й обмеження AI (українською) →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>
