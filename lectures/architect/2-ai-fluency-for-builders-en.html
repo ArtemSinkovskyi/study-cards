@@ -310,6 +310,17 @@ As AI accelerates implementation, your value shifts to <strong>framing problems 
 <li>Why is &quot;make it look good&quot; not a spec?</li>
 <li>Why does &quot;AI wrote it&quot; not excuse a bug in production?</li>
 </ol>
+<h2>11. Practice questions from the module quiz</h2>
+<p><strong>1. True or false: AI has predictable blind spots like concurrency, caching and race conditions.</strong>
+<strong>True.</strong> AI can write code that looks right and passes basic tests but hides bugs in concurrent execution, stale or wrongly invalidated caches, and <strong>race conditions</strong> (the result depends on the order of operations). Check these areas with extra care, together with thread safety and distributed-systems logic.</p>
+<p><strong>2. What is the correct order of the Description Chain?</strong>
+<strong>User voice → product requirement → technical spec → AI instruction.</strong> It moves from human intent to growing technical detail: what does the user need, what should the product deliver, how will the system do it, what exactly should the AI do. Do not jump from a vague request straight to a prompt.</p>
+<p><strong>3. &quot;The code works, but no one wants to use it&quot; is a failure at which lens?</strong>
+<strong>Experience Quality.</strong> It functions, but users find it confusing or frustrating. (Not Functional Integrity: it works. Not Production Readiness: it does not break in production. Not Responsible Impact: nobody is harmed.)</p>
+<p><strong>4. Before shipping something AI helped build, what does Diligence require?</strong>
+<strong>Understanding what the code does and being accountable for the outcome.</strong> Wrong answers: asking AI to review itself once more, checking that the latest model was used, only checking that AI-generated tests pass.</p>
+<p><strong>5. Why write acceptance tests before any code?</strong>
+<strong>To give you and AI a shared definition of &quot;done&quot; from the start.</strong> They fix expected behavior and success criteria before implementation. Wrong answers: limiting how much AI may change, better syntax, compliance with standard practice.</p>
 
 <nav class="pager"><a href="1-ai-capabilities-and-limitations-uk.html">← Тема 1 з 11: можливості й обмеження AI (українською)</a><a href="2-ai-fluency-for-builders-uk.html">Тема 2 з 11: AI Fluency для builders (українською) →</a></nav>
 </main>
