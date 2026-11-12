@@ -62,7 +62,7 @@
 <main><div class="wrap" id="app"></div></main>
 
 <script>
-const GROUP_ICONS = {"4D і курс": "🧭", "Властивості AI": "🧠", "Знання і межі": "📚", "Навчання і вдача": "🎭", "Контекст і пам'ять": "🪟", "Керованість і збої": "🎛", "Загальна лексика": "💬"};
+const GROUP_ICONS = {"4D і курс": "🧭", "Властивості AI": "🧠", "Знання і межі": "📚", "Навчання і вдача": "🎭", "Контекст і пам'ять": "🪟", "Керованість і збої": "🎛", "Загальна лексика": "💬", "Builders (тема 2)": "🛠"};
 function gi(g) { return (GROUP_ICONS[g] || "📌") + " " + g; }
 
 const GLOSSARY = [];
@@ -200,7 +200,66 @@ const CARDS = [
  { "g": "Керованість і збої", "t": "rapid", "q": "rapid", "lit": "прикметник", "m": "швидкий", "d": "Very fast.", "a": "Rapid changes move the boundaries." },
  { "g": "Керованість і збої", "t": "recognize product features", "q": "recognize product features", "lit": "фраза", "m": "розпізнавати функції продукту", "d": "Knowing which tool features reduce a limitation.", "a": "Recognize product features like search and citations." },
  { "g": "Загальна лексика", "t": "remain", "q": "remain", "lit": "дієслово", "m": "залишатися", "d": "To stay the same, not to leave.", "a": "Some limits remain even in new models." },
- { "g": "Загальна лексика", "t": "shift", "q": "shift", "lit": "дієслово", "m": "зсуватися, зміщуватися", "d": "To move or change position.", "a": "The boundaries will shift." }
+ { "g": "Загальна лексика", "t": "shift", "q": "shift", "lit": "дієслово", "m": "зсуватися, зміщуватися", "d": "To move or change position.", "a": "The boundaries will shift." },
+ { "g": "Builders (тема 2)", "t": "builder", "q": "builder", "lit": "іменник", "m": "творець, той, хто будує продукт", "d": "A product person, designer or maker who owns a project from the customer problem to the shipped solution.", "a": "Builders own the full arc." },
+ { "g": "Builders (тема 2)", "t": "builder brief", "q": "builder brief", "lit": "іменник", "m": "бриф творця (контекстний документ для AI)", "d": "A reusable document with your project, role, constraints and AI boundaries that you give AI at the start.", "a": "Paste your builder brief into every new session." },
+ { "g": "Builders (тема 2)", "t": "AI Fluency", "q": "AI Fluency", "lit": "іменник", "m": "вільне володіння AI", "d": "Working with AI effectively, efficiently, ethically and safely.", "a": "AI Fluency is a skill, not a tool." },
+ { "g": "Builders (тема 2)", "t": "inner loop", "q": "inner loop", "lit": "іменник", "m": "внутрішній цикл (Description + Discernment)", "d": "The daily cycle: ask, check, refine.", "a": "The inner loop guides each chat." },
+ { "g": "Builders (тема 2)", "t": "outer loop", "q": "outer loop", "lit": "іменник", "m": "зовнішній цикл (Delegation + Diligence)", "d": "The bigger decisions: when to use AI and who is accountable.", "a": "The outer loop decides what AI may touch." },
+ { "g": "Builders (тема 2)", "t": "acceptance tests", "q": "acceptance tests", "lit": "іменник (мн.)", "m": "приймальні тести (критерії «готово»)", "d": "Concrete statements that define done; each one passes or fails.", "a": "Write acceptance tests before any code." },
+ { "g": "Builders (тема 2)", "t": "Description Chain", "q": "Description Chain", "lit": "іменник", "m": "ланцюг опису", "d": "User voice, requirement, technical spec, AI instruction, tests.", "a": "A broken link in the Description Chain cascades downstream." },
+ { "g": "Builders (тема 2)", "t": "Automation", "q": "Automation", "lit": "іменник", "m": "автоматизація (AI робить, ви перевіряєте)", "d": "A collaboration mode: AI does it, you check.", "a": "Automation fits routine, low-risk steps." },
+ { "g": "Builders (тема 2)", "t": "Augmentation", "q": "Augmentation", "lit": "іменник", "m": "підсилення (ви з AI разом)", "d": "A collaboration mode: you and AI work on it together.", "a": "Use augmentation for the technical spec." },
+ { "g": "Builders (тема 2)", "t": "Agency", "q": "Agency", "lit": "іменник", "m": "самостійність AI в межах", "d": "A collaboration mode: AI acts with latitude inside boundaries you set.", "a": "Agency needs clear boundaries." },
+ { "g": "Builders (тема 2)", "t": "latitude", "q": "latitude", "lit": "іменник", "m": "свобода дій", "d": "Freedom to decide and act.", "a": "Give the agent latitude only inside set limits." },
+ { "g": "Builders (тема 2)", "t": "transformer", "q": "transformer", "lit": "іменник", "m": "архітектура transformer", "d": "The neural network design behind modern LLMs.", "a": "The transformer made LLMs possible." },
+ { "g": "Builders (тема 2)", "t": "compute", "q": "compute", "lit": "іменник", "m": "обчислювальна потужність", "d": "The processing power used to train and run models.", "a": "Massive compute is needed for training." },
+ { "g": "Builders (тема 2)", "t": "feature flag", "q": "feature flag", "lit": "іменник", "m": "перемикач функції", "d": "A switch that turns a feature on or off without a new release.", "a": "Ship behind a feature flag." },
+ { "g": "Builders (тема 2)", "t": "migration", "q": "migration", "lit": "іменник", "m": "міграція (зміна схеми даних)", "d": "A planned change to a database or system structure.", "a": "A migration can break live data." },
+ { "g": "Builders (тема 2)", "t": "versioning", "q": "versioning", "lit": "іменник", "m": "версіонування", "d": "Numbering releases so changes are tracked.", "a": "Versioning protects your API users." },
+ { "g": "Builders (тема 2)", "t": "rate limit", "q": "rate limit", "lit": "іменник", "m": "ліміт частоти запитів", "d": "A cap on how many requests are allowed in a time period.", "a": "Check the rate limit before launch." },
+ { "g": "Builders (тема 2)", "t": "accessibility", "q": "accessibility", "lit": "іменник", "m": "доступність (для людей з обмеженнями)", "d": "Making a product usable for everyone, e.g. contrast, screen reader, keyboard.", "a": "AI does not get accessibility right by default." },
+ { "g": "Builders (тема 2)", "t": "deprecate", "q": "deprecate", "lit": "дієслово", "m": "виводити з ужитку", "d": "To stop supporting something and plan to remove it.", "a": "Be ready to deprecate your own work." },
+ { "g": "Builders (тема 2)", "t": "prototype", "q": "prototype", "lit": "іменник/дієслово", "m": "прототип; робити прототип", "d": "An early quick version to test an idea.", "a": "Prototype freely, ship selectively." },
+ { "g": "Builders (тема 2)", "t": "edge case", "q": "edge case", "lit": "іменник", "m": "крайній випадок", "d": "An unusual situation at the limit of normal use.", "a": "Test the edge case: zero wait time." },
+ { "g": "Builders (тема 2)", "t": "test-first", "q": "test-first", "lit": "прикметник", "m": "спочатку тести", "d": "The habit of writing tests before code.", "a": "Test-first makes later changes safe." },
+ { "g": "Builders (тема 2)", "t": "blind spots", "q": "blind spots", "lit": "іменник (мн.)", "m": "сліпі плями", "d": "Areas where someone or something reliably misses problems.", "a": "AI has blind spots in concurrency and security." },
+ { "g": "Builders (тема 2)", "t": "concurrency", "q": "concurrency", "lit": "іменник", "m": "паралельність, конкурентність", "d": "Several things running at the same time.", "a": "Concurrency bugs appear only under load." },
+ { "g": "Builders (тема 2)", "t": "cascades downstream", "q": "cascades downstream", "lit": "фраза", "m": "каскадом передається далі вниз", "d": "An early failure spreads to every later step.", "a": "A description failure cascades downstream." },
+ { "g": "Builders (тема 2)", "t": "outcome", "q": "outcome", "lit": "іменник", "m": "результат, наслідок", "d": "What actually happens in the end. Compare: output.", "a": "You own the outcome, not the output." },
+ { "g": "Builders (тема 2)", "t": "output", "q": "output", "lit": "іменник", "m": "вивід, згенероване", "d": "What the model produced.", "a": "AI wrote the output; you own the outcome." },
+ { "g": "Builders (тема 2)", "t": "selectively", "q": "selectively", "lit": "прислівник", "m": "вибірково", "d": "Choosing carefully, not everything.", "a": "Ship selectively." },
+ { "g": "Builders (тема 2)", "t": "shapes", "q": "shapes", "lit": "дієслово", "m": "формує, визначає", "d": "Gives something its form or direction.", "a": "Each choice shapes what you build." },
+ { "g": "Builders (тема 2)", "t": "shipping a solution", "q": "shipping a solution", "lit": "фраза", "m": "випуск рішення", "d": "Delivering a finished product to users.", "a": "Builders own shipping a solution." },
+ { "g": "Builders (тема 2)", "t": "narrow slice", "q": "narrow slice", "lit": "фраза", "m": "вузький зріз", "d": "A small part of a bigger whole.", "a": "Prompting is a narrow slice of the work." },
+ { "g": "Builders (тема 2)", "t": "lasting AI fluency", "q": "lasting AI fluency", "lit": "фраза", "m": "стійке вміння працювати з AI", "d": "A skill that stays useful over time.", "a": "Build lasting AI fluency." },
+ { "g": "Builders (тема 2)", "t": "efficient", "q": "efficient", "lit": "прикметник", "m": "ефективний, без втрат", "d": "Doing something with little waste of time or effort.", "a": "Be effective and efficient." },
+ { "g": "Builders (тема 2)", "t": "safe", "q": "safe", "lit": "прикметник", "m": "безпечний", "d": "Not likely to cause harm.", "a": "Delegating implementation is usually safe." },
+ { "g": "Builders (тема 2)", "t": "disposal", "q": "disposal", "lit": "іменник", "m": "розпорядження («at your disposal» = у вашому розпорядженні)", "d": "At your disposal: available for you to use.", "a": "Many tools are at your disposal." },
+ { "g": "Builders (тема 2)", "t": "judgement", "q": "judgement", "lit": "іменник", "m": "судження, оцінка (також judgment)", "d": "The ability to make good decisions.", "a": "Do not delegate judgment." },
+ { "g": "Builders (тема 2)", "t": "advised", "q": "advised", "lit": "дієслово (мин.)", "m": "порадив", "d": "Gave a suggestion about what to do.", "a": "The AI advised a library that does not exist." },
+ { "g": "Builders (тема 2)", "t": "evaluate", "q": "evaluate", "lit": "дієслово", "m": "оцінювати", "d": "To judge how good or useful something is.", "a": "Evaluate AI output across five lenses." },
+ { "g": "Builders (тема 2)", "t": "scrape", "q": "scrape", "lit": "дієслово", "m": "збирати дані з вебсторінок", "d": "To automatically collect data from websites.", "a": "Do not scrape data without permission." },
+ { "g": "Builders (тема 2)", "t": "right brief", "q": "right brief", "lit": "фраза", "m": "правильний бриф", "d": "The correct short description of a task.", "a": "A right brief saves rework." },
+ { "g": "Builders (тема 2)", "t": "approach", "q": "approach", "lit": "іменник/дієслово", "m": "підхід; підходити до", "d": "A way of dealing with a task.", "a": "Describe how AI should approach it." },
+ { "g": "Builders (тема 2)", "t": "engage", "q": "engage", "lit": "дієслово", "m": "залучати, взаємодіяти", "d": "To take part or involve someone.", "a": "Engage the AI in a short round." },
+ { "g": "Builders (тема 2)", "t": "behavioral", "q": "behavioral", "lit": "прикметник", "m": "поведінковий", "d": "About how someone or something acts.", "a": "Behavioral differences between models matter." },
+ { "g": "Builders (тема 2)", "t": "prevalence", "q": "prevalence", "lit": "іменник", "m": "поширеність", "d": "How common something is.", "a": "The prevalence of hallucinations varies." },
+ { "g": "Builders (тема 2)", "t": "throughput", "q": "throughput", "lit": "іменник", "m": "пропускна здатність", "d": "How much work is done in a period of time.", "a": "AI raises throughput." },
+ { "g": "Builders (тема 2)", "t": "accurate", "q": "accurate", "lit": "прикметник", "m": "точний, правильний", "d": "Correct in every detail.", "a": "Is the API accurate and current?" },
+ { "g": "Builders (тема 2)", "t": "consider", "q": "consider", "lit": "дієслово", "m": "зважити, розглянути (у списку було concider)", "d": "To think carefully about something.", "a": "Consider who your build excludes." },
+ { "g": "Builders (тема 2)", "t": "fairly", "q": "fairly", "lit": "прислівник", "m": "доволі; справедливо", "d": "To a reasonable degree; or in a just way.", "a": "It is fairly reliable on common topics." },
+ { "g": "Builders (тема 2)", "t": "naturally", "q": "naturally", "lit": "прислівник", "m": "природно, від природи", "d": "In an easy, expected way.", "a": "Which lens do you naturally apply?" },
+ { "g": "Builders (тема 2)", "t": "much rarer", "q": "much rarer", "lit": "фраза", "m": "набагато рідше (у списку було mutch rarer)", "d": "Happening far less often.", "a": "Such failures are much rarer." },
+ { "g": "Builders (тема 2)", "t": "through conversation", "q": "through conversation", "lit": "фраза", "m": "через розмову", "d": "By talking, step by step.", "a": "Refine the spec through conversation." },
+ { "g": "Builders (тема 2)", "t": "nuance required", "q": "nuance required", "lit": "фраза", "m": "потрібна тонкість", "d": "A task that needs careful, fine distinctions.", "a": "UX critique needs nuance." },
+ { "g": "Builders (тема 2)", "t": "thoughtfully split tasks", "q": "thoughtfully split tasks", "lit": "фраза", "m": "обдумано розділені завдання (у списку було throughfully)", "d": "Breaking work into parts with care.", "a": "Thoughtfully split tasks make delegation safe." },
+ { "g": "Builders (тема 2)", "t": "leverage", "q": "leverage", "lit": "іменник/дієслово", "m": "важіль; використати з максимальною користю", "d": "To use something to get more value.", "a": "Leverage AI for implementation." },
+ { "g": "Builders (тема 2)", "t": "interact with them", "q": "interact with them", "lit": "фраза", "m": "взаємодіяти з ними", "d": "To communicate or work with them.", "a": "How do users interact with them?" },
+ { "g": "Builders (тема 2)", "t": "intentional", "q": "intentional", "lit": "прикметник", "m": "навмисний, цілеспрямований", "d": "Done on purpose.", "a": "Make intentional trade-offs." },
+ { "g": "Builders (тема 2)", "t": "be honest", "q": "be honest", "lit": "фраза", "m": "будьте чесні", "d": "Tell the truth, also about AI's role.", "a": "Be honest about what AI did." },
+ { "g": "Builders (тема 2)", "t": "claim", "q": "claim", "lit": "іменник/дієслово", "m": "твердження; стверджувати", "d": "A statement that something is true.", "a": "Check each claim the model makes." },
+ { "g": "Builders (тема 2)", "t": "confirm accuracy", "q": "confirm accuracy", "lit": "фраза", "m": "підтвердити точність (у списку було occuracy)", "d": "Check that something is correct.", "a": "Confirm accuracy before you ship." }
 ];
 
 const KEY = "cca_words_v1";

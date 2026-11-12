@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Topic 2 of 11: AI Fluency for Builders (English)</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Topic 2 of 11: AI Fluency for Builders (English)</h1>
+<blockquote>
+<p><strong>Claude Certified Architect path.</strong> Topic 2: the 4D Framework applied to building products with AI. Unknown words are in the cards: <strong>English words</strong>. <a href="2-ai-fluency-for-builders-uk.html">Читати українською</a> · Previous: <a href="1-ai-capabilities-and-limitations-en.html">Topic 1</a>
+Source: Anthropic course &quot;AI Fluency for Builders&quot;, © 2026 Anthropic, developed with CodePath, CC BY-NC-SA 4.0, built on the AI Fluency Framework (Prof. Rick Dakan, Prof. Joseph Feller).</p>
+</blockquote>
+<h2>1. Who is a builder and what is AI Fluency</h2>
+<ul>
+<li><strong>Builders</strong> are product people, designers and makers. They own the <strong>full arc from customer problem to shipped solution</strong>.</li>
+<li><strong>AI Fluency</strong> = working with AI <strong>effectively, efficiently, ethically and safely</strong>.</li>
+<li>Course roadmap: 4D Framework, AI capabilities and limitations, Delegation and the Builder's Toolkit, Discernment for code and UX, Shipping and next steps.</li>
+<li><strong>Delegating implementation is usually safe. Delegating judgment is usually not.</strong></li>
+<li>Most AI failures trace back to <strong>description, discernment or diligence</strong> failures made earlier.</li>
+<li><strong>Builder brief</strong>: a reusable context document you paste at the start of any AI session. It holds what you build and for whom, your role, your constraints (team size, stack, timelines, non-negotiables) and where you want AI involved and where you do not. Think of it as onboarding an AI colleague.</li>
+</ul>
+<h2>2. The 4D Framework: two loops</h2>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>D</th>
+<th>Meaning</th>
+<th>Loop</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="D"><strong>Delegation</strong></td>
+<td data-label="Meaning">Deciding what AI handles and what stays with you</td>
+<td data-label="Loop">outer</td>
+</tr>
+<tr>
+<td data-label="D"><strong>Description</strong></td>
+<td data-label="Meaning">Saying clearly what you need and how AI should approach it</td>
+<td data-label="Loop">inner</td>
+</tr>
+<tr>
+<td data-label="D"><strong>Discernment</strong></td>
+<td data-label="Meaning">Evaluating what AI gives back <strong>before acting on it</strong></td>
+<td data-label="Loop">inner</td>
+</tr>
+<tr>
+<td data-label="D"><strong>Diligence</strong></td>
+<td data-label="Meaning"><strong>Owning the final result fully</strong>, regardless of AI's role</td>
+<td data-label="Loop">outer</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Inner loop (Description + Discernment)</strong> guides daily AI interactions: ask, check, refine.</li>
+<li><strong>Outer loop (Delegation + Diligence)</strong> guides bigger decisions: when and how to use AI at all, and who is accountable.</li>
+<li>The 4Ds are <strong>dynamic, not a sequence</strong>: fluency means moving between them while you build.</li>
+</ul>
+<h2>3. What is generative AI (builder view)</h2>
+<ul>
+<li>Generative AI <strong>creates new content</strong> rather than analyzing existing data.</li>
+<li>Three developments made modern LLMs possible: the <strong>transformer architecture</strong>, <strong>vast training data</strong>, <strong>massive compute</strong>.</li>
+<li>Two training stages: <strong>pre-training</strong> (learn patterns from billions of examples) and <strong>fine-tuning</strong> (follow instructions helpfully). See <a href="1-ai-capabilities-and-limitations-en.html">Topic 1</a>.</li>
+<li><strong>Strengths:</strong> versatility across tasks, conversational fluency, tool use.</li>
+<li><strong>Limits:</strong> knowledge cutoffs, hallucinations, unreliable complex reasoning.</li>
+<li>Best results pair <strong>your judgment, creativity and oversight</strong> with AI's <strong>speed and scale</strong>.</li>
+<li>Self-test on a domain you know cold: (1) <em>versatility</em>: explain one topic for a PM, a mid-level engineer and a senior reviewer; did depth really change? (2) <em>hallucination</em>: ask for libraries or docs and check that they exist and the API is current; (3) <em>cutoff + reasoning</em>: ask about a recent change; does it warn that its data may be stale?</li>
+</ul>
+<h2>4. Delegation and the Builder's Toolkit</h2>
+<p>Before code, you make a dozen decisions. Delegation is not &quot;should I use AI here?&quot; but &quot;<strong>I have a customer problem: how do I break it down and what role does AI play?</strong>&quot;</p>
+<p>The toolkit has <strong>six capabilities</strong>, in this order:</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Capability</th>
+<th>AI's role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="#">1</td>
+<td data-label="Capability"><strong>Empathy</strong> (who are you building for)</td>
+<td data-label="AI&#x27;s role">weak: AI can surface data and personas, it cannot feel the gap</td>
+</tr>
+<tr>
+<td data-label="#">2</td>
+<td data-label="Capability"><strong>Design</strong></td>
+<td data-label="AI&#x27;s role">helps (my reading)</td>
+</tr>
+<tr>
+<td data-label="#">3</td>
+<td data-label="Capability"><strong>Architecture</strong></td>
+<td data-label="AI&#x27;s role">helps (my reading)</td>
+</tr>
+<tr>
+<td data-label="#">4</td>
+<td data-label="Capability"><strong>Implementation</strong></td>
+<td data-label="AI&#x27;s role">strongest</td>
+</tr>
+<tr>
+<td data-label="#">5</td>
+<td data-label="Capability"><strong>Judgment</strong></td>
+<td data-label="AI&#x27;s role">keep with you</td>
+</tr>
+<tr>
+<td data-label="#">6</td>
+<td data-label="Capability"><strong>Shipping</strong></td>
+<td data-label="AI&#x27;s role">keep with you</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>AI is strongest in the middle. Delegate implementation freely; keep empathy, judgment and shipping in your hands.</p>
+</blockquote>
+<p>Three <strong>collaboration modes</strong> per capability:</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Mode</th>
+<th>Who does what</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Mode"><strong>Automation</strong></td>
+<td data-label="Who does what">AI does it, you check</td>
+</tr>
+<tr>
+<td data-label="Mode"><strong>Augmentation</strong></td>
+<td data-label="Who does what">you and AI work it together</td>
+</tr>
+<tr>
+<td data-label="Mode"><strong>Agency</strong></td>
+<td data-label="Who does what">AI operates with latitude inside boundaries you set</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Acceptance tests</strong> define <em>done</em> before any code exists: 5 to 7 concrete statements a stranger can mark pass or fail.
+Good: &quot;A patient with a basic smartphone can find the current wait time in under 30 seconds without creating an account.&quot; Bad: &quot;The system is easy to use.&quot;
+As AI accelerates implementation, your value shifts to <strong>framing problems and raising the bar</strong>.</p>
+<h2>5. Description: the Description Chain</h2>
+<p><strong>user voice → requirement → technical spec → AI instruction → tests</strong></p>
+<ul>
+<li>Prompt engineering is <strong>only one link</strong> of the chain.</li>
+<li>The builder is the <strong>translator at every step</strong>. AI cannot hear what the user did not say.</li>
+<li>Every step needs judgment calls the previous phase did not make for you.</li>
+<li><strong>Code works but the product does not = a description failure.</strong> Find which upstream link broke.</li>
+<li><strong>Tests are the most precise form of description.</strong> A passing test with an unhappy user means you described the wrong intent.</li>
+<li>A requirement must be measurable: every adjective is a decision (&quot;fast&quot; means how fast).</li>
+</ul>
+<h2>6. Discernment for code: five lenses</h2>
+<p>When AI can build a working product in minutes, &quot;working&quot; stops being the bar. Lens 1 is easy to test; by lens 5 you make judgment calls AI cannot.</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Lens</th>
+<th>Name</th>
+<th>Question</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Lens">1</td>
+<td data-label="Name"><strong>Functional Integrity</strong></td>
+<td data-label="Question">Does it work? Correct output for real inputs, not just test data</td>
+</tr>
+<tr>
+<td data-label="Lens">2</td>
+<td data-label="Name"><strong>Production Readiness</strong></td>
+<td data-label="Question">Will it survive production?</td>
+</tr>
+<tr>
+<td data-label="Lens">3</td>
+<td data-label="Name"><strong>Problem Fit</strong></td>
+<td data-label="Question">Is it the right thing for the problem?</td>
+</tr>
+<tr>
+<td data-label="Lens">4</td>
+<td data-label="Name"><strong>Experience Quality</strong></td>
+<td data-label="Question">How does it feel to use?</td>
+</tr>
+<tr>
+<td data-label="Lens">5</td>
+<td data-label="Name"><strong>Responsible Impact</strong></td>
+<td data-label="Question">Who could it harm or exclude?</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>Note: the course spells out only lens 1 in detail; my questions for lenses 2-5 are a short reading of the lens names.</li>
+<li>Common failure at lens 1: code passes unit tests but breaks on real data the prompt never covered.</li>
+<li>AI has <strong>predictable blind spots</strong>: concurrency, security, anything that only breaks at scale. They show up in production, not in development.</li>
+<li><strong>Taste is a builder skill.</strong> AI delivers functional; making it worth using is on you.</li>
+</ul>
+<h2>7. Discernment for user experience</h2>
+<ul>
+<li>When implementation is fast, <strong>experience is the differentiator</strong>.</li>
+<li>&quot;Make it look good&quot; is a <strong>wish, not a spec</strong>. Describe experience with the precision of a function.</li>
+<li>Four UX principles: <strong>Clarity</strong> (every element shows its purpose), <strong>Hierarchy</strong> (most important first), <strong>Accessibility</strong> (contrast, screen reader, keyboard), <strong>Feedback</strong> (acknowledge actions, explain errors).</li>
+<li><strong>AI does not get accessibility right by default.</strong> Specify it, then audit.</li>
+<li>A good critique and an actionable AI description are different artifacts; learn to translate between them.</li>
+</ul>
+<h2>8. Diligence: sharing your work</h2>
+<ul>
+<li><strong>You own the outcome, not the output.</strong> &quot;AI wrote it&quot; explains nothing and excuses nothing.</li>
+<li>Shipping has its own vocabulary: <strong>migrations, versioning, rate limits, feature flags</strong>. AI will not raise them unless asked.</li>
+<li><strong>Tests make post-launch iteration safe</strong> (test-first habit).</li>
+<li><strong>Prototype freely, ship selectively</strong>; be willing to deprecate your own work.</li>
+<li><strong>Access is a design decision</strong>: check who your assumptions exclude.</li>
+<li>Pre-ship checklist: <strong>Understanding</strong> (can you explain what the code does?), <strong>Testing</strong> (edge cases: closed clinic, no data, zero wait), <strong>Access</strong>, <strong>Responsibility</strong> (misuse, honesty about AI's role), <strong>Feedback loop</strong> (how will you know it works after launch?).</li>
+</ul>
+<h2>9. Looking forward</h2>
+<ul>
+<li>Robust description follows the full chain; a failure at any link <strong>cascades downstream</strong>.</li>
+<li>AI output often passes &quot;Does it work?&quot; but stumbles on &quot;Is it the right thing?&quot;</li>
+<li>Apply all four Ds to one real task this week: which stages to delegate, the full description chain, five lenses, and &quot;would I stand behind it?&quot;.</li>
+</ul>
+<h2>10. Check yourself</h2>
+<ol>
+<li>Which two Ds form the inner loop and which two the outer loop?</li>
+<li>Name the six toolkit capabilities and where AI is strongest and weakest.</li>
+<li>Automation, Augmentation, Agency: what is the difference?</li>
+<li>What is the Description Chain? Which link is prompt engineering?</li>
+<li>Name the five lenses of discernment.</li>
+<li>Why is &quot;make it look good&quot; not a spec?</li>
+<li>Why does &quot;AI wrote it&quot; not excuse a bug in production?</li>
+</ol>
+
+<nav class="pager"><a href="1-ai-capabilities-and-limitations-uk.html">← Тема 1 з 11: можливості й обмеження AI (українською)</a><a href="2-ai-fluency-for-builders-uk.html">Тема 2 з 11: AI Fluency для builders (українською) →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>
