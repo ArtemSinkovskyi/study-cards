@@ -62,7 +62,7 @@
 <main><div class="wrap" id="app"></div></main>
 
 <script>
-const GROUP_ICONS = {"4D і курс": "🧭", "Властивості AI": "🧠", "Знання і межі": "📚", "Навчання і вдача": "🎭", "Контекст і пам'ять": "🪟", "Керованість і збої": "🎛", "Загальна лексика": "💬", "Builders (тема 2)": "🛠"};
+const GROUP_ICONS = {"4D і курс": "🧭", "Властивості AI": "🧠", "Знання і межі": "📚", "Навчання і вдача": "🎭", "Контекст і пам'ять": "🪟", "Керованість і збої": "🎛", "Загальна лексика": "💬", "Builders (тема 2)": "🛠", "Платформа і моделі (теми 3-4)": "🧩"};
 function gi(g) { return (GROUP_ICONS[g] || "📌") + " " + g; }
 
 const GLOSSARY = [];
@@ -263,7 +263,57 @@ const CARDS = [
  { "g": "Builders (тема 2)", "t": "race condition", "q": "race condition", "lit": "іменник", "m": "гонка (стан змагання) потоків", "d": "A bug where the result depends on the order or timing of operations.", "a": "A race condition appears only under load." },
  { "g": "Builders (тема 2)", "t": "cache invalidation", "q": "cache invalidation", "lit": "іменник", "m": "інвалідація кешу", "d": "Removing or updating cached data when the original data changes.", "a": "Wrong cache invalidation serves stale data." },
  { "g": "Builders (тема 2)", "t": "thread safety", "q": "thread safety", "lit": "іменник", "m": "потокобезпечність", "d": "Code that works correctly when several threads run it at once.", "a": "Check thread safety in AI-written code." },
- { "g": "Builders (тема 2)", "t": "stale", "q": "stale", "lit": "прикметник", "m": "застарілий (несвіжий)", "d": "No longer current or fresh.", "a": "A stale cache returns old values." }
+ { "g": "Builders (тема 2)", "t": "stale", "q": "stale", "lit": "прикметник", "m": "застарілий (несвіжий)", "d": "No longer current or fresh.", "a": "A stale cache returns old values." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "entry point", "q": "entry point", "lit": "іменник", "m": "точка входу", "d": "The place where you start working with Claude: Chat, Project, Artifact or Research.", "a": "Pick the entry point before you write the prompt." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "capability layer", "q": "capability layer", "lit": "іменник", "m": "шар можливостей", "d": "The features that extend what Claude can do: Projects, Skills, Code Execution, Memory.", "a": "The capability layer decides what Claude can do." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "Project", "q": "Project", "lit": "іменник", "m": "Project (постійний робочий простір)", "d": "A persistent workspace with standing instructions, a knowledge base and its own conversations.", "a": "Build a Project for recurring work." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "standing instructions", "q": "standing instructions", "lit": "іменник (мн.)", "m": "постійні інструкції", "d": "Rules that apply in every conversation of a Project.", "a": "Standing instructions define how Claude behaves." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "knowledge base", "q": "knowledge base", "lit": "іменник", "m": "база знань", "d": "Documents uploaded once so Claude can use them in every session.", "a": "The knowledge base defines what Claude knows." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "Artifact", "q": "Artifact", "lit": "іменник", "m": "Artifact (окремий редагований блок результату)", "d": "A separate editable block next to the chat, used for deliverables.", "a": "Use an Artifact for a report the reader will open." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "Research", "q": "Research", "lit": "іменник", "m": "режим глибокого дослідження", "d": "Multi-step search across many sources, then synthesis.", "a": "Use Research for deep multi-source work." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "Skill", "q": "Skill", "lit": "іменник", "m": "Skill (багаторазова процедура)", "d": "A reusable procedure Claude follows for a task type.", "a": "A Skill reduces variance but does not remove it." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "Code Execution", "q": "Code Execution", "lit": "іменник", "m": "виконання коду (для перевірених обчислень)", "d": "Claude runs code to compute a result instead of estimating it.", "a": "Use Code Execution when the result must be correct." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "Memory", "q": "Memory", "lit": "іменник", "m": "пам'ять (факти між сесіями)", "d": "Stored facts that carry across sessions without re-entry.", "a": "Review Memory at least once a month." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "Incognito mode", "q": "Incognito mode", "lit": "іменник", "m": "режим інкогніто (поза пам'яттю й історією)", "d": "A session kept out of Memory and chat history.", "a": "Incognito does not override data retention." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "data retention", "q": "data retention", "lit": "іменник", "m": "збереження даних (політика)", "d": "How long an organization keeps data.", "a": "Your organization's data retention still applies." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "variance", "q": "variance", "lit": "іменник", "m": "розкид, варіативність", "d": "How much results differ between runs.", "a": "Skills reduce variance." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "workstream", "q": "workstream", "lit": "іменник", "m": "напрям роботи", "d": "A line of related work over time.", "a": "One Project per workstream." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "persist", "q": "persist", "lit": "дієслово", "m": "зберегти надовго", "d": "To keep something so it is there in later sessions.", "a": "Persist key facts in Memory." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "restart", "q": "restart", "lit": "дієслово", "m": "почати заново", "d": "To begin a new conversation.", "a": "Restart when the session has drifted." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "summarize", "q": "summarize", "lit": "дієслово", "m": "підсумувати", "d": "To state the main points briefly.", "a": "Summarize decisions before you restart." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "drift", "q": "drift", "lit": "іменник/дієслово", "m": "дрейф, зсув", "d": "A slow move away from what was intended.", "a": "Long sessions drift from early instructions." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "quality ceiling", "q": "quality ceiling", "lit": "іменник", "m": "стеля якості", "d": "The highest quality a setup can reach.", "a": "Early decisions set the quality ceiling." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "setup tax", "q": "setup tax", "lit": "іменник", "m": "«податок» на налаштування", "d": "Time lost re-entering the same context each session.", "a": "A Project removes the setup tax." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "re-setup", "q": "re-setup", "lit": "іменник", "m": "повторне налаштування", "d": "Setting things up again from scratch.", "a": "Without a Project you need constant re-setup." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "deliverable", "q": "deliverable", "lit": "іменник", "m": "результат до передачі (документ, звіт)", "d": "A finished piece of work handed to someone.", "a": "An Artifact fits a deliverable." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "recurring", "q": "recurring", "lit": "прикметник", "m": "повторюваний", "d": "Happening again and again.", "a": "Recurring work suits a Project." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "stable", "q": "stable", "lit": "прикметник", "m": "стійкий, сталий", "d": "Not changing often.", "a": "A stable background suits a knowledge base." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "metered", "q": "metered", "lit": "прикметник", "m": "з обліком використання", "d": "Charged or limited by how much you use.", "a": "On metered plans cost is per call." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "headroom", "q": "headroom", "lit": "іменник", "m": "запас (до ліміту)", "d": "Room left before you hit a limit.", "a": "Paid plans add more headroom." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "usage limit", "q": "usage limit", "lit": "іменник", "m": "ліміт використання", "d": "How much you can use Claude in a time window.", "a": "Opus uses more of your usage limit." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "default model", "q": "default model", "lit": "іменник", "m": "модель за замовчуванням", "d": "The model used unless you change it.", "a": "Opus is the default on Pro, Max, Ultra and Team." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "tier", "q": "tier", "lit": "іменник", "m": "рівень, ярус", "d": "A level in a range, such as Haiku, Sonnet, Opus.", "a": "Match the tier to the task." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "Haiku", "q": "Haiku", "lit": "іменник", "m": "Haiku (найшвидша й найлегша модель)", "d": "The fastest, lightest model, for high-volume simple work.", "a": "Haiku suits classification at volume." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "Sonnet", "q": "Sonnet", "lit": "іменник", "m": "Sonnet (збалансована модель)", "d": "The balanced model for most everyday work.", "a": "Sonnet handles most professional drafting." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "Opus", "q": "Opus", "lit": "іменник", "m": "Opus (потужна модель для складної роботи)", "d": "The more capable model for complex work and judgment.", "a": "Start with Opus for most knowledge work." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "Fable", "q": "Fable", "lit": "іменник", "m": "Fable (найпотужніша, найважча модель)", "d": "The top model for the toughest, long-running work.", "a": "Try Fable if Opus at high effort still falls short." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "effort", "q": "effort", "lit": "іменник", "m": "effort (наскільки ґрунтовно працює модель)", "d": "A setting for how hard the model works: thinks longer, checks more.", "a": "Raise effort before you switch model." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "token", "q": "token", "lit": "іменник", "m": "токен (мала одиниця тексту)", "d": "A small unit of text the model processes and you pay for.", "a": "Usage is counted in tokens." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "turn", "q": "turn", "lit": "іменник", "m": "хід (обмін у розмові)", "d": "One round of asking and answering.", "a": "A capable model may need fewer turns." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "cost per task", "q": "cost per task", "lit": "фраза", "m": "вартість за завдання", "d": "Total cost to finish a task, not per token.", "a": "Cost per task matters more than cost per token." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "cost per token", "q": "cost per token", "lit": "фраза", "m": "вартість за токен", "d": "The price of each token processed.", "a": "A capable model has a higher cost per token." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "verbose", "q": "verbose", "lit": "прикметник", "m": "багатослівний", "d": "Using more words than needed.", "a": "Lower effort if answers get verbose." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "ambiguity", "q": "ambiguity", "lit": "іменник", "m": "неоднозначність", "d": "A situation with more than one possible meaning.", "a": "A capable model handles ambiguity better." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "bounded", "q": "bounded", "lit": "прикметник", "m": "обмежений, чітко окреслений", "d": "Limited in scope.", "a": "A bounded task suits a smaller model." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "steer", "q": "steer", "lit": "дієслово", "m": "спрямовувати", "d": "To guide the direction of an answer.", "a": "Count how often you must steer with follow-ups." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "follow-up", "q": "follow-up", "lit": "іменник", "m": "уточнювальне повідомлення", "d": "A further message that corrects or adds to a request.", "a": "Fewer follow-ups mean a better fit." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "daily driver", "q": "daily driver", "lit": "іменник", "m": "основний щоденний інструмент", "d": "The tool you use most days.", "a": "Opus is the strongest daily driver." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "cost-sensitive", "q": "cost-sensitive", "lit": "прикметник", "m": "чутливий до вартості", "d": "Where price matters a lot.", "a": "Haiku suits cost-sensitive work." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "go-to", "q": "go-to", "lit": "прикметник", "m": "звичний, перевірений", "d": "The one you usually choose.", "a": "Run your go-to tasks across models." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "falls short", "q": "falls short", "lit": "фраза", "m": "не дотягує", "d": "Fails to reach the needed level.", "a": "If quality falls short, raise effort." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "trade-off", "q": "trade-off", "lit": "іменник", "m": "компроміс", "d": "Gaining one thing by giving up another.", "a": "Models are a speed-capability trade-off." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "latency", "q": "latency", "lit": "іменник", "m": "затримка (час відповіді)", "d": "The time before an answer arrives.", "a": "Opus latency is described as moderate." },
+ { "g": "Платформа і моделі (теми 3-4)", "t": "variation", "q": "variation", "lit": "іменник", "m": "варіація, розкид результатів", "d": "Differences between outputs of the same request.", "a": "Variation is inherent; review is structural." }
 ];
 
 const KEY = "cca_words_v1";

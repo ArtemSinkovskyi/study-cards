@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тема 3 з 11: Claude Platform &amp; Model Foundations (українською)</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Тема 3 з 11: Claude Platform &amp; Model Foundations (українською)</h1>
+<blockquote>
+<p><strong>Шлях Claude Certified Architect.</strong> Тема 3: чотири рішення на початку кожної сесії Claude. Незнайомі слова є в картках: <strong>English words</strong>. <a href="3-claude-platform-and-model-foundations-en.html">Read in English</a> · Попередня: <a href="2-ai-fluency-for-builders-uk.html">Тема 2</a> · Наступна: <a href="4-choosing-the-right-claude-model-uk.html">Тема 4</a>
+Джерело: курс Anthropic Associate, модуль 1 «Claude Platform &amp; Model Foundations». Поведінка продукту станом на червень 2026; сам курс радить звіряти з актуальною документацією Anthropic.</p>
+</blockquote>
+<h2>1. Чотири рішення</h2>
+<p>До першого промпта чотири рішення задають <strong>стелю якості</strong> сесії:</p>
+<ol>
+<li><strong>Entry point</strong> (точка входу): Chat, Project, Artifact або Research.</li>
+<li><strong>Capability layer</strong> (шар можливостей): Projects, Skills, Code Execution, Memory.</li>
+<li><strong>Модель</strong>: Haiku, Sonnet чи Opus.</li>
+<li><strong>Керування контекстом</strong>: restart, summarize чи persist.</li>
+</ol>
+<p>Вони визначають, чи сесії надбудовуються на попередніх, чи щоразу все налаштовується заново.</p>
+<h2>2. П'ять поведінкових властивостей Claude</h2>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Властивість</th>
+<th>Що робити</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="#">1</td>
+<td data-label="Властивість"><strong>Відповіді різняться</strong>: те саме питання двічі дає дві відповіді. Вивід породжується ймовірністю, а не береться з бази.</td>
+<td data-label="Що робити">Закладіть варіативність і додайте перевірку в процес</td>
+</tr>
+<tr>
+<td data-label="#">2</td>
+<td data-label="Властивість"><strong>Впевнений тон не ознака точності</strong>: вигадана статистика звучить так само певно, як перевірена.</td>
+<td data-label="Що робити">Виробіть звички перевірки</td>
+</tr>
+<tr>
+<td data-label="#">3</td>
+<td data-label="Властивість"><strong>Контекст це бюджет</strong>: у кожної розмови є ліміт робочої пам'яті. Біля ліміту claude.ai автоматично підсумовує ранні повідомлення (платні плани з увімкненим Code Execution), і деталі стискаються.</td>
+<td data-label="Що робити">Restart, summarize чи persist (розділ 7)</td>
+</tr>
+<tr>
+<td data-label="#">4</td>
+<td data-label="Властивість"><strong>Знання мають межу навчання</strong>: дата cutoff.</td>
+<td data-label="Що робити">Підключіть актуальне джерело, увімкніть вебпошук чи Research</td>
+</tr>
+<tr>
+<td data-label="#">5</td>
+<td data-label="Властивість"><strong>Налаштовані процедури теж дають різний вивід</strong>: навіть Skill зменшує розкид, але не прибирає.</td>
+<td data-label="Що робити">Лишайте перевірку в процесі</td>
+</tr>
+</tbody>
+</table></div>
+<h2>3. Основні точки входу</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Завдання</th>
+<th>Точка входу</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Завдання">Разове питання чи швидке завдання, без повторного використання</td>
+<td data-label="Точка входу"><strong>Chat</strong></td>
+</tr>
+<tr>
+<td data-label="Завдання">Повторювана робота зі сталим контекстом</td>
+<td data-label="Точка входу"><strong>Project</strong></td>
+</tr>
+<tr>
+<td data-label="Завдання">Результат це документ, який отримувач відкриє й прочитає</td>
+<td data-label="Точка входу"><strong>Artifact</strong></td>
+</tr>
+<tr>
+<td data-label="Завдання">Глибоке дослідження чи синтез із багатьох джерел</td>
+<td data-label="Точка входу"><strong>Research</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Chat</strong>: типова, неструктурована розмова. Зберігається в історії й може продовжуватись, а Memory і пошук по минулих чатах переносять частину контексту. Йому бракує свідомої сталості Project, постійних інструкцій і впорядкованої бази знань. Тривожний знак: щоразу вставляєте в новий Chat той самий абзац передісторії.</li>
+<li><strong>Project</strong>: постійний робочий простір із трьох частин:
+<ul>
+<li><strong>Standing instructions</strong> (постійні інструкції): як Claude діє в кожній розмові цього простору.</li>
+<li><strong>Knowledge base</strong> (база знань): документи, завантажені раз.</li>
+<li><strong>Історія розмов</strong>: власний список, окремо від глобальної. Розмови в Project ділять інструкції та базу знань, але <strong>не ділять контекст між собою</strong>.</li>
+</ul>
+</li>
+<li><strong>Artifact</strong>: окремий редагований блок поруч із чатом; для документів, таблиць, звітів, коду. Відповіді, за якими дієте тут-таки в розмові, лишайте в тексті чату.</li>
+<li><strong>Research</strong>: багатокрокові пошуки по багатьох джерелах із синтезом (платні плани). Звичайний Chat теж шукає в інтернеті через перемикач на чат на всіх планах; на Team і Enterprise Owner спершу вмикає вебпошук для робочого простору. Швидкі довідки: вебпошук у Chat; глибока робота: Research.</li>
+</ul>
+<p><strong>Коли Project вартий створення?</strong> Три питання: чи завдання <strong>повторюється</strong>, чи <strong>передісторія стала</strong>, чи <strong>формат виводу сталий</strong>? <strong>Двох і більше «так» досить.</strong> Час налаштування повертається за дві-три сесії.</p>
+<p><em>Приклад:</em> координаторка щопонеділка писала тижневий статус-звіт у новому Chat (40 хвилин, близько 12 на завантаження контексту). З Project (команда й стейкхолдери в базі знань, формат і правила ескалації в інструкціях) сесія триває 25 хвилин. Якість та сама; «податок на налаштування» зник.</p>
+<h2>4. Capability layer</h2>
+<p>Точки входу визначають, <strong>де</strong> ви працюєте; шар можливостей визначає, <strong>що Claude вміє</strong> там. Шари незалежні; комбінуйте як треба.</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Шар</th>
+<th>Розв'язує</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Шар"><strong>Projects</strong> несуть контекст</td>
+<td data-label="Розв&#x27;язує">передісторія й постійні інструкції для напряму роботи</td>
+</tr>
+<tr>
+<td data-label="Шар"><strong>Skills</strong> задають процедури</td>
+<td data-label="Розв&#x27;язує">як виконувати завдання, однаково щоразу</td>
+</tr>
+<tr>
+<td data-label="Шар"><strong>Code Execution</strong> перевіряє обчислення</td>
+<td data-label="Розв&#x27;язує">результат має бути правильним, а не лише правдоподібним</td>
+</tr>
+<tr>
+<td data-label="Шар"><strong>Memory</strong> зберігає тяглість</td>
+<td data-label="Розв&#x27;язує">факти переходять між сесіями без повторного введення</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Skills</strong></p>
+<ul>
+<li>Багаторазові процедури. Вбудовані Skills працюють з Excel, Word, PowerPoint і PDF; власні можна додати в налаштуваннях.</li>
+<li>Skills живуть на <strong>рівні акаунта</strong>, а не всередині одного Project; Claude викликає їх автоматично, коли доречно, у Project чи поза ним.</li>
+<li>Skills <strong>зменшують розкид, але не прибирають його</strong>: текст щоразу трохи інший.</li>
+<li><strong>Оцінка довіри</strong>: Skill має доступ до всього, що ви дали Claude в сесії. Перед увімкненням стороннього Skill перегляньте джерело й запитані дозволи. Skills від Anthropic і схвалені організацією це безпечніший початок.</li>
+</ul>
+<p><strong>Memory</strong></p>
+<ul>
+<li>Зберігає робочі факти: роль, уподобання щодо формату, постійні співрозмовники, сталі обмеження.</li>
+<li><strong>Доглядайте за нею</strong>: переглядайте не рідше разу на місяць для активних користувачів, видаляйте чи оновлюйте застаріле, лишайте лише те, що справді повторюється. Застаріла пам'ять може ввести в оману; точність важливіша за обсяг.</li>
+<li><strong>Project-scoped Memory</strong> тримає контексти окремо для кожного Project (клієнт A не потрапляє в сесії клієнта B). Різні напрями робіть у різних Project.</li>
+<li><strong>Incognito mode</strong> тримає сесію поза Memory та історією чатів (окремі чати, поза Project). Він <strong>не скасовує</strong> політику збереження даних вашої організації.</li>
+<li>Імпорт пам'яті з інших AI-платформ станом на червень 2026 був <strong>експериментальним</strong> (задокументований для Free, Pro, Max, Team; не для Enterprise). Запасний шлях: додати ключові факти в Memory вручну в налаштуваннях, а не в базу знань Project.</li>
+</ul>
+<p><strong>Приклад:</strong> щомісячний регуляторний звіт аналітикині скоротився з 65 до 30 хвилин на сесію після того, як контекст і формат пішли в Project, минулі звіти в базу знань, формат виводу в Skill, а числові розрахунки в Code Execution. Перевірка лишилась; помилок у місяці 3-8 не було.</p>
+<p>Питання, щоб знайти шар: що однакове щоразу (постійні інструкції + Skill)? який довідковий матеріал повторюється (база знань)? що має бути обчислене правильно (Code Execution)? що переносити між сесіями (Memory)?</p>
+<p><strong>Перегляд договорів:</strong></p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Компонент</th>
+<th>Шар</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Компонент">«Познач будь-який пункт, що відхиляється від playbook, і поясни одним реченням»</td>
+<td data-label="Шар">Постійні інструкції</td>
+</tr>
+<tr>
+<td data-label="Компонент">Playbook компанії; договори цього циклу</td>
+<td data-label="Шар">База знань</td>
+</tr>
+<tr>
+<td data-label="Компонент">Процедура, що витягує позначені пункти у стандартний шаблон звіту</td>
+<td data-label="Шар">Skill</td>
+</tr>
+<tr>
+<td data-label="Компонент">Фінансова експозиція зі штрафного пункту зі змінною ставкою</td>
+<td data-label="Шар">Code Execution</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>Постійні інструкції визначають, <strong>як поводиться Claude</strong>; база знань визначає, <strong>що Claude знає</strong>. Обидві живуть у Project.</p>
+</blockquote>
+<h2>5. Вибір моделі: Haiku, Sonnet, Opus</h2>
+<p>Шар визначає, що робить Claude; модель визначає, <strong>наскільки добре і якою ціною швидкості</strong>.</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Профіль завдання</th>
+<th>Модель</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Профіль завдання">Рутинне структуроване витягування чи класифікація у великому обсязі</td>
+<td data-label="Модель"><strong>Haiku</strong>: найшвидша й найефективніша; класифікація, витяг, форматування, прості резюме</td>
+</tr>
+<tr>
+<td data-label="Профіль завдання">Більшість професійного складання, синтезу, аналізу</td>
+<td data-label="Модель"><strong>Sonnet</strong>: збалансована; відправна точка для більшості роботи зі знаннями</td>
+</tr>
+<tr>
+<td data-label="Профіль завдання">Складне судження, високі ставки, неоднозначні чи багатошарові входи</td>
+<td data-label="Модель"><strong>Opus</strong>: вища здатність, повільніша; клієнтські результати, стратегія, синтез із багатьох джерел</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>Якщо якість у складному завданні недотягує, підніміться до Opus; якщо завдання структуроване, а важливі швидкість і обсяг, розгляньте Haiku.</li>
+<li>На планах із лічильником чи бюджетом використання (включно з API) вища модель ще й коштує більше за виклик. На підписці claude.ai вважайте швидкість і запас використання замінником вартості.</li>
+<li>Перелік у вибірнику моделей, типова модель і автоперемикання залежать від плану й змінюються.</li>
+<li><strong>Примітка курсу:</strong> у червні 2026 родина має й четвертий рівень над Opus (Claude Fable 5), а затримку Opus описують як помірну. <strong>Сертифікація фіксує триярусну схему Haiku/Sonnet/Opus</strong>, тож вчіть її; Fable позначено як неважливий для іспиту. Погляд із чотирма моделями див. у <a href="4-choosing-the-right-claude-model-uk.html">Темі 4</a>.</li>
+</ul>
+<h2>6. Ліміти контексту й гігієна розмови</h2>
+<ul>
+<li>Вікно контексту заповнюється повідомленнями й файлами; тоді claude.ai підсумовує ранні повідомлення (повна історія лишається для довідки). Інструкції з перших 10 хвилин можуть не виконуватись через 90, бо <strong>деталі стиснулись</strong>, а не тому, що Claude вас ігнорує.</li>
+<li><strong>Ознаки, що розмові потрібне втручання:</strong> перестала виконувати раніші інструкції; відповідає лише на останній обмін; точність падає так, ніби бракує раннього контексту.</li>
+</ul>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Реакція</th>
+<th>Що</th>
+<th>Коли</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Реакція"><strong>Restart</strong></td>
+<td data-label="Що">Нова розмова; інструкції й база знань Project переходять, нитка розмови ні</td>
+<td data-label="Коли">Сесія зійшла з рейок безповоротно, або починається нове завдання</td>
+</tr>
+<tr>
+<td data-label="Реакція"><strong>Summarize</strong></td>
+<td data-label="Що">Попросіть Claude підсумок рішень, поточної роботи й відкритих питань; вставте у нову розмову</td>
+<td data-label="Коли">Потрібна тяглість нитки без деградованого вікна</td>
+</tr>
+<tr>
+<td data-label="Реакція"><strong>Persist</strong></td>
+<td data-label="Що">Збережіть у Memory чи оновіть базу знань Project</td>
+<td data-label="Коли">Інформація потрібна в усіх майбутніх сесіях</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Ліміти використання</strong> діють у кількох вікнах: коротке ковзне вікно сесії плюс тижневі ліміти на платних планах для всіх моделей (окремий тижневий пул для найвищого рівня). Плануйте наперед: діліть великі завдання, зберігайте проміжний прогрес у базі знань, перезапускайтесь із підсумку, а не розтягуйте одну сесію без кінця.</li>
+</ul>
+<h2>7. Вправа: підберіть конфігурацію</h2>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Картка</th>
+<th>Конфігурація</th>
+<th>Чому</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Картка">A</td>
+<td data-label="Конфігурація">Project + Skill, Sonnet</td>
+<td data-label="Чому">Повторюване структуроване завдання, стабільний контекст, фіксований формат</td>
+</tr>
+<tr>
+<td data-label="Картка">B</td>
+<td data-label="Конфігурація">Research, Sonnet</td>
+<td data-label="Чому">Актуальна інформація поза надійним відтворенням із навчання</td>
+</tr>
+<tr>
+<td data-label="Картка">C</td>
+<td data-label="Конфігурація">Code Execution, Haiku чи Sonnet</td>
+<td data-label="Чому">Розрахунок на визначеному наборі; має бути точним</td>
+</tr>
+<tr>
+<td data-label="Картка">D</td>
+<td data-label="Конфігурація">Project (база знань) + Artifact, Opus</td>
+<td data-label="Чому">Тонкий аналіз із багатьох джерел, неоднозначні входи, високі ставки</td>
+</tr>
+<tr>
+<td data-label="Картка">E</td>
+<td data-label="Конфігурація">Chat + Artifact, Sonnet</td>
+<td data-label="Чому">Разова чернетка, шар не потрібен</td>
+</tr>
+<tr>
+<td data-label="Картка">F</td>
+<td data-label="Конфігурація">Project + Code Execution + Skill, Sonnet</td>
+<td data-label="Чому">Повторюваний процес, перевірені числа, сталий формат</td>
+</tr>
+</tbody>
+</table></div>
+<p>Відповідність (у джерелі ключа нема; виведено з причин у картках):</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Сценарій</th>
+<th>Картка</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Сценарій">S1 запуски конкурентів за останні 90 днів</td>
+<td data-label="Картка"><strong>B</strong></td>
+</tr>
+<tr>
+<td data-label="Сценарій">S2 тижневі нотатки зустрічей у фіксованому форматі пів року</td>
+<td data-label="Картка"><strong>A</strong></td>
+</tr>
+<tr>
+<td data-label="Сценарій">S3 15-сторінковий аналіз для ради з чотирьох звітів, неоднозначні сигнали</td>
+<td data-label="Картка"><strong>D</strong> (зразкова відповідь джерела: Opus, бо для разового високоризикового результату якість важливіша за швидкість)</td>
+</tr>
+<tr>
+<td data-label="Сценарій">S4 800 відповідей опитування, частка відповідей по відділах, позначити нижче 60%</td>
+<td data-label="Картка"><strong>C</strong></td>
+</tr>
+<tr>
+<td data-label="Сценарій">S5 щомісячний аналіз відхилень, позначити понад 10%, стандартний шаблон</td>
+<td data-label="Картка"><strong>F</strong></td>
+</tr>
+<tr>
+<td data-label="Сценарій">S6 швидка разова відповідь постачальнику щодо умов оплати</td>
+<td data-label="Картка"><strong>E</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h2>8. Тест модуля</h2>
+<p>Джерело показує питання без ключа; відповіді нижче виведено з логіки модуля.</p>
+<ol>
+<li><strong>Щотижнева звірка запасів (незмінний документ порогів, новий файл щотижня, форматований звіт винятків)</strong> → <strong>B</strong>: Project із документом порогів у базі знань, постійними інструкціями про формат і Code Execution для порівняння.</li>
+<li><strong>Складні відсотки з п'ятьма змінними, найнадійніший результат</strong> → <strong>C</strong>: Code Execution повертає перевірений результат.</li>
+<li><strong>500 договорів постачальників, low/medium/high за чітким рубрикатором, одна сесія</strong> → <strong>C</strong>: Haiku для структурованої класифікації у великому обсязі.</li>
+<li><strong>Дві години в одній сесії, відповіді перестали відображати рамку, задану на початку</strong> → <strong>C</strong>: нова розмова з підсумком рішень і прогресу (більша модель не виправить стиснутий контекст).</li>
+<li><strong>Два клієнти, не пускати контекст A у B</strong> → <strong>C</strong>: окремі Project із Project-scoped Memory (Incognito прибирає будь-яку сталість, а не розділяє клієнтів).</li>
+</ol>
+<h2>9. П'ять висновків</h2>
+<ol>
+<li>Обирайте <strong>точку входу до</strong> промпта.</li>
+<li>Чотири шари, чотири проблеми: Projects несуть контекст, Skills задають процедури, Code Execution перевіряє обчислення, Memory зберігає тяглість.</li>
+<li>Рівні моделей це <strong>компроміс швидкість-здатність</strong>.</li>
+<li><strong>Контекст це бюджет</strong>: restart, summarize чи persist.</li>
+<li><strong>Варіативність невідворотна, перевірка структурна</strong>: навіть налаштовані Skills різняться від запуску до запуску.</li>
+</ol>
+<h2>10. Перевірте себе</h2>
+<ol>
+<li>Назвіть чотири рішення на початку кожної сесії.</li>
+<li>Двох із трьох умов досить, щоб Project був вартий. Яких трьох?</li>
+<li>Постійні інструкції проти бази знань?</li>
+<li>Чому довга сесія перестає виконувати ранні інструкції?</li>
+<li>Restart, summarize, persist: коли що?</li>
+<li>Яка модель для 800 рутинних класифікацій? Для аналізу для ради?</li>
+</ol>
+
+<nav class="pager"><a href="3-claude-platform-and-model-foundations-en.html">← Topic 3 of 11: Claude Platform &amp; Model Foundations (English)</a><a href="4-choosing-the-right-claude-model-en.html">Topic 4 of 11: Choosing the Right Claude Model (English) →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

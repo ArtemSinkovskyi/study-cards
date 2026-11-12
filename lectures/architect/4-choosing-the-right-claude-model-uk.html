@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тема 4 з 11: вибір правильної моделі Claude (українською)</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Тема 4 з 11: вибір правильної моделі Claude (українською)</h1>
+<blockquote>
+<p><strong>Шлях Claude Certified Architect.</strong> Тема 4: чотири моделі, з чого починати і коли міняти модель чи effort. Незнайомі слова є в картках: <strong>English words</strong>. <a href="4-choosing-the-right-claude-model-en.html">Read in English</a> · Попередня: <a href="3-claude-platform-and-model-foundations-uk.html">Тема 3</a>
+Джерело: Anthropic, «Choosing a Claude model for knowledge workers» (7 хв). Плани, типові моделі й ліміти змінюються; звіряйте в продукті.</p>
+</blockquote>
+<blockquote>
+<p><strong>Дві схеми, не змішуйте.</strong> <a href="3-claude-platform-and-model-foundations-uk.html">Тема 3</a> навчає <strong>триярусну</strong> схему (Haiku, Sonnet, Opus), яку фіксує сертифікація, і вважає Sonnet звичайним стартом. Ця тема описує <strong>чотири моделі</strong> (Fable, Opus, Sonnet, Haiku) і радить починати з <strong>Opus</strong>. Для питань іспиту про рівні користуйтесь триярусною схемою; для щоденного вибору ця тема.</p>
+</blockquote>
+<h2>1. Що означає вибір моделі</h2>
+<ul>
+<li>Claude має <strong>чотири моделі: Fable, Opus, Sonnet, Haiku</strong>. Вони різняться здатністю, швидкістю й тим, скільки ліміту використання споживають.</li>
+<li>Модель задає, скільки у вас <strong>здатності</strong>: знання, міркування й судження, які Claude вносить у завдання. Контекст і керування допомагають, але базові знання й здібності моделі незмінні.</li>
+<li><strong>Потужніша</strong> модель краще справляється з неоднозначністю та довгими завданнями, де один хибний крок псує все далі. Вона ймовірніше дійде правильної відповіді, часто за <strong>менше ходів</strong>.</li>
+<li><strong>Менш потужна</strong> відповідає швидше й найкраще працює на конкретних, обмежених завданнях.</li>
+<li><strong>Для більшості роботи зі знаннями починайте з Opus.</strong> Далі налаштовуйте два параметри: <strong>модель</strong> і <strong>effort</strong>.</li>
+<li>Доступ залежить від плану: Free має Haiku і Sonnet; платні плани додають Opus і більший запас; Fable залежить від плану (на деяких працює на кредитах використання). Адмін також може обмежити, які моделі видно в меню.</li>
+</ul>
+<h2>2. Чотири моделі</h2>
+<p>У порядку меню моделей.</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Модель</th>
+<th>Використання</th>
+<th>Для чого</th>
+<th>Найкраща в</th>
+<th>Варто знати</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Модель"><strong>Fable</strong></td>
+<td data-label="Використання">Найважче</td>
+<td data-label="Для чого">Найскладніші виклики; амбітна довготривала робота</td>
+<td data-label="Найкраща в">Складні відкриті проблеми, глибоке розслідування великих масивів, довга робота з меншою кількістю перевірок</td>
+<td data-label="Варто знати">На деяких планах витрачає ліміт швидше за інші; на інших працює на кредитах використання</td>
+</tr>
+<tr>
+<td data-label="Модель"><strong>Opus</strong> (<strong>починайте тут</strong>)</td>
+<td data-label="Використання">Важко</td>
+<td data-label="Для чого">Складна робота й повсякденні завдання; найсильніша «щоденна робоча конячка» для складного кодування й роботи зі знаннями</td>
+<td data-label="Найкраща в">Готовий до продакшну код і складні аналізи, що потребують сильного судження</td>
+<td data-label="Варто знати">Якщо не певні, починайте з нього. Витрачає ліміту більше за Sonnet, але часто завершує важчу роботу за менше ходів</td>
+</tr>
+<tr>
+<td data-label="Модель"><strong>Sonnet</strong></td>
+<td data-label="Використання">Помірно</td>
+<td data-label="Для чого">Найефективніша для простіших завдань; балансує здатність, швидкість, вартість</td>
+<td data-label="Найкраща в">Щоденна робота: гарні документи, слайди, таблиці</td>
+<td data-label="Варто знати">Швидша й легша за Opus, з певним компромісом у якості на важчому</td>
+</tr>
+<tr>
+<td data-label="Модель"><strong>Haiku</strong></td>
+<td data-label="Використання">Найлегше</td>
+<td data-label="Для чого">Найшвидша для швидких відповідей; великі обсяги, чутлива до вартості робота, зроблена переважно для тих, хто розробляє власні продукти</td>
+<td data-label="Найкраща в">Швидкі повторювані навантаження: резюме, ущільнення, запити до баз, класифікація</td>
+<td data-label="Варто знати">Неефективна для складної роботи, <strong>не рекомендована як типова</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h2>3. Коли міняти модель чи effort</h2>
+<p><strong>З чого починати.</strong> Opus типовий на планах <strong>Pro, Max, Ultra і Team</strong>. Деякі плани чи організації стартують із Sonnet; тоді починайте з нього, підхід той самий: <strong>спершу підніміть effort</strong>, потім переходьте на потужнішу модель, якщо все ще не вистачає.</p>
+<p><strong>Що можна налаштувати</strong> (обидва в меню моделі біля кнопки надсилання):</p>
+<ul>
+<li><strong>Model</strong>: наскільки <strong>потужна</strong>. Вгору (Opus, Fable) чи вниз (Sonnet).</li>
+<li><strong>Effort</strong>: наскільки <strong>ґрунтовна</strong>. Вищий: Claude думає довше, частіше викликає інструменти, більше перевіряє свою роботу. Нижчий: швидший, прямий прохід.</li>
+</ul>
+<p><strong>Як налаштовувати.</strong> Почніть із типового. Якщо результат хибний, спершу перевірте, чи ваш промпт і файли дали Claude все потрібне. Далі міняйте <strong>один параметр за раз, спершу effort</strong>, щоб бачити, що саме допомогло.</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Що ви помічаєте</th>
+<th>Що робити</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Що ви помічаєте">Пропускає інструкції або довга робота завершується раніше, ніж готова</td>
+<td data-label="Що робити"><strong>Підняти effort</strong></td>
+</tr>
+<tr>
+<td data-label="Що ви помічаєте">Claude має весь контекст, effort піднято, а якість усе ще недостатня</td>
+<td data-label="Що робити"><strong>Перейти на більшу модель</strong></td>
+</tr>
+<tr>
+<td data-label="Що ви помічаєте">Відповіді стають багатослівнішими без кращої якості, або обсяг виходить за ваш запит</td>
+<td data-label="Що робити"><strong>Знизити effort</strong></td>
+</tr>
+<tr>
+<td data-label="Що ви помічаєте">Якість тримається після зниження effort, а хочеться швидше</td>
+<td data-label="Що робити"><strong>Спробувати менш потужну модель</strong> (порівняйте результати, перш ніж покладатись)</td>
+</tr>
+</tbody>
+</table></div>
+<h2>4. Як параметри впливають на використання</h2>
+<ul>
+<li>Використання рахується в <strong>токенах</strong> (малі одиниці тексту): читання промпта, обробка файлів, міркування й написання відповіді споживають ліміт.</li>
+<li><strong>Модель</strong> визначає ціну кожного токена: потужніша загалом дорожча за токен.</li>
+<li><strong>Effort</strong> визначає, скільки токенів іде на завдання: вищий effort дає ґрунтовніші відповіді, але повільніше й швидше з'їдає ліміт.</li>
+<li><strong>Важливіша вартість за завдання.</strong> Потужніша модель часто завершує складне завдання за менше ходів, тож може коштувати <strong>менше за завдання</strong> на довгій чи неоднозначній роботі, хоч кожен токен дорожчий. Ілюстрація: чітко визначене завдання це 1 хід на будь-якій моделі (менш потужна дешевша); довге чи неоднозначне це близько 6 ходів на менш потужній проти 2 на потужнішій (вона дешевша). Тому курс і радить починати з Opus.</li>
+<li><strong>Щоб витрачати менше ліміту, спершу знизьте effort.</strong> Перехід на менш потужну модель змінює і вартість, і здатність; зниження effort змінює вартість, зберігаючи судження й міркування моделі.</li>
+</ul>
+<h2>5. Як це виглядає на практиці</h2>
+<ul>
+<li>Обирайте модель, що пасує вашій звичній роботі. Якщо Opus легко справляється з усім, Sonnet теж може підійти. Якщо найскладніші проєкти недотягують навіть після піднятого effort на Opus, спробуйте Fable і порівняйте.</li>
+<li>Два швидкі питання про роботу: <strong>скільки б це зайняло в вас без AI?</strong> і <strong>наскільки зрозуміло, який вивід правильний?</strong> Довша й менш визначена робота це там, де потужніша модель допомагає найбільше. Важать і інші чинники: ставки, наскільки легко ви самі можете перевірити, як швидко потрібно.</li>
+<li>Приблизні приклади з інтерактива курсу: редагування договорів, повні звіти, таблиці й презентації, складний аналіз пасують сильнішим моделям; коротке чітке завдання пасує Sonnet чи Haiku. Це ілюстрація; <strong>найкращий тест це спробувати</strong> і перевірити, чи Claude виконав інструкції, завершив роботу й досяг потрібної якості.</li>
+</ul>
+<p><strong>Спробуйте на власній роботі.</strong> Оберіть два завдання, одне обмежене й одне довге багатокрокове. Запустіть обидва на Opus і на Sonnet:</p>
+<ol>
+<li>Визначте, яким має бути добрий результат, <strong>до</strong> запуску.</li>
+<li>Той самий промпт і файли, новий чат, типовий effort.</li>
+<li>Порахуйте, скільки додаткових ходів чи повторів знадобилось для результату, яким ви б скористались.</li>
+<li>Порівнюйте по одному завданню. Приблизно однакова кількість ходів: підійде будь-яка, лишайте звичну. Менше ходів або знахідка, що важить: беріть цю модель для такої роботи.</li>
+</ol>
+<h2>6. Вибір моделей з часом</h2>
+<ul>
+<li>Кожна нова модель змінює, які завдання варто віддавати Claude; повторіть амбітніші завдання, що раніше впиралися в стелю.</li>
+<li>З кожною новою моделлю (включно з новішою версією вашої) перегляньте свої завдання: можливо, потужніша модель дасть той самий результат на <strong>нижчому effort</strong>, що може бути дешевше. Витратьте кілька хвилин, прогнавши звичні завдання на різних моделях.</li>
+</ul>
+<h2>7. Перевірте себе</h2>
+<ol>
+<li>Які два параметри можна налаштовувати і який першим?</li>
+<li>Що робити, якщо інструкції пропускаються? Якщо відповіді задовгі?</li>
+<li>Чому потужніша модель може коштувати менше за завдання?</li>
+<li>Як зменшити витрати ліміту, не втративши судження моделі?</li>
+<li>Яка модель «не рекомендована як типова» і чому?</li>
+<li>У чому різниця між триярусною схемою з Теми 3 і чотирма моделями тут?</li>
+</ol>
+
+<nav class="pager"><a href="4-choosing-the-right-claude-model-en.html">← Topic 4 of 11: Choosing the Right Claude Model (English)</a><span></span></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

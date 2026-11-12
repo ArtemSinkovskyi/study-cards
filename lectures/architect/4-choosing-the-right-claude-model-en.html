@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Topic 4 of 11: Choosing the Right Claude Model (English)</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Topic 4 of 11: Choosing the Right Claude Model (English)</h1>
+<blockquote>
+<p><strong>Claude Certified Architect path.</strong> Topic 4: the four models, where to start, and when to change model or effort. Unknown words are in the cards: <strong>English words</strong>. <a href="4-choosing-the-right-claude-model-uk.html">Читати українською</a> · Previous: <a href="3-claude-platform-and-model-foundations-en.html">Topic 3</a>
+Source: Anthropic, &quot;Choosing a Claude model for knowledge workers&quot; (7 min). Plans, defaults and limits change; verify in the product.</p>
+</blockquote>
+<blockquote>
+<p><strong>Two frames, do not mix them.</strong> <a href="3-claude-platform-and-model-foundations-en.html">Topic 3</a> teaches the <strong>three-tier</strong> frame (Haiku, Sonnet, Opus) that the certification pins, and treats Sonnet as the usual start. This topic describes the <strong>four-model</strong> lineup (Fable, Opus, Sonnet, Haiku) and recommends starting with <strong>Opus</strong>. Use the three-tier frame for exam questions about tiers; use this topic for real day-to-day choices.</p>
+</blockquote>
+<h2>1. What a model choice means</h2>
+<ul>
+<li>Claude comes in <strong>four models: Fable, Opus, Sonnet, Haiku</strong>. They differ in capability, speed and how much of your usage limit they consume.</li>
+<li>The model sets how much <strong>capability</strong> you have: the knowledge, reasoning and judgment Claude brings. Context and steering help, but the model's base knowledge and abilities are fixed.</li>
+<li>A <strong>more capable</strong> model is better at ambiguity and at long tasks where one wrong step spoils everything after it. It is more likely to reach the right answer, often in <strong>fewer turns</strong>.</li>
+<li>A <strong>less capable</strong> model answers faster and does its best work on specific, bounded tasks.</li>
+<li><strong>For most knowledge work, start with Opus.</strong> Then adjust two settings: <strong>model</strong> and <strong>effort</strong>.</li>
+<li>Access depends on the plan: Free has Haiku and Sonnet; paid plans add Opus and more headroom; Fable depends on the plan (on some it runs on usage credits). Your admin can also limit which models appear in your menu.</li>
+</ul>
+<h2>2. The four models</h2>
+<p>Listed in the order of the model menu.</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Usage</th>
+<th>For</th>
+<th>Excels at</th>
+<th>Good to know</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Model"><strong>Fable</strong></td>
+<td data-label="Usage">Heaviest</td>
+<td data-label="For">Your toughest challenges; ambitious, long-running work</td>
+<td data-label="Excels at">Hard open-ended problems, deep investigation across large material, long work with fewer check-ins</td>
+<td data-label="Good to know">On some plans it uses your limit faster than the others; on others it runs on usage credits</td>
+</tr>
+<tr>
+<td data-label="Model"><strong>Opus</strong> (<strong>start here</strong>)</td>
+<td data-label="Usage">Heavy</td>
+<td data-label="For">Complex work and everyday tasks; the strongest daily driver for complex coding and knowledge work</td>
+<td data-label="Excels at">Production-ready code and complex analyses needing strong judgment</td>
+<td data-label="Good to know">If unsure, start here. Uses more limit than Sonnet but often finishes harder work in fewer turns</td>
+</tr>
+<tr>
+<td data-label="Model"><strong>Sonnet</strong></td>
+<td data-label="Usage">Moderate</td>
+<td data-label="For">Most efficient for simpler tasks; balances capability, speed, cost</td>
+<td data-label="Excels at">Everyday work: polished documents, slides, spreadsheets</td>
+<td data-label="Good to know">Faster and lighter than Opus, with some quality trade-off on harder work</td>
+</tr>
+<tr>
+<td data-label="Model"><strong>Haiku</strong></td>
+<td data-label="Usage">Lightest</td>
+<td data-label="For">Fastest for quick answers; high-volume, cost-sensitive work, built mainly for people developing their own products</td>
+<td data-label="Excels at">Quick, repetitive workloads: summaries, compactions, database queries, classification</td>
+<td data-label="Good to know">Not effective for complex work, <strong>not recommended as a default</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h2>3. When to adjust model or effort</h2>
+<p><strong>Where to start.</strong> Opus is the default on <strong>Pro, Max, Ultra and Team</strong>. Some plans or organizations start you on Sonnet; then start there, same approach: <strong>raise effort first</strong>, then switch to a more capable model if it still falls short.</p>
+<p><strong>What you can adjust</strong> (both in the model menu next to the send button):</p>
+<ul>
+<li><strong>Model</strong>: how <strong>capable</strong>. Switch up (Opus, Fable) or down (Sonnet).</li>
+<li><strong>Effort</strong>: how <strong>thorough</strong>. Higher: Claude thinks longer, makes more tool calls, checks more of its work. Lower: a quicker, more direct pass.</li>
+</ul>
+<p><strong>How to adjust.</strong> Start at the default. If the result is wrong, first check that your prompt and files gave Claude what it needed. Then change <strong>one setting at a time, effort first</strong>, so you can tell what made the difference.</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>You notice</th>
+<th>Do this</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="You notice">Instructions get missed, or long work wraps up before it is finished</td>
+<td data-label="Do this"><strong>Raise effort</strong></td>
+</tr>
+<tr>
+<td data-label="You notice">Claude has all the context, effort is raised, and quality is still short</td>
+<td data-label="Do this"><strong>Switch to a larger model</strong></td>
+</tr>
+<tr>
+<td data-label="You notice">Responses get more verbose without better quality, or scope grows beyond what you asked</td>
+<td data-label="Do this"><strong>Lower effort</strong></td>
+</tr>
+<tr>
+<td data-label="You notice">Quality holds after lowering effort and you still want faster answers</td>
+<td data-label="Do this"><strong>Try a less capable model</strong> (compare results before you rely on it)</td>
+</tr>
+</tbody>
+</table></div>
+<h2>4. How settings affect usage</h2>
+<ul>
+<li>Usage is counted in <strong>tokens</strong> (small units of text): reading your prompt, processing files, thinking and writing all draw on your limit.</li>
+<li><strong>Model</strong> sets what each token costs: more capable generally means a higher cost per token.</li>
+<li><strong>Effort</strong> sets how many tokens a task uses: higher effort means more thorough answers but slower and faster limit use.</li>
+<li><strong>What matters more is cost per task.</strong> A more capable model often finishes a hard task in fewer turns, so it can cost <strong>less per task</strong> on long or ambiguous work even though each token costs more. Illustration: a clearly defined task takes 1 turn on either model (the less capable one costs less); a long or ambiguous task takes about 6 turns on the less capable model but 2 on the more capable one (which costs less). This is why the course recommends starting on Opus.</li>
+<li><strong>To use less of your limit, lower effort first.</strong> Switching to a less capable model changes both cost and capability; lowering effort changes cost while keeping the model's judgment and reasoning.</li>
+</ul>
+<h2>5. What it looks like in practice</h2>
+<ul>
+<li>Choose the model that fits how you usually work. If Opus easily handles everything, Sonnet may also fit. If your hardest projects still fall short after raising effort on Opus, try Fable and compare.</li>
+<li>Two quick questions about the work: <strong>how long would it take you without AI?</strong> and <strong>how clear is the correct output?</strong> Longer and less clear work is where a more capable model helps most. Other factors also matter: the stakes, how easily you can verify it, how fast you need it.</li>
+<li>Rough examples from the course explorer: contract redlining, full reports, sheets and decks, complex analysis suit the stronger models; a short, well-defined task suits Sonnet or Haiku. This is an illustration; <strong>the best test is to try it</strong> and check whether Claude followed instructions, finished the work and reached the quality you need.</li>
+</ul>
+<p><strong>Try it on your own work.</strong> Pick two tasks, one bounded and one long multi-step. Run both on Opus and on Sonnet:</p>
+<ol>
+<li>Decide what a good result looks like <strong>before</strong> you run anything.</li>
+<li>Same prompt and files, new chat, default effort.</li>
+<li>Count how many follow-up turns or retries you needed to get a result you would use.</li>
+<li>Compare one task at a time. About the same turns: either model works, keep the one you use. Fewer turns or a finding that matters: use that model for this kind of work.</li>
+</ol>
+<h2>6. Choosing models over time</h2>
+<ul>
+<li>Each new model changes which tasks are worth handing to Claude; retry more ambitious tasks that hit a ceiling before.</li>
+<li>With every new model (including a newer version of your current one), revisit your tasks: maybe the more capable model gets the same result at <strong>lower effort</strong>, which can make it cheaper. Spend a few minutes running your go-to tasks across models.</li>
+</ul>
+<h2>7. Check yourself</h2>
+<ol>
+<li>Which two settings can you adjust, and which one first?</li>
+<li>What do you do if instructions get missed? If answers get too long?</li>
+<li>Why can a more capable model cost less per task?</li>
+<li>How do you reduce limit use without losing the model's judgment?</li>
+<li>Which model is &quot;not recommended as a default&quot; and why?</li>
+<li>What is the difference between the three-tier frame of Topic 3 and the four-model view here?</li>
+</ol>
+
+<nav class="pager"><a href="3-claude-platform-and-model-foundations-uk.html">← Тема 3 з 11: Claude Platform &amp; Model Foundations (українською)</a><a href="4-choosing-the-right-claude-model-uk.html">Тема 4 з 11: вибір правильної моделі Claude (українською) →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

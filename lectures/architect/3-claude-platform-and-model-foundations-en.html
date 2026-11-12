@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Topic 3 of 11: Claude Platform &amp; Model Foundations (English)</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Topic 3 of 11: Claude Platform &amp; Model Foundations (English)</h1>
+<blockquote>
+<p><strong>Claude Certified Architect path.</strong> Topic 3: the four decisions at the front of every Claude session. Unknown words are in the cards: <strong>English words</strong>. <a href="3-claude-platform-and-model-foundations-uk.html">Читати українською</a> · Previous: <a href="2-ai-fluency-for-builders-en.html">Topic 2</a> · Next: <a href="4-choosing-the-right-claude-model-en.html">Topic 4</a>
+Source: Anthropic Associate course, Module 1 &quot;Claude Platform &amp; Model Foundations&quot;. Product behavior as of June 2026; the course itself says to verify it against current Anthropic docs.</p>
+</blockquote>
+<h2>1. The four decisions</h2>
+<p>Before you write a prompt, four decisions set the <strong>quality ceiling</strong> of a session:</p>
+<ol>
+<li><strong>Entry point</strong>: Chat, Project, Artifact or Research.</li>
+<li><strong>Capability layer</strong>: Projects, Skills, Code Execution, Memory.</li>
+<li><strong>Model</strong>: Haiku, Sonnet or Opus.</li>
+<li><strong>Context management</strong>: restart, summarize or persist.</li>
+</ol>
+<p>They decide whether sessions build on prior work or need constant re-setup.</p>
+<h2>2. Five behavioral properties of Claude</h2>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Property</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="#">1</td>
+<td data-label="Property"><strong>Responses vary</strong>: the same question twice gives two answers. Output is produced by probability, not retrieved from a database.</td>
+<td data-label="What to do">Plan for variation and build review into the workflow</td>
+</tr>
+<tr>
+<td data-label="#">2</td>
+<td data-label="Property"><strong>Confident tone is not a signal of accuracy</strong>: a fabricated statistic reads as assured as a verified one.</td>
+<td data-label="What to do">Build verification habits</td>
+</tr>
+<tr>
+<td data-label="#">3</td>
+<td data-label="Property"><strong>Context is a budget</strong>: every conversation has a working-memory limit. Near the limit, claude.ai automatically summarizes earlier messages (paid plans with Code Execution enabled), and detail is compressed.</td>
+<td data-label="What to do">Restart, summarize or persist (section 7)</td>
+</tr>
+<tr>
+<td data-label="#">4</td>
+<td data-label="Property"><strong>Knowledge has a training boundary</strong>: a cutoff date.</td>
+<td data-label="What to do">Connect a current source, turn on web search or use Research</td>
+</tr>
+<tr>
+<td data-label="#">5</td>
+<td data-label="Property"><strong>Configured procedures still produce varied outputs</strong>: even a Skill reduces variance but does not remove it.</td>
+<td data-label="What to do">Keep review in the workflow</td>
+</tr>
+</tbody>
+</table></div>
+<h2>3. Core entry points</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Task</th>
+<th>Entry point</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Task">One-off question or quick task, no plan to reuse</td>
+<td data-label="Entry point"><strong>Chat</strong></td>
+</tr>
+<tr>
+<td data-label="Task">Recurring work with stable context</td>
+<td data-label="Entry point"><strong>Project</strong></td>
+</tr>
+<tr>
+<td data-label="Task">Output is a deliverable the recipient will open and read</td>
+<td data-label="Entry point"><strong>Artifact</strong></td>
+</tr>
+<tr>
+<td data-label="Task">Deep multi-source investigation or synthesis</td>
+<td data-label="Entry point"><strong>Research</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Chat</strong>: the default, unstructured conversation. It is saved to history and can be continued, and Memory plus past-chat search can carry some context forward. It lacks a Project's deliberate persistence, standing instructions and curated knowledge base. Warning sign: you paste the same background paragraph into every new Chat.</li>
+<li><strong>Project</strong>: a persistent workspace with three parts:
+<ul>
+<li><strong>Standing instructions</strong>: how Claude should behave in every conversation of the space.</li>
+<li><strong>Knowledge base</strong>: documents uploaded once.</li>
+<li><strong>Conversation history</strong>: its own list, separate from global history. Conversations in a Project share the instructions and knowledge base, but <strong>not context with each other</strong>.</li>
+</ul>
+</li>
+<li><strong>Artifact</strong>: a separate, editable block next to the chat; for documents, tables, reports, code. Use inline replies for answers you act on in the conversation.</li>
+<li><strong>Research</strong>: multi-step searches over many sources, synthesized (paid plans). Plain Chat can also search the web via a per-chat toggle on all plans; on Team and Enterprise an Owner must first enable web search for the workspace. Quick lookups: web search in Chat; deep work: Research.</li>
+</ul>
+<p><strong>When is a Project worth building?</strong> Ask three questions: does the task <strong>recur</strong>, is the <strong>background context stable</strong>, is the <strong>output format consistent</strong>? <strong>Two or more &quot;yes&quot; = build the Project.</strong> Setup time is recovered within two or three sessions.</p>
+<p><em>Example:</em> a coordinator wrote weekly status reports in a new Chat every Monday (40 minutes, about 12 of them context loading). With a Project (team and stakeholders in the knowledge base, format and escalation rules in instructions) the session takes 25 minutes. Same quality; the &quot;setup tax&quot; is gone.</p>
+<h2>4. Capability layer</h2>
+<p>Entry points decide <strong>where</strong> you work; the capability layer decides <strong>what Claude can do</strong> there. The layers are independent; use any combination.</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Layer</th>
+<th>Solves</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Layer"><strong>Projects</strong> carry context</td>
+<td data-label="Solves">background knowledge and standing instructions for a workstream</td>
+</tr>
+<tr>
+<td data-label="Layer"><strong>Skills</strong> define procedures</td>
+<td data-label="Solves">how a task is executed, consistently</td>
+</tr>
+<tr>
+<td data-label="Layer"><strong>Code Execution</strong> verifies computations</td>
+<td data-label="Solves">the result must be correct, not merely plausible</td>
+</tr>
+<tr>
+<td data-label="Layer"><strong>Memory</strong> persists continuity</td>
+<td data-label="Solves">facts carry across sessions without re-entry</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Skills</strong></p>
+<ul>
+<li>Reusable procedures. Built-in Skills cover Excel, Word, PowerPoint and PDF work; custom Skills can be added in settings.</li>
+<li>Skills live at the <strong>account level</strong>, not inside one Project; Claude invokes them automatically when relevant, in or out of a Project.</li>
+<li>Skills <strong>reduce variance but do not eliminate it</strong>: the prose still differs each run.</li>
+<li><strong>Trust evaluation</strong>: a Skill can reach whatever you give Claude access to. Review a third-party Skill's source and requested permissions first. Anthropic-provided and organization-approved Skills are the lower-risk start.</li>
+</ul>
+<p><strong>Memory</strong></p>
+<ul>
+<li>Stores work-relevant facts: role context, format preferences, frequent collaborators, standing constraints.</li>
+<li><strong>Curate it</strong>: review at least monthly for active users, delete or update stale entries, keep only what really recurs. A stale memory can mislead; accuracy matters more than volume.</li>
+<li><strong>Project-scoped Memory</strong> keeps contexts separate per Project (client A does not leak into client B). Use separate Projects for separate workstreams.</li>
+<li><strong>Incognito mode</strong> keeps a session out of Memory and chat history (standalone chats, outside Projects). It does <strong>not</strong> override your organization's data retention.</li>
+<li>Memory import from other AI platforms was <strong>experimental</strong> as of June 2026 (documented for Free, Pro, Max, Team; not Enterprise). Fallback: add key facts to Memory manually in settings, not into a Project's knowledge base.</li>
+</ul>
+<p><strong>Worked scenario:</strong> an analyst's monthly regulatory report went from 65 to 30 minutes per session after moving context and format instructions into a Project, prior reports into the knowledge base, the output format into a Skill and the numeric calculations into Code Execution. Verification still ran; no errors in months 3 to 8.</p>
+<p>Questions to find the layer: what is the same every time (standing instructions + Skill)? what reference material recurs (knowledge base)? what must be computed correctly (Code Execution)? what to carry across sessions (Memory)?</p>
+<p><strong>Contract review mapping:</strong></p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Component</th>
+<th>Layer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Component">&quot;Flag any clause that departs from the playbook and explain it in one sentence&quot;</td>
+<td data-label="Layer">Standing instructions</td>
+</tr>
+<tr>
+<td data-label="Component">The company contract playbook; this cycle's contracts</td>
+<td data-label="Layer">Knowledge base</td>
+</tr>
+<tr>
+<td data-label="Component">A procedure that extracts flagged clauses into the standard report template</td>
+<td data-label="Layer">Skill</td>
+</tr>
+<tr>
+<td data-label="Component">Financial exposure from a penalty clause with a variable rate</td>
+<td data-label="Layer">Code Execution</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>Standing instructions define <strong>how Claude behaves</strong>; the knowledge base defines <strong>what Claude knows</strong>. Both live in the Project.</p>
+</blockquote>
+<h2>5. Choosing models: Haiku, Sonnet, Opus</h2>
+<p>The layer decides what Claude does; the model decides <strong>how well, and at what cost in speed</strong>.</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Task profile</th>
+<th>Model</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Task profile">Routine, structured extraction or classification at volume</td>
+<td data-label="Model"><strong>Haiku</strong>: fastest and most efficient; classification, extraction, formatting, simple summaries</td>
+</tr>
+<tr>
+<td data-label="Task profile">Most professional drafting, synthesis, analysis</td>
+<td data-label="Model"><strong>Sonnet</strong>: balanced; the starting point for most knowledge work</td>
+</tr>
+<tr>
+<td data-label="Task profile">Complex judgment, high-stakes output, ambiguous or multi-layered inputs</td>
+<td data-label="Model"><strong>Opus</strong>: higher capability, slower; client deliverables, strategy, multi-source synthesis</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>If quality falls short on a complex task, move up to Opus; if the task is structured and speed and volume matter, consider Haiku.</li>
+<li>On metered or usage-budgeted plans (including API) a more capable tier also costs more per call. On the claude.ai subscription, treat speed and usage headroom as the proxy for cost.</li>
+<li>The model picker, default model and auto-switching vary by plan and change over time.</li>
+<li><strong>Note from the course:</strong> by June 2026 the family also has a fourth tier above Opus (Claude Fable 5), and Opus latency is described as moderate. <strong>The certification pins the three-tier Haiku/Sonnet/Opus frame</strong>, so learn that frame; Fable is marked not exam-relevant. See <a href="4-choosing-the-right-claude-model-en.html">Topic 4</a> for the four-model view.</li>
+</ul>
+<h2>6. Context limits and conversation hygiene</h2>
+<ul>
+<li>The context window fills as messages and files accumulate; claude.ai then summarizes earlier messages (full history stays available for reference). Instructions from the first 10 minutes may not be followed 90 minutes later because <strong>detail is compressed</strong>, not because Claude ignores you.</li>
+<li><strong>Signs a conversation needs intervention:</strong> it stops following earlier instructions; it answers only the latest exchange; accuracy drops in ways that fit missing early context.</li>
+</ul>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Response</th>
+<th>What</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Response"><strong>Restart</strong></td>
+<td data-label="What">New conversation; the Project's instructions and knowledge base carry over, the thread does not</td>
+<td data-label="When">The session drifted beyond recovery, or a new task starts</td>
+</tr>
+<tr>
+<td data-label="Response"><strong>Summarize</strong></td>
+<td data-label="What">Ask Claude for a summary of decisions, work in progress and open questions; paste it into the new conversation</td>
+<td data-label="When">You want thread continuity without the degraded window</td>
+</tr>
+<tr>
+<td data-label="Response"><strong>Persist</strong></td>
+<td data-label="What">Save to Memory or update the Project knowledge base</td>
+<td data-label="When">Information needed in all future sessions</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Usage limits</strong> run on several windows: a short rolling session window plus weekly limits on paid plans across models (a separate weekly pool for the top tier). Plan ahead: split big tasks, save interim progress to the knowledge base, restart from a summary instead of extending one session forever.</li>
+</ul>
+<h2>7. Exercise: pick the right configuration</h2>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Card</th>
+<th>Configuration</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Card">A</td>
+<td data-label="Configuration">Project + Skill, Sonnet</td>
+<td data-label="Why">Recurring structured task, stable context, fixed format</td>
+</tr>
+<tr>
+<td data-label="Card">B</td>
+<td data-label="Configuration">Research, Sonnet</td>
+<td data-label="Why">Current information beyond reliable training recall</td>
+</tr>
+<tr>
+<td data-label="Card">C</td>
+<td data-label="Configuration">Code Execution, Haiku or Sonnet</td>
+<td data-label="Why">Calculation on a defined dataset; must be accurate</td>
+</tr>
+<tr>
+<td data-label="Card">D</td>
+<td data-label="Configuration">Project (knowledge base) + Artifact, Opus</td>
+<td data-label="Why">Nuanced multi-source analysis, ambiguous inputs, high stakes</td>
+</tr>
+<tr>
+<td data-label="Card">E</td>
+<td data-label="Configuration">Chat + Artifact, Sonnet</td>
+<td data-label="Why">One-off drafting, no layer needed</td>
+</tr>
+<tr>
+<td data-label="Card">F</td>
+<td data-label="Configuration">Project + Code Execution + Skill, Sonnet</td>
+<td data-label="Why">Recurring workflow, verified numbers, consistent format</td>
+</tr>
+</tbody>
+</table></div>
+<p>Matching (the source does not print the key; this is derived from the card reasons):</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Card</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Scenario">S1 competitors' launches in the last 90 days</td>
+<td data-label="Card"><strong>B</strong></td>
+</tr>
+<tr>
+<td data-label="Scenario">S2 weekly meeting notes in a fixed format for six months</td>
+<td data-label="Card"><strong>A</strong></td>
+</tr>
+<tr>
+<td data-label="Scenario">S3 15-page board analysis from four reports, ambiguous signals</td>
+<td data-label="Card"><strong>D</strong> (the source's model answer: Opus, because quality outranks speed for a one-off high-stakes deliverable)</td>
+</tr>
+<tr>
+<td data-label="Scenario">S4 800 survey responses, response rates by department, flag below 60%</td>
+<td data-label="Card"><strong>C</strong></td>
+</tr>
+<tr>
+<td data-label="Scenario">S5 monthly variance analysis, flag over 10%, standard template</td>
+<td data-label="Card"><strong>F</strong></td>
+</tr>
+<tr>
+<td data-label="Scenario">S6 quick one-off reply to a vendor about payment terms</td>
+<td data-label="Card"><strong>E</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h2>8. Module quiz</h2>
+<p>The source prints the questions without the key; the answers below are derived from the module's logic.</p>
+<ol>
+<li><strong>Weekly inventory reconciliation (unchanged threshold document, new file each week, formatted exception report)</strong> → <strong>B</strong>: a Project with the threshold document in the knowledge base, standing instructions for the format and Code Execution for the comparison.</li>
+<li><strong>Compound interest with five variables, most trustworthy result</strong> → <strong>C</strong>: Code Execution returns a verified result.</li>
+<li><strong>500 vendor agreements, low/medium/high by a clear rubric, one session</strong> → <strong>C</strong>: Haiku for structured classification at volume.</li>
+<li><strong>Two-hour session, responses stopped reflecting the framework defined at the start</strong> → <strong>C</strong>: start a new conversation and paste a summary of decisions and progress (a bigger model does not fix compressed context).</li>
+<li><strong>Two clients, keep Client A out of Client B</strong> → <strong>C</strong>: separate Projects with Project-scoped Memory (Incognito removes all persistence, it does not separate clients).</li>
+</ol>
+<h2>9. Five takeaways</h2>
+<ol>
+<li>Select the <strong>entry point before</strong> writing the prompt.</li>
+<li>Four layers, four problems: Projects carry context, Skills define procedures, Code Execution verifies computation, Memory persists continuity.</li>
+<li>Model tiers are a <strong>speed-capability trade-off</strong>.</li>
+<li><strong>Context is a budget</strong>: restart, summarize or persist.</li>
+<li><strong>Variation is inherent, review is structural</strong>: even configured Skills vary run to run.</li>
+</ol>
+<h2>10. Check yourself</h2>
+<ol>
+<li>Name the four decisions at the front of every session.</li>
+<li>Two of three conditions make a Project worth it. Which three?</li>
+<li>Standing instructions vs knowledge base?</li>
+<li>Why does a long session stop following early instructions?</li>
+<li>Restart, summarize, persist: when each?</li>
+<li>Which model for 800 routine classifications? For a board analysis?</li>
+</ol>
+
+<nav class="pager"><a href="2-ai-fluency-for-builders-uk.html">← Тема 2 з 11: AI Fluency для builders (українською)</a><a href="3-claude-platform-and-model-foundations-uk.html">Тема 3 з 11: Claude Platform &amp; Model Foundations (українською) →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>
