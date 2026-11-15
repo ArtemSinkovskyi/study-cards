@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -84,14 +84,20 @@
   nav.top { margin-bottom:.5rem; font-size:.9rem; }
   ul.list { list-style:none; padding:0; }
   ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+
+  nav.bar { display:flex; flex-wrap:wrap; gap:.5rem; margin:0 0 1rem; }
+  nav.bar a, nav.tools a { flex:1 1 auto; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.55rem .8rem; text-decoration:none; font-size:.9rem; }
+  nav.bar a.lang, nav.tools a.lang { background:#24466b; color:#fff; border-color:#24466b; }
+  nav.tools { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.8rem; }
+  nav.pager a small { display:block; color:#6b6b70; font-size:.75rem; }
 </style>
 </head>
 <body>
 <main>
-<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<nav class="bar"><a href="../../architect-hub.html">← Шлях</a><a href="index.html">☰ Усі теми</a><a href="../../architect.html">🃏 Слова</a><a class="lang" href="1-ai-capabilities-and-limitations-uk.html">🌐 Читати українською</a></nav>
 <h1>Topic 1 of 11: AI Capabilities &amp; Limitations (English)</h1>
 <blockquote>
-<p><strong>Claude Certified Architect path.</strong> Topic 1: how generative AI actually behaves. Unknown words are in the cards: <strong>English words</strong>. <a href="1-ai-capabilities-and-limitations-uk.html">Читати українською</a>
+<p><strong>Claude Certified Architect path.</strong> Topic 1: how generative AI actually behaves. Unknown words are in the cards: <strong>English words</strong>.
 Source: Anthropic course &quot;AI Capabilities &amp; Limitations&quot;, © 2026 Anthropic, CC BY-NC-SA 4.0, built on the AI Fluency Framework (Prof. Rick Dakan, Prof. Joseph Feller).</p>
 </blockquote>
 <h3>1. The big picture</h3>
@@ -279,7 +285,7 @@ Source: Anthropic course &quot;AI Capabilities &amp; Limitations&quot;, © 2026 
 <li>Which D fits each failure in section 4?</li>
 </ol>
 
-<nav class="pager"><span></span><a href="1-ai-capabilities-and-limitations-uk.html">Тема 1 з 11: що AI вміє і де помиляється (українською) →</a></nav>
+<nav class="pager"><span></span><a href="2-ai-fluency-for-builders-en.html"><small>Далі →</small>2. AI Fluency for Builders</a></nav><nav class="tools"><a href="../../architect-hub.html">← Шлях</a><a href="../../architect.html">🃏 Слова</a><a class="lang" href="1-ai-capabilities-and-limitations-uk.html">🌐 Читати українською</a></nav>
 </main>
 <script>
 const tg = window.Telegram && window.Telegram.WebApp;
@@ -287,7 +293,7 @@ if (tg) {
   tg.ready();
   tg.expand();
   tg.BackButton.show();
-  tg.BackButton.onClick(() => { location.href = "index.html"; });
+  tg.BackButton.onClick(() => { location.href = "../../architect-hub.html"; });
 }
 </script>
 </body>

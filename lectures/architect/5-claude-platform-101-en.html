@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -84,14 +84,20 @@
   nav.top { margin-bottom:.5rem; font-size:.9rem; }
   ul.list { list-style:none; padding:0; }
   ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+
+  nav.bar { display:flex; flex-wrap:wrap; gap:.5rem; margin:0 0 1rem; }
+  nav.bar a, nav.tools a { flex:1 1 auto; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.55rem .8rem; text-decoration:none; font-size:.9rem; }
+  nav.bar a.lang, nav.tools a.lang { background:#24466b; color:#fff; border-color:#24466b; }
+  nav.tools { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.8rem; }
+  nav.pager a small { display:block; color:#6b6b70; font-size:.75rem; }
 </style>
 </head>
 <body>
 <main>
-<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<nav class="bar"><a href="../../architect-hub.html">← Шлях</a><a href="index.html">☰ Усі теми</a><a href="../../architect.html">🃏 Слова</a><a class="lang" href="5-claude-platform-101-uk.html">🌐 Читати українською</a></nav>
 <h1>Topic 5 of 11: Claude Platform 101 (English)</h1>
 <blockquote>
-<p><strong>Claude Certified Architect path.</strong> Topic 5: building with Claude through the API: first call, models, the agent loop, tools, thinking, built-in tools, Skills, MCP, context, Managed Agents, Claude Code. Unknown words are in the cards: <strong>English words</strong>. <a href="5-claude-platform-101-uk.html">Читати українською</a> · Previous: <a href="4-choosing-the-right-claude-model-en.html">Topic 4</a>
+<p><strong>Claude Certified Architect path.</strong> Topic 5: building with Claude through the API: first call, models, the agent loop, tools, thinking, built-in tools, Skills, MCP, context, Managed Agents, Claude Code. Unknown words are in the cards: <strong>English words</strong>.
 Source: Anthropic course &quot;Claude Platform 101&quot; (14 lessons; the final quiz was not in the material). Code in the course uses older model IDs in places; section 14 compares it with the current docs (checked 2026-11-15).</p>
 </blockquote>
 <h2>1. What is the Claude Platform</h2>
@@ -357,7 +363,7 @@ for block in response.content:
 <li>Agent, environment, session, events: what is each? Why open the stream before the kickoff message?</li>
 </ol>
 
-<nav class="pager"><a href="4-choosing-the-right-claude-model-uk.html">← Тема 4 з 11: як обрати модель Claude (українською)</a><a href="5-claude-platform-101-uk.html">Тема 5 з 11: Claude Platform 101 (українською) →</a></nav>
+<nav class="pager"><a href="4-choosing-the-right-claude-model-en.html"><small>← Назад</small>4. Choosing the Right Claude Model</a><span></span></nav><nav class="tools"><a href="../../architect-hub.html">← Шлях</a><a href="../../architect.html">🃏 Слова</a><a class="lang" href="5-claude-platform-101-uk.html">🌐 Читати українською</a></nav>
 </main>
 <script>
 const tg = window.Telegram && window.Telegram.WebApp;
@@ -365,7 +371,7 @@ if (tg) {
   tg.ready();
   tg.expand();
   tg.BackButton.show();
-  tg.BackButton.onClick(() => { location.href = "index.html"; });
+  tg.BackButton.onClick(() => { location.href = "../../architect-hub.html"; });
 }
 </script>
 </body>

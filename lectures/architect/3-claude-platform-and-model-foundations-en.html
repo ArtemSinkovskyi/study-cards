@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -84,14 +84,20 @@
   nav.top { margin-bottom:.5rem; font-size:.9rem; }
   ul.list { list-style:none; padding:0; }
   ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+
+  nav.bar { display:flex; flex-wrap:wrap; gap:.5rem; margin:0 0 1rem; }
+  nav.bar a, nav.tools a { flex:1 1 auto; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.55rem .8rem; text-decoration:none; font-size:.9rem; }
+  nav.bar a.lang, nav.tools a.lang { background:#24466b; color:#fff; border-color:#24466b; }
+  nav.tools { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.8rem; }
+  nav.pager a small { display:block; color:#6b6b70; font-size:.75rem; }
 </style>
 </head>
 <body>
 <main>
-<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<nav class="bar"><a href="../../architect-hub.html">← Шлях</a><a href="index.html">☰ Усі теми</a><a href="../../architect.html">🃏 Слова</a><a class="lang" href="3-claude-platform-and-model-foundations-uk.html">🌐 Читати українською</a></nav>
 <h1>Topic 3 of 11: Claude Platform &amp; Model Foundations (English)</h1>
 <blockquote>
-<p><strong>Claude Certified Architect path.</strong> Topic 3: the four decisions at the front of every Claude session. Unknown words are in the cards: <strong>English words</strong>. <a href="3-claude-platform-and-model-foundations-uk.html">Читати українською</a> · Previous: <a href="2-ai-fluency-for-builders-en.html">Topic 2</a> · Next: <a href="4-choosing-the-right-claude-model-en.html">Topic 4</a>
+<p><strong>Claude Certified Architect path.</strong> Topic 3: the four decisions at the front of every Claude session. Unknown words are in the cards: <strong>English words</strong>.
 Source: Anthropic Associate course, Module 1 &quot;Claude Platform &amp; Model Foundations&quot;. Product behavior as of June 2026; the course itself says to verify it against current Anthropic docs.</p>
 </blockquote>
 <h2>1. The four decisions</h2>
@@ -481,7 +487,7 @@ Source: Anthropic Associate course, Module 1 &quot;Claude Platform &amp; Model F
 </table></div>
 <p><strong>Standard rule used across this path:</strong> start with <strong>Opus</strong>; go down to <strong>Sonnet</strong> for everyday or simpler work and to <strong>Haiku</strong> for high-volume, latency-sensitive work (classification, extraction, routing); go up to <strong>Fable</strong> when Opus at higher effort still falls short.</p>
 
-<nav class="pager"><a href="2-ai-fluency-for-builders-uk.html">← Тема 2 з 11: AI Fluency для тих, хто створює продукти (українською)</a><a href="3-claude-platform-and-model-foundations-uk.html">Тема 3 з 11: Claude Platform і основи вибору моделі (українською) →</a></nav>
+<nav class="pager"><a href="2-ai-fluency-for-builders-en.html"><small>← Назад</small>2. AI Fluency for Builders</a><a href="4-choosing-the-right-claude-model-en.html"><small>Далі →</small>4. Choosing the Right Claude Model</a></nav><nav class="tools"><a href="../../architect-hub.html">← Шлях</a><a href="../../architect.html">🃏 Слова</a><a class="lang" href="3-claude-platform-and-model-foundations-uk.html">🌐 Читати українською</a></nav>
 </main>
 <script>
 const tg = window.Telegram && window.Telegram.WebApp;
@@ -489,7 +495,7 @@ if (tg) {
   tg.ready();
   tg.expand();
   tg.BackButton.show();
-  tg.BackButton.onClick(() => { location.href = "index.html"; });
+  tg.BackButton.onClick(() => { location.href = "../../architect-hub.html"; });
 }
 </script>
 </body>

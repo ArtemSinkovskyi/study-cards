@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -84,14 +84,20 @@
   nav.top { margin-bottom:.5rem; font-size:.9rem; }
   ul.list { list-style:none; padding:0; }
   ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+
+  nav.bar { display:flex; flex-wrap:wrap; gap:.5rem; margin:0 0 1rem; }
+  nav.bar a, nav.tools a { flex:1 1 auto; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.55rem .8rem; text-decoration:none; font-size:.9rem; }
+  nav.bar a.lang, nav.tools a.lang { background:#24466b; color:#fff; border-color:#24466b; }
+  nav.tools { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.8rem; }
+  nav.pager a small { display:block; color:#6b6b70; font-size:.75rem; }
 </style>
 </head>
 <body>
 <main>
-<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<nav class="bar"><a href="../../architect-hub.html">← Шлях</a><a href="index.html">☰ Усі теми</a><a href="../../architect.html">🃏 Слова</a><a class="lang" href="4-choosing-the-right-claude-model-uk.html">🌐 Читати українською</a></nav>
 <h1>Topic 4 of 11: Choosing the Right Claude Model (English)</h1>
 <blockquote>
-<p><strong>Claude Certified Architect path.</strong> Topic 4: the four models, where to start, and when to change model or effort. Unknown words are in the cards: <strong>English words</strong>. <a href="4-choosing-the-right-claude-model-uk.html">Читати українською</a> · Previous: <a href="3-claude-platform-and-model-foundations-en.html">Topic 3</a>
+<p><strong>Claude Certified Architect path.</strong> Topic 4: the four models, where to start, and when to change model or effort. Unknown words are in the cards: <strong>English words</strong>.
 Source: Anthropic, &quot;Choosing a Claude model for knowledge workers&quot; (7 min). Plans, defaults and limits change; verify in the product.</p>
 </blockquote>
 <blockquote>
@@ -314,7 +320,7 @@ Source: Anthropic, &quot;Choosing a Claude model for knowledge workers&quot; (7 
 <p><strong>Standard rule for this path:</strong> start with <strong>Opus</strong>; lower effort or move to <strong>Sonnet</strong> for everyday and simpler work; <strong>Haiku</strong> for high-volume, latency-sensitive work; <strong>Fable</strong> when Opus at higher effort still falls short. The three-tier Haiku/Sonnet/Opus frame of Topic 3 is the course's exam frame, which I could not verify against an official exam guide.</p>
 </blockquote>
 
-<nav class="pager"><a href="3-claude-platform-and-model-foundations-uk.html">← Тема 3 з 11: Claude Platform і основи вибору моделі (українською)</a><a href="4-choosing-the-right-claude-model-uk.html">Тема 4 з 11: як обрати модель Claude (українською) →</a></nav>
+<nav class="pager"><a href="3-claude-platform-and-model-foundations-en.html"><small>← Назад</small>3. Claude Platform &amp; Model Foundations</a><a href="5-claude-platform-101-en.html"><small>Далі →</small>5. Claude Platform 101</a></nav><nav class="tools"><a href="../../architect-hub.html">← Шлях</a><a href="../../architect.html">🃏 Слова</a><a class="lang" href="4-choosing-the-right-claude-model-uk.html">🌐 Читати українською</a></nav>
 </main>
 <script>
 const tg = window.Telegram && window.Telegram.WebApp;
@@ -322,7 +328,7 @@ if (tg) {
   tg.ready();
   tg.expand();
   tg.BackButton.show();
-  tg.BackButton.onClick(() => { location.href = "index.html"; });
+  tg.BackButton.onClick(() => { location.href = "../../architect-hub.html"; });
 }
 </script>
 </body>
