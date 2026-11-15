@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Topic 5 of 11: Claude Platform 101 (English)</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Topic 5 of 11: Claude Platform 101 (English)</h1>
+<blockquote>
+<p><strong>Claude Certified Architect path.</strong> Topic 5: building with Claude through the API: first call, models, the agent loop, tools, thinking, built-in tools, Skills, MCP, context, Managed Agents, Claude Code. Unknown words are in the cards: <strong>English words</strong>. <a href="5-claude-platform-101-uk.html">Читати українською</a> · Previous: <a href="4-choosing-the-right-claude-model-en.html">Topic 4</a>
+Source: Anthropic course &quot;Claude Platform 101&quot; (14 lessons; the final quiz was not in the material). Code in the course uses older model IDs in places; section 14 compares it with the current docs (checked 2026-11-15).</p>
+</blockquote>
+<h2>1. What is the Claude Platform</h2>
+<p>The Claude Platform is Anthropic's infrastructure for building with Claude <strong>from code</strong>: you send structured requests and get structured responses, with control over the model, tokens, tools and system instructions. It consists of a <strong>REST API</strong>, <strong>SDKs</strong>, <strong>command-line tools</strong> and the <strong>Console</strong> (API keys, usage, managed agents, prompt testing).</p>
+<p><strong>Three layers:</strong></p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Layer</th>
+<th>What it holds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Layer"><strong>Primitives</strong></td>
+<td data-label="What it holds">Messages API, tool use, files, web search, code execution, MCP servers, Skills: the pieces you call</td>
+</tr>
+<tr>
+<td data-label="Layer"><strong>Infrastructure</strong></td>
+<td data-label="What it holds">What you need past a prototype: managed agents, retries, queues, observability, prompt caching, memory</td>
+</tr>
+<tr>
+<td data-label="Layer"><strong>Controls</strong></td>
+<td data-label="What it holds">Running in production: dashboards, evals, workspaces, usage and spend limits, request logs</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>Build with primitives, scale on infrastructure, run with control.</p>
+</blockquote>
+<p><em>Example:</em> a help desk button &quot;Draft reply with Claude&quot;: define a client, fetch the ticket, call <code>messages.create</code>, show the draft. You are not building a chatbot; you are <strong>adding Claude to a product that already exists</strong>.</p>
+<h2>2. Your first API call</h2>
+<ol>
+<li>Get an API key in the Console and make sure the account has <strong>credit</strong> (Billing page).</li>
+<li>Keep the key in an environment file such as <code>.env.local</code>, out of version control. Hardcoded keys end up leaked on GitHub.</li>
+<li>Install the SDK (<code>npm install @anthropic-ai/sdk</code>, or the Python package).</li>
+</ol>
+<p>Every call goes through <strong><code>messages.create</code></strong> with three required things:</p>
+<ul>
+<li><strong>model</strong>: which Claude model handles it;</li>
+<li><strong>max_tokens</strong>: a cap on the response length;</li>
+<li><strong>messages</strong>: a list of objects with role <code>user</code> or <code>assistant</code>.</li>
+</ul>
+<p>Optional but common: <strong>system</strong>, the system prompt that sets the role and tone (for example &quot;You are a terse senior code reviewer&quot;).</p>
+<pre><code class="language-python">response = client.messages.create(
+    model=&quot;claude-sonnet-5-5&quot;,
+    max_tokens=2048,
+    system=&quot;You are a terse senior code reviewer.&quot;,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Review this code: ...&quot;}],
+)
+for block in response.content:
+    if block.type == &quot;text&quot;:
+        print(block.text)
+</code></pre>
+<p><strong>The response <code>content</code> is an array of blocks, not a string.</strong> Claude can return text, tool calls and thinking, so always loop and check <code>block.type</code>. The same call is the engine of a &quot;summarize&quot; endpoint in a real app: read a transcript, send it with a system prompt, store the result.</p>
+<h2>3. Choosing the right model</h2>
+<ul>
+<li>Four tiers, chosen with the <code>model</code> parameter: <strong>Fable</strong> (top capability, highest cost), <strong>Opus</strong> (hard problems), <strong>Sonnet</strong> (the balanced &quot;sweet spot&quot; for most production work), <strong>Haiku</strong> (fastest and cheapest: classification, extraction, routing). See <a href="4-choosing-the-right-claude-model-en.html">Topic 4</a>.</li>
+<li><strong>Build a small evaluation first</strong>: 20 or 30 representative examples from your real workload, scored against what &quot;good&quot; means for you.</li>
+<li>The course's method: run the examples through <strong>Haiku first; if quality holds, you are done; otherwise step up to Sonnet; only use Opus when the task needs it.</strong> The right model is <strong>the cheapest one whose output you would actually ship</strong>.</li>
+<li>Compare tiers by changing only the <code>model</code> field and reading <strong><code>response.usage</code></strong>: it returns input and output tokens, which is what your bill is based on.</li>
+<li><strong>Route different work to different models</strong> in one endpoint: for example classify every incoming file with Haiku, draft client updates with Sonnet, and reserve Opus for RFP responses.</li>
+</ul>
+<h2>4. The agent loop</h2>
+<p>An <strong>agent</strong> is Claude in a loop with no human in the middle: observe, decide, act, repeat.</p>
+<ol>
+<li>Send a message to Claude with <strong>tools</strong> available.</li>
+<li>Claude answers with a final answer or a request to use a tool.</li>
+<li><strong>Your code runs the tool.</strong></li>
+<li>Send the result back.</li>
+<li>Repeat until <code>stop_reason</code> is <strong><code>end_turn</code></strong>.</li>
+</ol>
+<pre><code class="language-python">while True:
+    response = client.messages.create(model=MODEL, max_tokens=1024, tools=tools, messages=messages)
+    if response.stop_reason == &quot;end_turn&quot;:
+        break
+    results = []
+    for block in response.content:
+        if block.type == &quot;tool_use&quot;:
+            results.append({&quot;type&quot;: &quot;tool_result&quot;, &quot;tool_use_id&quot;: block.id, &quot;content&quot;: run_tool(block.name, block.input)})
+    messages.append({&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: response.content})
+    messages.append({&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: results})
+</code></pre>
+<p>Two turns in the weather demo: turn 1 ends with <code>tool_use</code> (Claude asks for <code>get_weather</code>); turn 2 ends with <code>end_turn</code> (the answer). <strong>You own the loop and the tools; Claude owns the reasoning.</strong> In production the shape is the same; only the tools and plumbing change (real tools, streaming to the UI, saving results). When you do not want to own the loop, managed agents run it for you.</p>
+<h2>5. What is tool use</h2>
+<ul>
+<li>A <strong>tool</strong> is a function you define and expose. <strong>Claude decides when to call it, but your code executes it.</strong></li>
+<li>A tool is a JSON schema with a <strong>name</strong>, a <strong>description</strong> and an <strong>input_schema</strong>, passed as a <code>tools</code> array.</li>
+<li><strong>The description is what Claude reads to decide whether to call the tool.</strong> Vague descriptions are the number one reason agents misfire or ignore available tools. Be specific.</li>
+<li><code>stop_reason: &quot;tool_use&quot;</code> is your signal; return the result as a <strong><code>tool_result</code></strong> block inside a <em>user</em> message, tied by <code>tool_use_id</code>.</li>
+<li><strong>Multiple tools:</strong> declare them all; Claude reads the descriptions and picks which to call, sometimes several in one turn. To add a tool, add it to the array and add a case to your dispatch function.</li>
+<li><strong>Tool runner</strong> (SDK helper, beta, in TypeScript, Python, Ruby, C#, Go, Java and PHP): you define each tool once (in TypeScript with <code>betaZodTool()</code> and a Zod schema, which also validates input) and the runner handles the whole tool use / tool result loop. Awaiting the runner returns the final message.</li>
+<li>Real tools are thin wrappers around functions you already have (for example <code>lookup_building_code</code>).</li>
+</ul>
+<h2>6. What is thinking</h2>
+<ul>
+<li><strong>Extended thinking</strong> lets Claude reason step by step before answering; it generates internal reasoning tokens (a chain of thought). Without it, a multi-step question can get a confidently wrong quick answer.</li>
+<li><strong>Adaptive thinking:</strong> Claude decides when to think and how much; there is no token budget to pick. The reasoning text stays hidden unless the request sets <code>&quot;display&quot;: &quot;summarized&quot;</code>.</li>
+<li>Control depth with the <strong><code>effort</code></strong> parameter, which goes <strong>inside <code>output_config</code></strong>, not next to <code>thinking</code>. Levels: <code>low</code>, <code>medium</code>, <code>high</code>, <code>xhigh</code>, <code>max</code>.</li>
+<li><strong>Use it for:</strong> math and multi-step logic, debugging, regulatory analysis, trade-offs and comparisons. <strong>Skip it for</strong> simple classification, extraction and boilerplate: it only adds latency and cost.</li>
+<li>In production it lets an agent connect findings across sections (for example a wind-load spec in section 3 that conflicts with a material spec elsewhere).</li>
+</ul>
+<h2>7. Built-in tools</h2>
+<p>Some capabilities ship pre-built, so you write no code and host no sandbox.</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Kind</th>
+<th>Who runs it</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Kind"><strong>Server tools</strong></td>
+<td data-label="Who runs it"><strong>Anthropic</strong>, on its infrastructure</td>
+<td data-label="Examples"><strong>Web search</strong> (with citations), <strong>code execution</strong> (Python in a sandbox), <strong>web fetch</strong></td>
+</tr>
+<tr>
+<td data-label="Kind"><strong>Client tools</strong></td>
+<td data-label="Who runs it"><strong>Your code</strong>, but the schema is built into Claude</td>
+<td data-label="Examples"><strong>Memory</strong> (read and write across sessions), <strong>Bash</strong> (a persistent shell)</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>For server tools there is <strong>no agent loop</strong>: you declare the tool, Anthropic runs it, and the result comes back in the same response as new block types (<code>server_tool_use</code>, a code execution tool result) next to normal text.</li>
+<li>Client tools have the same shape as custom ones, but you do not write the schema. For memory, four SDKs ship a helper that handles memory calls against <strong>storage you provide</strong>; for bash, <strong>your application runs the shell</strong>.</li>
+<li>Web search can power a fact-check endpoint, but <strong>something verified on the internet is not necessarily true. Always double-check.</strong></li>
+</ul>
+<h2>8. Skills</h2>
+<ul>
+<li><strong>Skills</strong> are folders of instructions, scripts and resources that Claude loads dynamically. The core is a <strong><code>SKILL.md</code></strong> file. Upload once, then attach to any request.</li>
+<li><strong>Tools vs Skills:</strong> tools connect Claude to data and actions (<strong>what Claude can do</strong>); Skills teach a procedure (<strong>how you want it done</strong>), sometimes by running bundled scripts.</li>
+<li><strong>Progressive loading:</strong> at startup only the <strong>name and description</strong> load; the full Skill enters context when the agent decides it is relevant. This keeps context lean even with many Skills.</li>
+<li>Upload with <code>client.skills.create(...)</code> (or in the Console), then attach through <strong><code>container.skills</code></strong>: a list of entries with <code>type</code>, <code>skill_id</code> and <code>version</code>. You can layer several.</li>
+<li>On the API, <strong>Skills run inside the code execution tool's container</strong>, so <strong>code execution must be enabled</strong> in the request. Skills are generally available, so the old beta header is no longer required.</li>
+<li>Use a Skill when <strong>the how matters as much as the what</strong>: for example every PM gets the same report structure, tone and order.</li>
+</ul>
+<h2>9. MCP</h2>
+<ul>
+<li><strong>Why MCP exists:</strong> with custom tools you write and maintain every integration. With MCP, <strong>the service provider publishes an MCP server and maintains it</strong>. When their API changes, you change nothing.</li>
+<li><strong>Tools</strong> are for your systems (you own the code and maintenance); <strong>Skills</strong> are for your processes; <strong>MCP</strong> is for <strong>third-party services</strong>.</li>
+<li>In the request: <strong><code>mcp_servers</code></strong> declares the connection (type, URL, name, optional auth token) and an <strong><code>mcp_toolset</code></strong> entry in <code>tools</code> grants access. Claude introspects the server and finds the tools itself; you write no schemas. The MCP connector is <strong>beta</strong>, so a beta header is required.</li>
+<li><strong>Limit what Claude may use:</strong> set <code>default_config: {&quot;enabled&quot;: False}</code> and enable only chosen tools in <code>configs</code> (for example search and list, but not post or delete). Useful for read-only access and for saving context.</li>
+</ul>
+<h2>10. Context management</h2>
+<p><strong>Context</strong> is everything Claude sees on a turn: system prompt, message history, tool definitions and results, attached files and Skills, thinking blocks. You pay for it on the way in; <strong>when the window is full, the request fails</strong>. The goal is not to fit everything, but to fit the right things.</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>What it does</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Pattern"><strong>Just-in-time context</strong></td>
+<td data-label="What it does">Load only what is needed now; let the agent pull more through tools (a code lookup tool instead of the whole code book in the prompt)</td>
+<td data-label="Type">Design pattern</td>
+</tr>
+<tr>
+<td data-label="Pattern"><strong>Server-side compaction</strong></td>
+<td data-label="What it does">The API summarizes old turns into one block automatically when input crosses the trigger threshold; you opt in with a <code>context_management</code> edit</td>
+<td data-label="Type">API feature (beta)</td>
+</tr>
+<tr>
+<td data-label="Pattern"><strong>Prompt caching</strong></td>
+<td data-label="What it does">Mark stable parts (system prompt, tool definitions, long documents) and reuse them at a fraction of the cost</td>
+<td data-label="Type">API feature</td>
+</tr>
+<tr>
+<td data-label="Pattern"><strong>Memory tool</strong></td>
+<td data-label="What it does">Claude reads and writes a memory directory via tool calls; <strong>you implement the storage</strong> (files, database, encrypted store)</td>
+<td data-label="Type">API feature, survives across sessions</td>
+</tr>
+</tbody>
+</table></div>
+<p>Each pattern fixes a different failure: <strong>cost, window size, statelessness</strong>. Production agents usually layer all four. Managed agents ship with caching and compaction on by default.</p>
+<h2>11. What are Managed Agents</h2>
+<p><strong>Claude Managed Agents</strong> is a suite of APIs to build and deploy agents at scale, <strong>hosted on Anthropic's infrastructure</strong>: Claude works inside an isolated container with file system access, bash and web search. It is your agent loop, hosted for you.</p>
+<p><em>Examples from the course:</em> a Kanban ticket &quot;optimize website performance&quot; starts a session in an environment with Lighthouse and Puppeteer and your repo mounted; a <strong>rubric</strong> defines &quot;done&quot; (score above 90, no render-blocking resources, lazy-loaded images) and a <strong>separate grader in its own context window</strong> checks the result until it passes; several sessions run in parallel. A weekly research agent that uses web search, Python, an Excel Skill and MCP servers (Slack, Asana) and keeps a <strong>memory store</strong> so next week's report can say what changed. An incident-response setup where a <strong>coordinator agent delegates to specialists</strong>, each in its own context window on a shared file system, and a <strong>permission policy</strong> pauses sensitive actions for human approval.</p>
+<p><strong>Building blocks:</strong> Agents, Sessions, Environments, Tools (including your custom ones), MCP, Memory, <strong>Outcomes</strong> (rubrics and graders), <strong>Multi-agent coordination</strong>.</p>
+<h2>12. Building your first managed agent</h2>
+<p>Use a managed agent when the loop would run <strong>too long, do too much, or need to survive a hiccup</strong> (minutes to hours, many tools, state, files, resume after a network drop). Use a manual loop when you want full control.</p>
+<p><strong>Four primitives, in order:</strong></p>
+<ol>
+<li><strong>Agent</strong>: persona (model, system prompt, toolset), reusable across runs.</li>
+<li><strong>Environment</strong>: where it runs (cloud or self-hosted, networking configuration).</li>
+<li><strong>Session</strong>: one run of an agent in an environment; the unit of work.</li>
+<li><strong>Events</strong>: the messages flowing in and out (actions, tool calls, results, replies).</li>
+</ol>
+<p>Steps in the demo: create the agent (the bundled agent toolset covers file, bash and web tools); create a <strong>cloud environment with <code>limited</code> networking</strong> (the sandbox and web tools reach only hosts in <code>allowed_hosts</code>; use <code>unrestricted</code> only when you cannot list the sites in advance); create the session; <strong>open the event stream first</strong> (it only delivers events after it opens), then send the <code>user.message</code> event; read events: <code>agent.message</code>, <code>agent.tool_use</code>, <code>session.status_idle</code>.</p>
+<p><strong>Check <code>stop_reason.type</code> on idle:</strong> <code>end_turn</code> means the turn finished (or was interrupted); <code>requires_action</code> means a tool call needs an answer from you. The event history is stored on the server, so after a dropped connection you can open a new stream, list past events and skip any live event already returned. You are not running a while loop; <strong>you send events and read events</strong>.</p>
+<h2>13. Building with Claude Code</h2>
+<ul>
+<li><strong>Claude Code</strong> is an agent that edits files and runs commands in your terminal. It has a built-in <strong>Claude API skill</strong> (invoke with <code>/claude-api</code>, or it loads automatically when it detects the TypeScript SDK).</li>
+<li>A good prompt names <strong>the file, the pattern and the end state</strong>. It then fills in the code, runs it and fixes errors in place.</li>
+<li>The recurring shape of API code: <strong>define a tool, hand it to a runner, return the result</strong>. Stub it, delegate it, <strong>review the diff</strong>.</li>
+</ul>
+<h2>14. Checked against the official docs (2026-11-15)</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Claim in the course</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Claim in the course">Four tiers: Fable, Opus, Sonnet, Haiku</td>
+<td data-label="Status"><strong>Confirmed</strong>; current models per the docs: Fable 5.2 (<code>claude-fable-5-2</code>), Opus 5.5 (<code>claude-opus-5-5</code>), Sonnet 5.5 (<code>claude-sonnet-5-5</code>), Haiku 5.5 (<code>claude-haiku-5-5</code>). The course code uses older IDs (<code>claude-haiku-4-5</code>, <code>claude-sonnet-5</code>, <code>claude-opus-5</code>, Fable 5.1): use the current ones in new code</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">&quot;Opus is the slowest and highest cost of the three core families&quot;</td>
+<td data-label="Status"><strong>Outdated for latency</strong>: docs list Fable and Opus as moderate, Sonnet fast, Haiku fastest. Cost ordering stands</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">&quot;Run the eval from Haiku upward&quot;</td>
+<td data-label="Status">A valid cost-first method. The docs' own advice when unsure is <strong>start with Opus</strong> and use Fable if Opus at higher effort falls short. Do both: run your eval, and without one start with Opus</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Effort levels low, medium, high (default), xhigh, max</td>
+<td data-label="Status">Levels <strong>confirmed</strong> (Help Center). The default differs by model: the docs table lists <strong>medium</strong> as the API default for Opus 5.5 and Haiku 5.5, <strong>high</strong> for Sonnet 5.5 and Fable 5.2</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Managed Agents &quot;enabled by default for every API account&quot;</td>
+<td data-label="Status"><strong>Confirmed</strong>, but the docs add: it is <strong>beta</strong> (header <code>managed-agents-2026-04-01</code>, set automatically by the SDK) and <strong>not eligible for Zero Data Retention or HIPAA</strong> (except self-hosted Managed Agents)</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">MCP connector is beta, header <code>mcp-client-2025-11-20</code></td>
+<td data-label="Status"><strong>Confirmed</strong> beta; the docs list <code>mcp-client-2026-09-15</code> and <code>mcp-client-2025-11-20</code>; the older <code>mcp-client-2025-04-04</code> is deprecated. Connector is for remote servers; it is not eligible for Zero Data Retention</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Server-side compaction with the <code>compact-2026-01-12</code> header and <code>compact_20260112</code> edit</td>
+<td data-label="Status"><strong>Changed</strong>: the docs now describe two beta kinds: <strong>compaction on demand</strong> (header <code>compact-2026-09-04</code>, top-level <code>compaction</code> parameter, you decide when) and <strong>compaction at a token threshold</strong> (the API decides when input reaches the trigger you set, which is what the course shows). Verify the current header and parameter before coding</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Skills generally available; run in the code execution container</td>
+<td data-label="Status">Stated by the course; <strong>not re-checked</strong> in the docs this session</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Tool runner is beta in seven SDKs</td>
+<td data-label="Status">Stated by the course; not re-checked</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Exact tool versions (<code>web_search_20260209</code>, <code>code_execution_20260120</code>, <code>agent_toolset_20260401</code>)</td>
+<td data-label="Status">Not re-checked; <strong>version strings change</strong>, copy them from current docs</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Takeaway for the exam:</strong> know the concepts (layers, loop, <code>stop_reason</code>, tool use, server vs client tools, Skills vs tools vs MCP, four context patterns, agent / environment / session / events) and treat model IDs, beta headers and version strings as <strong>look-up facts that change</strong>.</p>
+<h2>15. Check yourself</h2>
+<ol>
+<li>Name the three platform layers and one thing in each.</li>
+<li>What three things does every <code>messages.create</code> call need? Why is <code>content</code> an array?</li>
+<li>What are the steps of the agent loop and which <code>stop_reason</code> ends it?</li>
+<li>Who executes a tool? What does Claude read to decide whether to call it?</li>
+<li>Server tools vs client tools: who runs each? Give two examples of each.</li>
+<li>Skills vs tools vs MCP: when to use which?</li>
+<li>Name the four context patterns and which failure each addresses.</li>
+<li>Agent, environment, session, events: what is each? Why open the stream before the kickoff message?</li>
+</ol>
+
+<nav class="pager"><a href="4-choosing-the-right-claude-model-uk.html">← Тема 4 з 11: як обрати модель Claude (українською)</a><a href="5-claude-platform-101-uk.html">Тема 5 з 11: Claude Platform 101 (українською) →</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>

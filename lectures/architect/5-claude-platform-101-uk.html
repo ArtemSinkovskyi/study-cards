@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тема 5 з 11: Claude Platform 101 (українською)</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<h1>Тема 5 з 11: Claude Platform 101 (українською)</h1>
+<blockquote>
+<p><strong>Шлях Claude Certified Architect.</strong> Тема 5: як будувати з Claude через API: перший виклик, моделі, цикл агента, інструменти, thinking, вбудовані інструменти, Skills, MCP, контекст, Managed Agents, Claude Code. Незнайомі слова шукай у картках <strong>English words</strong>. <a href="5-claude-platform-101-en.html">Read in English</a> · Попередня: <a href="4-choosing-the-right-claude-model-uk.html">Тема 4</a>
+Джерело: курс Anthropic «Claude Platform 101» (14 уроків; підсумкового тесту в матеріалі не було). Виклад вільний, не дослівний переклад. У коді курсу подекуди старі ID моделей; розділ 14 порівнює його з актуальною документацією (звірено 2026-11-15).</p>
+</blockquote>
+<h2>1. Що таке Claude Platform</h2>
+<p>Claude Platform це інфраструктура Anthropic для створення продуктів із Claude <strong>через код</strong>: ти надсилаєш структуровані запити й отримуєш структуровані відповіді та керуєш моделлю, токенами, інструментами й системними інструкціями. До неї входять <strong>REST API</strong>, <strong>SDK</strong>, <strong>командні утиліти</strong> і <strong>Console</strong> (ключі API, використання, managed agents, перевірка промптів).</p>
+<p><strong>Три шари:</strong></p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Шар</th>
+<th>Що в ньому</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Шар"><strong>Primitives</strong> (будівельні блоки)</td>
+<td data-label="Що в ньому">Messages API, tool use, файли, вебпошук, виконання коду, MCP-сервери, Skills: те, що ти викликаєш у коді</td>
+</tr>
+<tr>
+<td data-label="Шар"><strong>Infrastructure</strong> (інфраструктура)</td>
+<td data-label="Що в ньому">Те, що потрібне після прототипу: managed agents, повтори запитів, черги, спостережуваність, prompt caching, пам'ять</td>
+</tr>
+<tr>
+<td data-label="Шар"><strong>Controls</strong> (керування)</td>
+<td data-label="Що в ньому">Робота в продакшні: дашборди, evals, робочі простори, ліміти використання й витрат, журнали запитів</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>Будуй із примітивів, масштабуй на інфраструктурі, керуй через контроль.</p>
+</blockquote>
+<p><em>Приклад:</em> кнопка «Скласти відповідь через Claude» в системі підтримки: створити клієнт, дістати тікет, викликати <code>messages.create</code>, показати чернетку. Ти не пишеш чат-бот із нуля, а <strong>додаєш Claude в продукт, який уже існує</strong>.</p>
+<h2>2. Перший виклик API</h2>
+<ol>
+<li>Отримай ключ API в Console і переконайся, що на акаунті є <strong>кошти</strong> (сторінка Billing).</li>
+<li>Тримай ключ у файлі оточення, наприклад <code>.env.local</code>, поза системою контролю версій. Ключі, вписані в код, зрештою потрапляють на GitHub.</li>
+<li>Встанови SDK (<code>npm install @anthropic-ai/sdk</code> або пакет для Python).</li>
+</ol>
+<p>Кожен виклик іде через <strong><code>messages.create</code></strong> і потребує трьох речей:</p>
+<ul>
+<li><strong>model</strong>: яка модель обробляє запит;</li>
+<li><strong>max_tokens</strong>: стеля довжини відповіді;</li>
+<li><strong>messages</strong>: список об'єктів із роллю <code>user</code> або <code>assistant</code>.</li>
+</ul>
+<p>Часто додають <strong>system</strong>: системний промпт, що задає роль і тон (наприклад, «Ти стислий старший рев'ювер коду»).</p>
+<pre><code class="language-python">response = client.messages.create(
+    model=&quot;claude-sonnet-5-5&quot;,
+    max_tokens=2048,
+    system=&quot;You are a terse senior code reviewer.&quot;,
+    messages=[{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;Review this code: ...&quot;}],
+)
+for block in response.content:
+    if block.type == &quot;text&quot;:
+        print(block.text)
+</code></pre>
+<p><strong><code>content</code> у відповіді це масив блоків, а не рядок.</strong> Claude може повернути текст, виклики інструментів і thinking, тому завжди проходь циклом і дивись на <code>block.type</code>. Той самий виклик лежить в основі ендпоінта «підсумувати» в справжньому застосунку: взяти стенограму, надіслати з системним промптом, зберегти результат.</p>
+<h2>3. Як обрати модель</h2>
+<ul>
+<li>Чотири рівні, вибір через параметр <code>model</code>: <strong>Fable</strong> (найпотужніша, найдорожча), <strong>Opus</strong> (складні задачі), <strong>Sonnet</strong> («золота середина» для більшості продакшн-завдань), <strong>Haiku</strong> (найшвидша й найдешевша: класифікація, витяг даних, маршрутизація). Докладніше в <a href="4-choosing-the-right-claude-model-uk.html">Темі 4</a>.</li>
+<li><strong>Спершу зроби невелику оцінку (eval)</strong>: 20-30 типових прикладів із твоєї справжньої роботи й критерії, що для тебе означає «добре».</li>
+<li>Метод курсу: прожени приклади через <strong>Haiku; якщо якість тримається, то все; якщо ні, піднімись до Sonnet; Opus бери лише тоді, коли без нього не обійтись.</strong> Правильна модель це <strong>найдешевша з тих, чий результат ти справді випустиш</strong>.</li>
+<li>Щоб порівняти рівні, міняй лише поле <code>model</code> і дивись на <strong><code>response.usage</code></strong>: там вхідні й вихідні токени, а за них і рахується рахунок.</li>
+<li><strong>Розподіляй роботу між моделями</strong> в одному ендпоінті: наприклад, класифікуй кожен вхідний файл через Haiku, чернетки оновлень для клієнтів роби на Sonnet, а Opus лишай для відповідей на RFP.</li>
+</ul>
+<h2>4. Цикл агента</h2>
+<p><strong>Агент</strong> це Claude у циклі без людини посередині: спостерігає, вирішує, діє, повторює.</p>
+<ol>
+<li>Надішли Claude повідомлення й доступні <strong>інструменти</strong>.</li>
+<li>Claude відповідає або остаточною відповіддю, або запитом викликати інструмент.</li>
+<li><strong>Твій код виконує інструмент.</strong></li>
+<li>Надішли результат назад.</li>
+<li>Повторюй, поки <code>stop_reason</code> не стане <strong><code>end_turn</code></strong>.</li>
+</ol>
+<pre><code class="language-python">while True:
+    response = client.messages.create(model=MODEL, max_tokens=1024, tools=tools, messages=messages)
+    if response.stop_reason == &quot;end_turn&quot;:
+        break
+    results = []
+    for block in response.content:
+        if block.type == &quot;tool_use&quot;:
+            results.append({&quot;type&quot;: &quot;tool_result&quot;, &quot;tool_use_id&quot;: block.id, &quot;content&quot;: run_tool(block.name, block.input)})
+    messages.append({&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: response.content})
+    messages.append({&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: results})
+</code></pre>
+<p>У прикладі з погодою два ходи: у першому зупинка з <code>tool_use</code> (Claude просить <code>get_weather</code>), у другому <code>end_turn</code> (відповідь). <strong>Цикл та інструменти твої, міркування Claude.</strong> У продакшні форма та сама, міняються лише інструменти й обв'язка (справжні інструменти, потокова передача в інтерфейс, збереження результатів). Не хочеш вести цикл сам, віддай його managed agents.</p>
+<h2>5. Що таке tool use</h2>
+<ul>
+<li><strong>Інструмент</strong> це функція, яку ти визначаєш і відкриваєш Claude. <strong>Коли її викликати, вирішує Claude, а виконує твій код.</strong></li>
+<li>Інструмент це JSON-схема з <strong>назвою</strong>, <strong>описом</strong> і <strong>input_schema</strong>, яку передають масивом <code>tools</code>.</li>
+<li><strong>Саме опис Claude читає, щоб вирішити, чи викликати інструмент.</strong> Нечіткі описи це головна причина, чому агенти схиблюють або не беруть доступні інструменти. Пиши конкретно.</li>
+<li>Сигнал до дії: <code>stop_reason: &quot;tool_use&quot;</code>; результат повертай блоком <strong><code>tool_result</code></strong> усередині повідомлення з роллю <em>user</em>, прив'язаним через <code>tool_use_id</code>.</li>
+<li><strong>Кілька інструментів:</strong> оголоси всі; Claude прочитає описи й сам вибере, що викликати, іноді кілька за один хід. Щоб додати інструмент, додай його в масив і додай гілку у функцію-диспетчер.</li>
+<li><strong>Tool runner</strong> (допоміжний засіб SDK, beta, у TypeScript, Python, Ruby, C#, Go, Java і PHP): інструмент описуєш один раз (у TypeScript через <code>betaZodTool()</code> і схему Zod, яка ще й перевіряє вхід), а runner веде весь цикл tool use / tool result. Дочекавшись runner, отримуєш фінальну відповідь.</li>
+<li>Справжні інструменти це тонкі обгортки над функціями, які в тебе вже є (наприклад, <code>lookup_building_code</code>).</li>
+</ul>
+<h2>6. Що таке thinking</h2>
+<ul>
+<li><strong>Extended thinking</strong> дає Claude міркувати крок за кроком перед відповіддю: він породжує внутрішні токени міркування (ланцюжок думок). Без цього на багатокрокове питання можна отримати швидку, але впевнено хибну відповідь.</li>
+<li><strong>Adaptive thinking:</strong> Claude сам вирішує, коли й скільки думати; обирати бюджет токенів не треба. Текст міркувань прихований, якщо в запиті немає <code>&quot;display&quot;: &quot;summarized&quot;</code>.</li>
+<li>Глибину задають параметром <strong><code>effort</code></strong>, який стоїть <strong>усередині <code>output_config</code></strong>, а не поруч із <code>thinking</code>. Рівні: <code>low</code>, <code>medium</code>, <code>high</code>, <code>xhigh</code>, <code>max</code>.</li>
+<li><strong>Коли вмикати:</strong> математика й багатокрокова логіка, відлагодження, регуляторний аналіз, компроміси й порівняння варіантів. <strong>Коли ні:</strong> проста класифікація, витяг даних, шаблонний текст: там це дає лише затримку й витрати.</li>
+<li>У продакшні це дозволяє агенту зв'язувати знахідки між розділами (наприклад, специфікація вітрового навантаження в розділі 3 суперечить специфікації матеріалів деінде).</li>
+</ul>
+<h2>7. Вбудовані інструменти</h2>
+<p>Деякі можливості вже готові, тож не треба писати код чи тримати пісочницю.</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Тип</th>
+<th>Хто виконує</th>
+<th>Приклади</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Тип"><strong>Server tools</strong> (серверні)</td>
+<td data-label="Хто виконує"><strong>Anthropic</strong>, на своїй інфраструктурі</td>
+<td data-label="Приклади"><strong>Вебпошук</strong> (з посиланнями), <strong>виконання коду</strong> (Python у пісочниці), <strong>web fetch</strong></td>
+</tr>
+<tr>
+<td data-label="Тип"><strong>Client tools</strong> (клієнтські)</td>
+<td data-label="Хто виконує"><strong>Твій код</strong>, але схема вже вбудована в Claude</td>
+<td data-label="Приклади"><strong>Memory</strong> (читати й писати між сесіями), <strong>Bash</strong> (постійна оболонка)</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>Для серверних інструментів <strong>цикл агента не потрібен</strong>: ти оголошуєш інструмент, Anthropic його виконує, і результат приходить у тій самій відповіді в нових типах блоків (<code>server_tool_use</code>, результат виконання коду) поруч зі звичайним текстом.</li>
+<li>Клієнтські інструменти мають ту саму форму, що й власні, тільки схему писати не треба. Для пам'яті чотири SDK мають помічник, який обробляє виклики пам'яті над <strong>сховищем, яке даєш ти</strong>; для bash <strong>оболонку запускає твій застосунок</strong>.</li>
+<li>Вебпошук може живити ендпоінт перевірки фактів, але <strong>те, що підтвердили в інтернеті, не обов'язково правда. Завжди перевіряй сам.</strong></li>
+</ul>
+<h2>8. Skills</h2>
+<ul>
+<li><strong>Skills</strong> це папки з інструкціями, скриптами й ресурсами, які Claude завантажує на льоту. Основа це файл <strong><code>SKILL.md</code></strong>. Завантажуєш один раз, потім підключаєш до будь-якого запиту.</li>
+<li><strong>Tools проти Skills:</strong> інструменти з'єднують Claude з даними й діями (<strong>що Claude може</strong>); Skills вчать процедури (<strong>як ти хочеш, щоб це було зроблено</strong>), іноді запускаючи вбудовані скрипти.</li>
+<li><strong>Поступове завантаження:</strong> на старті вантажаться лише <strong>назва й опис</strong>; повний Skill потрапляє в контекст, коли агент вирішить, що він доречний. Так контекст лишається легким навіть із багатьма Skills.</li>
+<li>Завантаж через <code>client.skills.create(...)</code> (або в Console), підключай через <strong><code>container.skills</code></strong>: список записів із <code>type</code>, <code>skill_id</code> і <code>version</code>. Можна накласти кілька.</li>
+<li>В API <strong>Skills працюють у контейнері інструмента виконання коду</strong>, тож у запиті <strong>має бути ввімкнено виконання коду</strong>. Skills загальнодоступні, тож старий beta-заголовок більше не потрібен.</li>
+<li>Бери Skill, коли <strong>«як» не менш важливо, ніж «що»</strong>: наприклад, щоб кожен PM отримував однакову структуру, тон і порядок звіту.</li>
+</ul>
+<h2>9. MCP</h2>
+<ul>
+<li><strong>Навіщо MCP:</strong> зі своїми інструментами ти сам пишеш і підтримуєш кожну інтеграцію. З MCP <strong>постачальник сервісу публікує MCP-сервер і підтримує його</strong>. Змінився їхній API, ти нічого не міняєш.</li>
+<li><strong>Tools</strong> для твоїх систем (код і підтримка твої); <strong>Skills</strong> для твоїх процесів; <strong>MCP</strong> для <strong>сторонніх сервісів</strong>.</li>
+<li>У запиті: <strong><code>mcp_servers</code></strong> оголошує з'єднання (тип, URL, ім'я, необов'язковий токен), а запис <strong><code>mcp_toolset</code></strong> у <code>tools</code> дає доступ. Claude сам вивчає сервер і знаходить інструменти; схем писати не треба. MCP connector у <strong>beta</strong>, тож потрібен beta-заголовок.</li>
+<li><strong>Обмеж, що Claude може використовувати:</strong> задай <code>default_config: {&quot;enabled&quot;: False}</code> і вмикай у <code>configs</code> лише потрібні інструменти (наприклад, пошук і список, але не публікація й видалення). Корисно для доступу лише на читання й для економії контексту.</li>
+</ul>
+<h2>10. Керування контекстом</h2>
+<p><strong>Контекст</strong> це все, що Claude бачить за хід: системний промпт, історія повідомлень, визначення й результати інструментів, прикріплені файли й Skills, блоки thinking. Ти платиш за нього на вході; <strong>коли вікно заповнене, запит завершується помилкою</strong>. Мета не втиснути все, а вмістити потрібне.</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Патерн</th>
+<th>Що робить</th>
+<th>Тип</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Патерн"><strong>Just-in-time context</strong></td>
+<td data-label="Що робить">Вантажити лише те, що потрібно зараз; решту агент підтягує інструментами (інструмент пошуку замість усього кодексу в промпті)</td>
+<td data-label="Тип">Патерн проєктування</td>
+</tr>
+<tr>
+<td data-label="Патерн"><strong>Server-side compaction</strong></td>
+<td data-label="Що робить">API саме стискає старі ходи в один блок, коли вхід перетинає поріг; вмикається записом <code>context_management</code></td>
+<td data-label="Тип">Можливість API (beta)</td>
+</tr>
+<tr>
+<td data-label="Патерн"><strong>Prompt caching</strong></td>
+<td data-label="Що робить">Позначити сталі частини (системний промпт, опис інструментів, довгі документи) і перевикористовувати за частку ціни</td>
+<td data-label="Тип">Можливість API</td>
+</tr>
+<tr>
+<td data-label="Патерн"><strong>Memory tool</strong></td>
+<td data-label="Що робить">Claude читає й пише в каталог пам'яті через виклики інструментів; <strong>сховище реалізуєш ти</strong> (файли, база, зашифроване сховище)</td>
+<td data-label="Тип">Можливість API, переживає сесії</td>
+</tr>
+</tbody>
+</table></div>
+<p>Кожен патерн лікує свою біду: <strong>вартість, розмір вікна, відсутність стану</strong>. У продакшні зазвичай поєднують усі чотири. У managed agents кешування й стискання ввімкнено за замовчуванням.</p>
+<h2>11. Що таке Managed Agents</h2>
+<p><strong>Claude Managed Agents</strong> це набір API для створення й розгортання агентів у масштабі, <strong>розміщених на інфраструктурі Anthropic</strong>: Claude працює в ізольованому контейнері з доступом до файлової системи, bash і вебпошуку. Це твій цикл агента, який хтось інший веде за тебе.</p>
+<p><em>Приклади з курсу:</em> тікет на Kanban-дошці «оптимізувати швидкість сайту» запускає сесію в оточенні з Lighthouse і Puppeteer та підключеним репозиторієм; <strong>rubric</strong> (критерії) визначає «готово» (оцінка понад 90, жодних ресурсів, що блокують рендер, ліниво завантажені зображення), а <strong>окремий grader у власному вікні контексту</strong> перевіряє результат, поки той не пройде; кілька сесій можуть працювати паралельно. Тижневий дослідницький агент, який шукає в мережі, рахує на Python, формує Excel через Skill, постить у Slack і створює задачу в Asana через MCP, а ще веде <strong>сховище пам'яті</strong>, щоб наступного тижня звіт міг сказати, що змінилось. Реагування на інциденти, де <strong>координатор делегує трьом спеціалістам</strong>, кожен у своєму контексті на спільній файловій системі, а <strong>політика дозволів</strong> зупиняє чутливі дії до схвалення людиною.</p>
+<p><strong>Складники:</strong> Agents, Sessions, Environments, Tools (зокрема власні), MCP, Memory, <strong>Outcomes</strong> (rubrics і graders), <strong>Multi-agent coordination</strong> (кілька агентів).</p>
+<h2>12. Перший managed agent</h2>
+<p>Бери managed agent, коли цикл <strong>надто довгий, робить надто багато або має пережити збій</strong> (хвилини чи години, багато інструментів, стан, файли, відновлення після обриву мережі). Бери ручний цикл, коли потрібен повний контроль.</p>
+<p><strong>Чотири примітиви, по порядку:</strong></p>
+<ol>
+<li><strong>Agent</strong>: «персона» (модель, системний промпт, набір інструментів), використовується повторно.</li>
+<li><strong>Environment</strong>: де він працює (хмара чи власна інфраструктура, налаштування мережі).</li>
+<li><strong>Session</strong>: один запуск агента в середовищі; одиниця роботи.</li>
+<li><strong>Events</strong>: повідомлення, що ходять туди й назад (дії, виклики інструментів, результати, відповіді).</li>
+</ol>
+<p>Кроки в демо: створити агента (вбудований набір інструментів агента охоплює файли, bash і веб); створити <strong>хмарне середовище з обмеженою мережею (<code>limited</code>)</strong> (пісочниця й вебінструменти бачать лише хости з <code>allowed_hosts</code>; <code>unrestricted</code> бери лише тоді, коли сайти наперед не перелічити); створити сесію; <strong>спершу відкрити потік подій</strong> (він доставляє лише події, що настали після відкриття), потім надіслати подію <code>user.message</code>; читати події: <code>agent.message</code>, <code>agent.tool_use</code>, <code>session.status_idle</code>.</p>
+<p><strong>Коли агент завмер у стані idle, перевір <code>stop_reason.type</code>:</strong> <code>end_turn</code> означає, що хід закінчено (або перервано); <code>requires_action</code> означає, що виклик інструмента чекає на твою відповідь. Історія подій зберігається на сервері, тож після обриву з'єднання відкрий новий потік, отримай список минулих подій і пропускай живі події, які в списку вже були. Ти не ведеш цикл <code>while</code>: <strong>ти надсилаєш події й читаєш події</strong>.</p>
+<h2>13. Робота з Claude Code</h2>
+<ul>
+<li><strong>Claude Code</strong> це агент, який редагує файли й запускає команди в твоєму терміналі. Має вбудований <strong>Claude API skill</strong> (виклик <code>/claude-api</code>, або вантажиться сам, коли він бачить TypeScript SDK).</li>
+<li>Добрий промпт називає <strong>файл, патерн і кінцевий результат</strong>. Далі Claude Code дописує код, запускає його й виправляє помилки на місці.</li>
+<li>Типова форма коду для API: <strong>описати інструмент, віддати runner, повернути результат</strong>. Зроби заготовку, віддай Claude Code й <strong>переглянь diff</strong>.</li>
+</ul>
+<h2>14. Звірено з офіційною документацією (2026-11-15)</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Твердження в курсі</th>
+<th>Статус</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Твердження в курсі">Чотири рівні: Fable, Opus, Sonnet, Haiku</td>
+<td data-label="Статус"><strong>Підтверджено</strong>; поточні моделі за документацією: Fable 5.2 (<code>claude-fable-5-2</code>), Opus 5.5 (<code>claude-opus-5-5</code>), Sonnet 5.5 (<code>claude-sonnet-5-5</code>), Haiku 5.5 (<code>claude-haiku-5-5</code>). Код курсу має старіші ID (<code>claude-haiku-4-5</code>, <code>claude-sonnet-5</code>, <code>claude-opus-5</code>, Fable 5.1): у новому коді бери актуальні</td>
+</tr>
+<tr>
+<td data-label="Твердження в курсі">«Opus найповільніший і найдорожчий із трьох основних родин»</td>
+<td data-label="Статус"><strong>Застаріло щодо затримки</strong>: документація подає Fable і Opus як помірні, Sonnet швидку, Haiku найшвидшу. Порядок за ціною лишається</td>
+</tr>
+<tr>
+<td data-label="Твердження в курсі">«Проганяй eval від Haiku вгору»</td>
+<td data-label="Статус">Робочий метод, коли ставка на ціну. Власна порада документації, коли вагаєшся: <strong>починай з Opus</strong>, а Fable бери, якщо Opus на вищому effort не дотягує. Роби так: є eval, проганяй його; нема, починай з Opus</td>
+</tr>
+<tr>
+<td data-label="Твердження в курсі">Рівні effort low, medium, high (за замовчуванням), xhigh, max</td>
+<td data-label="Статус">Рівні <strong>підтверджено</strong> (Help Center). Типове значення залежить від моделі: у таблиці документації типовий effort API це <strong>medium</strong> для Opus 5.5 і Haiku 5.5, <strong>high</strong> для Sonnet 5.5 і Fable 5.2</td>
+</tr>
+<tr>
+<td data-label="Твердження в курсі">Managed Agents «увімкнено за замовчуванням для кожного акаунта API»</td>
+<td data-label="Статус"><strong>Підтверджено</strong>, але документація додає: це <strong>beta</strong> (заголовок <code>managed-agents-2026-04-01</code>, SDK ставить його сам) і воно <strong>не підпадає під Zero Data Retention і HIPAA</strong> (окрім self-hosted Managed Agents)</td>
+</tr>
+<tr>
+<td data-label="Твердження в курсі">MCP connector у beta, заголовок <code>mcp-client-2025-11-20</code></td>
+<td data-label="Статус"><strong>Підтверджено</strong> beta; у документації названо <code>mcp-client-2026-09-15</code> і <code>mcp-client-2025-11-20</code>; старий <code>mcp-client-2025-04-04</code> застарів. Connector для віддалених серверів; не підпадає під Zero Data Retention</td>
+</tr>
+<tr>
+<td data-label="Твердження в курсі">Server-side compaction із заголовком <code>compact-2026-01-12</code> і записом <code>compact_20260112</code></td>
+<td data-label="Статус"><strong>Змінилось</strong>: документація тепер описує два види в beta: <strong>compaction on demand</strong> (заголовок <code>compact-2026-09-04</code>, параметр верхнього рівня <code>compaction</code>, момент вирішуєш ти) і <strong>compaction at a token threshold</strong> (API стискає, коли вхід досягає заданого порога; саме це показує курс). Перед кодуванням звір актуальний заголовок і параметр</td>
+</tr>
+<tr>
+<td data-label="Твердження в курсі">Skills загальнодоступні; працюють у контейнері виконання коду</td>
+<td data-label="Статус">Це твердження курсу; цього разу в документації <strong>не перевіряв</strong></td>
+</tr>
+<tr>
+<td data-label="Твердження в курсі">Tool runner у beta у семи SDK</td>
+<td data-label="Статус">Це твердження курсу; не перевіряв</td>
+</tr>
+<tr>
+<td data-label="Твердження в курсі">Точні версії інструментів (<code>web_search_20260209</code>, <code>code_execution_20260120</code>, <code>agent_toolset_20260401</code>)</td>
+<td data-label="Статус">Не перевіряв; <strong>рядки версій змінюються</strong>, копіюй їх з поточної документації</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Висновок для іспиту:</strong> знай поняття (шари, цикл, <code>stop_reason</code>, tool use, серверні й клієнтські інструменти, Skills проти tools проти MCP, чотири патерни контексту, agent / environment / session / events), а ID моделей, beta-заголовки й рядки версій сприймай як <strong>довідкові факти, що змінюються</strong>.</p>
+<h2>15. Перевір себе</h2>
+<ol>
+<li>Назви три шари платформи й по одній речі з кожного.</li>
+<li>Які три речі потрібні кожному виклику <code>messages.create</code>? Чому <code>content</code> це масив?</li>
+<li>З яких кроків складається цикл агента і який <code>stop_reason</code> його завершує?</li>
+<li>Хто виконує інструмент? Що Claude читає, щоб вирішити, чи його викликати?</li>
+<li>Серверні проти клієнтських інструментів: хто виконує кожен? По два приклади.</li>
+<li>Skills проти tools проти MCP: що коли брати?</li>
+<li>Назви чотири патерни контексту й яку біду лікує кожен.</li>
+<li>Agent, environment, session, events: що це? Чому потік відкривають до першого повідомлення?</li>
+</ol>
+
+<nav class="pager"><a href="5-claude-platform-101-en.html">← Topic 5 of 11: Claude Platform 101 (English)</a><span></span></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "index.html"; });
+}
+</script>
+</body>
+</html>
