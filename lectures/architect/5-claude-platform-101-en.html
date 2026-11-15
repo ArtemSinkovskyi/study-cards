@@ -362,6 +362,14 @@ for block in response.content:
 <li>Name the four context patterns and which failure each addresses.</li>
 <li>Agent, environment, session, events: what is each? Why open the stream before the kickoff message?</li>
 </ol>
+<h2>16. Practice questions from the course quiz</h2>
+<p>The quiz has 8 questions; these 3 were available.</p>
+<p><strong>1. When Claude decides to use a tool, who actually executes it?</strong>
+<strong>Your code runs it and sends the result back.</strong> Claude only returns a tool-use request. Your application executes the tool and sends a <code>tool_result</code> back, then Claude continues. Flow: user request, Claude decides to call a tool, your code runs it, your code returns the result, Claude writes the final answer. Wrong answers: Claude runs it inside the model; Anthropic runs it automatically (true only for <strong>server tools</strong> such as web search and code execution); the SDK blocks until a human approves.</p>
+<p><strong>2. Why does context management matter for long-running agents?</strong>
+<strong>The window is finite and you pay for what is in it, so the goal is fitting the right things in.</strong> Keep what is relevant, summarize or drop what is outdated, avoid filling the window with unnecessary data. Wrong answers: Claude refuses requests above half the window; old messages are deleted after ten turns; bigger contexts always improve quality. More context is not better context.</p>
+<p><strong>3. Which jobs are the best fit for a managed agent?</strong>
+<strong>Long-running, sandboxed or background work.</strong> Multi-step, extended runs with tools, where your application does not have to orchestrate every step. Wrong answers: single quick questions (use a plain <code>messages.create</code> call); high-volume cheap classification (use Haiku through the Messages API); work where you must inspect every tool call yourself (use your own loop).</p>
 
 <nav class="pager"><a href="4-choosing-the-right-claude-model-en.html"><small>← Назад</small>4. Choosing the Right Claude Model</a><span></span></nav><nav class="tools"><a href="../../architect-hub.html">← Шлях</a><a href="../../architect.html">🃏 Слова</a><a class="lang" href="5-claude-platform-101-uk.html">🌐 Читати українською</a></nav>
 </main>
