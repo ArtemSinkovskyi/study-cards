@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Тема 6 з 11: Claude Code 101 (українською)</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+
+  nav.bar { display:flex; flex-wrap:wrap; gap:.5rem; margin:0 0 1rem; }
+  nav.bar a, nav.tools a { flex:1 1 auto; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.55rem .8rem; text-decoration:none; font-size:.9rem; }
+  nav.bar a.lang, nav.tools a.lang { background:#24466b; color:#fff; border-color:#24466b; }
+  nav.tools { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.8rem; }
+  nav.pager a small { display:block; color:#6b6b70; font-size:.75rem; }
+</style>
+</head>
+<body>
+<main>
+<nav class="bar"><a href="../../architect-hub.html">← Шлях</a><a href="index.html">☰ Усі теми</a><a href="../../architect.html">🃏 Слова</a><a class="lang" href="6-claude-code-101-en.html">🌐 Read in English</a></nav>
+<h1>Тема 6 з 11: Claude Code 101 (українською)</h1>
+<blockquote>
+<p><strong>Шлях Claude Certified Architect.</strong> Тема 6: Claude Code як агент: цикл, дозволи, встановлення, процес «Explore → Plan → Code → Commit», контекст, рев'ю коду, CLAUDE.md, субагенти, скіли, MCP, хуки. Незнайомі слова шукай у картках <strong>English words</strong>.
+Джерело: курс Anthropic «Claude Code 101». Розділ 10 (скіли) і розділ 13 (перевірка) взято з офіційної документації Claude Code (звірено 2026-11-16). Команди, режими й налаштування змінюються між версіями, тож звіряй у своїй установці.</p>
+</blockquote>
+<h2>1. Що таке Claude Code</h2>
+<ul>
+<li><strong>Claude Code</strong> це <strong>агентний інструмент для кодингу</strong>: він розуміє твою кодову базу, редагує файли, запускає команди й підключається до твоїх інструментів розробника.</li>
+<li>Працює в <strong>терміналі</strong>, <strong>VS Code</strong>, застосунку <strong>Claude Desktop</strong>, у <strong>вебі</strong> та в IDE від <strong>JetBrains</strong>.</li>
+<li>Чим він відрізняється від Claude.ai: Claude Code має <strong>прямий доступ до твоїх файлів, терміналу й кодової бази</strong>. Не треба копіювати код туди-сюди: він іде й робить роботу сам.</li>
+<li>Головна відмінність: Claude Code працює як <strong>AI-агент</strong>.</li>
+</ul>
+<p><strong>Що таке агент?</strong> Програма, яка взаємодіє зі своїм середовищем і виконує дії, щоб досягти мети. Суть проста: <strong>мовна модель, що працює в циклі</strong>, і має доступ до інструментів, зовнішніх сервісів чи навіть інших агентів.</p>
+<p><strong>Що він робить на практиці:</strong></p>
+<ul>
+<li>читає й розуміє кодову базу (пояснює функцію, шукає джерело багу)</li>
+<li>редагує файли по всьому проєкту (переписує функцію й оновлює всі місця, де її викликають)</li>
+<li>запускає команди в терміналі (збірка, тести, встановлення пакетів) і за результатом вирішує, що робити далі</li>
+<li>шукає в інтернеті документацію й довідники з API</li>
+</ul>
+<p><strong>Три речі, які варто тримати в голові:</strong></p>
+<ol>
+<li><strong>Вікно контексту</strong> це його робоча пам'ять: велика, але не безмежна. Claude шукає розумні шляхи знайти відповідь, не завантажуючи в контекст усю кодову базу.</li>
+<li><strong>Дозволами керуєш ти:</strong> можна, щоб він питав перед кожною дією, а можна, щоб працював сам під фоновою перевіркою безпеки.</li>
+<li><strong>Він може помилитися:</strong> не так зрозуміти задачу, додати баг, ускладнити рішення. Тож лишайся в процесі.</li>
+</ol>
+<h2>2. Як працює Claude Code</h2>
+<h3>Агентний цикл</h3>
+<ol>
+<li>Ти вводиш запит.</li>
+<li>Claude <strong>збирає контекст</strong>: працює з моделлю, а та повертає текст або <strong>виклик інструмента</strong>, який Claude Code може виконати.</li>
+<li>Він <strong>діє</strong> (редагує файл, запускає команду).</li>
+<li>Він <strong>перевіряє</strong> результат: чи справді це те, що просив запит.</li>
+<li>Якщо готово, зупиняється й чекає. Якщо ні, <strong>повертається на початок циклу</strong> й пробує знову, поки результат не буде повним і перевіреним.</li>
+</ol>
+<p>Увесь цей час ти можеш <strong>додати контекст, перервати або скерувати</strong> його.</p>
+<h3>Контекст, інструменти, дозволи</h3>
+<ul>
+<li><strong>Контекст:</strong> у вікні лежать розмова, вміст файлів і вивід команд. Коли воно майже повне, Claude Code <strong>стискає</strong> розмову автоматично (робить резюме, викидає зайве).</li>
+<li><strong>Інструменти</strong> це основа: звичайні асистенти беруть текст і повертають текст, а інструменти дають Claude Code самому вирішувати, <strong>коли виконати код</strong> (прочитати файл, пошукати в інтернеті тощо) і використати результат.</li>
+<li><strong>Режими дозволів:</strong></li>
+</ul>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Режим</th>
+<th>Що відбувається</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Режим"><strong>Manual</strong> (ручний)</td>
+<td data-label="Що відбувається">Питає перед правкою файлу чи запуском команди</td>
+</tr>
+<tr>
+<td data-label="Режим"><strong>Auto-accept</strong> (у документації <em>Accept edits</em>)</td>
+<td data-label="Що відбувається">Правки файлів і звичні файлові команди (<code>mkdir</code>, <code>mv</code>, <code>rm</code>) проходять без питань, решта команд усе одно питає</td>
+</tr>
+<tr>
+<td data-label="Режим"><strong>Plan</strong> (планування)</td>
+<td data-label="Що відбувається">Читає файли й запускає команди, щоб розвідати, але <strong>не редагує</strong> код; спершу складає план</td>
+</tr>
+<tr>
+<td data-label="Режим"><strong>Auto</strong></td>
+<td data-label="Що відбувається">Працює без звичних запитів; у фоні <strong>класифікатор</strong> перевіряє дії й намагається блокувати незворотні, руйнівні чи спрямовані за межі твого середовища. Якщо щось заблоковано, Claude зазвичай шукає безпечніший шлях або питає дозволу</td>
+</tr>
+</tbody>
+</table></div>
+<p>У якому режимі стартує нова сесія, залежить від версії та налаштувань. Усе налаштовується у файлі settings. З пропуском дозволів будь обережний: помилку стає важче вчасно помітити.</p>
+<blockquote>
+<p>Підсумок: агентний цикл, керований контекст, інструменти й налаштовувані дозволи: саме це відрізняє його від вікна чату.</p>
+</blockquote>
+<h2>3. Встановлення</h2>
+<ul>
+<li><strong>Термінал:</strong> на macOS, Linux чи WSL ставиш інсталятором через <code>curl</code> (Homebrew теж підходить, але <strong>без автооновлення</strong> за замовчуванням). На Windows: PowerShell <code>Invoke-RestMethod</code>, CMD <code>curl</code> або <code>winget</code> (теж без автооновлення). Потім у теці проєкту запускаєш <code>claude</code>. Якщо команди немає, перезапусти термінал.</li>
+<li><strong>Перший запуск:</strong> обираєш тему, заходиш з акаунтом Claude (<strong>Pro, Max, Ultra, Team чи Enterprise</strong>) або з <strong>API-ключем</strong>. Якщо в організації є Enterprise, обирай цей варіант.</li>
+<li><strong>Область доступу:</strong> у якій теці запустив <code>claude</code>, ту теку з усіма підтеками він і бачить.</li>
+<li><strong>VS Code:</strong> ставиш розширення «Claude Code» від Anthropic (з синьою позначкою), за потреби перезапускаєш, відкриваєш через палітру команд (Ctrl/Cmd+Shift+P, «Claude Code Open in New Tab») або через логотип. Майже те саме, що термінал.</li>
+<li><strong>JetBrains:</strong> ставиш плагін із Marketplace, перезапускаєш; логотип відкриває панель із терміналом поруч із редактором.</li>
+<li><strong>Desktop:</strong> вкладка <strong>Code</strong>: працюєш у вибраній теці, міняєш дозволи, можеш навіть використати хмарне середовище.</li>
+<li><strong>Веб:</strong> <code>claude.ai/code</code>; <strong>лише репозиторії GitHub</strong>.</li>
+</ul>
+<p><strong>Що обрати?</strong> Термінал: нові можливості з'являються там першими. IDE: майже те саме, ближче до редактора. Desktop: зручно, коли Claude працює у фоні, а ти займаєшся іншим. Веб: віддалена робота з репозиторієм на GitHub.</p>
+<h2>4. Перший запит</h2>
+<ul>
+<li><strong>Режими перемикаються через Shift + Tab.</strong> Правильної відповіді нема: бери те, з чим тобі комфортно.</li>
+<li><strong>Plan mode</strong> читає файли й досліджує твою ідею, <strong>не редагуючи код</strong>, ставить уточнювальні питання, а тоді дає докладний план, який може виконати. Найкраще для складних багатокрокових фіч і для безпечного рев'ю коду.</li>
+<li><em>Приклад:</em> «У додатку треба темну тему. Додай перемикач у шапці й підбери контрастний колір, який пасує до наявної світлої теми». Переглянь план, прийми його, нехай Claude працює; наприкінці бачиш, що він зробив і чому.</li>
+<li><strong>Описуй якомога докладніше.</strong></li>
+</ul>
+<h2>5. Процес Explore → Plan → Code → Commit</h2>
+<blockquote>
+<p>Якщо запам'ятати з курсу лише одне, то це. Без нього люди одразу просять написати код, а потім довго виправляють курс.</p>
+</blockquote>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Крок</th>
+<th>Що відбувається</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Крок"><strong>Explore</strong> (розвідка)</td>
+<td data-label="Що відбувається">Дає Claude потрібний контекст. Користуйся plan mode (або <strong>субагентом Explore</strong> поза plan mode, щоб отримати огляд кодової бази)</td>
+</tr>
+<tr>
+<td data-label="Крок"><strong>Plan</strong> (план)</td>
+<td data-label="Що відбувається">План дій, за яким Claude потім міряє успіх. Найкраще місце, щоб підправити напрямок: <strong>доки коду ще нема</strong></td>
+</tr>
+<tr>
+<td data-label="Крок"><strong>Code</strong> (код)</td>
+<td data-label="Що відбувається">Діалог туди-сюди. Затверджуєш план; режим дозволів визначає, як часто він питатиме</td>
+</tr>
+<tr>
+<td data-label="Крок"><strong>Commit</strong> (коміт)</td>
+<td data-label="Що відбувається">Сам перевір, запусти <strong>субагента-рев'юера</strong>, а тоді нехай Claude напише повідомлення коміту у твоєму стилі</td>
+</tr>
+</tbody>
+</table></div>
+<p><em>Приклад для Explore/Plan:</em> «Треба додати конвертацію в WebP до нашого конвеєра завантаження зображень. З'ясуй, де це краще робити, чи потрібні нові залежності й як за це взятися».</p>
+<p><strong>Поради для кроку Code:</strong></p>
+<ul>
+<li><strong>Задай критерій успіху:</strong> Claude має знати, що таке «правильно». Запиши це в план.</li>
+<li><strong>Додай інструменти:</strong> для вебінтерфейсу розширення <strong>Claude in Chrome</strong> дає Claude керувати вкладкою браузера й самому тестувати UI.</li>
+<li><strong>Дай набір тестів</strong>, за яким можна звірятися. Переконайся, що тестам можна вірити (без хибнопозитивних).</li>
+<li>Якщо Claude раз у раз спотикається об одне й те саме, попроси <strong>записати рішення в CLAUDE.md</strong>.</li>
+</ul>
+<p><strong>Навіщо рев'юер-субагент:</strong> у нього свіжий погляд, і він не несе упередження головної сесії.</p>
+<h2>6. Керування контекстом</h2>
+<ul>
+<li>Місце займає все: кожен прочитаний файл, кожна команда, кожне повідомлення.</li>
+<li><strong>Коли вікно заповнюється:</strong> автоматичне <strong>стискання</strong> робить резюме важливого й викидає непотрібні результати інструментів. Воно <strong>може загубити деталі</strong>.</li>
+</ul>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Команда</th>
+<th>Що робить</th>
+<th>Коли брати</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Команда"><code>/compact</code></td>
+<td data-label="Що робить">Стискає все, що було досі, залишаючи пам'ять про роботу</td>
+<td data-label="Коли брати">Ти в одній фічі, впираєшся в ліміт, а продовжувати треба</td>
+</tr>
+<tr>
+<td data-label="Команда"><code>/clear</code></td>
+<td data-label="Що робить">Стирає все, нова сесія без пам'яті</td>
+<td data-label="Коли брати">Береш <strong>нову фічу</strong>; стара розмова її б «забарвила»</td>
+</tr>
+<tr>
+<td data-label="Команда"><code>/context</code></td>
+<td data-label="Що робить">Показує розмір, найбільші категорії й візуальну розбивку</td>
+<td data-label="Коли брати">Хочеш побачити, що з'їдає вікно</td>
+</tr>
+</tbody>
+</table></div>
+<p>Те, що треба пам'ятати між сесіями, клади в <strong>CLAUDE.md</strong>.</p>
+<p><strong>Як заощадити контекст:</strong></p>
+<ul>
+<li><strong>Будь конкретним.</strong> Розпливчастий запит здається дешевшим, але змушує Claude більше досліджувати й міркувати, і це коштує більше контексту.</li>
+<li><strong>Стеж за MCP-серверами.</strong> За замовчуванням сервер завантажує лише назви інструментів та інструкції, повні подробиці підтягуються за потреби. Але місце займає кожен сервер, тож вимикай ті, що не стосуються проєкту.</li>
+<li><strong>Використовуй субагентів:</strong> окреме вікно контексту, назад повертається лише резюме («де в нас ендпоінти авторизації?»).</li>
+</ul>
+<h2>7. Рев'ю коду</h2>
+<p>Сесія, що писала код, <strong>не найкращий суддя</strong> для нього. Спершу подивись зміну сам, а потім дай Claude переглянути її ще раз у <strong>чистому контексті</strong>.</p>
+<ul>
+<li><strong><code>/diff</code></strong> відкриває інтерактивний перегляд незакомічених змін (і того, що змінив кожен хід Claude). Стрілки перемикають файли, Enter відкриває. <strong><code>/diff</code> і <code>/code-review</code> потребують git-репозиторію.</strong> На іншій системі контролю версій дивись зміну у своєму інструменті й проси Claude звичайними словами переглянути файли, яких він торкався; <code>/rewind</code> усе одно працює.</li>
+<li><strong>Що заслуговує другого погляду щоразу:</strong>
+<ol>
+<li><strong>Зміни, яких ти не просив</strong> (чиєсь значення в конфігу, переписаний допоміжний метод).</li>
+<li><strong>Ослаблені тести</strong> (пропущені, видалені чи підганяні, щоб пройшли).</li>
+<li><strong>Нові пакети й захардкоджені значення</strong> (залежність заради однієї функції, URL чи ключ просто в коді).</li>
+</ol>
+</li>
+<li><strong>Відкотити хибну зміну:</strong> <code>/rewind</code> (або двічі Esc на порожньому запиті), вибираєш запит, обираєш <strong>Restore code and conversation</strong>. Файли, змінені <strong>командами оболонки</strong> (скажімо, встановленням пакета), <strong>не</strong> відкочуються.</li>
+<li><strong><code>/code-review</code></strong> це другий рев'юер із чистим контекстом: він <strong>звітує</strong>, нічого не править, поки не попросиш, працює у фоні (від секунд до кількох хвилин) і <strong>витрачає твій ліміт</strong>. Можна й просто попросити словами. <strong>Рівні effort:</strong> <code>/code-review low</code> (менше знахідок, найупевненіші), <code>high</code> (ширша сітка, є й менш певні). Рівень запам'ятовується.</li>
+</ul>
+<p><strong>Вправа 1 (порівняти підсумок із diff):</strong> підсумок Claude про зміну форми реєстрації правдивий («валідацію додано, тести проходять»), але змінилося 8 файлів. Три заслуговують уваги: файл тестів (послаблено перевірки), <code>src/config.ts</code> (захардкоджений URL) і нова залежність у <code>package.json</code>/lock-файлі. <em>Урок: правдивий підсумок усе одно може промовчати про зміни, які варто перевірити.</em> (Точного набору прапорців у джерелі нема, це виведено з прикладу.)</p>
+<p><strong>Сортування знахідок: Fix now, Ask why, Leave it.</strong></p>
+<ul>
+<li><strong>Fix now:</strong> справжня проблема, яка важлива. <strong>Ask why:</strong> ти не можеш перевірити, або вона виглядає дивно; рев'юер, що читає «з нуля», теж може помилитися. <strong>Leave it:</strong> справжня, але дрібна; збери в пачку на потім.</li>
+<li>Щоб спитати «чому», процитуй знахідку й попроси Claude перевірити ще раз: «Ти пишеш, що <code>isValidEmail</code> не обрізає пробіли, а в рядку 4 є <code>trim()</code>. Перевір ще раз».</li>
+<li>Просячи виправлення, <strong>проси докази</strong>: «Виправ першу знахідку, поверни початкову перевірку, запусти тести й покажи вивід».</li>
+<li>Якщо виправлення виросло у велику зміну, <strong>зроби рев'ю ще раз</strong>.</li>
+</ul>
+<p><strong>Вправа 2 (чотири знахідки), відповіді виведено з показаного коду:</strong></p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>№</th>
+<th>Знахідка</th>
+<th>Купка</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="№">1</td>
+<td data-label="Знахідка">Тест пропущено, перевірку послаблено</td>
+<td data-label="Купка"><strong>Fix now</strong></td>
+</tr>
+<tr>
+<td data-label="№">2</td>
+<td data-label="Знахідка"><code>isValidEmail</code> не обрізає пробіли</td>
+<td data-label="Купка"><strong>Ask why</strong> (код уже викликає <code>trim()</code>: хибна тривога)</td>
+</tr>
+<tr>
+<td data-label="№">3</td>
+<td data-label="Знахідка"><code>API_URL</code> захардкоджено на <code>localhost:3000</code></td>
+<td data-label="Купка"><strong>Fix now</strong> (продакшн ходив би на адресу розробки)</td>
+</tr>
+<tr>
+<td data-label="№">4</td>
+<td data-label="Знахідка">Hex-колір замість <code>--color-danger</code></td>
+<td data-label="Купка"><strong>Leave it</strong> (лише стиль)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Коли придивлятися пильніше:</strong> однорядкову зміну досить глянути побіжно. <strong>Людське й Claude-рев'ю разом</strong> потрібні, коли зміна більша, ніж ти можеш втримати в голові, торкається чутливого чи руйнівного, і перед передачею колезі.</p>
+<p><strong>Це не Claude Code Review:</strong> то окремий командний продукт (власник організації вмикає його для репозиторію на GitHub, і він лишає коментарі в pull request). Для цього уроку він не потрібен.</p>
+<h2>8. Файл CLAUDE.md</h2>
+<ul>
+<li><strong>Проблема:</strong> без нього кожна сесія стартує з нуля: Claude заново досліджує проєкт, з'ясовує залежності й готові фічі та вигадує припущення.</li>
+<li><strong>Що це:</strong> Markdown-файл у корені проєкту, який <strong>читається автоматично на початку кожної сесії</strong> й додається до твого запиту. Це як вступний інструктаж для кодової бази.</li>
+<li><strong>Приклад вмісту:</strong> проєкт (Next.js 15, App Router, Tailwind, Drizzle), команди (<code>pnpm dev</code>, <code>pnpm test</code>, <code>pnpm lint</code>), стиль коду (2 пробіли, іменовані експорти, API-маршрути в <code>app/api/</code>).</li>
+<li><strong>Для команди:</strong> коміть його. <strong>Рівень проєкту</strong>: <code>CLAUDE.md</code> у корені, спільний для всіх. <strong>Рівень користувача</strong>: <code>CLAUDE.md</code> у твоїй теці конфігурації, особистий і діє в усіх проєктах.</li>
+</ul>
+<p><strong>Поради:</strong></p>
+<ul>
+<li><strong>Зберігай виправлення в пам'ять:</strong> якщо раз у раз поправляєш те саме, попроси Claude записати правило.</li>
+<li><strong>Посилайся на документи через <code>@</code>:</strong> <code>@README.md</code> підтягує цей файл.</li>
+<li><strong>Почни без нього</strong>, подивись, де постійно доводиться виправляти модель, тримай файл компактним, а тоді запусти <strong><code>/init</code></strong>, щоб згенерувати його.</li>
+</ul>
+<blockquote>
+<p>Те, що завжди правда, лежить у CLAUDE.md. Процедури лежать у скілі (розділ 10).</p>
+</blockquote>
+<h2>9. Субагенти</h2>
+<ul>
+<li>Claude вміє передавати частини роботи <strong>субагентам</strong>, які виконують складові завдання паралельно, кожен у <strong>власному ізольованому вікні контексту</strong>.</li>
+<li><strong>Як це працює:</strong> Claude породжує субагента («дослідь цю кодову базу»), той робить усю розвідку у своєму контексті, а тоді <strong>повертає лише резюме</strong>. Ти отримуєш відповідь, а шлях до неї не засмічує головний контекст.</li>
+<li><strong>Як створити:</strong> Markdown-файл із <strong>YAML-шапкою</strong>. Найпростіше доручити це Claude: «Створи субагента code-reviewer у <code>.claude/agents/</code>, що перевіряє код на баги й читабельність. Зроби його лише для читання».</li>
+<li><strong>Де:</strong> <code>.claude/agents/</code> діє в цьому проєкті; <code>~/.claude/agents/</code> у всіх проєктах. Якщо теки не було на старті сесії, <strong>перезапусти</strong> Claude Code.</li>
+<li><strong>Налаштування:</strong> <strong>постійна пам'ять</strong> між розмовами; <strong>попереднє завантаження скілів</strong> через ключ <code>skills</code> (у субагента вантажиться <strong>весь</strong> скіл, на відміну від головної розмови).</li>
+</ul>
+<h2>10. Скіли (з офіційної документації Claude Code)</h2>
+<p><em>У матеріалі курсу була лише примітка «тут можна додати про скіли з офіційної документації»; цей розділ зібрано зі сторінки Skills документації Claude Code.</em></p>
+<ul>
+<li><strong>Скіл</strong> це тека з файлом <strong><code>SKILL.md</code></strong>: інструкції, які Claude завантажує, <strong>коли вони доречні</strong>, або які <strong>ти викликаєш напряму через <code>/назва-скіла</code></strong>. Старі файли в <code>.claude/commands/</code> досі працюють і вже злиті зі скілами.</li>
+<li><strong>Скіли тримають процедури, CLAUDE.md тримає факти.</strong> Якщо розділ у CLAUDE.md виріс у процедуру, винеси його в скіл (тіло вантажиться лише коли воно потрібне).</li>
+</ul>
+<p><strong>Де живуть скіли:</strong></p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Рівень</th>
+<th>Шлях</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Рівень">Enterprise</td>
+<td data-label="Шлях"><code>.claude/skills/&lt;name&gt;/SKILL.md</code> у теці managed settings</td>
+</tr>
+<tr>
+<td data-label="Рівень">Особистий</td>
+<td data-label="Шлях"><code>~/.claude/skills/&lt;name&gt;/SKILL.md</code> (усі твої проєкти)</td>
+</tr>
+<tr>
+<td data-label="Рівень">Проєкту</td>
+<td data-label="Шлях"><code>.claude/skills/&lt;name&gt;/SKILL.md</code> (коміть, щоб ділитися)</td>
+</tr>
+<tr>
+<td data-label="Рівень">Плагіна</td>
+<td data-label="Шлях"><code>&lt;plugin&gt;/skills/&lt;name&gt;/SKILL.md</code>, викликається як <code>/plugin-name:skill-name</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Однакова назва в кількох місцях: <strong>enterprise сильніший за особистий, особистий сильніший за проєктний</strong>; скіли плагінів мають власний префікс, тож не конфліктують. Claude Code стежить за теками зі скілами, тому правки діють просто в сесії.</p>
+<p><strong>Будова:</strong> YAML-шапка між рядками <code>---</code>, далі інструкції в Markdown. Усі поля необов'язкові, <strong>рекомендоване одне: <code>description</code></strong>.</p>
+<pre><code class="language-yaml">---
+name: summarize-changes
+description: Summarizes uncommitted changes and flags risky ones. Use when the user asks what changed or wants a commit message.
+allowed-tools: Bash(git diff *) Bash(git status *)
+---
+Summarize the changes, then list any risks.
+</code></pre>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Поле</th>
+<th>Навіщо</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Поле"><code>name</code></td>
+<td data-label="Навіщо">Назва в меню <code>/</code> (за замовчуванням ім'я теки)</td>
+</tr>
+<tr>
+<td data-label="Поле"><code>description</code></td>
+<td data-label="Навіщо">Що робить і <strong>коли застосовувати</strong>: за цим Claude вирішує, чи завантажувати</td>
+</tr>
+<tr>
+<td data-label="Поле"><code>disable-model-invocation: true</code></td>
+<td data-label="Навіщо">Викликати може <strong>лише ти</strong> (для дій із побічними ефектами, як <code>/deploy</code>)</td>
+</tr>
+<tr>
+<td data-label="Поле"><code>user-invocable: false</code></td>
+<td data-label="Навіщо">Прихований із меню <code>/</code>; завантажує <strong>лише Claude</strong> (фонові знання)</td>
+</tr>
+<tr>
+<td data-label="Поле"><code>allowed-tools</code></td>
+<td data-label="Навіщо">Інструменти, <strong>заздалегідь дозволені</strong> на час скіла; решту <strong>не обмежує</strong></td>
+</tr>
+<tr>
+<td data-label="Поле"><code>context: fork</code> (+ <code>agent</code>)</td>
+<td data-label="Навіщо">Запустити скіл у <strong>субагенті</strong>, який не бачить твоєї розмови</td>
+</tr>
+<tr>
+<td data-label="Поле"><code>model</code>, <code>effort</code></td>
+<td data-label="Навіщо">Перевизначення на цей хід</td>
+</tr>
+<tr>
+<td data-label="Поле"><code>paths</code></td>
+<td data-label="Навіщо">Автозавантаження, лише коли в роботі відповідні файли</td>
+</tr>
+<tr>
+<td data-label="Поле"><code>hooks</code></td>
+<td data-label="Навіщо">Хуки, що діють, поки скіл використовується</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Як відбувається завантаження (поступове розкриття):</strong> <strong>описи</strong> всіх скілів лежать у контексті, тож Claude знає, що в нього є; <strong>повне тіло завантажується лише тоді, коли скіл потрібен</strong>. <code>description</code> разом із <code>when_to_use</code> у списку обрізається на <strong>1 536 символах</strong>: найважливіший випадок став на початок. Завантажений вміст лишається в розмові, тому пиши <strong>постійні інструкції</strong>, а не разові кроки. Після стискання останній виклик кожного скіла приєднується назад (до 5 000 токенів на скіл і 25 000 разом).</p>
+<p><strong>Допоміжні файли:</strong> тримай <code>SKILL.md</code> у межах приблизно <strong>500 рядків</strong>, а подробиці виносить у <code>reference.md</code>, <code>examples.md</code> чи <code>scripts/</code> (скрипти <strong>виконуються</strong>, а не завантажуються). Посилайся на них зі <code>SKILL.md</code>, щоб Claude знав, коли їх читати.</p>
+<p><strong>Аргументи й динамічний контекст:</strong> <code>$ARGUMENTS</code>, <code>$0</code>/<code>$1</code>, <code>${CLAUDE_SKILL_DIR}</code>. Рядок на кшталт <code>!`git diff HEAD`</code> запускає команду <strong>до</strong> надсилання скіла й вставляє її вивід.</p>
+<p><strong>Скіли проти інших інструментів:</strong></p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Інструмент</th>
+<th>Для чого</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Інструмент"><strong>CLAUDE.md</strong></td>
+<td data-label="Для чого">Постійні факти про проєкт</td>
+</tr>
+<tr>
+<td data-label="Інструмент"><strong>Скіл</strong></td>
+<td data-label="Для чого">Повторювана процедура, що вантажиться за потреби</td>
+</tr>
+<tr>
+<td data-label="Інструмент"><strong>Субагент</strong></td>
+<td data-label="Для чого">Ізольований виконавець зі своїм контекстом (скіл може йти в ньому через <code>context: fork</code>)</td>
+</tr>
+<tr>
+<td data-label="Інструмент"><strong>Хук</strong></td>
+<td data-label="Для чого">Те, що має відбуватися <strong>щоразу</strong> (детерміновано)</td>
+</tr>
+<tr>
+<td data-label="Інструмент"><strong>MCP</strong></td>
+<td data-label="Для чого">Підключення зовнішніх інструментів і даних (поєднуй зі скілом, який вчить ними користуватися)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Контроль доступу:</strong> заборонити всі скіли можна правилом <code>Skill</code> у deny; дозволити чи заборонити один: <code>Skill(name)</code>. Серед вбудованих скілів є <code>/code-review</code>, <code>/debug</code>, <code>/loop</code>, <code>/claude-api</code>, <code>/skill-doctor</code> (показує, скільки контексту коштують твої скіли).</p>
+<h2>11. MCP</h2>
+<ul>
+<li><strong>Model Context Protocol</strong> це відкритий стандарт, який підключає Claude Code до <strong>зовнішніх інструментів і даних</strong> (бази, застосунки для роботи, публічні репозиторії). Claude сам вирішує, коли їх застосувати.</li>
+<li><em>Приклади:</em> MCP-сервер <strong>Linear</strong>, щоб тягнути деталі задач; <strong>Context7</strong> для актуальної документації бібліотек.</li>
+<li><strong>Додати сервер:</strong> <code>claude mcp add</code>. Два основні типи: <strong>HTTP</strong> (віддалений, його хостить сервіс) і <strong>stdio</strong> (локальний процес на твоїй машині).</li>
+<li><strong>Керування:</strong> <code>/mcp</code> у сесії показує, що підключено, статус, і дає вимкнути сервер.</li>
+<li><strong>Області дії (scopes):</strong></li>
+</ul>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Scope</th>
+<th>Що означає</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Scope"><strong>Local</strong></td>
+<td data-label="Що означає">Лише поточний проєкт, лише ти (за замовчуванням)</td>
+</tr>
+<tr>
+<td data-label="Scope"><strong>User</strong></td>
+<td data-label="Що означає">Усі твої проєкти</td>
+</tr>
+<tr>
+<td data-label="Scope"><strong>Project</strong></td>
+<td data-label="Що означає"><code>.mcp.json</code> у репозиторії; уся команда отримує ті самі сервери</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Ціна для контексту:</strong> кожен підключений сервер додає назви інструментів та інструкції, навіть коли простоює. Відкрий <code>/mcp</code> і вимкни зайві. <strong>Tool search увімкнено за замовчуванням</strong>: повні описи інструментів не потрапляють у контекст, доки не знадобляться.</li>
+<li><strong>Якщо є CLI, віддавай перевагу йому</strong> (<code>gh</code>, <code>aws</code>): він не додає списку інструментів, тож ощадніший для контексту.</li>
+<li>Поєднуй MCP-сервер зі <strong>скілом</strong>, який вчить Claude добре користуватися його інструментами.</li>
+</ul>
+<h2>12. Хуки</h2>
+<ul>
+<li><strong>Хуки</strong> запускають команди в певні моменти життєвого циклу Claude Code. <strong>На відміну від усього іншого тут вони детерміновані: виконуються завжди.</strong></li>
+<li><em>Навіщо:</em> «запускай Prettier після кожної правки» в CLAUDE.md спрацює <strong>здебільшого</strong>; хук робить так, що це відбувається <strong>щоразу</strong>.</li>
+<li><strong>Приклади:</strong> автоформатування після правок; журнал усіх команд для аудиту; блокування небезпечних операцій; сповіщення, коли Claude закінчив.</li>
+<li><strong>Налаштовуються в <code>settings.json</code>:</strong> обираєш <strong>подію</strong>, за бажанням <strong>matcher</strong> (до яких інструментів), і <strong>команду</strong>.</li>
+</ul>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Подія</th>
+<th>Коли спрацьовує</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Подія"><code>PreToolUse</code></td>
+<td data-label="Коли спрацьовує">Перед викликом інструмента (<strong>може заблокувати</strong>)</td>
+</tr>
+<tr>
+<td data-label="Подія"><code>PostToolUse</code></td>
+<td data-label="Коли спрацьовує">Після завершення виклику інструмента</td>
+</tr>
+<tr>
+<td data-label="Подія"><code>UserPromptSubmit</code></td>
+<td data-label="Коли спрацьовує">Коли ти надсилаєш запит, до обробки Claude</td>
+</tr>
+<tr>
+<td data-label="Подія"><code>Stop</code></td>
+<td data-label="Коли спрацьовує">Коли Claude завершив відповідь</td>
+</tr>
+<tr>
+<td data-label="Подія"><code>Notification</code></td>
+<td data-label="Коли спрацьовує">Коли Claude надсилає сповіщення</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Приклад автоформатування:</strong> <code>PostToolUse</code> із matcher <code>Edit|Write</code> і командою, що дивиться на розширення файлу й запускає Prettier, gofmt тощо.</li>
+<li><strong>Блокування через <code>PreToolUse</code>:</strong> хук отримує назву інструмента й вхідні дані як <strong>JSON на stdin</strong>. <strong>Код виходу 0</strong>: продовжувати. <strong>Код виходу 2</strong>: <strong>блок</strong>; stderr повертається Claude, щоб він міг підлаштуватися. <strong>Будь-який інший код</strong>: неблокувальна помилка, показується тобі, нічого не зупиняє.</li>
+<li><strong>Поділитися з командою:</strong> хуки в <code>.claude/settings.json</code> діють на рівні проєкту й коміться. Використовуй <code>CLAUDE_PROJECT_DIR</code>, щоб посилатися на скрипти: так вони працюють з будь-якої робочої теки.</li>
+<li><strong><code>/hooks</code></strong> відкриває список <strong>лише для читання</strong>, щоб перевірити, що новий хук з'явився.</li>
+</ul>
+<blockquote>
+<p>Якщо щось має відбуватися щоразу без винятків, не клади це в промпт. Клади в хук.</p>
+</blockquote>
+<h2>13. Звірено з офіційною документацією (2026-11-16)</h2>
+<p>Джерела: документація Claude Code: «Skills», «Permission modes», «Hooks», «MCP».</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Твердження в курсі</th>
+<th>Статус</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Твердження в курсі">Режими Manual, Auto-accept, Plan, Auto; Shift+Tab перемикає</td>
+<td data-label="Статус"><strong>Підтверджено</strong>, але з іншими назвами: у документації <strong>Manual (<code>default</code>), Accept edits (<code>acceptEdits</code>), Plan, Auto</strong>. Документація додає <strong>Don't ask (<code>dontAsk</code>)</strong> для закритого CI (у циклі Shift+Tab його нема) і <strong>Bypass permissions</strong> лише для ізольованих контейнерів і віртуальних машин</td>
+</tr>
+<tr>
+<td data-label="Твердження в курсі">«У якому режимі стартує сесія, залежить від версії й налаштувань»</td>
+<td data-label="Статус"><strong>Підтверджено</strong>, причому конкретно: з версії v2.1.283 інтерактивні сесії в терміналі та VS Code стартують в <strong>Auto</strong>; <code>claude -p</code> і Agent SDK стартують у <strong>Manual</strong>. Значення <code>auto</code> у <strong>проєктному</strong> файлі налаштувань ігнорується</td>
+</tr>
+<tr>
+<td data-label="Твердження в курсі">Auto mode використовує фоновий класифікатор</td>
+<td data-label="Статус"><strong>Підтверджено</strong>. Потрібна підтримувана модель (наприклад, Opus 4.6+, Sonnet 4.6+, Haiku 5.5 чи Fable в Anthropic API); для Team і Enterprise увімкнено за замовчуванням, адміни можуть вимкнути. Документація: auto mode <strong>зменшує кількість запитів, але не гарантує безпеки</strong></td>
+</tr>
+<tr>
+<td data-label="Твердження в курсі">Події хуків PreToolUse, PostToolUse, UserPromptSubmit, Stop, Notification</td>
+<td data-label="Статус"><strong>Підтверджено</strong>; у документації їх набагато більше (<code>SessionStart</code>, <code>SubagentStop</code>, <code>PreCompact</code> та інші). Коди виходу 0 / 2 / інший <strong>підтверджено</strong>; документація наголошує: <strong>код 1 не блокує</strong></td>
+</tr>
+<tr>
+<td data-label="Твердження в курсі">Хуки налаштовуються в <code>settings.json</code></td>
+<td data-label="Статус"><strong>Підтверджено</strong>, а документація додає місця: <code>~/.claude/settings.json</code>, <code>.claude/settings.json</code>, <code>.claude/settings.local.json</code> (в gitignore), managed policy, плагіни та шапки скілів і субагентів. Рівні <strong>зливаються</strong>. Типи обробників: <code>command</code>, <code>http</code>, <code>mcp_tool</code>, <code>prompt</code>, <code>agent</code></td>
+</tr>
+<tr>
+<td data-label="Твердження в курсі"><code>/hooks</code> лише для читання</td>
+<td data-label="Статус"><strong>Підтверджено</strong></td>
+</tr>
+<tr>
+<td data-label="Твердження в курсі">MCP: HTTP і stdio; scopes local, user, project; <code>.mcp.json</code></td>
+<td data-label="Статус"><strong>Підтверджено</strong>. Local це scope за замовчуванням. <strong>SSE застарів</strong>; WebSocket лише через <code>.mcp.json</code> чи <code>add-json</code>. Документація додає пріоритет <strong>local, потім project, потім user</strong> для серверів з однаковою назвою. Інтерактивна сесія просить схвалити проєктні сервери</td>
+</tr>
+<tr>
+<td data-label="Твердження в курсі">Tool search увімкнено за замовчуванням</td>
+<td data-label="Статус"><strong>Підтверджено</strong> (змінна <code>ENABLE_TOOL_SEARCH</code> це налаштовує)</td>
+</tr>
+<tr>
+<td data-label="Твердження в курсі">Скіли: шляхи, поля, поступове розкриття</td>
+<td data-label="Статус"><strong>Розділ 10 узято з документації</strong>, не з курсу</td>
+</tr>
+<tr>
+<td data-label="Твердження в курсі">Команди встановлення, назви планів, точні формулювання інтерфейсу</td>
+<td data-label="Статус">Не перевірено повторно; <strong>вони змінюються між версіями</strong></td>
+</tr>
+<tr>
+<td data-label="Твердження в курсі">Відповіді до вправ із рев'ю (які файли позначити, яка купка)</td>
+<td data-label="Статус">У джерелі не наведено; <strong>виведено</strong> з показаного коду</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Підсумок для іспиту:</strong> знай цикл (зібрати контекст, діяти, перевірити), чотири режими, процес <strong>Explore → Plan → Code → Commit</strong>, <code>/compact</code> проти <code>/clear</code>, навіщо рев'юер із чистим контекстом, CLAUDE.md проти скіла, субагента, хука й MCP, та правило <strong>коду виходу 2</strong>. Назви команд, підтримку моделей і номери версій сприймай як факти, які треба звіряти.</p>
+<h2>14. Перевір себе</h2>
+<ol>
+<li>Що таке агент і як виглядає агентний цикл?</li>
+<li>Назви режими дозволів. Який із них ніколи не редагує код?</li>
+<li>Що таке процес Explore → Plan → Code → Commit і навіщо субагент-рев'юер перед комітом?</li>
+<li><code>/compact</code> чи <code>/clear</code>: коли який? Куди класти довготривалі факти?</li>
+<li>Три речі, які заслуговують другого погляду в кожному diff?</li>
+<li>Fix now / Ask why / Leave it: як вирішити, і чого просити разом із виправленням?</li>
+<li>CLAUDE.md, скіл, субагент, хук чи MCP: коли що?</li>
+<li>Який код виходу блокує хук <code>PreToolUse</code> і що бачить Claude?</li>
+<li>Що робить <code>disable-model-invocation: true</code>? А <code>context: fork</code>?</li>
+<li>Назви три способи заощадити контекст.</li>
+</ol>
+<h2>15. Питання з тесту курсу</h2>
+<p><strong>1. Claude Code працює як AI-агент. Що таке AI-агент?</strong>
+<strong>ШІ, який діє, щоб досягти мети.</strong> Хибні відповіді: чат-бот, що відповідає в реальному часі; редактор коду з автодоповненням; хмарний сервіс для хостингу проєктів.</p>
+<p><strong>2. Що відбувається, коли Claude Code досягає ліміту вікна контексту?</strong>
+<strong>Він автоматично стискає розмову, щоб звільнити місце.</strong> Хибні відповіді: перемикається на меншу модель; видаляє найстаріші файли; зупиняється й просить перезапустити сесію.</p>
+<p><strong>3. Який рекомендований процес роботи з Claude Code?</strong>
+<strong>Explore → Plan → Code → Commit.</strong> Хибні відповіді: Code → Test → Deploy → Monitor; Write → Review → Merge → Ship; Prompt → Accept → Push → Repeat.</p>
+<p><strong>4. Як Claude Code використовує файл CLAUDE.md?</strong>
+<strong>Читає його автоматично на початку кожної сесії.</strong> Хибні відповіді: лише після <code>/init</code>; один раз, коли створюєш проєкт; лише коли ти попросиш.</p>
+
+<nav class="pager"><a href="5-claude-platform-101-uk.html"><small>← Назад</small>5. Claude Platform 101</a><span></span></nav><nav class="tools"><a href="../../architect-hub.html">← Шлях</a><a href="../../architect.html">🃏 Слова</a><a class="lang" href="6-claude-code-101-en.html">🌐 Read in English</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "../../architect-hub.html"; });
+}
+</script>
+</body>
+</html>

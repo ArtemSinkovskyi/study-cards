@@ -62,7 +62,7 @@
 <main><div class="wrap" id="app"></div></main>
 
 <script>
-const GROUP_ICONS = {"4D і курс": "🧭", "Властивості AI": "🧠", "Знання і межі": "📚", "Навчання і вдача": "🎭", "Контекст і пам'ять": "🪟", "Керованість і збої": "🎛", "Загальна лексика": "💬", "Builders (тема 2)": "🛠", "Платформа і моделі (теми 3-4)": "🧩", "Платформа API (тема 5)": "🔌"};
+const GROUP_ICONS = {"4D і курс": "🧭", "Властивості AI": "🧠", "Знання і межі": "📚", "Навчання і вдача": "🎭", "Контекст і пам'ять": "🪟", "Керованість і збої": "🎛", "Загальна лексика": "💬", "Builders (тема 2)": "🛠", "Платформа і моделі (теми 3-4)": "🧩", "Платформа API (тема 5)": "🔌", "Claude Code (тема 6)": "⌨️"};
 function gi(g) { return (GROUP_ICONS[g] || "📌") + " " + g; }
 
 const GLOSSARY = [];
@@ -375,7 +375,42 @@ const CARDS = [
  { "g": "Платформа API (тема 5)", "t": "grader", "q": "grader", "lit": "іменник", "m": "перевіряльник (оцінює результат за критеріями)", "d": "A separate agent that scores output against a rubric.", "a": "The grader runs in its own context window." },
  { "g": "Платформа API (тема 5)", "t": "coordinator", "q": "coordinator", "lit": "іменник", "m": "координатор", "d": "An agent that hands tasks to specialist agents.", "a": "The coordinator delegates to three specialists." },
  { "g": "Платформа API (тема 5)", "t": "permission policy", "q": "permission policy", "lit": "фраза", "m": "політика дозволів", "d": "A rule that pauses sensitive actions for human approval.", "a": "The permission policy waits for approval." },
- { "g": "Платформа API (тема 5)", "t": "primitives", "q": "primitives", "lit": "іменник (мн.)", "m": "примітиви, базові блоки", "d": "The basic building blocks you call from code.", "a": "Build with primitives." }
+ { "g": "Платформа API (тема 5)", "t": "primitives", "q": "primitives", "lit": "іменник (мн.)", "m": "примітиви, базові блоки", "d": "The basic building blocks you call from code.", "a": "Build with primitives." },
+ { "g": "Claude Code (тема 6)", "t": "intend", "q": "intend", "lit": "дієслово", "m": "мати намір, мати на меті", "d": "To plan to do something.", "a": "What do you intend to change in the code?" },
+ { "g": "Claude Code (тема 6)", "t": "quick recap", "q": "quick recap", "lit": "фраза", "m": "коротке повторення, підсумок", "d": "A short summary of the main points.", "a": "Here is a quick recap of the lesson." },
+ { "g": "Claude Code (тема 6)", "t": "best explained", "q": "best explained", "lit": "фраза", "m": "найкраще пояснюється", "d": "Easiest to understand when described a certain way.", "a": "Claude Code is best explained through the agentic loop." },
+ { "g": "Claude Code (тема 6)", "t": "achieve", "q": "achieve", "lit": "дієслово", "m": "досягати, домагатися", "d": "To succeed in getting a result.", "a": "Check that the results achieve what your prompt asked." },
+ { "g": "Claude Code (тема 6)", "t": "throughout", "q": "throughout", "lit": "прийменник/прислівник", "m": "протягом усього, скрізь", "d": "During the whole time or in every part.", "a": "You can steer the model throughout the loop." },
+ { "g": "Claude Code (тема 6)", "t": "toward", "q": "toward", "lit": "прийменник", "m": "у напрямку до", "d": "In the direction of something.", "a": "Guide the agent toward the right answer." },
+ { "g": "Claude Code (тема 6)", "t": "conversation", "q": "conversation", "lit": "іменник", "m": "розмова, діалог", "d": "A back-and-forth exchange of messages.", "a": "Compaction shortens the conversation." },
+ { "g": "Claude Code (тема 6)", "t": "backbone", "q": "backbone", "lit": "іменник", "m": "основа, кістяк", "d": "The most important part that supports everything else.", "a": "Tools are the backbone of how agents work." },
+ { "g": "Claude Code (тема 6)", "t": "cautious", "q": "cautious", "lit": "прикметник", "m": "обережний", "d": "Careful to avoid risk or mistakes.", "a": "Be cautious when skipping permissions." },
+ { "g": "Claude Code (тема 6)", "t": "whether", "q": "whether", "lit": "сполучник", "m": "чи (чи ...чи ні)", "d": "Used to introduce a choice between two possibilities.", "a": "Check whether we need new dependencies." },
+ { "g": "Claude Code (тема 6)", "t": "explicit permission", "q": "explicit permission", "lit": "фраза", "m": "явний дозвіл", "d": "Approval that is clearly and directly given.", "a": "Manual mode asks for explicit permission." },
+ { "g": "Claude Code (тема 6)", "t": "suggested implementation", "q": "suggested implementation", "lit": "фраза", "m": "запропонована реалізація", "d": "The way of building something that was proposed.", "a": "Plan mode researches your suggested implementation." },
+ { "g": "Claude Code (тема 6)", "t": "explore", "q": "explore", "lit": "дієслово", "m": "досліджувати, розвідувати", "d": "To look into something carefully to learn about it.", "a": "First explore, then plan." },
+ { "g": "Claude Code (тема 6)", "t": "later on", "q": "later on", "lit": "фраза", "m": "пізніше, згодом", "d": "At a time after now.", "a": "You will need fewer fixes later on." },
+ { "g": "Claude Code (тема 6)", "t": "gather", "q": "gather", "lit": "дієслово", "m": "збирати", "d": "To bring things or information together.", "a": "Claude gathers the context it needs." },
+ { "g": "Claude Code (тема 6)", "t": "how to tackle", "q": "how to tackle", "lit": "фраза", "m": "як узятися за, як подолати", "d": "How to deal with a problem or task.", "a": "Figure out how to tackle the migration." },
+ { "g": "Claude Code (тема 6)", "t": "revise", "q": "revise", "lit": "дієслово", "m": "переглядати, переробляти", "d": "To change something to improve it.", "a": "Ask Claude to revise specific parts of the plan." },
+ { "g": "Claude Code (тема 6)", "t": "determine", "q": "determine", "lit": "дієслово", "m": "визначати, з'ясовувати", "d": "To find out or decide something exactly.", "a": "Claude determines what it can remove." },
+ { "g": "Claude Code (тема 6)", "t": "every single time", "q": "every single time", "lit": "фраза", "m": "щоразу без винятку", "d": "Always, with no exceptions.", "a": "A hook runs every single time." },
+ { "g": "Claude Code (тема 6)", "t": "forth", "q": "forth", "lit": "прислівник", "m": "вперед (back and forth: туди-сюди)", "d": "Forward; used in the phrase back and forth.", "a": "No more copying code back and forth." },
+ { "g": "Claude Code (тема 6)", "t": "test suite", "q": "test suite", "lit": "іменник", "m": "набір тестів", "d": "A collection of tests that checks the code.", "a": "Give Claude a test suite to validate against." },
+ { "g": "Claude Code (тема 6)", "t": "amount of space", "q": "amount of space", "lit": "фраза", "m": "обсяг місця", "d": "How much room is available.", "a": "The window holds a limited amount of space." },
+ { "g": "Claude Code (тема 6)", "t": "finite", "q": "finite", "lit": "прикметник", "m": "скінченний, обмежений", "d": "Having a limit; not endless.", "a": "Context space is finite." },
+ { "g": "Claude Code (тема 6)", "t": "free up", "q": "free up", "lit": "фразове дієслово", "m": "звільняти (місце, ресурси)", "d": "To make space or resources available again.", "a": "Compaction frees up space." },
+ { "g": "Claude Code (тема 6)", "t": "handy", "q": "handy", "lit": "прикметник", "m": "зручний, корисний під рукою", "d": "Useful and convenient.", "a": "/compact is handy when the window is nearly full." },
+ { "g": "Claude Code (тема 6)", "t": "rediscover", "q": "rediscover", "lit": "дієслово", "m": "знову відкривати, з'ясовувати заново", "d": "To find out something again.", "a": "Without CLAUDE.md it must rediscover your project." },
+ { "g": "Claude Code (тема 6)", "t": "journey", "q": "journey", "lit": "іменник", "m": "шлях, подорож (тут: увесь хід роботи)", "d": "The path taken to get somewhere.", "a": "You get the answer without the whole journey." },
+ { "g": "Claude Code (тема 6)", "t": "preferences", "q": "preferences", "lit": "іменник (мн.)", "m": "уподобання, налаштування за вподобанням", "d": "Things you like or choose over others.", "a": "Put personal preferences in the user-level file." },
+ { "g": "Claude Code (тема 6)", "t": "figure out", "q": "figure out", "lit": "фразове дієслово", "m": "розібратися, з'ясувати", "d": "To understand or find a solution.", "a": "Figure out where the change belongs." },
+ { "g": "Claude Code (тема 6)", "t": "trace", "q": "trace", "lit": "дієслово", "m": "простежувати, відстежувати", "d": "To follow something step by step to find its origin.", "a": "Trace a bug throughout your code." },
+ { "g": "Claude Code (тема 6)", "t": "accurately", "q": "accurately", "lit": "прислівник", "m": "точно", "d": "In a correct and exact way.", "a": "Subagents answer more accurately and efficiently." },
+ { "g": "Claude Code (тема 6)", "t": "efficiently", "q": "efficiently", "lit": "прислівник", "m": "ефективно, без зайвих витрат", "d": "In a way that wastes little time or effort.", "a": "Work efficiently with a clean context." },
+ { "g": "Claude Code (тема 6)", "t": "adjust", "q": "adjust", "lit": "дієслово", "m": "підлаштовувати, коригувати", "d": "To change slightly to fit better.", "a": "The error message helps Claude adjust." },
+ { "g": "Claude Code (тема 6)", "t": "whatever", "q": "whatever", "lit": "займенник", "m": "що завгодно, будь-що", "d": "Anything at all; no matter what.", "a": "Use whatever formatter your project uses." },
+ { "g": "Claude Code (тема 6)", "t": "suggest", "q": "suggest", "lit": "дієслово", "m": "пропонувати, радити", "d": "To put an idea forward.", "a": "We suggest starting without a CLAUDE.md." }
 ];
 
 const KEY = "cca_words_v1";

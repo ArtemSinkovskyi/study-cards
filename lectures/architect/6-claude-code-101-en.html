@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Topic 6 of 11: Claude Code 101 (English)</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+
+  nav.bar { display:flex; flex-wrap:wrap; gap:.5rem; margin:0 0 1rem; }
+  nav.bar a, nav.tools a { flex:1 1 auto; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.55rem .8rem; text-decoration:none; font-size:.9rem; }
+  nav.bar a.lang, nav.tools a.lang { background:#24466b; color:#fff; border-color:#24466b; }
+  nav.tools { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.8rem; }
+  nav.pager a small { display:block; color:#6b6b70; font-size:.75rem; }
+</style>
+</head>
+<body>
+<main>
+<nav class="bar"><a href="../../architect-hub.html">← Шлях</a><a href="index.html">☰ Усі теми</a><a href="../../architect.html">🃏 Слова</a><a class="lang" href="6-claude-code-101-uk.html">🌐 Читати українською</a></nav>
+<h1>Topic 6 of 11: Claude Code 101 (English)</h1>
+<blockquote>
+<p><strong>Claude Certified Architect path.</strong> Topic 6: Claude Code as an agent: the loop, permissions, install, the Explore → Plan → Code → Commit workflow, context, code review, CLAUDE.md, subagents, Skills, MCP, hooks. Unknown words are in the cards: <strong>English words</strong>.
+Source: Anthropic course &quot;Claude Code 101&quot;. Section 10 (Skills) and section 13 (checks) come from the official Claude Code docs (checked 2026-11-16). Commands, modes and settings change between versions; verify in your install.</p>
+</blockquote>
+<h2>1. What is Claude Code</h2>
+<ul>
+<li><strong>Claude Code</strong> is an <strong>agentic coding tool</strong>: it understands your codebase, edits your files, runs commands and connects to your developer tools.</li>
+<li>It runs in the <strong>terminal</strong>, <strong>VS Code</strong>, the <strong>Claude Desktop</strong> app, on the <strong>web</strong> and in <strong>JetBrains</strong> IDEs.</li>
+<li>Difference from Claude.ai: Claude Code has <strong>direct access to your files, terminal and codebase</strong>. You do not copy code back and forth; it goes in and does the work.</li>
+<li>The key difference: Claude Code works as an <strong>AI agent</strong>.</li>
+</ul>
+<p><strong>What is an agent?</strong> Software that can interact with its environment and perform actions to complete a goal. At its core: <strong>a language model running in a loop</strong>, with access to tools, external services or even other agents.</p>
+<p><strong>What it does in practice:</strong></p>
+<ul>
+<li>reads and understands the codebase (explain a feature, trace a bug)</li>
+<li>edits files across the project (refactor a function and update every reference)</li>
+<li>runs terminal commands (build, tests, install packages) and uses the output to decide the next step</li>
+<li>searches the web for documentation and API references</li>
+</ul>
+<p><strong>Three things to keep in mind:</strong></p>
+<ol>
+<li><strong>The context window</strong> is its working memory: large, but not everything at once. Claude finds strategic ways to locate answers without loading the whole codebase.</li>
+<li><strong>You control permissions:</strong> ask before every action, or let it run with a background safety check.</li>
+<li><strong>It can make mistakes:</strong> misread your intent, add a bug, over-engineer. Stay in the loop.</li>
+</ol>
+<h2>2. How Claude Code works</h2>
+<h3>The agentic loop</h3>
+<ol>
+<li>You enter a prompt.</li>
+<li>Claude <strong>gathers context</strong> by working with the model, which returns text or a <strong>tool call</strong> Claude Code can execute.</li>
+<li>It <strong>takes action</strong> (edits a file, runs a command).</li>
+<li>It <strong>verifies</strong> the result against what your prompt asked for.</li>
+<li>If it is done, it stops and waits. If not, it <strong>loops back</strong> until the result is complete and verifiable.</li>
+</ol>
+<p>Throughout the loop you can <strong>add context, interrupt or steer</strong>.</p>
+<h3>Context, tools, permissions</h3>
+<ul>
+<li><strong>Context:</strong> the window holds conversation, file contents and command output. At the limit, Claude Code <strong>compacts</strong> the conversation automatically (summarizes, drops what it can).</li>
+<li><strong>Tools</strong> are the backbone: most assistants take text in and return text out; tools let Claude Code decide <strong>when to execute code</strong> (read a file, search the web, and more) and use the output.</li>
+<li><strong>Permission modes:</strong></li>
+</ul>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Mode</th>
+<th>What happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Mode"><strong>Manual</strong></td>
+<td data-label="What happens">Asks before editing a file or running a shell command</td>
+</tr>
+<tr>
+<td data-label="Mode"><strong>Auto-accept</strong> (docs: <em>Accept edits</em>)</td>
+<td data-label="What happens">File edits and common filesystem commands (<code>mkdir</code>, <code>mv</code>, <code>rm</code>) run without asking; other commands still ask</td>
+</tr>
+<tr>
+<td data-label="Mode"><strong>Plan</strong></td>
+<td data-label="What happens">Reads files and runs shell commands to explore, <strong>does not edit</strong> source, builds a plan first</td>
+</tr>
+<tr>
+<td data-label="Mode"><strong>Auto</strong></td>
+<td data-label="What happens">Works without routine prompts; a <strong>classifier</strong> in the background screens actions, aiming to block irreversible, destructive or out-of-environment ones. If blocked, Claude usually finds a safer way or asks</td>
+</tr>
+</tbody>
+</table></div>
+<p>Which mode a new session starts in depends on your version and settings. Everything is configurable in the settings file. Be careful skipping permissions: a mistake becomes harder to catch.</p>
+<blockquote>
+<p>Recap: an agentic loop, a managed context window, tools and configurable permissions: that is what makes it different from a chat window.</p>
+</blockquote>
+<h2>3. Installing Claude Code</h2>
+<ul>
+<li><strong>Terminal:</strong> on macOS, Linux or WSL use the <code>curl</code> installer (Homebrew also works, but does <strong>not auto-update</strong> by default). On Windows: PowerShell <code>Invoke-RestMethod</code>, CMD <code>curl</code>, or <code>winget</code> (also no auto-update). Then run <code>claude</code> in your project directory. If the command is missing, restart the terminal.</li>
+<li><strong>First run:</strong> pick a theme and sign in with a Claude account (<strong>Pro, Max, Ultra, Team or Enterprise</strong>) or an <strong>API key</strong>. Under an Enterprise org choose that option.</li>
+<li><strong>Access scope:</strong> whatever directory you run <code>claude</code> in, it can access that directory and all subfolders.</li>
+<li><strong>VS Code:</strong> install the &quot;Claude Code&quot; extension by Anthropic (blue check), maybe restart, open from the command palette (Ctrl/Cmd+Shift+P, &quot;Claude Code Open in New Tab&quot;) or the logo. Almost the same as the terminal.</li>
+<li><strong>JetBrains:</strong> install the plugin from the Marketplace, restart; the logo opens a terminal pane next to your editor.</li>
+<li><strong>Desktop:</strong> the <strong>Code</strong> tab: work in a chosen folder, change permissions, even use a cloud environment.</li>
+<li><strong>Web:</strong> <code>claude.ai/code</code>; <strong>GitHub repositories only</strong>.</li>
+</ul>
+<p><strong>Which to use?</strong> Terminal: newest features ship there first. IDE: nearly identical, closer to the editor. Desktop: good for letting Claude run in the background. Web: remote work on a GitHub repository.</p>
+<h2>4. Your first prompt</h2>
+<ul>
+<li><strong>Switch modes with Shift + Tab.</strong> There is no right answer; pick what you are comfortable with.</li>
+<li><strong>Plan mode</strong> reads files and researches your idea <strong>without editing source</strong>, asks clarifying questions, then returns a detailed plan it can execute. Best for complex multi-step features and for a safe code review.</li>
+<li><em>Example:</em> &quot;My app needs dark mode across the whole app. Add a toggle in the header and find a contrast colour that works with the existing light theme.&quot; Review the plan, accept it, and let Claude work; at the end you can see what it did and why.</li>
+<li><strong>Be as descriptive as you can</strong> in the prompt.</li>
+</ul>
+<h2>5. The Explore → Plan → Code → Commit workflow</h2>
+<blockquote>
+<p>If you take one thing from the course, take this. Without it people jump straight to code and correct course later.</p>
+</blockquote>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Step</th>
+<th>What happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Step"><strong>Explore</strong></td>
+<td data-label="What happens">Gives Claude the context it needs. Use plan mode (or the <strong>Explore subagent</strong> outside plan mode for a codebase summary)</td>
+</tr>
+<tr>
+<td data-label="Step"><strong>Plan</strong></td>
+<td data-label="What happens">A plan of action Claude later measures success against. The best place to course-correct: <strong>before any code exists</strong></td>
+</tr>
+<tr>
+<td data-label="Step"><strong>Code</strong></td>
+<td data-label="What happens">The back and forth. Approve the plan; permission mode decides how much it asks</td>
+</tr>
+<tr>
+<td data-label="Step"><strong>Commit</strong></td>
+<td data-label="What happens">Test it yourself, run a <strong>subagent code reviewer</strong>, then have Claude write the commit message in your style</td>
+</tr>
+</tbody>
+</table></div>
+<p><em>Explore/Plan example:</em> &quot;Add WebP conversion to our image upload pipeline. Figure out where it should happen, whether we need new dependencies, and how to approach it.&quot;</p>
+<p><strong>Tips for the Code step:</strong></p>
+<ul>
+<li><strong>Define success criteria:</strong> Claude needs to know what &quot;correct&quot; looks like. Put it in the plan.</li>
+<li><strong>Add tools:</strong> for a web UI, the <strong>Claude in Chrome</strong> extension lets Claude drive a browser tab and test the UI.</li>
+<li><strong>Include a test suite</strong> it can validate against. Make sure tests are a reliable source of truth (no false positives).</li>
+<li>If Claude keeps hitting the same issue, ask it to <strong>save the solution to CLAUDE.md</strong>.</li>
+</ul>
+<p><strong>Why a subagent reviewer:</strong> it gets fresh eyes and does not carry the bias of the main session.</p>
+<h2>6. Context management</h2>
+<ul>
+<li>Everything takes space: every file read, command run, message sent.</li>
+<li><strong>When it fills:</strong> automatic <strong>compaction</strong> summarizes key details and removes unneeded tool results. It <strong>can lose details</strong>.</li>
+</ul>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Does</th>
+<th>Use when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Command"><code>/compact</code></td>
+<td data-label="Does">Compacts everything up to now, keeps a memory of the work</td>
+<td data-label="Use when">You are on one feature and nearing the limit, but must continue</td>
+</tr>
+<tr>
+<td data-label="Command"><code>/clear</code></td>
+<td data-label="Does">Wipes everything, a fresh session with no memory</td>
+<td data-label="Use when">You start a <strong>new feature</strong>; old conversation would bias it</td>
+</tr>
+<tr>
+<td data-label="Command"><code>/context</code></td>
+<td data-label="Does">Shows size, biggest categories and a visual breakdown</td>
+<td data-label="Use when">You want to see what is eating the window</td>
+</tr>
+</tbody>
+</table></div>
+<p>Things to remember across sessions go in <strong>CLAUDE.md</strong>.</p>
+<p><strong>Saving context:</strong></p>
+<ul>
+<li><strong>Be specific.</strong> A vague prompt looks cheaper but forces Claude to explore and reason more, which costs more context.</li>
+<li><strong>Manage MCP servers.</strong> By default a server loads only tool names and instructions; full details load when needed. Each server still takes space, so turn off ones unrelated to the project.</li>
+<li><strong>Use subagents:</strong> separate context window, only a summary comes back (&quot;where are the auth endpoints?&quot;).</li>
+</ul>
+<h2>7. Code review</h2>
+<p>The session that wrote the code is <strong>not the best judge</strong> of it. Look at the change yourself, then have Claude review it again from a <strong>clean context</strong>.</p>
+<ul>
+<li><strong><code>/diff</code></strong> opens an interactive viewer of uncommitted changes (and what each Claude turn changed). Arrows move between files, Enter opens one. <strong><code>/diff</code> and <code>/code-review</code> need a git repository.</strong> On another VCS, read the change in your own tool and ask Claude in plain words to review the files it touched; <code>/rewind</code> still works.</li>
+<li><strong>What deserves a second look every time:</strong>
+<ol>
+<li><strong>Changes you did not ask for</strong> (an edited config value, a rewritten helper).</li>
+<li><strong>Weaker tests</strong> (skipped, deleted, loosened until they pass).</li>
+<li><strong>New packages and hard-coded values</strong> (a dependency for one function, a URL or key in code).</li>
+</ol>
+</li>
+<li><strong>Undo a wrong change:</strong> <code>/rewind</code> (or press Esc twice on an empty prompt), pick the prompt, choose <strong>Restore code and conversation</strong>. Files changed by <strong>shell commands</strong> (such as a package install) are <strong>not</strong> rolled back.</li>
+<li><strong><code>/code-review</code></strong> is the clean-context second reviewer: it <strong>reports</strong>, edits nothing unless asked, runs in the background (seconds to minutes) and <strong>counts against your usage</strong>. You can also ask in plain words. <strong>Effort levels:</strong> <code>/code-review low</code> (fewer, most confident findings), <code>high</code> (wider net, less sure findings). The level is remembered.</li>
+</ul>
+<p><strong>Exercise 1 (compare summary with diff):</strong> Claude's summary of a signup-form change is true (&quot;validation added, tests pass&quot;) but 8 files changed. Three deserve scrutiny: the test file (assertions weakened), <code>src/config.ts</code> (hard-coded URL), and the new dependency in <code>package.json</code>/lock file. <em>Lesson: a true summary can still omit changes worth scrutinizing.</em> (The exact flagged set is not in the source; this is derived from the example.)</p>
+<p><strong>Sorting findings: Fix now, Ask why, Leave it.</strong></p>
+<ul>
+<li><strong>Fix now:</strong> a real problem that matters. <strong>Ask why:</strong> you cannot verify it or it looks off; a reviewer reading cold can be wrong. <strong>Leave it:</strong> real but small; batch for later.</li>
+<li>To ask why, quote the finding and ask Claude to check again: &quot;You reported that <code>isValidEmail</code> doesn't trim, but line 4 calls <code>trim()</code>. Check again.&quot;</li>
+<li>When asking for a fix, <strong>ask for evidence</strong>: &quot;Fix the first finding, restore the original assertion, run the tests and show me the output.&quot;</li>
+<li>If a fix grows into a large change, <strong>review again</strong>.</li>
+</ul>
+<p><strong>Exercise 2 (the four findings), answers derived from the code shown:</strong></p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Finding</th>
+<th>Pile</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="#">1</td>
+<td data-label="Finding">Test skipped and assertion weakened</td>
+<td data-label="Pile"><strong>Fix now</strong></td>
+</tr>
+<tr>
+<td data-label="#">2</td>
+<td data-label="Finding"><code>isValidEmail</code> doesn't trim</td>
+<td data-label="Pile"><strong>Ask why</strong> (the code already calls <code>trim()</code>: false alarm)</td>
+</tr>
+<tr>
+<td data-label="#">3</td>
+<td data-label="Finding"><code>API_URL</code> hard-coded to <code>localhost:3000</code></td>
+<td data-label="Pile"><strong>Fix now</strong> (production would hit a dev address)</td>
+</tr>
+<tr>
+<td data-label="#">4</td>
+<td data-label="Finding">Hex colour instead of <code>--color-danger</code></td>
+<td data-label="Pile"><strong>Leave it</strong> (style only)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>When to review closely:</strong> a one-line change needs a glance. Use <strong>human + Claude review</strong> when the change is bigger than you can hold in your head, touches something sensitive or destructive, or before handing it to a teammate.</p>
+<p><strong>Not the same as Claude Code Review:</strong> that is a separate team product (an org Owner enables it for a GitHub repo and it posts on pull requests). Nothing in this lesson needs it.</p>
+<h2>8. The CLAUDE.md file</h2>
+<ul>
+<li><strong>Problem:</strong> without it, every session starts fresh: Claude re-explores, rediscovers dependencies and features, and makes assumptions.</li>
+<li><strong>What it is:</strong> a Markdown file in the project root, <strong>read automatically at the start of every session</strong>, added to your prompt. An onboarding script for the codebase.</li>
+<li><strong>Example content:</strong> project (Next.js 15, App Router, Tailwind, Drizzle), commands (<code>pnpm dev</code>, <code>pnpm test</code>, <code>pnpm lint</code>), code style (2 spaces, named exports, API routes in <code>app/api/</code>).</li>
+<li><strong>For teams:</strong> commit it. <strong>Project-level</strong> <code>CLAUDE.md</code> in the root is shared. <strong>User-level</strong> <code>CLAUDE.md</code> in your config folder is personal and applies to all projects.</li>
+</ul>
+<p><strong>Tips:</strong></p>
+<ul>
+<li><strong>Save corrections to memory:</strong> if you keep correcting the same thing, ask Claude to save the rule.</li>
+<li><strong>Reference docs with <code>@</code>:</strong> <code>@README.md</code> pulls that file in.</li>
+<li><strong>Start without one</strong>, see where you keep correcting the model, keep it compact, then run <strong><code>/init</code></strong> to generate one.</li>
+</ul>
+<blockquote>
+<p>Facts that are always true belong in CLAUDE.md. Procedures belong in a Skill (section 10).</p>
+</blockquote>
+<h2>9. Subagents</h2>
+<ul>
+<li>Claude can delegate to <strong>subagents</strong> that run component tasks in parallel, each in <strong>its own isolated context window</strong>.</li>
+<li><strong>How it works:</strong> Claude spawns a subagent (&quot;explore this codebase&quot;), it does all the exploration in its own context, then <strong>returns only a summary</strong>. You get the answer without the journey cluttering the main context.</li>
+<li><strong>Create one:</strong> a Markdown file with <strong>YAML frontmatter</strong>. Easiest: let Claude generate it. &quot;Create a code-reviewer subagent in <code>.claude/agents/</code> that reviews code for bugs and readability. Make it read-only.&quot;</li>
+<li><strong>Where:</strong> <code>.claude/agents/</code> = this project; <code>~/.claude/agents/</code> = all projects. If the folder did not exist when the session began, <strong>restart</strong> Claude Code.</li>
+<li><strong>Customization:</strong> <strong>persistent memory</strong> across conversations; <strong>preload skills</strong> with the <code>skills</code> key (the <strong>entire</strong> skill is loaded into the subagent, unlike in the main conversation).</li>
+</ul>
+<h2>10. Skills (from the official Claude Code docs)</h2>
+<p><em>The course material only pointed here (&quot;add skills from the official docs&quot;); this section is built from the Claude Code Skills page.</em></p>
+<ul>
+<li>A <strong>skill</strong> is a folder with a <strong><code>SKILL.md</code></strong>: instructions Claude loads <strong>when relevant</strong>, or that <strong>you invoke directly with <code>/skill-name</code></strong>. Old <code>.claude/commands/</code> files still work and have been merged into skills.</li>
+<li><strong>Skills hold procedures, CLAUDE.md holds facts.</strong> If a CLAUDE.md section has grown into a procedure, move it to a skill (the body only loads when used).</li>
+</ul>
+<p><strong>Where skills live:</strong></p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Scope</th>
+<th>Path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Scope">Enterprise</td>
+<td data-label="Path"><code>.claude/skills/&lt;name&gt;/SKILL.md</code> in the managed settings directory</td>
+</tr>
+<tr>
+<td data-label="Scope">Personal</td>
+<td data-label="Path"><code>~/.claude/skills/&lt;name&gt;/SKILL.md</code> (all your projects)</td>
+</tr>
+<tr>
+<td data-label="Scope">Project</td>
+<td data-label="Path"><code>.claude/skills/&lt;name&gt;/SKILL.md</code> (commit to share)</td>
+</tr>
+<tr>
+<td data-label="Scope">Plugin</td>
+<td data-label="Path"><code>&lt;plugin&gt;/skills/&lt;name&gt;/SKILL.md</code>, used as <code>/plugin-name:skill-name</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Same name in several places: <strong>enterprise beats personal, personal beats project</strong>; plugin skills are namespaced, so they do not conflict. Claude Code watches the skill folders, so edits apply within the session.</p>
+<p><strong>Anatomy:</strong> YAML frontmatter between <code>---</code> lines, then Markdown instructions. All fields are optional; <strong><code>description</code> is the recommended one</strong>.</p>
+<pre><code class="language-yaml">---
+name: summarize-changes
+description: Summarizes uncommitted changes and flags risky ones. Use when the user asks what changed or wants a commit message.
+allowed-tools: Bash(git diff *) Bash(git status *)
+---
+Summarize the changes, then list any risks.
+</code></pre>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Field</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Field"><code>name</code></td>
+<td data-label="Purpose">Name in the <code>/</code> menu (defaults to the folder name)</td>
+</tr>
+<tr>
+<td data-label="Field"><code>description</code></td>
+<td data-label="Purpose">What it does and <strong>when to use it</strong>: this is how Claude decides to load it</td>
+</tr>
+<tr>
+<td data-label="Field"><code>disable-model-invocation: true</code></td>
+<td data-label="Purpose"><strong>Only you</strong> can invoke it (use for side effects like <code>/deploy</code>)</td>
+</tr>
+<tr>
+<td data-label="Field"><code>user-invocable: false</code></td>
+<td data-label="Purpose">Hidden from the <code>/</code> menu; <strong>only Claude</strong> loads it (background knowledge)</td>
+</tr>
+<tr>
+<td data-label="Field"><code>allowed-tools</code></td>
+<td data-label="Purpose">Tools <strong>pre-approved</strong> while the skill runs; does <strong>not</strong> restrict other tools</td>
+</tr>
+<tr>
+<td data-label="Field"><code>context: fork</code> (+ <code>agent</code>)</td>
+<td data-label="Purpose">Run the skill in a <strong>subagent</strong> that does not see your conversation</td>
+</tr>
+<tr>
+<td data-label="Field"><code>model</code>, <code>effort</code></td>
+<td data-label="Purpose">Override for that turn</td>
+</tr>
+<tr>
+<td data-label="Field"><code>paths</code></td>
+<td data-label="Purpose">Auto-load only when matching files are in play</td>
+</tr>
+<tr>
+<td data-label="Field"><code>hooks</code></td>
+<td data-label="Purpose">Hooks registered while the skill is used</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>How loading works (progressive disclosure):</strong> the <strong>descriptions</strong> of all skills sit in context so Claude knows what exists; the <strong>full body loads only when the skill is used</strong>. <code>description</code> + <code>when_to_use</code> is cut at <strong>1,536 characters</strong> in the list: put the key use case first. Once loaded, the content stays in the conversation, so write <strong>standing instructions</strong>, not one-off steps. After compaction the latest invocation of each skill is re-attached (up to 5,000 tokens each, 25,000 combined).</p>
+<p><strong>Supporting files:</strong> keep <code>SKILL.md</code> under about <strong>500 lines</strong> and put detail in <code>reference.md</code>, <code>examples.md</code> or <code>scripts/</code> (scripts are <strong>executed</strong>, not loaded). Reference them from <code>SKILL.md</code> so Claude knows when to read them.</p>
+<p><strong>Arguments and dynamic context:</strong> <code>$ARGUMENTS</code>, <code>$0</code>/<code>$1</code>, <code>${CLAUDE_SKILL_DIR}</code>. A line like <code>!`git diff HEAD`</code> runs a command <strong>before</strong> the skill is sent and inserts its output.</p>
+<p><strong>Skills vs the other tools:</strong></p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Tool</th>
+<th>Best for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Tool"><strong>CLAUDE.md</strong></td>
+<td data-label="Best for">Always-on facts about the project</td>
+</tr>
+<tr>
+<td data-label="Tool"><strong>Skill</strong></td>
+<td data-label="Best for">A reusable procedure loaded on demand</td>
+</tr>
+<tr>
+<td data-label="Tool"><strong>Subagent</strong></td>
+<td data-label="Best for">An isolated worker with its own context (a skill can run in one with <code>context: fork</code>)</td>
+</tr>
+<tr>
+<td data-label="Tool"><strong>Hook</strong></td>
+<td data-label="Best for">Something that must happen <strong>every time</strong> (deterministic)</td>
+</tr>
+<tr>
+<td data-label="Tool"><strong>MCP</strong></td>
+<td data-label="Best for">Connecting external tools and data (pair it with a skill that teaches how to use it well)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Control access:</strong> deny all skills with <code>Skill</code> in deny rules; allow or deny one with <code>Skill(name)</code>. Bundled skills include <code>/code-review</code>, <code>/debug</code>, <code>/loop</code>, <code>/claude-api</code>, <code>/skill-doctor</code> (reports the context cost of your skills).</p>
+<h2>11. MCP</h2>
+<ul>
+<li><strong>Model Context Protocol</strong> is an open standard to connect Claude Code to <strong>external tools and data</strong> (databases, productivity apps, public repos). Claude decides on its own when to use them.</li>
+<li><em>Examples:</em> a <strong>Linear</strong> MCP server to pull issue details; <strong>Context7</strong> for up-to-date library docs.</li>
+<li><strong>Add a server:</strong> <code>claude mcp add</code>. Two main types: <strong>HTTP</strong> (remote, hosted by the provider) and <strong>stdio</strong> (a local process on your machine).</li>
+<li><strong>Manage:</strong> <code>/mcp</code> inside a session shows what is connected, status, and lets you disable servers.</li>
+<li><strong>Scopes:</strong></li>
+</ul>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Scope</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Scope"><strong>Local</strong></td>
+<td data-label="Meaning">Current project only, just you (the default)</td>
+</tr>
+<tr>
+<td data-label="Scope"><strong>User</strong></td>
+<td data-label="Meaning">All your projects</td>
+</tr>
+<tr>
+<td data-label="Scope"><strong>Project</strong></td>
+<td data-label="Meaning"><code>.mcp.json</code> committed to the repo; the whole team gets the same servers</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Context cost:</strong> each connected server adds tool names and instructions even when idle. Run <code>/mcp</code> and disable unused ones. <strong>Tool search is on by default</strong>: full tool definitions stay out of context until needed.</li>
+<li><strong>Prefer a CLI when one exists</strong> (<code>gh</code>, <code>aws</code>): it adds no per-tool listing, so it is more context-efficient.</li>
+<li>Pair an MCP server with a <strong>Skill</strong> that teaches Claude to use its tools well.</li>
+</ul>
+<h2>12. Hooks</h2>
+<ul>
+<li><strong>Hooks</strong> run commands at points in Claude Code's lifecycle. <strong>Unlike everything else here they are deterministic: they always run.</strong></li>
+<li><em>Why:</em> &quot;run Prettier after every edit&quot; in CLAUDE.md works <strong>most</strong> of the time; a hook makes it happen <strong>every</strong> time.</li>
+<li><strong>Use cases:</strong> auto-format after edits; log every command for compliance; block dangerous operations; notify you when Claude finishes.</li>
+<li><strong>Configured in <code>settings.json</code>:</strong> pick an <strong>event</strong>, optionally a <strong>matcher</strong> (which tools), and a <strong>command</strong>.</li>
+</ul>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Event</th>
+<th>Fires</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Event"><code>PreToolUse</code></td>
+<td data-label="Fires">Before a tool call (<strong>can block</strong>)</td>
+</tr>
+<tr>
+<td data-label="Event"><code>PostToolUse</code></td>
+<td data-label="Fires">After a tool call completes</td>
+</tr>
+<tr>
+<td data-label="Event"><code>UserPromptSubmit</code></td>
+<td data-label="Fires">When you submit a prompt, before Claude processes it</td>
+</tr>
+<tr>
+<td data-label="Event"><code>Stop</code></td>
+<td data-label="Fires">When Claude finishes responding</td>
+</tr>
+<tr>
+<td data-label="Event"><code>Notification</code></td>
+<td data-label="Fires">When Claude sends a notification</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Auto-format example:</strong> <code>PostToolUse</code> with matcher <code>Edit|Write</code>, a command that checks the file extension and runs Prettier, gofmt, etc.</li>
+<li><strong>Blocking with <code>PreToolUse</code>:</strong> the hook gets the tool name and input as <strong>JSON on stdin</strong>. <strong>Exit code 0</strong> = proceed. <strong>Exit code 2</strong> = <strong>block</strong>; stderr is fed back to Claude so it can adjust. <strong>Any other code</strong> = non-blocking error, shown to you, nothing stops.</li>
+<li><strong>Share with the team:</strong> hooks in <code>.claude/settings.json</code> are project-level and can be committed. Use <code>CLAUDE_PROJECT_DIR</code> to reference scripts so they work from any working directory.</li>
+<li><strong><code>/hooks</code></strong> opens a <strong>read-only</strong> list so you can check a new hook appears.</li>
+</ul>
+<blockquote>
+<p>If something must happen every time without fail, do not put it in a prompt. Put it in a hook.</p>
+</blockquote>
+<h2>13. Checked against the official docs (2026-11-16)</h2>
+<p>Sources: Claude Code docs &quot;Skills&quot;, &quot;Permission modes&quot;, &quot;Hooks&quot;, &quot;MCP&quot;.</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Claim in the course</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Claim in the course">Modes Manual, Auto-accept, Plan, Auto; Shift+Tab cycles</td>
+<td data-label="Status"><strong>Confirmed</strong>, with different names: docs call them <strong>Manual (<code>default</code>), Accept edits (<code>acceptEdits</code>), Plan, Auto</strong>. Docs add <strong>Don't ask (<code>dontAsk</code>)</strong> for locked-down CI (never in the Shift+Tab cycle) and <strong>Bypass permissions</strong> for isolated containers and VMs only</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">&quot;Which mode a new session starts in depends on version and settings&quot;</td>
+<td data-label="Status"><strong>Confirmed</strong>, and specific: on v2.1.283 and later, interactive terminal and VS Code sessions start in <strong>Auto</strong>; <code>claude -p</code> and the Agent SDK start in <strong>Manual</strong>. <code>auto</code> in a <strong>project</strong> settings file is ignored</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Auto mode uses a background classifier</td>
+<td data-label="Status"><strong>Confirmed</strong>. It needs a supported model (for example Opus 4.6+, Sonnet 4.6+, Haiku 5.5 or Fable on the Anthropic API) and is on by default for Team and Enterprise; admins can disable it. Docs: auto mode <strong>reduces prompts but does not guarantee safety</strong></td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Hook events PreToolUse, PostToolUse, UserPromptSubmit, Stop, Notification</td>
+<td data-label="Status"><strong>Confirmed</strong>; docs list many more (<code>SessionStart</code>, <code>SubagentStop</code>, <code>PreCompact</code>, and others). Exit 0 / 2 / other <strong>confirmed</strong>; docs stress that <strong>exit 1 is not a block</strong></td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Hooks configured in <code>settings.json</code></td>
+<td data-label="Status"><strong>Confirmed</strong>, and docs add more places: <code>~/.claude/settings.json</code>, <code>.claude/settings.json</code>, <code>.claude/settings.local.json</code> (gitignored), managed policy, plugins, and skill/subagent frontmatter. Levels <strong>merge</strong>. Handler types: <code>command</code>, <code>http</code>, <code>mcp_tool</code>, <code>prompt</code>, <code>agent</code></td>
+</tr>
+<tr>
+<td data-label="Claim in the course"><code>/hooks</code> is read-only</td>
+<td data-label="Status"><strong>Confirmed</strong></td>
+</tr>
+<tr>
+<td data-label="Claim in the course">MCP: HTTP and stdio; scopes local, user, project; <code>.mcp.json</code></td>
+<td data-label="Status"><strong>Confirmed</strong>. Local is the default scope. <strong>SSE is deprecated</strong>; WebSocket only via <code>.mcp.json</code> or <code>add-json</code>. Docs add precedence <strong>local, then project, then user</strong> for same-named servers. Interactive sessions ask you to approve project servers</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Tool search on by default</td>
+<td data-label="Status"><strong>Confirmed</strong> (variable <code>ENABLE_TOOL_SEARCH</code> configures it)</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Skills: paths, frontmatter, progressive disclosure</td>
+<td data-label="Status"><strong>Section 10 is taken from the docs</strong>, not the course</td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Install commands, plan names, exact UI wording</td>
+<td data-label="Status">Not re-checked; <strong>they change by version</strong></td>
+</tr>
+<tr>
+<td data-label="Claim in the course">Code-review exercise answers (which files to flag, which pile)</td>
+<td data-label="Status">Not stated in the source; <strong>derived</strong> from the code shown</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Takeaway for the exam:</strong> know the loop (gather, act, verify), the four modes, the <strong>Explore → Plan → Code → Commit</strong> workflow, <code>/compact</code> vs <code>/clear</code>, why a clean-context reviewer, CLAUDE.md vs Skill vs Subagent vs Hook vs MCP, and the <strong>exit code 2</strong> rule. Treat command names, model support and version numbers as look-up facts.</p>
+<h2>14. Check yourself</h2>
+<ol>
+<li>What is an agent, and what does the agentic loop look like?</li>
+<li>Name the permission modes. Which one never edits source?</li>
+<li>What is the Explore → Plan → Code → Commit workflow and why a subagent reviewer before commit?</li>
+<li><code>/compact</code> vs <code>/clear</code>: when each? Where do long-term facts go?</li>
+<li>Three things that deserve a second look in every diff?</li>
+<li>Fix now / Ask why / Leave it: how do you decide, and what do you ask for with a fix?</li>
+<li>CLAUDE.md vs Skill vs Subagent vs Hook vs MCP: when to use which?</li>
+<li>Which exit code blocks a <code>PreToolUse</code> hook, and what does Claude see?</li>
+<li>What does <code>disable-model-invocation: true</code> do? What does <code>context: fork</code> do?</li>
+<li>Name three ways to save context.</li>
+</ol>
+<h2>15. Quiz questions from the course</h2>
+<p><strong>1. Claude Code works as an AI agent. What is an AI agent?</strong>
+<strong>AI that takes action to complete goals.</strong> Wrong answers: a chatbot that answers in real time; an editor with autocomplete; a cloud service hosting your projects.</p>
+<p><strong>2. What happens when Claude Code reaches its context window limit?</strong>
+<strong>It automatically compacts your conversation to free up space.</strong> Wrong answers: it switches to a smaller model; it removes your oldest files; it stops and asks you to restart.</p>
+<p><strong>3. What is the recommended workflow for using Claude Code effectively?</strong>
+<strong>Explore → Plan → Code → Commit.</strong> Wrong answers: Code → Test → Deploy → Monitor; Write → Review → Merge → Ship; Prompt → Accept → Push → Repeat.</p>
+<p><strong>4. How does Claude Code use the CLAUDE.md file?</strong>
+<strong>It reads it automatically at the start of every session.</strong> Wrong answers: only after <code>/init</code>; once when the project is created; only when you ask.</p>
+
+<nav class="pager"><a href="5-claude-platform-101-en.html"><small>← Назад</small>5. Claude Platform 101</a><span></span></nav><nav class="tools"><a href="../../architect-hub.html">← Шлях</a><a href="../../architect.html">🃏 Слова</a><a class="lang" href="6-claude-code-101-uk.html">🌐 Читати українською</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "../../architect-hub.html"; });
+}
+</script>
+</body>
+</html>
