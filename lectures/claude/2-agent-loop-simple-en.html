@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 2: how an agent works with tools</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+
+  nav.bar { display:flex; flex-wrap:wrap; gap:.5rem; margin:0 0 1rem; }
+  nav.bar a, nav.tools a { flex:1 1 auto; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.55rem .8rem; text-decoration:none; font-size:.9rem; }
+  nav.bar a.lang, nav.tools a.lang { background:#24466b; color:#fff; border-color:#24466b; }
+  nav.tools { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.8rem; }
+  nav.pager a small { display:block; color:#6b6b70; font-size:.75rem; }
+</style>
+</head>
+<body>
+<main>
+<nav class="bar"><a href="../../claude-hub.html">← Claude General</a><a href="index.html">☰ Усі теми</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="2-agent-loop-simple.html">🌐 Читати українською</a></nav>
+<h1>Lecture 2: how an agent works with tools</h1>
+<blockquote>
+<p>Simplified version. The full lecture exists in Ukrainian only. The exam-course view of the loop is in lecture 9.</p>
+</blockquote>
+<h2>The main idea</h2>
+<p><strong>The model runs nothing. It returns a request, and your code runs it.</strong></p>
+<p>Normally a client calls your controller. Here it is the other way round: <strong>the model is the client</strong> that sends you a request &quot;call this method&quot;, and your code runs it and returns the result. The model itself cannot reach your database or API.</p>
+<h2>Why it is designed this way</h2>
+<p>The model only says &quot;I need a tool&quot;. Your code runs it and returns the result, so you need the loop and stop_reason to know when to continue.</p>
+<h2>Step 1. What a tool is</h2>
+<p>A tool is your function, described for the model: a name, what it does and what parameters it takes.</p>
+<p>Example: <code>get_weather</code>, &quot;returns the current weather&quot;, parameter <code>city</code>.</p>
+<p>The model does not see your code, only this description. So <strong>the better it is described, the more accurately the model calls it</strong>. It is like an OpenAPI contract: the client knows only the contract.</p>
+<h2>Step 2. One round of the conversation</h2>
+<p>The user asks: &quot;What's the weather in Kyiv?&quot;</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Who</th>
+<th>What happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Who">You</td>
+<td data-label="What happens">Send the question and the tool descriptions</td>
+</tr>
+<tr>
+<td data-label="Who">The model</td>
+<td data-label="What happens">Answers with a <strong>tool_use</strong> block: &quot;call get_weather, city Kyiv&quot;</td>
+</tr>
+<tr>
+<td data-label="Who">Your code</td>
+<td data-label="What happens">Actually calls the weather service: +15, cloudy</td>
+</tr>
+<tr>
+<td data-label="Who">You</td>
+<td data-label="What happens">Send a <strong>tool_result</strong> block with that result</td>
+</tr>
+<tr>
+<td data-label="Who">The model</td>
+<td data-label="What happens">Tells the user: &quot;It's +15 and cloudy in Kyiv&quot;</td>
+</tr>
+</tbody>
+</table></div>
+<p>The model said what it wanted <strong>but did not run it</strong>. You did.</p>
+<p><code>tool_use</code> has an <code>id</code>, and in <code>tool_result</code> you give the same <code>tool_use_id</code>, so the model knows which request this answers.</p>
+<h2>Step 3. How to know what to do next: stop_reason</h2>
+<p>Every model reply has a <code>stop_reason</code> field, like a result status.</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Value</th>
+<th>What it means</th>
+<th>What you do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Value"><code>tool_use</code></td>
+<td data-label="What it means">The model asks for a call</td>
+<td data-label="What you do">Run the tool, send the result</td>
+</tr>
+<tr>
+<td data-label="Value"><code>end_turn</code></td>
+<td data-label="What it means">The model is done</td>
+<td data-label="What you do">Show the answer, <strong>exit</strong></td>
+</tr>
+<tr>
+<td data-label="Value"><code>max_tokens</code></td>
+<td data-label="What it means">The answer was cut by the limit</td>
+<td data-label="What you do">Raise the limit</td>
+</tr>
+<tr>
+<td data-label="Value"><code>refusal</code></td>
+<td data-label="What it means">The model refused</td>
+<td data-label="What you do">Look at <code>stop_details</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>The loop in Java:</p>
+<pre><code class="language-java">Response response = client.send(messages);
+while (&quot;tool_use&quot;.equals(response.stopReason())) {
+    List&lt;ToolResult&gt; results = executeAll(response.toolUses());
+    messages.add(response.asAssistantMessage());
+    messages.add(userMessageOf(results));
+    response = client.send(messages);
+}
+show(response);
+</code></pre>
+<p>Read it as: <strong>while the model asks for a call, run it and ask again</strong>.</p>
+<h2>Step 4. Three rules people get wrong</h2>
+<p><strong>Rule 1. Several tools at once.</strong> The model can return three <code>tool_use</code> blocks in one reply. You run them all and return <strong>all results in one message</strong>. If you send them separately, the model &quot;unlearns&quot; asking for several at once.</p>
+<p><strong>Rule 2. The tool failed.</strong> Do not stay silent and do not crash. Return a <code>tool_result</code> with <code>is_error: true</code> and a clear text, for example: &quot;Service unavailable, retry in 60 seconds&quot;. Then the model can try something else.</p>
+<p><strong>Rule 3. A round limit.</strong> The documentation does not limit the number of rounds. If the model keeps asking for tools, your <code>while</code> spins forever. Set <strong>your own limit</strong>, for example 10. It is the same as <code>maxAttempts</code> in a retry.</p>
+<h2>Step 5. Who runs the tool</h2>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Kind</th>
+<th>Who runs it</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Kind">Your own</td>
+<td data-label="Who runs it"><strong>You</strong></td>
+<td data-label="Examples"><code>get_weather</code>, a query to your database</td>
+</tr>
+<tr>
+<td data-label="Kind">Ready-made from Anthropic</td>
+<td data-label="Who runs it"><strong>You</strong></td>
+<td data-label="Examples"><code>bash</code>, <code>text_editor</code>, <code>memory</code></td>
+</tr>
+<tr>
+<td data-label="Kind">Server tools</td>
+<td data-label="Who runs it"><strong>Anthropic</strong></td>
+<td data-label="Examples"><code>web_search</code>, <code>web_fetch</code>, <code>code_execution</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>For server tools you only switch the tool on, and the result arrives inside the finished reply.</p>
+<h2>Step 6. Two rare things</h2>
+<ul>
+<li><strong>pause_turn.</strong> Server tools have their own inner loop limited to 10 rounds. When it hits the limit you get <code>pause_turn</code>: &quot;not finished yet&quot;. Just send the conversation again.</li>
+<li><strong>disable_parallel_tool_use.</strong> Turns off parallel calls. The parameter lives <strong>inside <code>tool_choice</code></strong>, not on its own.</li>
+</ul>
+<h2>Glossary</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Term</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Term"><strong>Agent loop</strong></td>
+<td data-label="What it is">request, model reply, tool call, request again</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>stop_reason</strong></td>
+<td data-label="What it is">why the model stopped: <code>tool_use</code>, <code>end_turn</code>, <code>max_tokens</code> and so on</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>tool_use / tool_result</strong></td>
+<td data-label="What it is">the block where the model asks for a tool, and the block with the result</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>Parallel calls</strong></td>
+<td data-label="What it is">several <code>tool_use</code> blocks in one reply; the results go back together</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>pause_turn</strong></td>
+<td data-label="What it is">a server tool paused the turn; continue it</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>Client / server tool</strong></td>
+<td data-label="What it is">run by your code, or run by Anthropic</td>
+</tr>
+</tbody>
+</table></div>
+<h2>🖼 Схема: Claude: цикл агента і stop_reason</h2><div class="dg"><div class="dtitle">Модель просить, ваш код виконує</div><div class="dflow"><div class="dbox aws">Ви: питання й описи інструментів</div><div class="darrow">↓</div><div class="dbox yellow">Модель: блок tool_use (id, ім&#x27;я, вхід)</div><div class="darrow">↓</div><div class="dbox blue">Ваш код: реально виконує інструмент</div><div class="darrow">↓</div><div class="dbox green">Ви: блок tool_result з тим самим tool_use_id</div><div class="darrow">↓</div><div class="dbox aws">Модель: відповідь користувачу (end_turn)</div></div><div class="dnote">Модель сказала, що хоче, але не виконала. Виконали ви.</div><div class="dtitle">stop_reason: що робити далі</div><div class="tw"><table class="two"><thead><tr><th>Значення</th><th>Що робите</th></tr></thead><tbody><tr><td>tool_use</td><td>виконати інструмент, надіслати результат, питати знову</td></tr><tr><td>end_turn</td><td>показати відповідь, вихід із циклу</td></tr><tr><td>max_tokens</td><td>відповідь обрізана, збільшити ліміт</td></tr><tr><td>refusal</td><td>модель відмовилась, дивитись stop_details</td></tr></tbody></table></div><div class="dnote">Цикл: поки stop_reason це tool_use, виконуємо й питаємо знову. Поставте власний ліміт кругів, наприклад 10.</div><div class="dtitle">Три правила, на яких помиляються</div><div class="dcols"><div class="dcol blue"><b>Кілька tool_use за раз</b><ul><li>виконати всі</li><li>повернути всі результати одним повідомленням</li></ul></div><div class="dcol red"><b>Інструмент упав</b><ul><li>tool_result з is_error: true</li><li>зрозумілий текст: «повтори за 60 секунд»</li></ul></div><div class="dcol yellow"><b>Ліміт кругів</b><ul><li>документація його не ставить</li><li>свій ліміт у циклі</li></ul></div></div><div class="dtitle">Хто виконує інструмент</div><div class="dgroup green"><b>Виконуєте ви</b><div class="dkids"><div class="dbox green">власні: get_weather, запит у вашу базу</div><div class="dbox green">готові від Anthropic: bash, text_editor, memory</div></div></div><div class="dgroup blue"><b>Виконує Anthropic (серверні)</b><div class="dkids"><div class="dbox blue">web_search</div><div class="dbox blue">web_fetch</div><div class="dbox blue">code_execution</div></div></div><div class="dnote">pause_turn: внутрішній цикл серверних інструментів упирається в 10 кругів, надішліть розмову знову. disable_parallel_tool_use лежить усередині tool_choice.</div></div><div class="remember"><h2>What to remember for the exam</h2>
+<ol>
+<li>The model asks, your code runs.</li>
+<li>The loop continues while <code>stop_reason</code> is <code>tool_use</code>.</li>
+<li>All results of one turn go in one message.</li>
+<li>A tool error: <code>is_error: true</code> and a clear text.</li>
+<li>You set the round limit yourself.</li>
+<li><code>pause_turn</code> means &quot;send it again&quot;.</li>
+</ol>
+</div><h2>Check yourself</h2>
+<ol>
+<li>Who actually runs <code>get_weather</code>?</li>
+<li>What do you do when <code>stop_reason</code> is <code>end_turn</code>?</li>
+<li>The model asked for three tools. How many result messages?</li>
+<li>A tool failed. What do you return to the model?</li>
+<li>Why have your own round limit?</li>
+</ol>
+<details>
+<summary>Answers</summary>
+<ol>
+<li>Your code. The model only asks.</li>
+<li>Show the answer and leave the loop.</li>
+<li>One, with three results.</li>
+<li>A <code>tool_result</code> with <code>is_error: true</code> and a clear text.</li>
+<li>The documentation gives no limit, and the model can keep asking for tools.</li>
+</ol>
+</details>
+
+<nav class="pager"><a href="1-start-simple-en.html"><small>← Назад</small>Lecture 1: what the exam is and where to start</a><a href="3-tools-and-mcp-simple-en.html"><small>Далі →</small>Lecture 3: how to describe tools and what MCP is</a></nav><nav class="tools"><a href="../../claude-hub.html">← Claude General</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="2-agent-loop-simple.html">🌐 Читати українською</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "../../claude-hub.html"; });
+}
+</script>
+</body>
+</html>

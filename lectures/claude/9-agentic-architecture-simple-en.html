@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 9: agents and orchestration (domain 1)</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+
+  nav.bar { display:flex; flex-wrap:wrap; gap:.5rem; margin:0 0 1rem; }
+  nav.bar a, nav.tools a { flex:1 1 auto; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.55rem .8rem; text-decoration:none; font-size:.9rem; }
+  nav.bar a.lang, nav.tools a.lang { background:#24466b; color:#fff; border-color:#24466b; }
+  nav.tools { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.8rem; }
+  nav.pager a small { display:block; color:#6b6b70; font-size:.75rem; }
+</style>
+</head>
+<body>
+<main>
+<nav class="bar"><a href="../../claude-hub.html">← Claude General</a><a href="index.html">☰ Усі теми</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="9-agentic-architecture-simple.html">🌐 Читати українською</a></nav>
+<h1>Lecture 9: agents and orchestration (domain 1)</h1>
+<blockquote>
+<p>Based on the exam course, domain 1: Agentic Architecture &amp; Orchestration. Cards: group &quot;Агенти й оркестрація&quot;, test &quot;Домен 1&quot;.</p>
+</blockquote>
+<h2>The main idea</h2>
+<p><strong>Everything in domain 1 is built around the agentic loop.</strong> Coordinators, subagents, hooks, task decomposition and sessions are things we do around that loop.</p>
+<p>The exam tests decisions: which pattern to pick and why.</p>
+<h2>Step 1. The agentic loop</h2>
+<p>A chatbot answers once. An agent keeps going until the job is done.</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Step</th>
+<th>What happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Step">Perceive</td>
+<td data-label="What happens">The model reads the request</td>
+</tr>
+<tr>
+<td data-label="Step">Reason</td>
+<td data-label="What happens">It decides what to do</td>
+</tr>
+<tr>
+<td data-label="Step">Act</td>
+<td data-label="What happens">It calls a tool</td>
+</tr>
+<tr>
+<td data-label="Step">Observe</td>
+<td data-label="What happens">It reads the result and goes round again</td>
+</tr>
+</tbody>
+</table></div>
+<p>One field drives the loop, <strong>stop_reason</strong>:</p>
+<ul>
+<li><code>tool_use</code>: run the tool, send back a <code>tool_result</code>, call the model again;</li>
+<li><code>end_turn</code>: the model is done, leave the loop.</li>
+</ul>
+<p>Example. &quot;Where's my refund for order 9931?&quot; The model calls <code>look_up_order(9931)</code>, sees no refund on file, calls <code>check_refund_policy()</code>, sees &quot;eligible&quot; and answers (<code>end_turn</code>). The model chose each tool from the previous result. That is the loop reasoning, not a fixed script.</p>
+<p><strong>Three anti-patterns</strong> (common wrong answers on the exam):</p>
+<ol>
+<li>ignoring <code>stop_reason</code>;</li>
+<li>no end condition (an infinite loop);</li>
+<li>not feeding tool results back: the model flies blind.</li>
+</ol>
+<p>The exam favours a <strong>model-driven</strong> loop: the model picks the next tool from context. An <code>if/else</code> tree breaks on cases you did not foresee.</p>
+<h2>Step 2. Coordinator and subagents</h2>
+<p>A big job with several parts (research, analysis, writing) clutters one agent's context. The answer is <strong>hub-and-spoke</strong>.</p>
+<ul>
+<li>The coordinator hands work to subagents.</li>
+<li>Subagents report only to the coordinator and never talk to each other.</li>
+<li>Each subagent has a clean context with only its own part.</li>
+</ul>
+<p>The coordinator's jobs: <strong>route, select the subagents, handle their errors, synthesize the results</strong>. It does not do the task itself. After synthesizing it can judge the result and send work back for another pass.</p>
+<p>Independent parts run in parallel, dependent ones in sequence.</p>
+<p><strong>The narrow-decomposition trap.</strong> A question about &quot;the creative industries&quot; went only to a visual-arts subagent, so music, film and design were lost. The pieces must add up to the whole question.</p>
+<p>A simple single-threaded job does not need a coordinator.</p>
+<h2>Step 3. Spawning a subagent and what to give it</h2>
+<p>A subagent is spawned with the <strong>Task</strong> tool (newer Claude Code versions call it Agent). Several such calls in one turn run the subagents in parallel.</p>
+<p>Four fields describe a subagent:</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Field</th>
+<th>What it sets</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Field">description</td>
+<td data-label="What it sets">When the coordinator should use it</td>
+</tr>
+<tr>
+<td data-label="Field">prompt</td>
+<td data-label="What it sets">How it behaves</td>
+</tr>
+<tr>
+<td data-label="Field">tools</td>
+<td data-label="What it sets">Only the tools it needs</td>
+</tr>
+<tr>
+<td data-label="Field">model</td>
+<td data-label="What it sets">Optional: a cheaper model for simple work</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>A subagent inherits nothing.</strong> It sees neither the coordinator's conversation nor other subagents' findings. So its prompt must hold:</p>
+<ul>
+<li>the goal and the quality bar (&quot;find the top 3, with sources&quot;);</li>
+<li>the facts it needs;</li>
+<li>complete, structured prior findings, not a one-line summary.</li>
+</ul>
+<p>Give a goal, not step-by-step directions: the subagent has its own loop.</p>
+<h2>Step 4. When a rule must always hold</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Way</th>
+<th>What you get</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Way">Prompt</td>
+<td data-label="What you get">Probable compliance: usually holds</td>
+</tr>
+<tr>
+<td data-label="Way">Code or hook</td>
+<td data-label="What you get">Guaranteed compliance: always holds</td>
+</tr>
+</tbody>
+</table></div>
+<p>Ask yourself: what happens if Claude ignores this rule once? If the harm is serious (payment without an identity check, a refund over the limit), it is a rule for code.</p>
+<ul>
+<li><strong>Prerequisite gate</strong>: code blocks an action until a required step is done. No refund until identity is verified.</li>
+<li><strong>PreToolUse hook</strong>: fires before a tool call and can allow it, modify the input or block it. Canonical example: block any refund over $500 and route it to a human.</li>
+<li><strong>PostToolUse hook</strong>: fires after the call. In the course it is used to transform the result before Claude sees it (normalize timestamps) and for logging.</li>
+</ul>
+<p><strong>A handoff to a human</strong> carries a structured summary: the customer, the issue, what has been done and the recommended action. The human should not have to re-read everything.</p>
+<h2>Step 5. How to decompose a task</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Situation</th>
+<th>What to pick</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Situation">Steps cannot be listed upfront (research, debugging)</td>
+<td data-label="What to pick">Adaptive decomposition and <strong>orchestrator-workers</strong></td>
+</tr>
+<tr>
+<td data-label="Situation">Steps are known and depend on each other</td>
+<td data-label="What to pick">A sequential chain, <strong>prompt chaining</strong></td>
+</tr>
+<tr>
+<td data-label="Situation">Steps are known and independent</td>
+<td data-label="What to pick">Parallel</td>
+</tr>
+</tbody>
+</table></div>
+<p>A code-review example: per-file passes in parallel, then one cross-file pass for how the files fit together.</p>
+<h2>Step 6. Sessions</h2>
+<ul>
+<li><code>--resume</code> reopens a specific saved session, <code>--continue</code> the most recent one. The agent keeps its whole prior context.</li>
+<li><strong>The stale-transcript trap:</strong> a resumed session still holds old tool results. If files changed, Claude will act on stale data with confidence.</li>
+<li><strong>fork_session</strong> copies a session for an experiment. Pattern: one stable base session, a fork per investigation, throw the fork away afterwards.</li>
+<li>If the session is stale, do not resume it: start a fresh one with a short summary of the key facts.</li>
+</ul>
+<div class="remember"><h2>What to remember for the exam</h2>
+<ul>
+<li><code>tool_use</code> means keep looping, <code>end_turn</code> means stop.</li>
+<li>&quot;Must never break&quot; means a hook or code, not a prompt.</li>
+<li>Fixed known steps: prompt chaining. A coordinator directing workers: orchestrator-workers.</li>
+<li>A subagent inherits nothing: put everything it needs into its prompt.</li>
+<li>Stale session: summarize and start fresh.</li>
+</ul>
+</div><h2>Check yourself</h2>
+<ol>
+<li>What does your code do when <code>stop_reason</code> is <code>tool_use</code>?</li>
+<li>Does a subagent see the coordinator's conversation?</li>
+<li>How do you guarantee that no refund goes through without an identity check?</li>
+<li>When do you pick orchestrator-workers over prompt chaining?</li>
+<li>Why is <code>--resume</code> risky after files have changed?</li>
+</ol>
+<details>
+<summary>Answers</summary>
+<ol>
+<li>Runs the tool, sends back a <code>tool_result</code> and calls the model again.</li>
+<li>No. The coordinator writes everything it needs into its prompt.</li>
+<li>A prerequisite gate in code or a PreToolUse hook.</li>
+<li>When the steps cannot be listed upfront.</li>
+<li>Old tool results: the model acts on stale data with confidence.</li>
+</ol>
+</details>
+
+<nav class="pager"><a href="8-effort-budgets-sandbox-hooks-simple-en.html"><small>← Назад</small>Lecture 8: effort, task budget, preserved thinking, sandbox and hooks</a><a href="10-tool-design-and-mcp-simple-en.html"><small>Далі →</small>Lecture 10: tool design and MCP (domain 2)</a></nav><nav class="tools"><a href="../../claude-hub.html">← Claude General</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="9-agentic-architecture-simple.html">🌐 Читати українською</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "../../claude-hub.html"; });
+}
+</script>
+</body>
+</html>

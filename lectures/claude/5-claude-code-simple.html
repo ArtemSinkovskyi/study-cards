@@ -84,11 +84,17 @@
   nav.top { margin-bottom:.5rem; font-size:.9rem; }
   ul.list { list-style:none; padding:0; }
   ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+
+  nav.bar { display:flex; flex-wrap:wrap; gap:.5rem; margin:0 0 1rem; }
+  nav.bar a, nav.tools a { flex:1 1 auto; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.55rem .8rem; text-decoration:none; font-size:.9rem; }
+  nav.bar a.lang, nav.tools a.lang { background:#24466b; color:#fff; border-color:#24466b; }
+  nav.tools { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.8rem; }
+  nav.pager a small { display:block; color:#6b6b70; font-size:.75rem; }
 </style>
 </head>
 <body>
 <main>
-<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<nav class="bar"><a href="../../claude-hub.html">← Claude General</a><a href="index.html">☰ Усі теми</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="5-claude-code-simple-en.html">🌐 Read in English</a></nav>
 <h1>Лекція 5: Claude Code</h1>
 <blockquote>
 <p>Спрощена версія. Повна: ../5-claude-code-memory-hooks-skills-permissions-subagents.md. Деталі, яких тут нема (усі події hooks, всі ключі налаштувань), дивіться там.</p>
@@ -122,7 +128,7 @@
 <li>лише факти, потрібні в кожній сесії. Покрокові процедури краще в skill, а частину коду в rule з <code>paths</code>.</li>
 </ul>
 <p>Де лежить: <code>~/.claude/CLAUDE.md</code> (для вас), <code>./CLAUDE.md</code> (для проєкту), <code>./CLAUDE.local.md</code> (особисте, у <code>.gitignore</code>).</p>
-<p>Усі знайдені файли <strong>додаються разом</strong>, а не перекривають один одного. Файли в підкаталогах вантажаться, коли Claude торкається файлів там.</p>
+<p>Усі знайдені файли <strong>додаються разом</strong>, а не перекривають один одного. При конфлікті перемагає конкретніший рівень: у вас 2 пробіли, у проєкті 4, діє 4. Файли в підкаталогах вантажаться, коли Claude торкається файлів там. Докладніше в лекції 11.</p>
 <h2>Крок 2. AGENTS.md</h2>
 <p>Загальний формат інструкцій для різних агентів. Правило читання:</p>
 <div class="tw"><table class="two">
@@ -176,7 +182,7 @@
 </tr>
 <tr>
 <td data-label="Режим"><code>plan</code></td>
-<td data-label="Що робить">Лише читає й планує, без змін</td>
+<td data-label="Що робить">Лише читає й планує, Write і Edit заблоковані до схвалення. Вмикається Shift+Tab двічі, <code>/plan</code> чи <code>--permission-mode plan</code></td>
 </tr>
 <tr>
 <td data-label="Режим"><code>auto</code></td>
@@ -224,7 +230,7 @@
 <tr>
 <td data-label="Подія"><code>PostToolUse</code></td>
 <td data-label="Коли"><strong>Після</strong> інструмента</td>
-<td data-label="Що можна">Нічого скасувати (вже виконано)</td>
+<td data-label="Що можна">Скасувати не можна (вже виконано). За курсом: обробити результат для Claude, логування</td>
 </tr>
 <tr>
 <td data-label="Подія"><code>UserPromptSubmit</code></td>
@@ -284,6 +290,8 @@
 <li>Дуже довгу процедуру винесіть із CLAUDE.md у skill: вона не коштує контексту, доки не потрібна.</li>
 <li><code>disable-model-invocation: true</code>: skill можете запустити лише ви (для деплою).</li>
 <li><code>context: fork</code>: skill виконується в окремому субагенті.</li>
+<li><code>allowed-tools</code> дозволяє перелічені інструменти без запиту, але <strong>не блокує інших</strong>.</li>
+<li>Slash-команди (<code>.claude/commands/*.md</code>, <code>$ARGUMENTS</code>) тепер злиті з навичками. Однакові імена: перемагає навичка (лекція 11).</li>
 </ul>
 <h2>Крок 7. Субагенти</h2>
 <p><strong>Субагент</strong> це помічник з окремим вікном контексту.</p>
@@ -374,7 +382,7 @@
 <hr />
 <p><em>Повна версія:</em> 5-claude-code-memory-hooks-skills-permissions-subagents.md.</p>
 
-<nav class="pager"><a href="4-prompts-simple.html">← Лекція 4</a><a href="6-context-and-cache-simple.html">Лекція 6 →</a></nav>
+<nav class="pager"><a href="4-prompts-simple.html"><small>← Назад</small>Лекція 4: як писати промпти й перевіряти їх</a><a href="6-context-and-cache-simple.html"><small>Далі →</small>Лекція 6: контекст, кеш і токени</a></nav><nav class="tools"><a href="../../claude-hub.html">← Claude General</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="5-claude-code-simple-en.html">🌐 Read in English</a></nav>
 </main>
 <script>
 const tg = window.Telegram && window.Telegram.WebApp;
@@ -382,7 +390,7 @@ if (tg) {
   tg.ready();
   tg.expand();
   tg.BackButton.show();
-  tg.BackButton.onClick(() => { location.href = "index.html"; });
+  tg.BackButton.onClick(() => { location.href = "../../claude-hub.html"; });
 }
 </script>
 </body>

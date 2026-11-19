@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 13: контекст і надійність (домен 5)</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+
+  nav.bar { display:flex; flex-wrap:wrap; gap:.5rem; margin:0 0 1rem; }
+  nav.bar a, nav.tools a { flex:1 1 auto; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.55rem .8rem; text-decoration:none; font-size:.9rem; }
+  nav.bar a.lang, nav.tools a.lang { background:#24466b; color:#fff; border-color:#24466b; }
+  nav.tools { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.8rem; }
+  nav.pager a small { display:block; color:#6b6b70; font-size:.75rem; }
+</style>
+</head>
+<body>
+<main>
+<nav class="bar"><a href="../../claude-hub.html">← Claude General</a><a href="index.html">☰ Усі теми</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="13-context-and-reliability-simple-en.html">🌐 Read in English</a></nav>
+<h1>Лекція 13: контекст і надійність (домен 5)</h1>
+<blockquote>
+<p>За курсом до іспиту, домен 5: Context Management &amp; Reliability. Картки групи «Надійність і контекст», тест «Домен 5». Кеш, compaction і context editing у лекціях 6 і 7.</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>Витягти головне, зберегти, решту обрізати.</strong> Цей принцип працює і для довгої розмови, і для великого коду. Друга половина домену про чесність: коли зупинитись і покликати людину, як повідомляти про збої і звідки взявся кожен факт.</p>
+<h2>Крок 1. Чому довгі розмови гіршають</h2>
+<ul>
+<li>Вікно контексту скінченне. Коли воно заповнюється, точність падає: це <strong>context rot</strong>.</li>
+<li>Модель найкраще бачить <strong>початок і кінець</strong>. Факт посередині може загубитись: це <strong>lost in the middle</strong>.</li>
+</ul>
+<p>Що робити:</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Прийом</th>
+<th>Суть</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Прийом">Обрізати старі виводи інструментів</td>
+<td data-label="Суть">Висновок лишити, сирий вивід на 2 000 рядків прибрати</td>
+</tr>
+<tr>
+<td data-label="Прийом">Підсумовувати старі ходи</td>
+<td data-label="Суть">Так робить <code>/compact</code>. Кажіть, що має вціліти: поганий підсумок мовчки губить деталь</td>
+</tr>
+<tr>
+<td data-label="Прийом"><strong>Case-facts block</strong></td>
+<td data-label="Суть">Короткий блок: клієнт, проблема, рішення. Щоходу додавати в <strong>кінець</strong> промпту, де увага найвища</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Крок 2. Великий код</h2>
+<p>Читання великого коду заповнює вікно так само швидко. Інструменти:</p>
+<ul>
+<li><strong>Explore subagent:</strong> важке читання в окремому контексті, назад приходять лише висновки (лекція 11).</li>
+<li><strong>Scratchpad-файли:</strong> записуйте знахідки на диск («auth у auth/, баг у login()») і перечитуйте лише потрібну нотатку.</li>
+<li><strong><code>/compact</code>:</strong> запускайте завчасно, приблизно на 70-75% заповнення, у природній паузі, а не коли змусить ліміт.</li>
+<li><strong>Crash-recovery manifest:</strong> файл із задачею, тим, що зроблено, і наступними кроками. Рефакторинг упав на 40-му файлі: нова сесія читає маніфест і продовжує, а не починає з першого.</li>
+</ul>
+<h2>Крок 3. Коли кликати людину</h2>
+<p>Впевнена неправильна дія гірша за питання. Агент, що знає свої межі, працює правильно.</p>
+<p>Тригери ескалації:</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Тригер</th>
+<th>Приклад</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Тригер">Низька впевненість</td>
+<td data-label="Приклад">Модель не певна, що діяти правильно</td>
+</tr>
+<tr>
+<td data-label="Тригер">Високі ставки</td>
+<td data-label="Приклад">Гроші, безпека, юридичні питання</td>
+</tr>
+<tr>
+<td data-label="Тригер">Прогалина в політиці</td>
+<td data-label="Приклад">Жодне правило не покриває випадок. <strong>Не вигадувати політику</strong></td>
+</tr>
+<tr>
+<td data-label="Тригер">Явне прохання</td>
+<td data-label="Приклад">«Хочу поговорити з людиною»: передати одразу, без спроб відмовити</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Кілька збігів</strong> це інше. Двоє клієнтів Sharma чи два підходящі замовлення: поставте уточнювальне питання користувачу («Ви мали на увазі A чи B?»). Це уточнення, а не передача людині.</p>
+<h2>Крок 4. Збої в мультиагентній системі</h2>
+<p>Найгірший збій тихий: субагент нічого не повернув, координатор цього не помітив і впевнено видав неповний звіт.</p>
+<p>Субагент повертає координатору <strong>структуровану помилку</strong> (той самий формат, що в лекції 10: <code>isError</code>, категорія):</p>
+<ul>
+<li>що зламалось і чому;</li>
+<li>тип збою;</li>
+<li>часткові результати («дістав 2 з 5 джерел»).</li>
+</ul>
+<p>Розрізняйте <strong>недоступне джерело</strong> (справжній збій, можна повторити) і <strong>порожній результат</strong> (валідна відповідь, не повторювати).</p>
+<p>Що робить координатор:</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Ситуація</th>
+<th>Дія</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Ситуація">Тимчасовий збій (таймаут)</td>
+<td data-label="Дія">Повторити</td>
+</tr>
+<tr>
+<td data-label="Ситуація">Некритична частина</td>
+<td data-label="Дія">Пропустити з позначкою</td>
+</tr>
+<tr>
+<td data-label="Ситуація">Критична частина</td>
+<td data-label="Дія">Ескалювати людині</td>
+</tr>
+</tbody>
+</table></div>
+<p>У звіті чесно сказати, чого бракує: «Усе зібрано, крім новин: джерело було недоступне».</p>
+<h2>Крок 5. Людська перевірка й впевненість</h2>
+<p>Перевіряти все неможливо, не перевіряти нічого ризиковано. Перевіряйте те, що найімовірніше хибне.</p>
+<ul>
+<li><strong>Впевненість на кожне поле</strong>, а не на весь документ: надрукований номер полісу певний, рукописна сума ні. Людині йде лише сумнівне поле.</li>
+<li><strong>Маршрутизація:</strong> висока впевненість приймається автоматично, низька йде людині.</li>
+<li><strong>Stratified sampling:</strong> вибірково перевіряйте всі рівні впевненості, а не лише низький. Інакше не зловите випадків, коли модель впевнено неправа.</li>
+<li><strong>Точність за типами документів і полями:</strong> рукописні форми частіше хибні, поле total слабке? Посилюйте перевірку саме там і послаблюйте на полях, що стабільно правильні.</li>
+</ul>
+<h2>Крок 6. Джерела</h2>
+<p>Коли зливаєш десять джерел у гладкий текст, губиться, звідки взявся кожен факт, і вигадку вже не відрізнити від знахідки.</p>
+<ul>
+<li><strong>Прив'язка твердження до джерела:</strong> кожен факт зберігає своє джерело, як цитата.</li>
+<li><strong>Суперечності показувати:</strong> обидві версії з джерелами, без тихого вибору й без усереднення. Сумнівне позначати.</li>
+<li><strong>Дата факту (temporal framing):</strong> цифра 2019 року і цифра 2026 року не однаково актуальні. Старе, подане як поточне, тихо бреше.</li>
+</ul>
+<div class="remember"><h2>Що запам'ятати на іспит</h2>
+<ul>
+<li>Lost in the middle: ключові факти в case-facts block у кінці промпту.</li>
+<li>Витягти, зберегти, обрізати. Для коду: Explore subagent, scratchpad, <code>/compact</code> на 70-75%, маніфест.</li>
+<li>Ескалація: низька впевненість, високі ставки, прогалина в політиці, явне прохання про людину.</li>
+<li>Кілька збігів: уточнювальне питання користувачу.</li>
+<li>Субагент ніколи не мовчить про збій. Порожньо не означає помилка.</li>
+<li>Впевненість по полях, stratified sampling, джерело й дата для кожного факту.</li>
+</ul>
+</div><h2>Перевірте себе</h2>
+<ol>
+<li>Де тримати ключові факти в довгій розмові?</li>
+<li>Коли запускати <code>/compact</code>?</li>
+<li>Що робити, якщо жодне правило не покриває випадок?</li>
+<li>Що повертає субагент, який дістав 2 з 5 джерел?</li>
+<li>Чому не можна перевіряти лише результати з низькою впевненістю?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>У case-facts block у кінці промпту.</li>
+<li>Завчасно, приблизно на 70-75% заповнення.</li>
+<li>Ескалювати людині, а не вигадувати правило.</li>
+<li>Структуровану помилку з типом збою і частковими результатами.</li>
+<li>Не зловите впевнених помилок.</li>
+</ol>
+</details>
+
+<nav class="pager"><a href="12-prompts-and-structured-output-simple.html"><small>← Назад</small>Лекція 12: промпти, структурований вивід і рев&#x27;ю (домен 4)</a><span></span></nav><nav class="tools"><a href="../../claude-hub.html">← Claude General</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="13-context-and-reliability-simple-en.html">🌐 Read in English</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "../../claude-hub.html"; });
+}
+</script>
+</body>
+</html>

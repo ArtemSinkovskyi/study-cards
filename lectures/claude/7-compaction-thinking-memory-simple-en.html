@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 7: compaction, thinking and memory</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+
+  nav.bar { display:flex; flex-wrap:wrap; gap:.5rem; margin:0 0 1rem; }
+  nav.bar a, nav.tools a { flex:1 1 auto; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.55rem .8rem; text-decoration:none; font-size:.9rem; }
+  nav.bar a.lang, nav.tools a.lang { background:#24466b; color:#fff; border-color:#24466b; }
+  nav.tools { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.8rem; }
+  nav.pager a small { display:block; color:#6b6b70; font-size:.75rem; }
+</style>
+</head>
+<body>
+<main>
+<nav class="bar"><a href="../../claude-hub.html">← Claude General</a><a href="index.html">☰ Усі теми</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="7-compaction-thinking-memory-simple.html">🌐 Читати українською</a></nav>
+<h1>Lecture 7: compaction, thinking and memory</h1>
+<blockquote>
+<p>Simplified version. The full lecture exists in Ukrainian only.</p>
+</blockquote>
+<h2>The main idea</h2>
+<p><strong>A long conversation does not fit in the window, so the old part is replaced by a short summary. The model's thinking has strict rules about how it is sent back. And memory keeps what must survive the summary.</strong></p>
+<h2>Why it is designed this way</h2>
+<p>A long conversation does not fit in the context, so the old part is squeezed into a summary (compaction), and what matters is kept in external memory.</p>
+<h2>Part 1. Compaction</h2>
+<p>The server writes the summary of the old part itself; you write no summarizing code.</p>
+<p>There are <strong>two modes</strong>:</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>On demand</th>
+<th>By threshold</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="">Who decides when</td>
+<td data-label="On demand">You</td>
+<td data-label="By threshold">The API, when the input reaches the threshold</td>
+</tr>
+<tr>
+<td data-label="">How it is enabled</td>
+<td data-label="On demand">The top-level <code>compaction</code> parameter</td>
+<td data-label="By threshold">The <code>compact_20260112</code> edit in <code>context_management</code></td>
+</tr>
+<tr>
+<td data-label="">Beta header</td>
+<td data-label="On demand"><code>compact-2026-09-04</code></td>
+<td data-label="By threshold"><code>compact-2026-01-12</code></td>
+</tr>
+<tr>
+<td data-label="">Where the summary block goes</td>
+<td data-label="On demand"><strong>First</strong> in <code>messages</code></td>
+<td data-label="By threshold">After the summarized part; the API drops the old part itself</td>
+</tr>
+</tbody>
+</table></div>
+<p>The documentation recommends <strong>on-demand mode</strong> where it is available. Both are in beta.</p>
+<h3>On-demand mode</h3>
+<ol>
+<li>Send the conversation with <code>&quot;compaction&quot;: {&quot;type&quot;: &quot;summarize&quot;}</code>.</li>
+<li>The reply: <strong>one <code>compaction</code> block</strong> and <code>stop_reason: &quot;compaction&quot;</code>. There is no model answer.</li>
+<li>Put this block <strong>first</strong> in <code>messages</code> and <strong>remove the summarized messages</strong>.</li>
+<li>Send the block <strong>exactly as received</strong>, with its signature. Exactly one block per request.</li>
+</ol>
+<p>Two mistakes that produce no error message:</p>
+<ul>
+<li>the summarized messages stayed <strong>after</strong> the block: the API sends them to the model again;</li>
+<li>the block was <strong>not added</strong> to the next request: the model does not see the summary.</li>
+</ul>
+<p>If the summarized messages stayed <strong>before</strong> the block, you get 400.</p>
+<p>More rules:</p>
+<ul>
+<li><code>compaction</code> and <code>context_management</code> <strong>cannot</strong> be in the same request;</li>
+<li>your own summary prompt: <code>instructions</code> up to <strong>16,384 characters</strong>; it <strong>fully replaces</strong> the default one. Say what to keep and tell it <strong>not to call tools</strong>;</li>
+<li>if no summary was produced, the reply is still <strong>200 with empty content</strong>, so check <code>stop_reason</code>;</li>
+<li>images, documents, uploads and fetched URLs in the summarized part <strong>disappear</strong>.</li>
+</ul>
+<h3>Threshold mode</h3>
+<ul>
+<li>Default threshold <strong>150,000</strong> input tokens, minimum <strong>50,000</strong>.</li>
+<li>The block arrives at the start of the reply; append the full <code>response.content</code> together with it.</li>
+<li>If the request has <code>tools</code>, the model sometimes calls a tool instead of summarizing, and the block has <code>content: null</code>. Then <strong>forbid tool calls</strong> in <code>instructions</code>.</li>
+<li>You can stop after the summary (<code>pause_after_compaction</code>) to keep the last messages.</li>
+</ul>
+<h3>Cost</h3>
+<p>Summarizing costs money too. <strong>Sum <code>usage.iterations</code></strong>, not the top-level <code>input_tokens</code> and <code>output_tokens</code> (they do not include compaction).</p>
+<h2>Part 2. Thinking</h2>
+<p>New models have <strong>adaptive thinking</strong>: the model decides whether and how much to think. A <code>thinking</code> block comes before the text and has a <code>signature</code>: an encrypted copy of the full thinking.</p>
+<h3>How to show thinking: display</h3>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Value</th>
+<th>What you get</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Value"><code>summarized</code></td>
+<td data-label="What you get">A short summary of the thinking is visible</td>
+</tr>
+<tr>
+<td data-label="Value"><code>omitted</code></td>
+<td data-label="What you get">The block arrives empty, the signature stays (the default on Claude 5 models and newer)</td>
+</tr>
+<tr>
+<td data-label="Value"><code>updates</code> (beta)</td>
+<td data-label="What you get">Short progress updates between calls</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>omitted</code> gives <strong>lower latency to the first text token, at the same cost</strong>. You pay for the <strong>full</strong> generated thinking, not the visible summary.</p>
+<h3>What you cannot do</h3>
+<ul>
+<li><code>thinking: enabled</code> with <code>budget_tokens</code> on new models (Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable, Mythos, Opus 5, Sonnet 5, Opus 4.8 and 4.7) returns <strong>400</strong>.</li>
+<li>You cannot switch thinking mode <strong>in the middle of a turn with tool calls</strong>: the API silently turns thinking off for that request. Switch between turns.</li>
+<li><strong>From API version 2026-10-21</strong> any value of <code>temperature</code>, <code>top_p</code>, <code>top_k</code> returns 400 on every model.</li>
+</ul>
+<h3>How to send blocks back</h3>
+<ul>
+<li>Within a turn with tools, thinking blocks <strong>must</strong> be sent back unchanged.</li>
+<li>A modified block returns 400.</li>
+<li>There is also <code>redacted_thinking</code>: encrypted blocks with no text; they are also sent back unchanged. A typical bug: a <code>block.type == &quot;thinking&quot;</code> filter silently drops them and breaks the protocol.</li>
+</ul>
+<h2>Part 3. The memory tool</h2>
+<p>A tool Claude uses to save and read files between conversations.</p>
+<p>It is a <strong>client tool</strong>: Claude only asks for an operation, and your application performs it on storage you control.</p>
+<ul>
+<li>Files live in the <code>/memories</code> directory (your code maps it onto real storage).</li>
+<li>Commands: <code>view</code>, <code>create</code>, <code>str_replace</code>, <code>insert</code>, <code>delete</code>, <code>rename</code>.</li>
+<li>The root <code>/memories</code> <strong>cannot</strong> be deleted or renamed.</li>
+</ul>
+<p><strong>Security is on you.</strong> A path like <code>/memories/../../secrets.env</code> escapes the directory (path traversal). Check every path: it starts with <code>/memories</code>, canonicalise it, reject <code>../</code> and <code>%2e%2e%2f</code>.</p>
+<p>Memory is combined with compaction: the summary keeps the general picture, and memory keeps everything that <strong>must</strong> survive the summary.</p>
+<p><strong>A multi-session pattern:</strong> the first session creates a progress log and a checklist, each next session starts by reading them and updates the log at the end. Mark a feature done only after an end-to-end check.</p>
+<h2>Glossary</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Term</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Term"><strong>Compaction block</strong></td>
+<td data-label="What it is">a block with a summary that replaces the old part of the conversation</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>Thinking</strong></td>
+<td data-label="What it is">the model's reasoning before the answer</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>Adaptive thinking</strong></td>
+<td data-label="What it is">the model chooses how deeply to think</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>Memory tool</strong></td>
+<td data-label="What it is">a tool that keeps notes in files between conversations</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>Client tool</strong></td>
+<td data-label="What it is">run by your code; security is on you</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>Compaction instructions</strong></td>
+<td data-label="What it is">a hint about what exactly to keep in the summary</td>
+</tr>
+</tbody>
+</table></div>
+<h2>🖼 Схема: Claude: compaction, thinking, memory</h2><div class="dg"><div class="dtitle">Compaction: два режими</div><div class="tw"><table><thead><tr><th></th><th>За запитом</th><th>За порогом</th></tr></thead><tbody><tr><td>Хто вирішує</td><td>ви</td><td>API, коли вхід сягає порогу</td></tr><tr><td>Як вмикається</td><td>верхній параметр compaction</td><td>compact_20260112 у context_management</td></tr><tr><td>Beta-заголовок</td><td>compact-2026-09-04</td><td>compact-2026-01-12</td></tr><tr><td>Блок підсумку</td><td>першим у messages</td><td>після підсумованого</td></tr></tbody></table></div><div class="dnote">Документація радить режим за запитом, де він доступний. Поріг за замовчуванням 150 000 токенів, мінімум 50 000.</div><div class="dtitle">За запитом: чотири кроки</div><div class="dflow"><div class="dbox aws">1. Надсилаєте розмову з compaction: summarize</div><div class="darrow">↓</div><div class="dbox yellow">2. Відповідь: один блок compaction і stop_reason compaction</div><div class="darrow">↓</div><div class="dbox blue">3. Блок ставите першим у messages, підсумовані повідомлення прибираєте</div><div class="darrow">↓</div><div class="dbox green">4. Блок шлете точно як отримали, один на запит</div></div><div class="dcols"><div class="dcol red"><b>Тихі помилки</b><ul><li>підсумовані повідомлення лишились після блока</li><li>блок не додали в наступний запит</li></ul></div><div class="dcol gray"><b>Одразу 400</b><ul><li>підсумовані повідомлення лишились перед блоком</li><li>compaction разом з context_management</li></ul></div></div><div class="dtitle">Thinking: як показувати (display)</div><div class="dgroup blue"><b>display</b><div class="dkids"><div class="dbox blue">summarized: видно короткий підсумок</div><div class="dbox blue">omitted: порожній блок, підпис лишається, менше затримки, вартість та сама; на Claude 5+ це типове значення</div><div class="dbox blue">updates (beta): оновлення прогресу між викликами</div></div></div><div class="dcols"><div class="dcol red"><b>Не можна</b><ul><li>thinking enabled з budget_tokens на нових моделях: 400</li><li>перемикати thinking посеред ходу з інструментами</li><li>temperature, top_p, top_k з API 2026-10-21: 400</li></ul></div><div class="dcol green"><b>Обов&#x27;язково</b><ul><li>повертати thinking і redacted_thinking без змін</li><li>змінений блок: 400</li></ul></div></div><div class="dtitle">Memory tool</div><div class="dgroup green"><b>Клієнтський: виконує ваш застосунок</b><div class="dkids"><div class="dbox green">каталог /memories</div><div class="dbox green">команди: view, create, str_replace, insert, delete, rename</div><div class="dbox green">безпека на вас: перевіряйте шляхи (path traversal)</div></div></div><div class="dnote">Підсумок зберігає загальне, пам&#x27;ять зберігає те, що має пережити підсумок. Платите за повні згенеровані роздуми, а не за видимий підсумок.</div></div><div class="remember"><h2>What to remember for the exam</h2>
+<ol>
+<li>Two compaction modes: on demand (block first, you remove the summarized part) and by threshold (150,000, minimum 50,000).</li>
+<li>The cost is the sum of <code>usage.iterations</code>.</li>
+<li>No summary still means 200 with empty content: check <code>stop_reason</code>.</li>
+<li><code>display: omitted</code> saves latency, not money.</li>
+<li><code>enabled</code> with <code>budget_tokens</code> on new models returns 400.</li>
+<li>Thinking is not switched in the middle of a turn with tools.</li>
+<li><code>temperature</code> in API version 2026-10-21 returns 400 on all models.</li>
+<li><code>redacted_thinking</code> is also sent back unchanged.</li>
+<li>The memory tool is a client tool: you protect against path traversal.</li>
+</ol>
+</div><h2>Check yourself</h2>
+<ol>
+<li>Where does the <code>compaction</code> block go in on-demand mode?</li>
+<li>How do you calculate the cost with compaction?</li>
+<li>What happens if the summarized messages stayed <strong>after</strong> the block?</li>
+<li>What does <code>display: omitted</code> save?</li>
+<li>What happens if you switch thinking in the middle of a turn with tools?</li>
+<li>Who performs memory tool operations?</li>
+<li>What is the most important check in its handler?</li>
+</ol>
+<details>
+<summary>Answers</summary>
+<ol>
+<li>First in <code>messages</code>; remove the summarized messages.</li>
+<li>The sum of the <code>usage.iterations</code> entries.</li>
+<li>No error; the API sends them to the model again.</li>
+<li>Latency to the first token. The cost is the same.</li>
+<li>The API silently turns thinking off for that request.</li>
+<li>Your application.</li>
+<li>That the path stays inside <code>/memories</code> (canonicalisation, rejecting <code>../</code>).</li>
+</ol>
+</details>
+
+<nav class="pager"><a href="6-context-and-cache-simple-en.html"><small>← Назад</small>Lecture 6: context, caching and tokens</a><a href="8-effort-budgets-sandbox-hooks-simple-en.html"><small>Далі →</small>Lecture 8: effort, task budget, preserved thinking, sandbox and hooks</a></nav><nav class="tools"><a href="../../claude-hub.html">← Claude General</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="7-compaction-thinking-memory-simple.html">🌐 Читати українською</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "../../claude-hub.html"; });
+}
+</script>
+</body>
+</html>

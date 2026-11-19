@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 5: Claude Code</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+
+  nav.bar { display:flex; flex-wrap:wrap; gap:.5rem; margin:0 0 1rem; }
+  nav.bar a, nav.tools a { flex:1 1 auto; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.55rem .8rem; text-decoration:none; font-size:.9rem; }
+  nav.bar a.lang, nav.tools a.lang { background:#24466b; color:#fff; border-color:#24466b; }
+  nav.tools { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.8rem; }
+  nav.pager a small { display:block; color:#6b6b70; font-size:.75rem; }
+</style>
+</head>
+<body>
+<main>
+<nav class="bar"><a href="../../claude-hub.html">← Claude General</a><a href="index.html">☰ Усі теми</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="5-claude-code-simple.html">🌐 Читати українською</a></nav>
+<h1>Lecture 5: Claude Code</h1>
+<blockquote>
+<p>Simplified version. The full lecture exists in Ukrainian only. The exam-course view of Claude Code configuration is in lecture 11.</p>
+</blockquote>
+<h2>The main idea</h2>
+<p><strong>Some things only advise the model; others enforce.</strong> The exam keeps asking about exactly this difference.</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Only advises</th>
+<th>Enforces</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Only advises">CLAUDE.md, rules, skills, auto memory</td>
+<td data-label="Enforces">Permission rules (deny), hooks with exit 2, managed settings, sandbox</td>
+</tr>
+</tbody>
+</table></div>
+<p>For a Spring developer: CLAUDE.md is like a README or Javadoc (people read it, nobody is forced to follow it), while <code>deny</code> and hooks are like Spring Security or a filter (they cannot be broken).</p>
+<p>So the answer to &quot;how do I <strong>guarantee</strong> X&quot; is never &quot;write it in CLAUDE.md&quot;.</p>
+<h2>Why it is designed this way</h2>
+<p>Claude Code runs on your machine and can break things, so there are permissions, hooks and a sandbox: you decide yourself what it may do.</p>
+<h2>Step 1. CLAUDE.md</h2>
+<p>This is the instruction file Claude reads at the start of every session. It is context, not an enforced rule.</p>
+<p>Rules for a good file:</p>
+<ul>
+<li>up to <strong>200 lines</strong>;</li>
+<li>concrete instructions (&quot;Use 2-space indentation&quot;, not &quot;format nicely&quot;);</li>
+<li>only facts needed in every session. Step-by-step procedures belong in a skill, and rules for part of the code in a rule with <code>paths</code>.</li>
+</ul>
+<p>Where it lives: <code>~/.claude/CLAUDE.md</code> (for you), <code>./CLAUDE.md</code> (for the project), <code>./CLAUDE.local.md</code> (personal, in <code>.gitignore</code>).</p>
+<p>All found files <strong>are added together</strong>; they do not override each other. On a conflict the more specific level wins: you say 2 spaces, the project says 4, it is 4. Files in subdirectories load when Claude touches files there. More in lecture 11.</p>
+<h2>Step 2. AGENTS.md</h2>
+<p>A shared instruction format for different agents. The reading rule:</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>In the repository</th>
+<th>Claude reads</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="In the repository">only <code>AGENTS.md</code></td>
+<td data-label="Claude reads"><code>AGENTS.md</code></td>
+</tr>
+<tr>
+<td data-label="In the repository"><code>AGENTS.md</code> and <code>CLAUDE.md</code></td>
+<td data-label="Claude reads">only <code>CLAUDE.md</code></td>
+</tr>
+<tr>
+<td data-label="In the repository">a <code>CLAUDE.md</code> that imports <code>@AGENTS.md</code></td>
+<td data-label="Claude reads">both</td>
+</tr>
+</tbody>
+</table></div>
+<p>That is why in ai-ops <code>CLAUDE.md</code> simply contains <code>@AGENTS.md</code>.</p>
+<h2>Step 3. Rules and auto memory</h2>
+<ul>
+<li><strong>Rules</strong> (<code>.claude/rules/</code>): separate files per topic. With <code>paths</code> they load only when Claude works on files matching the pattern.</li>
+<li><strong>Auto memory:</strong> notes Claude writes itself. The <code>MEMORY.md</code> index loads at startup (<strong>the first 200 lines or 25 KB</strong>), topic files only on demand. The memory is local to the machine.</li>
+</ul>
+<h2>Step 4. Permissions</h2>
+<p>Three kinds of rules: <strong>deny, ask, allow</strong>. They are checked in exactly that order, and <strong>the first match decides</strong>.</p>
+<p>Hence the key point: <strong>allow cannot carve an exception out of deny</strong>. If deny has <code>Bash(aws *)</code>, then <code>Bash(aws s3 ls)</code> in allow will not help.</p>
+<p>The rules are enforced by Claude Code itself, not by the model. A prompt or CLAUDE.md cannot change them.</p>
+<h3>Modes</h3>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Mode</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Mode"><code>default</code></td>
+<td data-label="What it does">Asks on first use of a tool</td>
+</tr>
+<tr>
+<td data-label="Mode"><code>acceptEdits</code></td>
+<td data-label="What it does">Accepts file edits on its own</td>
+</tr>
+<tr>
+<td data-label="Mode"><code>plan</code></td>
+<td data-label="What it does">Only reads and plans; Write and Edit are blocked until you approve. Turn it on with Shift+Tab twice, <code>/plan</code> or <code>--permission-mode plan</code></td>
+</tr>
+<tr>
+<td data-label="Mode"><code>auto</code></td>
+<td data-label="What it does">A separate classifier model checks actions</td>
+</tr>
+<tr>
+<td data-label="Mode"><code>dontAsk</code></td>
+<td data-label="What it does">Denies everything that would prompt (for CI)</td>
+</tr>
+<tr>
+<td data-label="Mode"><code>bypassPermissions</code></td>
+<td data-label="What it does">No prompts; only for isolated environments</td>
+</tr>
+</tbody>
+</table></div>
+<p>In <code>bypassPermissions</code> <strong>deny rules apply</strong> and <strong>allow rules do not</strong>.</p>
+<h3>Bash rules</h3>
+<ul>
+<li>Put the star <strong>after the subcommand</strong>: <code>Bash(git log *)</code> allows only <code>git log</code>, while <code>Bash(git *)</code> allows every git command.</li>
+<li>A compound command (<code>a &amp;&amp; b</code>) runs without a prompt only if <strong>every part</strong> is allowed.</li>
+<li><strong>A Bash rule is not a security boundary.</strong> <code>Bash(curl *)</code> will not stop <code>sh -c 'curl ...'</code> or <code>/usr/bin/curl</code>. For that you need the sandbox or a hook.</li>
+</ul>
+<h3>File rules</h3>
+<ul>
+<li><code>Read(./.env)</code> in deny blocks reading, and also Edit and Write on that path.</li>
+<li><code>Grep(...)</code>, <code>Glob(...)</code> and <code>Write(...)</code> rules with a path <strong>do nothing</strong>: write <code>Read(...)</code> or <code>Edit(...)</code>.</li>
+<li>A <code>.claudeignore</code> file <strong>does nothing</strong>: move it into a <code>Read</code> deny.</li>
+</ul>
+<h2>Step 5. Hooks</h2>
+<p>A <strong>hook</strong> is a script (or a prompt) that Claude Code runs on an event. The most important ones:</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Event</th>
+<th>When</th>
+<th>What it can do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Event"><code>PreToolUse</code></td>
+<td data-label="When"><strong>Before</strong> a tool</td>
+<td data-label="What it can do">Block it</td>
+</tr>
+<tr>
+<td data-label="Event"><code>PostToolUse</code></td>
+<td data-label="When"><strong>After</strong> a tool</td>
+<td data-label="What it can do">Cannot undo it (already done). In the course: shape the result for Claude, logging</td>
+</tr>
+<tr>
+<td data-label="Event"><code>UserPromptSubmit</code></td>
+<td data-label="When">Before the prompt is processed</td>
+<td data-label="What it can do">Block it or add context</td>
+</tr>
+<tr>
+<td data-label="Event"><code>Stop</code></td>
+<td data-label="When">When Claude finished answering</td>
+<td data-label="What it can do">Keep it from stopping</td>
+</tr>
+<tr>
+<td data-label="Event"><code>SessionStart</code></td>
+<td data-label="When">At session start (with <code>compact</code>, after compaction)</td>
+<td data-label="What it can do">Add context</td>
+</tr>
+</tbody>
+</table></div>
+<p>For a Spring developer <code>PreToolUse</code> is like <code>HandlerInterceptor.preHandle</code>: it can stop the call from going further.</p>
+<h3>Exit codes</h3>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Code</th>
+<th>What happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Code"><code>0</code></td>
+<td data-label="What happens">Success</td>
+</tr>
+<tr>
+<td data-label="Code"><code>2</code></td>
+<td data-label="What happens"><strong>Blocks</strong> the action (stderr goes to the model as the reason)</td>
+</tr>
+<tr>
+<td data-label="Code">any other, including <code>1</code></td>
+<td data-label="What happens">Does not block; the action continues</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>2 blocks, 1 does not.</strong></p>
+<h3>What else to know</h3>
+<ul>
+<li>A decision can be returned as JSON in <code>hookSpecificOutput</code> (<code>permissionDecision</code>: <code>allow</code>, <code>deny</code>, <code>ask</code>, <code>defer</code>). A top-level field is <strong>silently ignored</strong>.</li>
+<li><code>deny</code> in a hook applies <strong>even in <code>bypassPermissions</code></strong>.</li>
+<li>Several hooks on one event run in parallel; <strong>the strictest decision wins</strong> (<code>deny</code> &gt; <code>defer</code> &gt; <code>ask</code> &gt; <code>allow</code>).</li>
+<li>A <strong>Stop hook</strong> fires after every reply. After <strong>8 blocks in a row</strong> Claude Code overrides it. The script must check the <code>stop_hook_active</code> field.</li>
+<li>If a hook crashed or timed out, the action <strong>continues</strong> (to block you need <code>onFailure: &quot;block&quot;</code>).</li>
+<li>JSON from a hook does not work if the shell profile prints something first (the output must start with <code>{</code>).</li>
+</ul>
+<h2>Step 6. Skills</h2>
+<p>A <strong>skill</strong> is a folder with <code>SKILL.md</code>: instructions for a specific task.</p>
+<ul>
+<li><strong>The description is always in context</strong>; the full body only when the skill is invoked.</li>
+<li>Move a very long procedure out of CLAUDE.md into a skill: it costs no context until needed.</li>
+<li><code>disable-model-invocation: true</code>: only you can run the skill (for deployment).</li>
+<li><code>context: fork</code>: the skill runs in a separate subagent.</li>
+<li><code>allowed-tools</code> pre-approves the listed tools but <strong>does not block the others</strong>.</li>
+<li>Slash commands (<code>.claude/commands/*.md</code>, <code>$ARGUMENTS</code>) are now merged into skills. On a name clash the skill wins (lecture 11).</li>
+</ul>
+<h2>Step 7. Subagents</h2>
+<p>A <strong>subagent</strong> is a helper with its own context window.</p>
+<p>The main benefit: <strong>context isolation</strong>. It runs a bulky search in its own window and returns only a summary.</p>
+<p>You can limit its tools (<code>tools</code>) and permissions. Built-in ones: <code>Explore</code> (fast read-only search), <code>Plan</code>, <code>general-purpose</code>.</p>
+<p>Default limits: up to 3 levels of nesting, up to 20 at once.</p>
+<h2>Step 8. Settings</h2>
+<p>Priority from highest: <strong>managed</strong>, command line, <strong>local</strong>, <strong>shared project</strong>, <strong>user</strong>. Lists (for example <code>allow</code>) are merged, not overridden. It is like the order of property sources in Spring.</p>
+<p>Managed settings are the organisation's settings that a user cannot bypass.</p>
+<h2>Step 9. Sandbox (briefly)</h2>
+<p>An operating-system boundary around shell commands (Bash, PowerShell, Monitor). <strong>Off by default.</strong> File tools, MCP and hooks are outside it.</p>
+<p>Details in lecture 8.</p>
+<h2>Glossary</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Term</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Term"><strong>CLAUDE.md</strong></td>
+<td data-label="What it is">the instruction file read at session start</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>Rules</strong></td>
+<td data-label="What it is">separate rule files, can apply only to certain paths</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>Auto memory</strong></td>
+<td data-label="What it is">notes Claude Code keeps itself between sessions</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>Permissions</strong></td>
+<td data-label="What it is"><code>deny</code>, <code>ask</code>, <code>allow</code> rules: the first match decides, deny is stronger</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>Hook</strong></td>
+<td data-label="What it is">a command run on an event that guarantees an action</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>Skill</strong></td>
+<td data-label="What it is">an instruction package loaded when needed</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>Subagent</strong></td>
+<td data-label="What it is">a separate agent with an isolated context</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>Sandbox</strong></td>
+<td data-label="What it is">file-system and network limits for commands</td>
+</tr>
+</tbody>
+</table></div>
+<h2>🖼 Схема: Claude Code: дозволи, hooks, налаштування</h2><div class="dg"><div class="dtitle">Радить чи примушує</div><div class="dcols"><div class="dcol yellow"><b>Лише радить</b><ul><li>CLAUDE.md</li><li>rules</li><li>skills</li><li>auto memory</li></ul></div><div class="dcol red"><b>Примусово діє</b><ul><li>deny у дозволах</li><li>hooks з exit 2</li><li>managed settings</li><li>sandbox</li></ul></div></div><div class="dnote">«Як гарантувати X» ніколи не відповідь «напишіть у CLAUDE.md».</div><div class="dtitle">Дозволи: перший збіг вирішує</div><div class="dflow"><div class="dbox red">1. deny</div><div class="darrow">↓</div><div class="dbox yellow">2. ask</div><div class="darrow">↓</div><div class="dbox green">3. allow</div></div><div class="dnote">allow не може зробити виняток із deny. Правила виконує Claude Code, а не модель.</div><div class="dtitle">Режими дозволів</div><div class="dgroup green"><b>Звичайні</b><div class="dkids"><div class="dbox green">default: питає при першому використанні</div><div class="dbox green">acceptEdits: сам приймає редагування файлів</div><div class="dbox green">plan: лише читає й планує</div></div></div><div class="dgroup yellow"><b>Автоматичні</b><div class="dkids"><div class="dbox yellow">auto: модель-класифікатор перевіряє дії</div><div class="dbox yellow">dontAsk: відмовляє в усьому, що питало б (для CI)</div></div></div><div class="dgroup red"><b>Без запитів</b><div class="dkids"><div class="dbox red">bypassPermissions: лише для ізольованих середовищ; deny діють, allow ні</div></div></div><div class="dtitle">Hooks: події</div><div class="tw"><table class="two"><thead><tr><th>Подія</th><th>Що можна</th></tr></thead><tbody><tr><td>PreToolUse</td><td>перед інструментом: заблокувати</td></tr><tr><td>PostToolUse</td><td>після інструмента: нічого скасувати</td></tr><tr><td>UserPromptSubmit</td><td>заблокувати чи додати контекст</td></tr><tr><td>Stop</td><td>не дати Claude зупинитись</td></tr><tr><td>SessionStart</td><td>додати контекст на старті</td></tr></tbody></table></div><div class="dcols"><div class="dcol green"><b>Exit 0</b><ul><li>успіх</li></ul></div><div class="dcol red"><b>Exit 2</b><ul><li>блокує, stderr іде моделі</li></ul></div><div class="dcol gray"><b>Інший, зокрема 1</b><ul><li>не блокує, дія триває</li></ul></div></div><div class="dnote">Кілька hooks на одну подію: найсуворіше рішення виграє (deny, defer, ask, allow). deny у hook діє навіть у bypassPermissions.</div><div class="dtitle">Пріоритет налаштувань</div><div class="dflow"><div class="dbox red">1. managed: налаштування організації</div><div class="darrow">↓</div><div class="dbox yellow">2. командний рядок</div><div class="darrow">↓</div><div class="dbox blue">3. local</div><div class="darrow">↓</div><div class="dbox green">4. shared project</div><div class="darrow">↓</div><div class="dbox gray">5. user</div></div><div class="dnote">Списки (наприклад allow) зливаються, а не перекриваються.</div><div class="dtitle">Де живуть інструкції</div><div class="dgroup blue"><b>CLAUDE.md: усі знайдені додаються разом</b><div class="dkids"><div class="dbox blue">~/.claude/CLAUDE.md: для вас</div><div class="dbox blue">./CLAUDE.md: для проєкту</div><div class="dbox blue">./CLAUDE.local.md: особисте, у .gitignore</div></div></div><div class="dgroup yellow"><b>Інші носії</b><div class="dkids"><div class="dbox yellow">Rules: .claude/rules/, з paths лише для потрібних файлів</div><div class="dbox yellow">Auto memory: MEMORY.md, перші 200 рядків чи 25 КБ</div><div class="dbox yellow">Skills: опис завжди в контексті, тіло за викликом</div><div class="dbox yellow">Субагенти: окреме вікно контексту</div></div></div></div><div class="remember"><h2>What to remember for the exam</h2>
+<ol>
+<li>CLAUDE.md advises. Deny, hooks and managed settings enforce.</li>
+<li>Rule order: deny, ask, allow. Allow does not carve an exception out of deny.</li>
+<li>Exit 2 blocks, exit 1 does not.</li>
+<li><code>deny</code> in a hook and in rules applies even in <code>bypassPermissions</code>.</li>
+<li>A Bash rule is not a security boundary.</li>
+<li><code>MEMORY.md</code> at startup: 200 lines or 25 KB.</li>
+<li>AGENTS.md is read only when there is no CLAUDE.md (or through an import).</li>
+<li>A subagent gives context isolation.</li>
+<li>Stop hook: 8 continuations in a row, check <code>stop_hook_active</code>.</li>
+</ol>
+</div><h2>Check yourself</h2>
+<ol>
+<li>How do you <strong>guarantee</strong> that Claude will not change <code>.env</code>?</li>
+<li>What does a hook with exit code 1 do?</li>
+<li>Which wins: <code>deny Bash(aws *)</code> or <code>allow Bash(aws s3 ls)</code>?</li>
+<li>How much of <code>MEMORY.md</code> loads at startup?</li>
+<li>What is the main benefit of a subagent?</li>
+<li>What part of a skill is always in context?</li>
+</ol>
+<details>
+<summary>Answers</summary>
+<ol>
+<li><code>deny</code> for <code>Read</code> and <code>Edit</code> on <code>.env</code>, or a PreToolUse hook with exit 2.</li>
+<li>It does not block: the action continues.</li>
+<li><code>deny</code>.</li>
+<li>The first 200 lines or 25 KB.</li>
+<li>Context isolation.</li>
+<li>Only the description.</li>
+</ol>
+</details>
+
+<nav class="pager"><a href="4-prompts-simple-en.html"><small>← Назад</small>Lecture 4: how to write prompts and check them</a><a href="6-context-and-cache-simple-en.html"><small>Далі →</small>Lecture 6: context, caching and tokens</a></nav><nav class="tools"><a href="../../claude-hub.html">← Claude General</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="5-claude-code-simple.html">🌐 Читати українською</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "../../claude-hub.html"; });
+}
+</script>
+</body>
+</html>

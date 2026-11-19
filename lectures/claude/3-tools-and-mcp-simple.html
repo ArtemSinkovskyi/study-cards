@@ -84,11 +84,17 @@
   nav.top { margin-bottom:.5rem; font-size:.9rem; }
   ul.list { list-style:none; padding:0; }
   ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+
+  nav.bar { display:flex; flex-wrap:wrap; gap:.5rem; margin:0 0 1rem; }
+  nav.bar a, nav.tools a { flex:1 1 auto; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.55rem .8rem; text-decoration:none; font-size:.9rem; }
+  nav.bar a.lang, nav.tools a.lang { background:#24466b; color:#fff; border-color:#24466b; }
+  nav.tools { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.8rem; }
+  nav.pager a small { display:block; color:#6b6b70; font-size:.75rem; }
 </style>
 </head>
 <body>
 <main>
-<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<nav class="bar"><a href="../../claude-hub.html">← Claude General</a><a href="index.html">☰ Усі теми</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="3-tools-and-mcp-simple-en.html">🌐 Read in English</a></nav>
 <h1>Лекція 3: як описувати інструменти і що таке MCP</h1>
 <blockquote>
 <p>Спрощена версія. Усі факти ті самі, що в повній лекції: ../3-define-tools-handle-results-mcp-connector.md. Рідкісні деталі (повні списки моделей, коди помилок) лишились лише там.</p>
@@ -110,7 +116,7 @@
 <p>Документація радить мінімум 3-4 речення на інструмент. Приклад: «Повертає поточну ціну акції за тікером з NYSE чи NASDAQ, у доларах. Використовуйте, коли питають про поточну ціну. Іншу інформацію про компанію не повертає.» Поганий опис: «Дає ціну акції».</p>
 <h2>Крок 2. Ще чотири поради</h2>
 <ul>
-<li><strong>Менше інструментів, але потужніших.</strong> Один <code>pr</code> з параметром <code>action</code> краще за <code>create_pr</code>, <code>review_pr</code>, <code>merge_pr</code>.</li>
+<li><strong>Менше інструментів, але потужніших.</strong> Документація радить один <code>pr</code> з параметром <code>action</code> замість <code>create_pr</code>, <code>review_pr</code>, <code>merge_pr</code>. Курс до іспиту (лекція 10) ставить акцент інакше: різні дії розбивати (<code>search_flights</code>, <code>book_flight</code> замість <code>handle_travel(action)</code>), а об'єднувати лише кроки, що завжди йдуть разом. Спільне в обох: інструментів не має бути ні десятки дрібних, ні один «на все».</li>
 <li><strong>Префікси в іменах</strong>, коли інструментів багато: <code>github_list_prs</code>, <code>slack_send_message</code>.</li>
 <li><strong>Повертайте з інструмента лише корисні поля.</strong> Довгі відповіді витрачають контекст.</li>
 <li><strong><code>input_examples</code></strong> допомагають для складних входів (кожен приклад має відповідати схемі, інакше 400).</li>
@@ -147,7 +153,9 @@
 <li>На <strong>Opus 5.5, Sonnet 5.5, Fable 5.1 і Mythos 5.1</strong> значення <code>any</code> і <code>tool</code> дають <strong>400</strong>. Там використовуйте <code>auto</code> разом зі <code>strict</code>.</li>
 <li>При <code>any</code> і <code>tool</code> модель <strong>не пише пояснення</strong> перед викликом.</li>
 <li>Зміна <code>tool_choice</code> посеред розмови скидає кеш <strong>повідомлень</strong> (інструменти й system лишаються в кеші).</li>
+<li>За курсом до іспиту <code>any</code> і <code>tool</code> не поєднуються з extended thinking.</li>
 </ol>
+<p>Коли що брати (лекція 10): <code>auto</code> для звичайного асистента, <code>any</code> для структурованого виводу, <code>tool</code> для обов'язкового кроку (завжди <code>save_report</code>), <code>none</code> для відповіді лише текстом.</p>
 <h2>Крок 4. Як повертати результат</h2>
 <p>Три жорсткі правила, порушення яких дає 400:</p>
 <ol>
@@ -269,7 +277,7 @@
 <hr />
 <p><em>Повна версія:</em> 3-define-tools-handle-results-mcp-connector.md.</p>
 
-<nav class="pager"><a href="2-agent-loop-simple.html">← Лекція 2</a><a href="4-prompts-simple.html">Лекція 4 →</a></nav>
+<nav class="pager"><a href="2-agent-loop-simple.html"><small>← Назад</small>Лекція 2: як агент працює з інструментами</a><a href="4-prompts-simple.html"><small>Далі →</small>Лекція 4: як писати промпти й перевіряти їх</a></nav><nav class="tools"><a href="../../claude-hub.html">← Claude General</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="3-tools-and-mcp-simple-en.html">🌐 Read in English</a></nav>
 </main>
 <script>
 const tg = window.Telegram && window.Telegram.WebApp;
@@ -277,7 +285,7 @@ if (tg) {
   tg.ready();
   tg.expand();
   tg.BackButton.show();
-  tg.BackButton.onClick(() => { location.href = "index.html"; });
+  tg.BackButton.onClick(() => { location.href = "../../claude-hub.html"; });
 }
 </script>
 </body>

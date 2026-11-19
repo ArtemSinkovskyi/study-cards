@@ -84,11 +84,17 @@
   nav.top { margin-bottom:.5rem; font-size:.9rem; }
   ul.list { list-style:none; padding:0; }
   ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+
+  nav.bar { display:flex; flex-wrap:wrap; gap:.5rem; margin:0 0 1rem; }
+  nav.bar a, nav.tools a { flex:1 1 auto; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.55rem .8rem; text-decoration:none; font-size:.9rem; }
+  nav.bar a.lang, nav.tools a.lang { background:#24466b; color:#fff; border-color:#24466b; }
+  nav.tools { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.8rem; }
+  nav.pager a small { display:block; color:#6b6b70; font-size:.75rem; }
 </style>
 </head>
 <body>
 <main>
-<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<nav class="bar"><a href="../../claude-hub.html">← Claude General</a><a href="index.html">☰ Усі теми</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="4-prompts-simple-en.html">🌐 Read in English</a></nav>
 <h1>Лекція 4: як писати промпти й перевіряти їх</h1>
 <blockquote>
 <p>Спрощена версія. Повна: ../4-prompting-and-evaluations.md.</p>
@@ -110,7 +116,7 @@
 <ul>
 <li><strong>Будьте чіткими.</strong> Модель як «новий розумний працівник без контексту». Покажіть промпт колезі: якщо він не зрозуміє, модель теж ні.</li>
 <li><strong>Давайте мотивацію.</strong> Не «ніколи не пиши три крапки», а «текст читатиме синтезатор мовлення, який не вміє їх вимовляти». Модель узагальнює з пояснення.</li>
-<li><strong>Дайте приклади.</strong> Найкраще <strong>3-5</strong>, релевантних і <strong>різноманітних</strong>, у тегах <code>&lt;example&gt;</code>.</li>
+<li><strong>Дайте приклади.</strong> Документація радить <strong>3-5</strong>, релевантних і <strong>різноманітних</strong>, у тегах <code>&lt;example&gt;</code>. Курс до іспиту каже «зазвичай 2-5, доки точність росте» і радить додати приклад, де даних нема і відповідь <code>null</code>, щоб модель не вигадувала (лекція 12).</li>
 <li><strong>Розділяйте частини тегами</strong>: <code>&lt;instructions&gt;</code>, <code>&lt;context&gt;</code>, <code>&lt;input&gt;</code>.</li>
 </ul>
 <h2>Крок 3. Довгі документи</h2>
@@ -149,7 +155,7 @@
 <tbody>
 <tr>
 <td data-label="Для чого був prefill">Примусовий формат (JSON)</td>
-<td data-label="Чим замінити">structured outputs; для класифікації інструмент з <code>enum</code></td>
+<td data-label="Чим замінити">structured outputs або інструмент зі схемою і <code>tool_choice</code> any чи tool (лекція 12); для класифікації інструмент з <code>enum</code></td>
 </tr>
 <tr>
 <td data-label="Для чого був prefill">Прибрати вступ «Here is...»</td>
@@ -275,7 +281,7 @@
 <hr />
 <p><em>Повна версія:</em> 4-prompting-and-evaluations.md.</p>
 
-<nav class="pager"><a href="3-tools-and-mcp-simple.html">← Лекція 3</a><a href="5-claude-code-simple.html">Лекція 5 →</a></nav>
+<nav class="pager"><a href="3-tools-and-mcp-simple.html"><small>← Назад</small>Лекція 3: як описувати інструменти і що таке MCP</a><a href="5-claude-code-simple.html"><small>Далі →</small>Лекція 5: Claude Code</a></nav><nav class="tools"><a href="../../claude-hub.html">← Claude General</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="4-prompts-simple-en.html">🌐 Read in English</a></nav>
 </main>
 <script>
 const tg = window.Telegram && window.Telegram.WebApp;
@@ -283,7 +289,7 @@ if (tg) {
   tg.ready();
   tg.expand();
   tg.BackButton.show();
-  tg.BackButton.onClick(() => { location.href = "index.html"; });
+  tg.BackButton.onClick(() => { location.href = "../../claude-hub.html"; });
 }
 </script>
 </body>

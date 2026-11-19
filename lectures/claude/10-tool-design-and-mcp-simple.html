@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Лекція 10: дизайн інструментів і MCP (домен 2)</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+
+  nav.bar { display:flex; flex-wrap:wrap; gap:.5rem; margin:0 0 1rem; }
+  nav.bar a, nav.tools a { flex:1 1 auto; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.55rem .8rem; text-decoration:none; font-size:.9rem; }
+  nav.bar a.lang, nav.tools a.lang { background:#24466b; color:#fff; border-color:#24466b; }
+  nav.tools { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.8rem; }
+  nav.pager a small { display:block; color:#6b6b70; font-size:.75rem; }
+</style>
+</head>
+<body>
+<main>
+<nav class="bar"><a href="../../claude-hub.html">← Claude General</a><a href="index.html">☰ Усі теми</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="10-tool-design-and-mcp-simple-en.html">🌐 Read in English</a></nav>
+<h1>Лекція 10: дизайн інструментів і MCP (домен 2)</h1>
+<blockquote>
+<p>За курсом до іспиту, домен 2: Tool Design &amp; MCP Integration. Картки груп «Інструменти: дизайн і помилки» та «MCP і вбудовані інструменти», тест «Домен 2».</p>
+</blockquote>
+<h2>Головна ідея</h2>
+<p><strong>Модель бачить ваш інструмент лише через назву, опис і помилки, які він повертає.</strong> Погано спроєктований інструмент не падає з помилкою: агент просто тихо поводиться гірше.</p>
+<h2>Крок 1. Опис це механізм вибору</h2>
+<p>Claude не бачить коду функції. Він обирає інструмент за назвою й описом, як покупець за етикеткою на коробці.</p>
+<p>Добрий опис має чотири частини:</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Частина</th>
+<th>Приклад</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Частина">Що робить</td>
+<td data-label="Приклад">«Шукає замовлення клієнта за email»</td>
+</tr>
+<tr>
+<td data-label="Частина">Коли використовувати і коли ні</td>
+<td data-label="Приклад">«Не для пошуку за номером замовлення: для цього get_order_by_id»</td>
+</tr>
+<tr>
+<td data-label="Частина">Кожен параметр простими словами</td>
+<td data-label="Приклад">«email: адреса клієнта, як у профілі»</td>
+</tr>
+<tr>
+<td data-label="Частина">Короткий приклад виклику</td>
+<td data-label="Приклад"><code>search_orders_by_customer(email=&quot;a@b.com&quot;)</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Частину «коли ні» найчастіше пропускають, а саме вона не дає моделі взяти не той інструмент.</p>
+<p><strong>Назви.</strong> <code>getData</code> і <code>fetchData</code> звучать однаково, і модель їх плутає. Краще <code>get_order_by_id</code> і <code>search_orders_by_customer</code>. Перекриття назв і описів одна з головних причин виклику не того інструмента.</p>
+<p><strong>Розбити чи об'єднати.</strong> Різні дії розбивайте: замість <code>handle_travel(action, ...)</code> дайте <code>search_flights</code>, <code>book_flight</code>, <code>cancel_booking</code>. Кроки, що завжди йдуть разом, об'єднуйте. Уникайте обох крайнощів: десятків дрібних інструментів і одного «на все».</p>
+<h2>Крок 2. Помилки, з якими модель може щось зробити</h2>
+<p>«Booking failed» нічого не каже. «Оплата не пройшла: недостатньо коштів, спробуйте інший спосіб» дає моделі наступний крок.</p>
+<ul>
+<li><strong>Повертайте помилку, а не кидайте виняток.</strong> <code>isError: true</code> з поясненням модель бачить і може відреагувати. Виняток стає низькорівневою помилкою протоколу.</li>
+<li><strong>Категорія помилки</strong> (<code>errorCategory</code>) підказує наступний крок:</li>
+</ul>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Категорія</th>
+<th>Що робити моделі</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Категорія">validation</td>
+<td data-label="Що робити моделі">Виправити вхід і повторити</td>
+</tr>
+<tr>
+<td data-label="Категорія">auth / permission</td>
+<td data-label="Що робити моделі">Ескалювати</td>
+</tr>
+<tr>
+<td data-label="Категорія">not_found</td>
+<td data-label="Що робити моделі">Нічого нема, повідомити</td>
+</tr>
+<tr>
+<td data-label="Категорія">rate_limit / transient</td>
+<td data-label="Що робити моделі">Почекати й повторити</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>isRetryable</strong> каже, чи є сенс повторювати: <code>true</code> для transient і rate_limit, <code>false</code> для validation, auth і бізнес-правил. Повернення понад ліміт ніколи не повторюється: відповідь щоразу буде «ні».</li>
+<li><strong>Порожній результат не є помилкою.</strong> <code>isError: false, resultCount: 0</code> означає «нічого не знайдено». Помилка це «не вдалось дістатися бази». Класична пастка: агент повторює успішний порожній запит.</li>
+<li><strong>Текст помилки:</strong> що пробували, що зламалось, що робити далі. Без stack trace: він плутає модель і розкриває внутрішню будову. «no such table: users_v2» замініть на «Запитаний ресурс недоступний».</li>
+</ul>
+<h2>Крок 3. Скільки інструментів і tool_choice</h2>
+<p>Дайте агенту 60 інструментів, і точність вибору впаде. Кожна роль отримує лише свої інструменти: агенту звітів не потрібен інструмент повернення коштів.</p>
+<p>Набір інструментів це меню. <strong>tool_choice</strong> вирішує, чи можна замовляти і що саме:</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Режим</th>
+<th>Що робить</th>
+<th>Коли брати</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Режим"><code>auto</code></td>
+<td data-label="Що робить">Модель вирішує сама (за замовчуванням)</td>
+<td data-label="Коли брати">Звичайний асистент</td>
+</tr>
+<tr>
+<td data-label="Режим"><code>any</code></td>
+<td data-label="Що робить">Мусить викликати якийсь інструмент</td>
+<td data-label="Коли брати">«Дій, але сам обери як», структурований вивід</td>
+</tr>
+<tr>
+<td data-label="Режим"><code>tool</code></td>
+<td data-label="Що робить">Мусить викликати названий інструмент</td>
+<td data-label="Коли брати">Крок обов'язковий: завжди <code>save_report</code></td>
+</tr>
+<tr>
+<td data-label="Режим"><code>none</code></td>
+<td data-label="Що робить">Без інструментів</td>
+<td data-label="Коли брати">Лише текстова відповідь</td>
+</tr>
+</tbody>
+</table></div>
+<p>За курсом <code>any</code> і <code>tool</code> не поєднуються з extended thinking. Окремо пам'ятайте з лекції 3: на Opus 5.5, Sonnet 5.5, Fable 5.1 і Mythos 5.1 ці два режими дають 400.</p>
+<h2>Крок 4. MCP</h2>
+<p>MCP це USB-C для інструментів: один стандартний роз'єм замість окремого з'єднувача для кожної системи.</p>
+<ul>
+<li><strong>Tools</strong> це дії (<code>create_issue</code>, <code>run_query</code>). <strong>Resources</strong> це дані лише для читання (файл, схема). У Claude Code resource підтягують через <code>@</code>.</li>
+<li><strong>Транспорт:</strong> <code>stdio</code> це локальна програма, яку запускає Claude (<code>command</code>, <code>args</code>). <code>http</code> це віддалений сервер за <code>url</code>.</li>
+<li><strong>Секрети:</strong> не вписуйте ключ у файл. Пишіть <code>${GITHUB_TOKEN}</code> або <code>${VAR:-default}</code>. Працює в <code>command</code>, <code>args</code>, <code>env</code>, <code>url</code>, <code>headers</code>.</li>
+</ul>
+<p>Три scope в Claude Code:</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Scope</th>
+<th>Де лежить</th>
+<th>Кому видно</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Scope">local</td>
+<td data-label="Де лежить"><code>~/.claude.json</code></td>
+<td data-label="Кому видно">Лише вам у цьому проєкті (за замовчуванням)</td>
+</tr>
+<tr>
+<td data-label="Scope">project</td>
+<td data-label="Де лежить"><code>.mcp.json</code> у git</td>
+<td data-label="Кому видно">Усій команді</td>
+</tr>
+<tr>
+<td data-label="Scope">user</td>
+<td data-label="Де лежить"><code>~/.claude.json</code></td>
+<td data-label="Кому видно">Вам у всіх проєктах</td>
+</tr>
+</tbody>
+</table></div>
+<p>Однойменний сервер: <strong>local &gt; project &gt; user</strong>. Особистий токен у project scope потрапить до всієї команди. Стан серверів видно в <code>/mcp</code>. Називайте сервери зрозуміло: <code>github</code>, <code>stripe-prod</code>, а не <code>server1</code>.</p>
+<h2>Крок 5. Вбудовані інструменти Claude Code</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Інструмент</th>
+<th>Робота</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Інструмент">Read</td>
+<td data-label="Робота">Відкрити файл</td>
+</tr>
+<tr>
+<td data-label="Інструмент">Write</td>
+<td data-label="Робота">Створити або переписати весь файл</td>
+</tr>
+<tr>
+<td data-label="Інструмент">Edit</td>
+<td data-label="Робота">Точна заміна частини файла</td>
+</tr>
+<tr>
+<td data-label="Інструмент">Bash</td>
+<td data-label="Робота">Запустити команду</td>
+</tr>
+<tr>
+<td data-label="Інструмент">Grep</td>
+<td data-label="Робота">Шукати <strong>всередині</strong> файлів</td>
+</tr>
+<tr>
+<td data-label="Інструмент">Glob</td>
+<td data-label="Робота">Шукати файли <strong>за іменем</strong></td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li>Grep чи Glob: вміст чи імена. Іспит перевіряє це напряму.</li>
+<li><strong>Read перед Edit.</strong> Текст для заміни має збігатися точно й бути унікальним. Не унікальний: розширте навколишній текст або <code>replace_all</code>. Read і Write лише як останній варіант.</li>
+<li>Вбудовані інструменти кращі за <code>cat</code>, <code>grep</code>, <code>find</code> у Bash: точніші дозволи й менше запитів. Bash лишайте для запуску тестів і збірки.</li>
+<li>Спершу знайдіть потрібне через Grep чи Glob, потім читайте лише ці файли.</li>
+</ul>
+<div class="remember"><h2>Що запам'ятати на іспит</h2>
+<ul>
+<li>Модель обирає інструмент за назвою й описом.</li>
+<li>Помилку повертають з <code>isError</code>, категорією та <code>isRetryable</code>, без stack trace.</li>
+<li>Порожній результат це успіх, а не збій.</li>
+<li><code>tool</code> для обов'язкового кроку, <code>any</code> для структурованого виводу.</li>
+<li>MCP: local &gt; project &gt; user, ключі через <code>${VAR}</code>.</li>
+<li>Grep для вмісту, Glob для імен, Read перед Edit.</li>
+</ul>
+</div><h2>Перевірте себе</h2>
+<ol>
+<li>Яку частину опису найчастіше пропускають?</li>
+<li>Що поверне інструмент, який нічого не знайшов?</li>
+<li>Яке <code>isRetryable</code> для бізнес-помилки?</li>
+<li>Де лежить MCP-сервер для всієї команди?</li>
+<li>Чим шукати всі <code>*.test.js</code>?</li>
+</ol>
+<details>
+<summary>Відповіді</summary>
+<ol>
+<li>Коли використовувати й коли ні.</li>
+<li><code>isError: false</code> і 0 результатів.</li>
+<li><code>false</code>.</li>
+<li><code>.mcp.json</code> у git (project scope).</li>
+<li>Glob.</li>
+</ol>
+</details>
+
+<nav class="pager"><a href="9-agentic-architecture-simple.html"><small>← Назад</small>Лекція 9: агенти й оркестрація (домен 1)</a><a href="11-claude-code-configuration-simple.html"><small>Далі →</small>Лекція 11: налаштування Claude Code і робочі процеси (домен 3)</a></nav><nav class="tools"><a href="../../claude-hub.html">← Claude General</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="10-tool-design-and-mcp-simple-en.html">🌐 Read in English</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "../../claude-hub.html"; });
+}
+</script>
+</body>
+</html>

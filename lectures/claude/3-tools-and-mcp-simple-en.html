@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 3: how to describe tools and what MCP is</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+
+  nav.bar { display:flex; flex-wrap:wrap; gap:.5rem; margin:0 0 1rem; }
+  nav.bar a, nav.tools a { flex:1 1 auto; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.55rem .8rem; text-decoration:none; font-size:.9rem; }
+  nav.bar a.lang, nav.tools a.lang { background:#24466b; color:#fff; border-color:#24466b; }
+  nav.tools { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.8rem; }
+  nav.pager a small { display:block; color:#6b6b70; font-size:.75rem; }
+</style>
+</head>
+<body>
+<main>
+<nav class="bar"><a href="../../claude-hub.html">← Claude General</a><a href="index.html">☰ Усі теми</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="3-tools-and-mcp-simple.html">🌐 Читати українською</a></nav>
+<h1>Lecture 3: how to describe tools and what MCP is</h1>
+<blockquote>
+<p>Simplified version. The full lecture exists in Ukrainian only. The exam-course view of tool design is in lecture 10.</p>
+</blockquote>
+<h2>The main idea</h2>
+<p><strong>The model picks a tool only from its description.</strong> The description is everything it knows about the tool. So its quality matters more than anything else.</p>
+<h2>Why it is designed this way</h2>
+<p>Tools are described with a schema so the model knows what they can do. MCP is a shared standard, so you do not write a separate integration for every service.</p>
+<h2>Step 1. How to describe a tool</h2>
+<p>A tool has four fields: <code>name</code>, <code>description</code>, <code>input_schema</code> and, optionally, <code>input_examples</code>.</p>
+<p>For the model it is like an OpenAPI contract: it does not see the code, only the contract.</p>
+<p>What the description should say:</p>
+<ul>
+<li>what the tool does;</li>
+<li><strong>when to use it and when not</strong>;</li>
+<li>what each parameter means;</li>
+<li>what it does <strong>not</strong> return.</li>
+</ul>
+<p>The documentation recommends at least 3-4 sentences per tool. Example: &quot;Returns the current stock price for a ticker on NYSE or NASDAQ, in dollars. Use it when someone asks about the current price. Returns no other company information.&quot; A bad one: &quot;Gets a stock price&quot;.</p>
+<h2>Step 2. Four more tips</h2>
+<ul>
+<li><strong>Fewer, more capable tools.</strong> The documentation suggests one <code>pr</code> tool with an <code>action</code> parameter instead of <code>create_pr</code>, <code>review_pr</code>, <code>merge_pr</code>. The exam course (lecture 10) puts the emphasis differently: split distinct actions (<code>search_flights</code>, <code>book_flight</code> instead of <code>handle_travel(action)</code>) and consolidate only steps that always go together. Both agree: neither dozens of tiny tools nor one do-everything tool.</li>
+<li><strong>Prefixes in names</strong> when there are many tools: <code>github_list_prs</code>, <code>slack_send_message</code>.</li>
+<li><strong>Return only useful fields from a tool.</strong> Long outputs waste context.</li>
+<li><strong><code>input_examples</code></strong> help with complex inputs (each example must match the schema, otherwise 400).</li>
+</ul>
+<h2>Step 3. How to make the model pick a tool: tool_choice</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Value</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Value"><code>auto</code></td>
+<td data-label="What it does">The model decides (the default when there are tools)</td>
+</tr>
+<tr>
+<td data-label="Value"><code>any</code></td>
+<td data-label="What it does">Must call some tool</td>
+</tr>
+<tr>
+<td data-label="Value"><code>tool</code></td>
+<td data-label="What it does">Must call the named tool</td>
+</tr>
+<tr>
+<td data-label="Value"><code>none</code></td>
+<td data-label="What it does">Calls nothing (the default when there are no tools)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Things people get wrong:</p>
+<ol>
+<li>On <strong>Opus 5.5, Sonnet 5.5, Fable 5.1 and Mythos 5.1</strong> the values <code>any</code> and <code>tool</code> return <strong>400</strong>. Use <code>auto</code> with <code>strict</code> there.</li>
+<li>With <code>any</code> and <code>tool</code> the model <strong>writes no explanation</strong> before the call.</li>
+<li>Changing <code>tool_choice</code> mid-conversation invalidates the <strong>messages</strong> cache (tools and system stay cached).</li>
+<li>In the exam course, <code>any</code> and <code>tool</code> cannot be combined with extended thinking.</li>
+</ol>
+<p>When to use which (lecture 10): <code>auto</code> for an ordinary assistant, <code>any</code> for structured output, <code>tool</code> for a mandatory step (always <code>save_report</code>), <code>none</code> for a text-only reply.</p>
+<h2>Step 4. How to return the result</h2>
+<p>Three hard rules; breaking them gives 400:</p>
+<ol>
+<li>The <code>tool_result</code> must come <strong>right after</strong> the message with <code>tool_use</code>, nothing in between.</li>
+<li>In the user message the <code>tool_result</code> blocks come <strong>first</strong>, text after them.</li>
+<li>Several results of one turn go in one message (see lecture 2).</li>
+</ol>
+<p>A typical error: &quot;tool_use ids were found without tool_result blocks immediately after&quot;.</p>
+<h2>Step 5. Tool errors</h2>
+<ul>
+<li>A tool failed: a <code>tool_result</code> with <code>is_error: true</code> and a <strong>clear</strong> text. Not &quot;failed&quot;, but &quot;Rate limit exceeded. Retry after 60 seconds&quot;.</li>
+<li>The model called a tool without a required parameter: it usually retries 2-3 times with fixes. Better to improve the description.</li>
+<li>To rule this out completely, set <strong><code>strict: true</code></strong>: the input is guaranteed to match the schema and the tool name is always valid.</li>
+</ul>
+<h2>Step 6. Security</h2>
+<p>Tool results often hold someone else's content: web pages, emails, third-party API replies. Someone can hide an instruction there: &quot;ignore everything and do this&quot;. This is <strong>indirect prompt injection</strong>.</p>
+<p>Rule: keep such content <strong>inside <code>tool_result</code></strong>, not in the system prompt or plain user text.</p>
+<p>One more: tool schemas are cached for up to 24 hours, so <strong>do not put personal data</strong> in a schema (property names, <code>enum</code>, <code>const</code>, <code>pattern</code>).</p>
+<h2>Step 7. What MCP is</h2>
+<p><strong>MCP (Model Context Protocol)</strong> is the protocol the model uses to connect to external systems through a server. One MCP server offers a set of tools.</p>
+<p>The <strong>MCP connector</strong> is a Messages API feature that connects remote MCP servers without your own MCP client (beta).</p>
+<p>Limits the exam asks about:</p>
+<ul>
+<li>only <strong>tool calls</strong> are supported (not resources or prompts);</li>
+<li>the server must be <strong>public HTTPS</strong> (Streamable HTTP or SSE);</li>
+<li>a <strong>local STDIO</strong> server cannot be connected.</li>
+</ul>
+<p>For a private network (for example Loki or Prometheus inside) the connector does not fit: you need your own MCP connection. The SDK has client-side helpers for that.</p>
+<h2>Step 8. How to set up the MCP connector</h2>
+<p>The request has two pieces:</p>
+<ol>
+<li><code>mcp_servers</code>: a list of servers with <code>type</code> (<code>url</code>), <code>url</code>, <code>name</code>, <code>authorization_token</code>.</li>
+<li>An <code>mcp_toolset</code> in the <code>tools</code> array: what to enable from that server.</li>
+</ol>
+<p>Each server has exactly one <code>mcp_toolset</code>.</p>
+<p>How to make a <strong>read-only</strong> assistant:</p>
+<ul>
+<li><strong>Denylist:</strong> switch off dangerous tools (<code>configs</code> with <code>enabled: false</code>).</li>
+<li><strong>Allowlist:</strong> <code>default_config.enabled: false</code> and switch on only the ones you need.</li>
+</ul>
+<p>Authentication: you obtain the OAuth token yourself and pass it in <code>authorization_token</code>; refreshing it is also on you.</p>
+<p>The reply contains <code>mcp_tool_use</code> and <code>mcp_tool_result</code> blocks.</p>
+<h2>Step 9. Tool runner</h2>
+<p>Instead of your own loop (lecture 2) the SDK can run the loop for you: you describe tools as functions, and the runner executes them and drives the conversation. It wraps errors in <code>is_error</code> too.</p>
+<p>When you need a <strong>manual loop</strong>: human approval, your own logging, conditional execution.</p>
+<h2>Glossary</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Term</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Term"><strong>Tool description</strong></td>
+<td data-label="What it is">name, explanation and input JSON schema; the model chooses by them</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>tool_choice</strong></td>
+<td data-label="What it is">how to make the model pick a tool: auto, any, a named tool, none</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>strict: true</strong></td>
+<td data-label="What it is">guarantees the input matches the schema</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>is_error</strong></td>
+<td data-label="What it is">a flag that the tool returned an error</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>MCP</strong></td>
+<td data-label="What it is">a protocol where a server gives the model tools and data</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>MCP connector</strong></td>
+<td data-label="What it is">connecting a remote MCP server right in the API request</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>Indirect prompt injection</strong></td>
+<td data-label="What it is">a malicious instruction inside data the model reads</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>Tool runner</strong></td>
+<td data-label="What it is">a ready-made tool-calling loop in the SDK</td>
+</tr>
+</tbody>
+</table></div>
+<h2>🖼 Схема: Claude: інструменти, tool_choice, MCP</h2><div class="dg"><div class="dtitle">Опис інструмента: усе, що знає модель</div><div class="drow"><div class="dbox aws">name</div><div class="dbox aws">description</div><div class="dbox aws">input_schema</div><div class="dbox aws">input_examples (за бажанням)</div></div><div class="dnote">В описі: що робить, коли використовувати й коли ні, що означає кожен параметр, чого не повертає. Мінімум 3-4 речення.</div><div class="dtitle">tool_choice</div><div class="tw"><table class="two"><thead><tr><th>Значення</th><th>Що робить</th></tr></thead><tbody><tr><td>auto</td><td>модель сама вирішує (типово, коли є інструменти)</td></tr><tr><td>any</td><td>мусить викликати якийсь інструмент</td></tr><tr><td>tool</td><td>мусить викликати саме названий</td></tr><tr><td>none</td><td>не викликає (типово, коли інструментів нема)</td></tr></tbody></table></div><div class="dnote">На Opus 5.5, Sonnet 5.5, Fable 5.1 і Mythos 5.1 значення any і tool дають 400, беріть auto зі strict. При any і tool модель не пише пояснення. Зміна tool_choice скидає кеш повідомлень.</div><div class="dtitle">Результати: три жорсткі правила (інакше 400)</div><div class="dflow"><div class="dbox gray">1. tool_result одразу після повідомлення з tool_use</div><div class="darrow">↓</div><div class="dbox gray">2. У user-повідомленні блоки tool_result першими, текст після</div><div class="darrow">↓</div><div class="dbox gray">3. Кілька результатів одного ходу в одному повідомленні</div></div><div class="dtitle">Помилки</div><div class="dcols"><div class="dcol red"><b>Інструмент упав</b><ul><li>tool_result з is_error: true</li><li>не «failed», а «Rate limit exceeded. Retry after 60 seconds»</li></ul></div><div class="dcol green"><b>Щоб не було зовсім</b><ul><li>strict: true</li><li>вхід відповідає схемі, ім&#x27;я завжди валідне</li></ul></div></div><div class="dtitle">MCP</div><div class="dgroup blue"><b>MCP (Model Context Protocol)</b><div class="dkids"><div class="dbox blue">MCP-сервер дає набір інструментів</div><div class="dbox blue">MCP connector: підключає віддалені сервери в Messages API (beta)</div></div></div><div class="dcols"><div class="dcol green"><b>Connector підтримує</b><ul><li>лише виклики інструментів</li><li>публічний HTTPS (Streamable HTTP, SSE)</li></ul></div><div class="dcol red"><b>Не підтримує</b><ul><li>ресурси й промпти</li><li>локальний STDIO</li><li>приватну мережу</li></ul></div></div><div class="dtitle">Асистент лише для читання</div><div class="dcols"><div class="dcol red"><b>Denylist</b><ul><li>вимкнути небезпечні</li><li>configs з enabled: false</li></ul></div><div class="dcol green"><b>Allowlist</b><ul><li>default_config.enabled: false</li><li>увімкнути лише потрібні</li></ul></div></div><div class="dnote">Indirect prompt injection: чужий вміст тримайте всередині tool_result. У схему інструмента не кладіть персональні дані, вона кешується до 24 годин. Tool runner у SDK веде цикл сам, ручний цикл потрібен для схвалення людиною чи власного логування.</div></div><div class="remember"><h2>What to remember for the exam</h2>
+<ol>
+<li>The tool description is the most important factor. At least 3-4 sentences, with limits.</li>
+<li><code>any</code> and <code>tool</code> return 400 on Opus 5.5, Sonnet 5.5, Fable 5.1, Mythos 5.1.</li>
+<li><code>tool_result</code> right after <code>tool_use</code> and before any text.</li>
+<li>An error: <code>is_error: true</code> and a clear text. <code>strict: true</code> removes invalid calls.</li>
+<li>Tool results are untrusted: keep them in <code>tool_result</code>.</li>
+<li>MCP connector: tools only, public HTTPS only, no STDIO.</li>
+<li>Read-only mode: a denylist or allowlist in <code>mcp_toolset</code>.</li>
+</ol>
+</div><h2>Check yourself</h2>
+<ol>
+<li>What does the model know about your tool?</li>
+<li>What does <code>tool_choice: any</code> return on Opus 5.5?</li>
+<li>Where do <code>tool_result</code> blocks go in the user message?</li>
+<li>Can the connector attach a local STDIO server?</li>
+<li>How do you make an MCP assistant read-only?</li>
+<li>What does <code>strict: true</code> guarantee?</li>
+</ol>
+<details>
+<summary>Answers</summary>
+<ol>
+<li>Only its description and parameter schema.</li>
+<li>A 400 error.</li>
+<li>First, text after them.</li>
+<li>No, public HTTPS only.</li>
+<li>A denylist of dangerous tools or an allowlist of needed ones in <code>mcp_toolset</code>.</li>
+<li>The input matches <code>input_schema</code> and the tool name is valid.</li>
+</ol>
+</details>
+
+<nav class="pager"><a href="2-agent-loop-simple-en.html"><small>← Назад</small>Lecture 2: how an agent works with tools</a><a href="4-prompts-simple-en.html"><small>Далі →</small>Lecture 4: how to write prompts and check them</a></nav><nav class="tools"><a href="../../claude-hub.html">← Claude General</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="3-tools-and-mcp-simple.html">🌐 Читати українською</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "../../claude-hub.html"; });
+}
+</script>
+</body>
+</html>

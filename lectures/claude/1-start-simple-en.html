@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 1: what the exam is and where to start</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+
+  nav.bar { display:flex; flex-wrap:wrap; gap:.5rem; margin:0 0 1rem; }
+  nav.bar a, nav.tools a { flex:1 1 auto; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.55rem .8rem; text-decoration:none; font-size:.9rem; }
+  nav.bar a.lang, nav.tools a.lang { background:#24466b; color:#fff; border-color:#24466b; }
+  nav.tools { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.8rem; }
+  nav.pager a small { display:block; color:#6b6b70; font-size:.75rem; }
+</style>
+</head>
+<body>
+<main>
+<nav class="bar"><a href="../../claude-hub.html">← Claude General</a><a href="index.html">☰ Усі теми</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="1-start-simple.html">🌐 Читати українською</a></nav>
+<h1>Lecture 1: what the exam is and where to start</h1>
+<blockquote>
+<p>Simplified version. The full lecture exists in Ukrainian only.</p>
+</blockquote>
+<h2>What the exam is</h2>
+<p><strong>Claude Certified Architect, Foundations (CCA-F)</strong> is an Anthropic certification. These figures come from third-party sites; I did not find an official guide, so check the official Anthropic page before you book.</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>What</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="What">Questions</td>
+<td data-label="Value">60 multiple choice</td>
+</tr>
+<tr>
+<td data-label="What">Time</td>
+<td data-label="Value">120 minutes</td>
+</tr>
+<tr>
+<td data-label="What">Passing score</td>
+<td data-label="Value">720 of 1000</td>
+</tr>
+<tr>
+<td data-label="What">Price</td>
+<td data-label="Value">99 or 125 dollars (sources disagree)</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Why it is designed this way</h2>
+<p>The certification does not test whether you memorised the API. It tests whether you can design reliable systems around the model. So the questions are about decisions and traps.</p>
+<h2>The five exam topics</h2>
+<p>Weights come from a third-party page; the fifth topic's weight is not confirmed.</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Topic (course domain)</th>
+<th>Weight</th>
+<th>Lectures</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Topic (course domain)">Agentic architecture (1: Agentic Architecture &amp; Orchestration)</td>
+<td data-label="Weight">27%</td>
+<td data-label="Lectures">2, 9</td>
+</tr>
+<tr>
+<td data-label="Topic (course domain)">Claude Code (3: Claude Code Configuration &amp; Workflows)</td>
+<td data-label="Weight">20%</td>
+<td data-label="Lectures">5, 8, 11</td>
+</tr>
+<tr>
+<td data-label="Topic (course domain)">Prompts (4: Prompt Engineering &amp; Structured Output)</td>
+<td data-label="Weight">20%</td>
+<td data-label="Lectures">4, 12</td>
+</tr>
+<tr>
+<td data-label="Topic (course domain)">Tools and MCP (2: Tool Design &amp; MCP Integration)</td>
+<td data-label="Weight">18%</td>
+<td data-label="Lectures">3, 10</td>
+</tr>
+<tr>
+<td data-label="Topic (course domain)">Context (5: Context Management &amp; Reliability)</td>
+<td data-label="Weight">not confirmed</td>
+<td data-label="Lectures">6, 7, 13</td>
+</tr>
+</tbody>
+</table></div>
+<p>Lectures 9-13 follow the exam course, one per domain. They hold the decisions and traps the exam tests most often.</p>
+<p>Agentic architecture is the hardest and the most important topic, so start there.</p>
+<h2>One sentence per topic</h2>
+<ul>
+<li><strong>Agentic architecture:</strong> the model asks for tools and your code runs them (the loop).</li>
+<li><strong>Tools and MCP:</strong> how to describe tools and connect external systems.</li>
+<li><strong>Prompts:</strong> how to write instructions and check that they work.</li>
+<li><strong>Claude Code:</strong> what only advises (CLAUDE.md) and what guarantees (permissions, hooks).</li>
+<li><strong>Context:</strong> what fills the window, how to shrink it and how to save with caching.</li>
+</ul>
+<h2>How to study</h2>
+<ol>
+<li>Read lectures 2-8, then 9-13 (the course domains). Each takes 15-20 minutes.</li>
+<li>After each lecture answer the questions at the end.</li>
+<li>Spend 5-10 minutes a day on the cards. Do not learn all 156 at once, take one group at a time.</li>
+<li>At the end take the tests, including the five domain tests. Put your mistakes back into the cards.</li>
+</ol>
+<h2>Official documentation (where to read more)</h2>
+<ul>
+<li>Tools: <a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview.md">Tool use overview</a>, <a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/how-tool-use-works.md">How tool use works</a>, <a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools.md">Define tools</a></li>
+<li>MCP: <a href="https://platform.claude.com/docs/en/agents-and-tools/mcp-connector.md">MCP connector</a>, <a href="https://code.claude.com/docs/en/mcp.md">MCP in Claude Code</a></li>
+<li>Prompts: <a href="https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices.md">Prompting best practices</a>, <a href="https://platform.claude.com/docs/en/test-and-evaluate/develop-tests.md">Evaluations</a></li>
+<li>Context: <a href="https://platform.claude.com/docs/en/build-with-claude/context-windows.md">Context windows</a>, <a href="https://platform.claude.com/docs/en/build-with-claude/prompt-caching.md">Prompt caching</a>, <a href="https://platform.claude.com/docs/en/build-with-claude/compaction.md">Compaction</a></li>
+<li>Claude Code: <a href="https://code.claude.com/docs/en/memory.md">Memory</a>, <a href="https://code.claude.com/docs/en/hooks.md">Hooks</a>, <a href="https://code.claude.com/docs/en/permissions.md">Permissions</a>, <a href="https://code.claude.com/docs/en/skills.md">Skills</a>, <a href="https://code.claude.com/docs/en/sub-agents.md">Subagents</a></li>
+</ul>
+<h2>Glossary</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Term</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Term"><strong>Agentic architecture</strong></td>
+<td data-label="What it is">the model calls tools in a loop until it is done</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>Tool</strong></td>
+<td data-label="What it is">a function the model can ask you to run</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>MCP</strong></td>
+<td data-label="What it is">an open protocol for connecting external tools</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>Context</strong></td>
+<td data-label="What it is">everything the model sees in a request: prompt, history, results</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>Token</strong></td>
+<td data-label="What it is">a unit of text; input, output and price are counted in tokens</td>
+</tr>
+<tr>
+<td data-label="Term"><strong>Prompt</strong></td>
+<td data-label="What it is">the instructions and data you give the model</td>
+</tr>
+</tbody>
+</table></div>
+<h2>What to remember</h2>
+<ol>
+<li>The exam: 60 questions, 120 minutes, 720 of 1000.</li>
+<li>Five topics: agentic architecture, tools and MCP, prompts, Claude Code, context.</li>
+<li>These figures come from third-party sites; check the official page before you book.</li>
+</ol>
+
+<nav class="pager"><span></span><a href="2-agent-loop-simple-en.html"><small>Далі →</small>Lecture 2: how an agent works with tools</a></nav><nav class="tools"><a href="../../claude-hub.html">← Claude General</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="1-start-simple.html">🌐 Читати українською</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "../../claude-hub.html"; });
+}
+</script>
+</body>
+</html>

@@ -84,11 +84,17 @@
   nav.top { margin-bottom:.5rem; font-size:.9rem; }
   ul.list { list-style:none; padding:0; }
   ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+
+  nav.bar { display:flex; flex-wrap:wrap; gap:.5rem; margin:0 0 1rem; }
+  nav.bar a, nav.tools a { flex:1 1 auto; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.55rem .8rem; text-decoration:none; font-size:.9rem; }
+  nav.bar a.lang, nav.tools a.lang { background:#24466b; color:#fff; border-color:#24466b; }
+  nav.tools { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.8rem; }
+  nav.pager a small { display:block; color:#6b6b70; font-size:.75rem; }
 </style>
 </head>
 <body>
 <main>
-<nav class="top"><a href="index.html">← До списку лекцій</a></nav>
+<nav class="bar"><a href="../../claude-hub.html">← Claude General</a><a href="index.html">☰ Усі теми</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="6-context-and-cache-simple-en.html">🌐 Read in English</a></nav>
 <h1>Лекція 6: контекст, кеш і токени</h1>
 <blockquote>
 <p>Спрощена версія. Повна: ../6-context-caching-and-token-counting.md. Повні списки моделей і рідкісні параметри лишились лише там.</p>
@@ -108,6 +114,7 @@
 <p>Розмір: <strong>1 мільйон токенів</strong> на більшості нових моделей, відповідь до <strong>128 тисяч</strong>. Старіші моделі мають 200 тисяч.</p>
 <h2>Крок 2. Чому більше не краще</h2>
 <p>Є явище <strong>context rot</strong>: чим довший контекст, тим гірші точність і згадування. Тому добирати, що класти в контекст, так само важливо, як мати для нього місце.</p>
+<p>Ще одне: модель найкраще бачить початок і кінець, а факт посередині може загубитись (<strong>lost in the middle</strong>). Ключові факти тримайте в короткому блоці в кінці промпту (лекція 13).</p>
 <h2>Крок 3. Коли вікно переповнене</h2>
 <ul>
 <li>Якщо <strong>лише вхід</strong> уже більший за вікно: помилка <strong>400</strong> («prompt is too long»).</li>
@@ -311,7 +318,7 @@
 <hr />
 <p><em>Повна версія:</em> 6-context-caching-and-token-counting.md.</p>
 
-<nav class="pager"><a href="5-claude-code-simple.html">← Лекція 5</a><a href="7-compaction-thinking-memory-simple.html">Лекція 7 →</a></nav>
+<nav class="pager"><a href="5-claude-code-simple.html"><small>← Назад</small>Лекція 5: Claude Code</a><a href="7-compaction-thinking-memory-simple.html"><small>Далі →</small>Лекція 7: ущільнення розмови, роздуми й пам&#x27;ять</a></nav><nav class="tools"><a href="../../claude-hub.html">← Claude General</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="6-context-and-cache-simple-en.html">🌐 Read in English</a></nav>
 </main>
 <script>
 const tg = window.Telegram && window.Telegram.WebApp;
@@ -319,7 +326,7 @@ if (tg) {
   tg.ready();
   tg.expand();
   tg.BackButton.show();
-  tg.BackButton.onClick(() => { location.href = "index.html"; });
+  tg.BackButton.onClick(() => { location.href = "../../claude-hub.html"; });
 }
 </script>
 </body>

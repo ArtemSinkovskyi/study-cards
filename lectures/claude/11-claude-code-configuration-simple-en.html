@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 11: Claude Code configuration and workflows (domain 3)</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+
+  nav.bar { display:flex; flex-wrap:wrap; gap:.5rem; margin:0 0 1rem; }
+  nav.bar a, nav.tools a { flex:1 1 auto; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.55rem .8rem; text-decoration:none; font-size:.9rem; }
+  nav.bar a.lang, nav.tools a.lang { background:#24466b; color:#fff; border-color:#24466b; }
+  nav.tools { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.8rem; }
+  nav.pager a small { display:block; color:#6b6b70; font-size:.75rem; }
+</style>
+</head>
+<body>
+<main>
+<nav class="bar"><a href="../../claude-hub.html">← Claude General</a><a href="index.html">☰ Усі теми</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="11-claude-code-configuration-simple.html">🌐 Читати українською</a></nav>
+<h1>Lecture 11: Claude Code configuration and workflows (domain 3)</h1>
+<blockquote>
+<p>Based on the exam course, domain 3: Claude Code Configuration &amp; Workflows. Cards: groups &quot;Claude Code: пам'ять і налаштування&quot; and &quot;Claude Code: команди й CI&quot;, test &quot;Домен 3&quot;. Permissions and hooks in detail are in lecture 5.</p>
+</blockquote>
+<h2>The main idea</h2>
+<p><strong>Explain your project once, not every session.</strong> Standing rules go into CLAUDE.md and <code>.claude/rules</code>, repeatable actions into commands and skills, risky work into plan mode, automated work into CI.</p>
+<h2>Step 1. The CLAUDE.md hierarchy</h2>
+<p>CLAUDE.md is a note Claude reads at the start of every session: build commands, conventions, gotchas.</p>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Level</th>
+<th>Where it lives</th>
+<th>What it is for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Level">user</td>
+<td data-label="Where it lives"><code>~/.claude/CLAUDE.md</code></td>
+<td data-label="What it is for">Your preferences across all projects</td>
+</tr>
+<tr>
+<td data-label="Level">project</td>
+<td data-label="Where it lives"><code>./CLAUDE.md</code></td>
+<td data-label="What it is for">Team rules, in git</td>
+</tr>
+<tr>
+<td data-label="Level">directory</td>
+<td data-label="Where it lives">a nested <code>CLAUDE.md</code></td>
+<td data-label="What it is for">Rules for one folder</td>
+</tr>
+</tbody>
+</table></div>
+<p>Organisation policy (managed) sits on top of everything.</p>
+<ul>
+<li>The levels <strong>combine</strong> into one context; one does not replace another.</li>
+<li>On a conflict <strong>the more specific one wins</strong>. You say 2 spaces, the project says 4: it is 4.</li>
+<li>A nested <code>frontend/CLAUDE.md</code> loads only when Claude works on files in that folder. That saves large monorepos.</li>
+<li><code>@docs/style.md</code> imports another file. Imports keep things tidy but do not shrink the context: imported files load at launch.</li>
+<li><code>/memory</code> opens memory files for editing.</li>
+</ul>
+<p>What to write: what Claude cannot guess (pitfalls, departures from defaults, the reason behind a rule). What to skip: folder layout, dependency lists. Keep it under about 200 lines: a bloated CLAUDE.md is followed less well.</p>
+<h2>Step 2. Rules for part of the code: <code>.claude/rules</code></h2>
+<ul>
+<li>Every <code>.md</code> in <code>.claude/rules/</code> loads as project memory, at the same priority as <code>.claude/CLAUDE.md</code>.</li>
+<li>With a <code>paths:</code> frontmatter (a list of glob patterns) the rule loads <strong>only</strong> for matching files. For example <code>paths: [&quot;src/api/**&quot;]</code>.</li>
+<li>Without <code>paths:</code> the rule always applies.</li>
+</ul>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>You need</th>
+<th>Pick</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="You need">A pattern across the repo (every <code>*.test.js</code>)</td>
+<td data-label="Pick">A rule with <code>paths:</code></td>
+</tr>
+<tr>
+<td data-label="You need">Everything in one folder</td>
+<td data-label="Pick">A <code>CLAUDE.md</code> in that folder</td>
+</tr>
+</tbody>
+</table></div>
+<p>Path rules are appended last, so they win on a conflict: broad first, most specific last.</p>
+<h2>Step 3. Commands and skills</h2>
+<p>A <strong>slash command</strong> is a Markdown file:</p>
+<ul>
+<li><code>.claude/commands/</code> for the whole team (in git) or <code>~/.claude/commands/</code> for you alone;</li>
+<li>the file name becomes the command, the body becomes the prompt;</li>
+<li><code>$ARGUMENTS</code> drops in your input: <code>fix-issue.md</code> runs as <code>/fix-issue 123</code>.</li>
+</ul>
+<p>Command frontmatter: <code>description</code> (shown in <code>/help</code>, lets Claude suggest the command), <code>argument-hint</code>, <code>allowed-tools</code>, <code>model</code>.</p>
+<p>A <strong>skill</strong> is the richer form: <code>.claude/skills/&lt;name&gt;/SKILL.md</code> also gives <code>/name</code>, but it has a folder for supporting files and Claude can invoke it on its own. Commands are now merged into skills. On a name clash the skill wins.</p>
+<p>Three fields the exam likes:</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Field</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Field"><code>context: fork</code></td>
+<td data-label="What it does">Runs the skill in an isolated context</td>
+</tr>
+<tr>
+<td data-label="Field"><code>allowed-tools</code></td>
+<td data-label="What it does">Pre-approves the listed tools. <strong>It does not block the others</strong></td>
+</tr>
+<tr>
+<td data-label="Field"><code>disable-model-invocation: true</code></td>
+<td data-label="What it does">Only you can trigger it: for <code>/commit</code>, <code>/deploy</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>CLAUDE.md or a command?</strong> Standing conventions go into CLAUDE.md (always on). Repeatable tasks become a command or skill (on demand).</p>
+<h2>Step 4. Plan mode</h2>
+<p>Plan mode is read-only: Claude explores and writes a plan, and <strong>Write and Edit are blocked at the tool level</strong> until you approve the plan. It is a block, not a polite request.</p>
+<p>How to turn it on: Shift+Tab twice, <code>/plan</code>, or <code>--permission-mode plan</code> (also works with <code>-p</code>).</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Plan</th>
+<th>No need</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Plan">Several files, refactors, migrations</td>
+<td data-label="No need">A single-file tweak</td>
+</tr>
+<tr>
+<td data-label="Plan">Auth, payments, production</td>
+<td data-label="No need">Small quick edits</td>
+</tr>
+<tr>
+<td data-label="Plan">An unfamiliar repo, an ambiguous task</td>
+<td data-label="No need"></td>
+</tr>
+</tbody>
+</table></div>
+<p>The loop: explore, plan, approve (or edit the plan first), execute, verify with tests.</p>
+<p>The <strong>Explore subagent</strong> is a scout with only Read, Grep and Glob. It reads in a separate context and returns only the findings, so heavy reading does not clutter your session.</p>
+<h2>Step 5. Iteration</h2>
+<ul>
+<li>Treat the first result as a draft.</li>
+<li>Show an <strong>input/output example</strong>: it removes guesswork better than a long description.</li>
+<li><strong>Interview pattern:</strong> ask Claude to question you first (framework, error handling, edge cases). A fuzzy ask becomes a spec.</li>
+<li><strong>Test first:</strong> write the test that must pass and let Claude iterate to green.</li>
+<li>Batch independent fixes, sequence dependent ones.</li>
+</ul>
+<h2>Step 6. Claude Code in CI/CD</h2>
+<ul>
+<li><code>claude -p &quot;prompt&quot;</code> is headless mode: it runs, prints the result and exits with a status code.</li>
+<li><code>--output-format json</code> returns the result plus metadata (cost, session_id), parsed with <code>jq</code>. Formats: <code>text</code>, <code>json</code>, <code>stream-json</code>.</li>
+<li><code>--json-schema</code> guarantees the shape of the result in <code>structured_output</code>: use it when a later step branches on the result.</li>
+<li>Limits, because nobody is watching: <code>--max-turns</code>, <code>--allowedTools</code>, <code>--max-budget-usd</code>. Check the output content, not just the exit code.</li>
+<li>CLAUDE.md loads in CI too: your rules become the reviewer's context.</li>
+<li>A <strong>separate instance</strong> does the review: it never saw the author's reasoning and does not defend its own choices.</li>
+</ul>
+<div class="remember"><h2>What to remember for the exam</h2>
+<ul>
+<li>CLAUDE.md: user, project and directory combine; the more specific wins.</li>
+<li>A pattern across the repo: a rule with <code>paths:</code>. One folder: a CLAUDE.md in it.</li>
+<li><code>allowed-tools</code> pre-approves but does not restrict.</li>
+<li><code>disable-model-invocation: true</code> for commands with side effects.</li>
+<li>Plan mode blocks Write and Edit until approval.</li>
+<li>CI: <code>-p</code>, <code>--output-format json</code>, <code>--json-schema</code>, turn and budget caps.</li>
+</ul>
+</div><h2>Check yourself</h2>
+<ol>
+<li>You say 2 spaces, the project says 4. Which applies?</li>
+<li>What happens to other tools if a skill has <code>allowed-tools: Read</code>?</li>
+<li>How do you turn on plan mode?</li>
+<li>How do you guarantee the shape of a <code>claude -p</code> result?</li>
+<li>Why use a separate instance for review?</li>
+</ol>
+<details>
+<summary>Answers</summary>
+<ol>
+<li>4: the more specific level wins.</li>
+<li>Nothing: they stay available as usual.</li>
+<li>Shift+Tab twice, <code>/plan</code> or <code>--permission-mode plan</code>.</li>
+<li><code>--output-format json</code> with <code>--json-schema</code>.</li>
+<li>It is not biased by the author's choices.</li>
+</ol>
+</details>
+
+<nav class="pager"><a href="10-tool-design-and-mcp-simple-en.html"><small>← Назад</small>Lecture 10: tool design and MCP (domain 2)</a><a href="12-prompts-and-structured-output-simple-en.html"><small>Далі →</small>Lecture 12: prompts, structured output and review (domain 4)</a></nav><nav class="tools"><a href="../../claude-hub.html">← Claude General</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="11-claude-code-configuration-simple.html">🌐 Читати українською</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "../../claude-hub.html"; });
+}
+</script>
+</body>
+</html>

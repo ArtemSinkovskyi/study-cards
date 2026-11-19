@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 12: prompts, structured output and review (domain 4)</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+
+  nav.bar { display:flex; flex-wrap:wrap; gap:.5rem; margin:0 0 1rem; }
+  nav.bar a, nav.tools a { flex:1 1 auto; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.55rem .8rem; text-decoration:none; font-size:.9rem; }
+  nav.bar a.lang, nav.tools a.lang { background:#24466b; color:#fff; border-color:#24466b; }
+  nav.tools { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.8rem; }
+  nav.pager a small { display:block; color:#6b6b70; font-size:.75rem; }
+</style>
+</head>
+<body>
+<main>
+<nav class="bar"><a href="../../claude-hub.html">← Claude General</a><a href="index.html">☰ Усі теми</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="12-prompts-and-structured-output-simple.html">🌐 Читати українською</a></nav>
+<h1>Lecture 12: prompts, structured output and review (domain 4)</h1>
+<blockquote>
+<p>Based on the exam course, domain 4: Prompt Engineering &amp; Structured Output. Cards: group &quot;Структурований вивід і рев'ю&quot;, test &quot;Домен 4&quot;. Basic prompting techniques are in lecture 4.</p>
+</blockquote>
+<h2>The main idea</h2>
+<p><strong>A schema guarantees the shape of the answer; your code checks that it is right.</strong> Around that: clear criteria, examples, validation with retries, batch processing and multi-pass review.</p>
+<h2>Step 1. Explicit criteria</h2>
+<p>Ask &quot;Is this code good?&quot; and Claude invents its own yardstick, which drifts from run to run.</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Vague (a wish)</th>
+<th>Specific (testable)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Vague (a wish)">&quot;Check for security problems&quot;</td>
+<td data-label="Specific (testable)">&quot;Flag any SQL query built with string concatenation&quot;</td>
+</tr>
+</tbody>
+</table></div>
+<p>A criterion you could not check by hand will be applied inconsistently.</p>
+<p><strong>Severity levels:</strong></p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Level</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Level">critical</td>
+<td data-label="Example">A hard-coded password: blocks the release</td>
+</tr>
+<tr>
+<td data-label="Level">major</td>
+<td data-label="Example">Missing error handling: fix soon</td>
+</tr>
+<tr>
+<td data-label="Level">minor</td>
+<td data-label="Example">An inconsistent name: nice to fix</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>False positives.</strong> A false positive flags something that is actually fine. 18 noise flags bury the 2 real ones, and people stop reading altogether. A noisy reviewer is worse than none.</p>
+<p>What to do: tighten the noisy category's rule or switch it off. &quot;Be more careful&quot; does not help. A tuned reviewer finds fewer things, and that is exactly why the team acts on them.</p>
+<h2>Step 2. Few-shot</h2>
+<p>Shot means example. Zero-shot: no examples. One-shot: one. Few-shot: several.</p>
+<ul>
+<li>One example replaces a paragraph of rules: it shows tone, format and edge handling at once.</li>
+<li>Examples pin down fuzzy labels (&quot;urgent&quot;) and the output format.</li>
+<li>The model learns the <strong>pattern</strong>, not the literal examples: show 3 &quot;messy → clean&quot; addresses and it cleans a fourth.</li>
+<li><strong>Add an example where the data is missing</strong> and the right answer is <code>null</code>. If every example is &quot;full&quot;, the model assumes it must always produce a value and fabricates.</li>
+</ul>
+<p>Which examples: correct, diverse, with edge cases. How many: usually 2-5, stop when accuracy plateaus. The same format in all of them. Place them <strong>before</strong> the real input.</p>
+<h2>Step 3. Structured output with tool_use</h2>
+<p>Free text is unreliable for automation: the model may add &quot;Here's the data:&quot; or a markdown fence, and the parser breaks.</p>
+<p>In the course the standard move is <strong>a tool with a schema</strong>. You describe a tool with an <code>input_schema</code>, and the model's answer becomes that tool's input.</p>
+<pre><code class="language-json">{
+  &quot;name&quot;: &quot;extract_claim&quot;,
+  &quot;input_schema&quot;: {
+    &quot;type&quot;: &quot;object&quot;,
+    &quot;properties&quot;: {
+      &quot;claim_id&quot;: {&quot;type&quot;: &quot;string&quot;},
+      &quot;amount&quot;: {&quot;type&quot;: &quot;number&quot;},
+      &quot;phone&quot;: {&quot;type&quot;: [&quot;string&quot;, &quot;null&quot;]},
+      &quot;type&quot;: {&quot;enum&quot;: [&quot;auto&quot;, &quot;home&quot;, &quot;health&quot;, &quot;other&quot;]},
+      &quot;detail&quot;: {&quot;type&quot;: &quot;string&quot;}
+    },
+    &quot;required&quot;: [&quot;claim_id&quot;, &quot;amount&quot;]
+  }
+}
+</code></pre>
+<ul>
+<li><strong>Required and nullable fields.</strong> A field the document might not have should be optional or nullable. A required field with no data gets filled with an invention. That is the root-cause fix, not a &quot;don't guess&quot; plea.</li>
+<li><strong>Enum with <code>other</code>.</strong> Without an escape hatch an unusual input lands in the closest wrong option. <code>other</code> plus <code>detail</code> keeps the answer honest.</li>
+<li><strong>tool_choice.</strong> On <code>auto</code> the model may reply in text. Use <code>any</code> or a named <code>tool</code> so the call is guaranteed.</li>
+<li>A malformed schema is rejected up front (400), before the model even runs.</li>
+</ul>
+<p>The API itself also has a structured outputs mode and <code>strict: true</code> (lecture 3). The principle is the same.</p>
+<p><strong>What it does not fix.</strong> The shape is guaranteed, the truth is not: sums may not add up, a value may be invented or sit in the wrong field.</p>
+<h2>Step 4. Validation and retry with feedback</h2>
+<div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
+<thead>
+<tr>
+<th>Error</th>
+<th>Example</th>
+<th>Who catches it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Error">Syntax</td>
+<td data-label="Example">Broken JSON</td>
+<td data-label="Who catches it">The schema and tool_use</td>
+</tr>
+<tr>
+<td data-label="Error">Semantic</td>
+<td data-label="Example">Valid shape, wrong content</td>
+<td data-label="Who catches it">Your validation</td>
+</tr>
+</tbody>
+</table></div>
+<p>What to check: do the totals add up, are the dates real and in range, does every value actually appear in the document.</p>
+<p>If a check fails, send the model <strong>the document, the bad extraction and the specific error</strong>: &quot;line items sum to 4,800, but total says 5,000&quot;. &quot;It's wrong&quot; barely helps.</p>
+<p>Cap it at 2-3 retries. After that, a human or a low-confidence flag. Without a cap the loop can run forever.</p>
+<h2>Step 5. The Message Batches API</h2>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>What</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="What">Price</td>
+<td data-label="Value">50% off input and output</td>
+</tr>
+<tr>
+<td data-label="What">Time</td>
+<td data-label="Value">Up to 24 hours (often faster)</td>
+</tr>
+<tr>
+<td data-label="What">Streaming</td>
+<td data-label="Value">None</td>
+</tr>
+<tr>
+<td data-label="What">Size</td>
+<td data-label="Value">Up to 100,000 requests or 256 MB</td>
+</tr>
+<tr>
+<td data-label="What">Result retention</td>
+<td data-label="Value">About 29 days: save them right away</td>
+</tr>
+</tbody>
+</table></div>
+<p>Decision rule: is it fine for the user to get this within 24 hours? Yes: batch (bulk extraction, evals, moderation). No: the normal API (chat, a live UI).</p>
+<p>Results come back out of order, so give each request a <strong>custom_id</strong> from your own record (the claim number), not a throwaway.</p>
+<p>The flow: submit, poll the status, retrieve the JSONL, save it. Each result still goes through the same validation from step 4.</p>
+<h2>Step 6. Multi-pass review</h2>
+<p>One pass misses things: attention spreads thin, and an author reviewing its own work is biased to approve.</p>
+<ul>
+<li><strong>An independent reviewer:</strong> a separate instance with a clean context.</li>
+<li><strong>A per-file pass</strong> catches local bugs, <strong>a cross-file pass</strong> catches mismatched interfaces. You need both.</li>
+<li><strong>Confidence</strong> on every finding: high gets applied, low goes to a human.</li>
+<li><strong>Aggregate:</strong> de-duplicate, keep the highest severity, group by confidence.</li>
+</ul>
+<div class="remember"><h2>What to remember for the exam</h2>
+<ul>
+<li>Criteria are specific and testable, with severity levels. A noisy category is tightened or switched off.</li>
+<li>Few-shot: 2-5 diverse examples in one format before the input, including a <code>null</code> case.</li>
+<li>Structured output: tool_use with a schema and <code>tool_choice</code> any or tool.</li>
+<li>Nullable fields against invention, enum with <code>other</code>.</li>
+<li>The schema guarantees shape, validation checks meaning. Retry with the specific error, cap at 2-3.</li>
+<li>Batch: 50% cheaper, up to 24 hours, custom_id.</li>
+</ul>
+</div><h2>Check yourself</h2>
+<ol>
+<li>What do you do with a category that gives many false positives?</li>
+<li>Why include a <code>null</code> example in few-shot?</li>
+<li>How do you stop the model inventing a phone number?</li>
+<li>Who catches a total that does not add up?</li>
+<li>When is the Batch API the wrong choice?</li>
+</ol>
+<details>
+<summary>Answers</summary>
+<ol>
+<li>Tighten its rule or switch the category off.</li>
+<li>So the model does not invent values when the data is missing.</li>
+<li>Make the field nullable or optional.</li>
+<li>Your validation, not the schema.</li>
+<li>When a user is waiting for the answer now.</li>
+</ol>
+</details>
+
+<nav class="pager"><a href="11-claude-code-configuration-simple-en.html"><small>← Назад</small>Lecture 11: Claude Code configuration and workflows (domain 3)</a><a href="13-context-and-reliability-simple-en.html"><small>Далі →</small>Lecture 13: context and reliability (domain 5)</a></nav><nav class="tools"><a href="../../claude-hub.html">← Claude General</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="12-prompts-and-structured-output-simple.html">🌐 Читати українською</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "../../claude-hub.html"; });
+}
+</script>
+</body>
+</html>

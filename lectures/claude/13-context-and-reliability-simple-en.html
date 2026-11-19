@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lecture 13: context and reliability (domain 5)</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
+  main { max-width:42rem; margin:0 auto; padding:1rem 1rem 4rem; }
+  h1 { font-size:1.35rem; line-height:1.3; }
+  h2 { font-size:1.15rem; margin-top:2rem; border-top:1px solid #e3dfd6; padding-top:1rem; }
+  h3 { font-size:1.02rem; }
+  blockquote { margin:1rem 0; padding:.6rem .9rem; background:#eef3f9; border-radius:.5rem; color:#33475b; }
+  blockquote p { margin:0; }
+  .tw td code, .tw th code { white-space:nowrap; }
+  .tw { overflow-x:auto; margin:1rem 0; border:1px solid #e3dfd6; border-radius:.6rem; background:#fff; }
+  .tw table { margin:0; width:100%; border-collapse:collapse; font-size:.86rem; line-height:1.4; display:table; }
+  .tw th, .tw td { border:none; border-bottom:1px solid #eee; padding:.4rem .55rem; min-width:6.5rem; text-align:left; vertical-align:top; }
+  .tw th { background:#24466b; color:#fff; font-weight:600; position:sticky; top:0; }
+  .tw tbody tr:nth-child(even) td { background:#faf8f3; }
+  .tw tbody tr:last-child td { border-bottom:none; }
+  .tw td:first-child, .tw th:first-child { font-weight:600; position:sticky; left:0; background:#eef3f9; color:#1d1d1f; min-width:6rem; z-index:1; }
+  .tw th:first-child { background:#24466b; color:#fff; }
+  .tw table.two th, .tw table.two td { min-width:0; }
+  .tw table.two td:first-child, .tw table.two th:first-child { width:34%; }
+  .tw table.two td code { white-space:normal; overflow-wrap:anywhere; }
+  strong { background:linear-gradient(transparent 58%, #ffe7a3 58%); padding:0 .1rem; }
+  .tw strong { background:none; }
+  .remember { background:#fff7e0; border:1px solid #ecd59a; border-radius:.7rem; padding:.2rem 1rem .6rem; margin:1.5rem 0; }
+  .remember h2 { border-top:none; margin-top:.8rem; }
+  .remember li { margin:.35rem 0; }
+  .dg { margin:.8rem 0 1.2rem; }
+  .dicon { height:1.5em; width:1.5em; vertical-align:middle; margin-right:.45rem; }
+  .dcol li.hi { list-style:none; margin-left:-1.1rem; }
+  .dcol li .dicon { height:1.3em; width:1.3em; margin-right:.4rem; }
+  .dgap { display:inline-block; width:1.3em; margin-right:.4rem; }
+  .dtitle { font-weight:700; font-size:1.02rem; color:#24466b; margin:1.2rem 0 .45rem; }
+  .dbox, .dcol { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.6rem .8rem; font-size:.95rem; line-height:1.4; }
+  .dbox.green, .dcol.green { background:#d5e8d4; border-color:#82b366; }
+  .dbox.yellow, .dcol.yellow { background:#fff2cc; border-color:#d6b656; }
+  .dbox.red, .dcol.red { background:#f8cecc; border-color:#b85450; }
+  .dbox.blue, .dcol.blue { background:#dae8fc; border-color:#6c8ebf; }
+  .dbox.gray, .dcol.gray { background:#f5f5f5; border-color:#999; }
+  .dgroup { border:2px solid #d79b00; background:#ffe6cc; border-radius:.75rem; padding:.55rem .6rem .6rem; margin:.45rem 0; font-size:.95rem; line-height:1.4; }
+  .dgroup.green { background:#eaf3e8; border-color:#82b366; }
+  .dgroup.yellow { background:#fff9e3; border-color:#d6b656; }
+  .dgroup.red { background:#fbe6e5; border-color:#b85450; }
+  .dgroup.blue { background:#eef4fd; border-color:#6c8ebf; }
+  .dgroup.gray { background:#fafafa; border-color:#999; }
+  .dgroup > b { display:block; margin-bottom:.1rem; }
+  .dkids { margin:.45rem 0 0 .5rem; padding-left:.65rem; border-left:3px solid rgba(0,0,0,.18); display:flex; flex-direction:column; gap:.35rem; }
+  .dkids .dbox { background:#fff; }
+  .drow { display:flex; flex-wrap:wrap; gap:.4rem; }
+  .drow .dbox { flex:1 1 auto; }
+  .dflow .darrow { text-align:center; color:#8a8577; line-height:1.15; font-size:1.1rem; }
+  .dcols { display:grid; grid-template-columns:repeat(auto-fit, minmax(235px, 1fr)); gap:.55rem; }
+  .dcol ul { margin:.35rem 0 0; padding-left:1.1rem; font-size:.9rem; }
+  .dcol li { margin:.15rem 0; }
+  .dcol b { font-size:.95rem; }
+  .dnote { border:1.5px dashed #b9b2a0; border-radius:.6rem; padding:.55rem .75rem; color:#4a4a4a; font-size:.9rem; line-height:1.45; background:#fffdf7; margin:.65rem 0; }
+  .dstep { margin:.7rem 0; }
+  .dlabel { font-weight:700; }
+  .dpills { display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin:.35rem 0; }
+  .dcap { font-size:.9rem; color:#4a4a4a; line-height:1.4; }
+  .pill { border-radius:.55rem; padding:.4rem .5rem; font-size:.84rem; font-weight:600; color:#fff; border:1.5px solid rgba(0,0,0,.2); text-align:center; }
+  .pill.green { background:#60a917; }
+  .pill.yellow { background:#e3c800; color:#1d1d1f; }
+  .pill.orange { background:#fa6800; }
+  .pill.red { background:#e51400; }
+  .pill.blue { background:#6c8ebf; }
+  .dcards { margin:1.2rem 0; }
+  a.dcard { display:block; background:#fffaf0; border:1px dashed #d9b95c; border-radius:.7rem; padding:.7rem 1rem; margin:.5rem 0; text-decoration:none; color:#5a4a1f; font-weight:600; }
+  .scrollhint { display:none; font-size:.75rem; color:#6b6b70; margin:.6rem 0 -.7rem; }
+  @media (max-width: 640px) { .scrollhint { display:block; } .tw table.two + .x { display:none; } }
+  code { background:#ece8de; padding:.1rem .3rem; border-radius:.3rem; font-size:.9em; overflow-wrap:break-word; }
+  pre { background:#1d1d1f; color:#f4f1ea; padding:.7rem .9rem; border-radius:.5rem; overflow-x:auto; }
+  pre code { background:none; padding:0; }
+  details { background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.5rem .8rem; margin:1rem 0; }
+  summary { cursor:pointer; font-weight:600; }
+  a { color:#24466b; }
+  nav.pager { display:flex; justify-content:space-between; gap:.5rem; margin-top:2.5rem; }
+  nav.pager a { flex:1; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.7rem; text-decoration:none; }
+  nav.top { margin-bottom:.5rem; font-size:.9rem; }
+  ul.list { list-style:none; padding:0; }
+  ul.list li a { display:block; background:#fff; border:1px solid #e3dfd6; border-radius:.7rem; padding:.8rem 1rem; margin-bottom:.6rem; text-decoration:none; color:inherit; }
+
+  nav.bar { display:flex; flex-wrap:wrap; gap:.5rem; margin:0 0 1rem; }
+  nav.bar a, nav.tools a { flex:1 1 auto; text-align:center; background:#fff; border:1px solid #e3dfd6; border-radius:.6rem; padding:.55rem .8rem; text-decoration:none; font-size:.9rem; }
+  nav.bar a.lang, nav.tools a.lang { background:#24466b; color:#fff; border-color:#24466b; }
+  nav.tools { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.8rem; }
+  nav.pager a small { display:block; color:#6b6b70; font-size:.75rem; }
+</style>
+</head>
+<body>
+<main>
+<nav class="bar"><a href="../../claude-hub.html">← Claude General</a><a href="index.html">☰ Усі теми</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="13-context-and-reliability-simple.html">🌐 Читати українською</a></nav>
+<h1>Lecture 13: context and reliability (domain 5)</h1>
+<blockquote>
+<p>Based on the exam course, domain 5: Context Management &amp; Reliability. Cards: group &quot;Надійність і контекст&quot;, test &quot;Домен 5&quot;. Caching, compaction and context editing are in lectures 6 and 7.</p>
+</blockquote>
+<h2>The main idea</h2>
+<p><strong>Extract what matters, persist it, trim the rest.</strong> The principle works both for a long conversation and for a large codebase. The second half of the domain is about honesty: when to stop and call a human, how to report failures, and where every fact came from.</p>
+<h2>Step 1. Why long conversations get worse</h2>
+<ul>
+<li>The context window is finite. As it fills, accuracy drops: this is <strong>context rot</strong>.</li>
+<li>The model weighs <strong>the start and the end</strong> most. A fact in the middle can be missed: this is <strong>lost in the middle</strong>.</li>
+</ul>
+<p>What to do:</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Technique</th>
+<th>Point</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Technique">Trim old tool output</td>
+<td data-label="Point">Keep the conclusion, drop the 2,000-line raw dump</td>
+</tr>
+<tr>
+<td data-label="Technique">Summarize older turns</td>
+<td data-label="Point">This is what <code>/compact</code> does. Say what must survive: a bad summary silently drops a detail</td>
+</tr>
+<tr>
+<td data-label="Technique"><strong>Case-facts block</strong></td>
+<td data-label="Point">A short block: the customer, the issue, the decisions. Re-inject it at the <strong>end</strong> of the prompt every turn, where attention is highest</td>
+</tr>
+</tbody>
+</table></div>
+<h2>Step 2. A large codebase</h2>
+<p>Reading a big codebase fills the window just as fast. The tools:</p>
+<ul>
+<li><strong>Explore subagent:</strong> heavy reading in a separate context, only findings come back (lecture 11).</li>
+<li><strong>Scratchpad files:</strong> write findings to disk (&quot;auth lives in auth/, the bug is in login()&quot;) and re-read only the note you need.</li>
+<li><strong><code>/compact</code>:</strong> run it proactively at about 70-75% full, at a natural break, not only when forced.</li>
+<li><strong>Crash-recovery manifest:</strong> a file with the task, what is done and what is next. A refactor crashed at file 40: a new session reads the manifest and carries on instead of starting at file 1.</li>
+</ul>
+<h2>Step 3. When to call a human</h2>
+<p>A confident wrong action is worse than asking. An agent that knows its limits is working correctly.</p>
+<p>Escalation triggers:</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Trigger</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Trigger">Low confidence</td>
+<td data-label="Example">The model is not sure enough to act</td>
+</tr>
+<tr>
+<td data-label="Trigger">High stakes</td>
+<td data-label="Example">Money, safety, legal matters</td>
+</tr>
+<tr>
+<td data-label="Trigger">Policy gap</td>
+<td data-label="Example">No rule covers the case. <strong>Do not invent a policy</strong></td>
+</tr>
+<tr>
+<td data-label="Trigger">Explicit request</td>
+<td data-label="Example">&quot;I want to speak to a person&quot;: hand over at once, do not talk them out of it</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Multiple matches</strong> are different. Two customers named Sharma or two orders that fit: ask the user a clarifying question (&quot;Did you mean A or B?&quot;). That is clarification, not a human handoff.</p>
+<h2>Step 4. Failures in a multi-agent system</h2>
+<p>The worst failure is a silent one: a subagent returned nothing, the coordinator did not notice and confidently produced an incomplete report.</p>
+<p>A subagent hands the coordinator a <strong>structured error</strong> (the same format as lecture 10: <code>isError</code>, category):</p>
+<ul>
+<li>what failed and why;</li>
+<li>the failure type;</li>
+<li>partial results (&quot;got 2 of 5 sources&quot;).</li>
+</ul>
+<p>Tell <strong>an unreachable source</strong> (a real failure, retryable) apart from <strong>an empty result</strong> (a valid answer, do not retry).</p>
+<p>What the coordinator does:</p>
+<div class="tw"><table class="two">
+<thead>
+<tr>
+<th>Situation</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td data-label="Situation">A transient failure (a timeout)</td>
+<td data-label="Action">Retry</td>
+</tr>
+<tr>
+<td data-label="Situation">A non-critical part</td>
+<td data-label="Action">Skip it with a note</td>
+</tr>
+<tr>
+<td data-label="Situation">A critical part</td>
+<td data-label="Action">Escalate to a human</td>
+</tr>
+</tbody>
+</table></div>
+<p>The report says honestly what is missing: &quot;Findings complete except news sources, which were unavailable.&quot;</p>
+<h2>Step 5. Human review and confidence</h2>
+<p>Reviewing everything is impossible, reviewing nothing is risky. Review what is most likely to be wrong.</p>
+<ul>
+<li><strong>Confidence per field</strong>, not per document: a typed policy number is certain, a handwritten total is not. Only the shaky field goes to a human.</li>
+<li><strong>Routing:</strong> high confidence is accepted automatically, low goes to a human.</li>
+<li><strong>Stratified sampling:</strong> spot-check every confidence band, not only the low one. Otherwise you never catch the cases where the model was confidently wrong.</li>
+<li><strong>Accuracy by document type and field:</strong> handwritten forms error-prone, the total field weak? Route those more aggressively and relax on fields that are consistently right.</li>
+</ul>
+<h2>Step 6. Sources</h2>
+<p>Blend ten sources into smooth prose and you lose where each fact came from; a fabrication becomes indistinguishable from a finding.</p>
+<ul>
+<li><strong>Claim-source mapping:</strong> every fact keeps its source, like a citation.</li>
+<li><strong>Surface conflicts:</strong> show both versions with their sources, do not silently pick one or average them. Flag what is uncertain.</li>
+<li><strong>Date every fact (temporal framing):</strong> a 2019 figure and a 2026 figure are not equally current. An old fact stated as current is quietly wrong.</li>
+</ul>
+<div class="remember"><h2>What to remember for the exam</h2>
+<ul>
+<li>Lost in the middle: key facts go in a case-facts block at the end of the prompt.</li>
+<li>Extract, persist, trim. For code: Explore subagent, scratchpad, <code>/compact</code> at 70-75%, a manifest.</li>
+<li>Escalate on low confidence, high stakes, a policy gap or an explicit request for a human.</li>
+<li>Multiple matches: a clarifying question to the user.</li>
+<li>A subagent never hides a failure. Empty does not mean error.</li>
+<li>Confidence per field, stratified sampling, a source and a date for every fact.</li>
+</ul>
+</div><h2>Check yourself</h2>
+<ol>
+<li>Where do key facts live in a long conversation?</li>
+<li>When should you run <code>/compact</code>?</li>
+<li>What do you do when no rule covers the case?</li>
+<li>What does a subagent that got 2 of 5 sources return?</li>
+<li>Why is reviewing only low-confidence results not enough?</li>
+</ol>
+<details>
+<summary>Answers</summary>
+<ol>
+<li>In a case-facts block at the end of the prompt.</li>
+<li>Proactively, at about 70-75% full.</li>
+<li>Escalate to a human, do not invent a rule.</li>
+<li>A structured error with the failure type and partial results.</li>
+<li>You miss the confident mistakes.</li>
+</ol>
+</details>
+
+<nav class="pager"><a href="12-prompts-and-structured-output-simple-en.html"><small>← Назад</small>Lecture 12: prompts, structured output and review (domain 4)</a><span></span></nav><nav class="tools"><a href="../../claude-hub.html">← Claude General</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="13-context-and-reliability-simple.html">🌐 Читати українською</a></nav>
+</main>
+<script>
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.BackButton.show();
+  tg.BackButton.onClick(() => { location.href = "../../claude-hub.html"; });
+}
+</script>
+</body>
+</html>
