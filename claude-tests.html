@@ -2001,51 +2001,51 @@ const TESTS = [
     "s": "Домен 1: агентна архітектура",
     "q": "Агент повернув відповідь зі stop_reason tool_use. Що робить ваш код?",
     "o": [
-     "Показує відповідь користувачу й виходить з циклу",
-     "Виконує інструмент, додає tool_result і знову викликає модель",
+     "Чекає, поки модель сама виконає інструмент",
      "Збільшує max_tokens і повторює запит",
-     "Чекає, поки модель сама виконає інструмент"
+     "Виконує інструмент, додає tool_result і знову викликає модель",
+     "Показує відповідь користувачу й виходить з циклу"
     ],
-    "a": 1,
+    "a": 2,
     "e": [
-     "Так роблять на end_turn, а не на tool_use.",
-     "tool_use означає: модель чекає результат. Виконали, повернули tool_result, цикл триває.",
+     "Модель нічого не виконує сама: інструмент запускає ваш код.",
      "Це реакція на max_tokens.",
-     "Модель нічого не виконує сама: інструмент запускає ваш код."
+     "tool_use означає: модель чекає результат. Виконали, повернули tool_result, цикл триває.",
+     "Так роблять на end_turn, а не на tool_use."
     ],
     "w": "Поки stop_reason tool_use, цикл триває. (лекція 9)"
    },
    {
     "q": "Який із варіантів НЕ належить до трьох анти-патернів агентного циклу?",
     "o": [
-     "Ігнорувати stop_reason",
-     "Не мати умови зупинки",
+     "Не повертати моделі результати інструментів",
      "Дати моделі самій обирати наступний інструмент",
-     "Не повертати моделі результати інструментів"
+     "Не мати умови зупинки",
+     "Ігнорувати stop_reason"
     ],
-    "a": 2,
+    "a": 1,
     "e": [
-     "Це анти-патерн: невідомо, коли зупинятись.",
-     "Це анти-патерн: нескінченний цикл.",
+     "Це анти-патерн: модель працює наосліп.",
      "Це не помилка, а model-driven підхід, якому іспит віддає перевагу.",
-     "Це анти-патерн: модель працює наосліп."
+     "Це анти-патерн: нескінченний цикл.",
+     "Це анти-патерн: невідомо, коли зупинятись."
     ],
     "w": "Три пастки: ігнорувати stop_reason, нескінченний цикл, не повертати результати. (лекція 9)"
    },
    {
     "q": "Координатор запускає субагента для аналізу. Що субагент знає про попередню розмову координатора?",
     "o": [
+     "Лише останні 20 повідомлень",
      "Нічого, крім того, що координатор написав у його промпт",
      "Лише знахідки інших субагентів",
-     "Усю розмову: контекст успадковується",
-     "Лише останні 20 повідомлень"
+     "Усю розмову: контекст успадковується"
     ],
-    "a": 0,
+    "a": 1,
     "e": [
+     "Такого правила немає.",
      "Промпт і є передача справ: туди пишуть ціль, факти й повні знахідки.",
      "Знахідок інших субагентів він теж не бачить, якщо їх не передали.",
-     "Контекст не успадковується: субагент стартує з чистого аркуша.",
-     "Такого правила немає."
+     "Контекст не успадковується: субагент стартує з чистого аркуша."
     ],
     "w": "Субагент не успадковує контекст. (лекція 9)"
    },
@@ -2054,85 +2054,230 @@ const TESTS = [
     "o": [
      "Написати правило великими літерами в системному промпті",
      "Додати кілька few-shot прикладів",
-     "Prerequisite gate у коді або PreToolUse hook, що блокує виклик без перевірки",
-     "Попросити модель двічі перевіряти себе"
+     "Попросити модель двічі перевіряти себе",
+     "Prerequisite gate у коді або PreToolUse hook, що блокує виклик без перевірки"
     ],
-    "a": 2,
+    "a": 3,
     "e": [
      "Промпт дає лише ймовірне виконання.",
      "Приклади покращують поведінку, але нічого не гарантують.",
-     "Код і hooks детерміновані: дія фізично не виконається без перевірки.",
-     "Самоперевірка теж ймовірнісна."
+     "Самоперевірка теж ймовірнісна.",
+     "Код і hooks детерміновані: дія фізично не виконається без перевірки."
     ],
     "w": "«Не можна порушити ніколи» означає код або hook, а не промпт. (лекція 9)"
    },
    {
     "q": "Кроки задачі відомі наперед і завжди однакові: витягти, перевірити, відформатувати. Який патерн?",
     "o": [
-     "Orchestrator-workers",
+     "Один агент з 60 інструментами",
      "Prompt chaining",
      "Адаптивне розбиття",
-     "Один агент з 60 інструментами"
+     "Orchestrator-workers"
     ],
     "a": 1,
     "e": [
-     "Оркестратор потрібен, коли кроки з'являються в процесі.",
+     "Забагато інструментів погіршує вибір.",
      "Фіксовані відомі кроки, вихід одного це вхід наступного: prompt chaining.",
      "Адаптивне розбиття для задач, де кроки невідомі (дослідження, налагодження).",
-     "Забагато інструментів погіршує вибір."
+     "Оркестратор потрібен, коли кроки з'являються в процесі."
     ],
     "w": "Можна перелічити кроки наперед: chain. Не можна: orchestrator. (лекція 9)"
    },
    {
     "q": "Координатору дали питання про «креативні індустрії», і він запустив лише субагента з візуального мистецтва. Як зветься помилка?",
     "o": [
+     "Narrow decomposition",
      "Context rot",
      "False positive",
-     "Stale transcript",
-     "Narrow decomposition"
+     "Stale transcript"
     ],
-    "a": 3,
+    "a": 0,
     "e": [
+     "Підзадачі разом не покривають питання: музика, кіно й дизайн випали.",
      "Це деградація довгого контексту.",
      "Це хибне спрацювання рецензента.",
-     "Це про застарілі результати в відновленій сесії.",
-     "Підзадачі разом не покривають питання: музика, кіно й дизайн випали."
+     "Це про застарілі результати в відновленій сесії."
     ],
     "w": "Частини мають разом давати ціле питання. (лекція 9)"
    },
    {
     "q": "Ви відновили сесію через --resume, але з того часу кілька файлів змінились. Що найкраще?",
     "o": [
-     "Продовжувати: модель сама помітить зміни",
+     "Збільшити контекстне вікно",
      "Почати нову сесію з коротким підсумком ключових фактів",
      "Викликати fork_session і продовжувати в копії",
-     "Збільшити контекстне вікно"
+     "Продовжувати: модель сама помітить зміни"
     ],
     "a": 1,
     "e": [
-     "Модель довіряє старим результатам інструментів і впевнено помиляється.",
+     "Розмір вікна не робить старі дані свіжими.",
      "Застаріла сесія: підсумок ключових фактів і чистий старт.",
      "Fork копіює ті самі застарілі результати.",
-     "Розмір вікна не робить старі дані свіжими."
+     "Модель довіряє старим результатам інструментів і впевнено помиляється."
     ],
     "w": "Session is stale: summarize and start fresh. (лекція 9)"
    },
    {
     "q": "Як координатор запускає кілька субагентів паралельно?",
     "o": [
-     "Кілька викликів Task в одній відповіді",
+     "Через tool_choice any",
      "Один виклик Task з масивом задач",
      "Окремий запит до API для кожного субагента з тим самим контекстом",
-     "Через tool_choice any"
+     "Кілька викликів Task в одній відповіді"
+    ],
+    "a": 3,
+    "e": [
+     "tool_choice керує тим, чи викликати інструмент, а не паралельністю.",
+     "Один виклик створює одного субагента.",
+     "Субагент це не копія контексту координатора.",
+     "Кілька викликів Task (у новіших версіях Claude Code Agent) в одній відповіді виконуються паралельно."
+    ],
+    "w": "Several Task calls in one turn: parallel. (лекція 9)"
+   }
+  ]
+ },
+ {
+  "id": "d1-en",
+  "title": "Domain 1 (EN): agents and orchestration",
+  "sub": "8 questions",
+  "intro": "The agentic loop, coordinator and subagents, hooks, task decomposition, sessions. Based on lectures 9-13 (the 5 exam domains). Not official questions. After checking, every option has an explanation.",
+  "qs": [
+   {
+    "s": "Domain 1: agentic architecture",
+    "q": "The agent returned a reply with stop_reason tool_use. What does your code do?",
+    "o": [
+     "Waits for the model to run the tool itself",
+     "Raises max_tokens and repeats the request",
+     "Runs the tool, appends a tool_result and calls the model again",
+     "Shows the answer to the user and leaves the loop"
+    ],
+    "a": 2,
+    "e": [
+     "The model runs nothing itself: your code runs the tool.",
+     "That is the reaction to max_tokens.",
+     "tool_use means the model is waiting for a result. Run it, send the tool_result, the loop continues.",
+     "That is what you do on end_turn, not on tool_use."
+    ],
+    "w": "While stop_reason is tool_use, the loop continues. (lecture 9)"
+   },
+   {
+    "q": "Which of these is NOT one of the three agentic-loop anti-patterns?",
+    "o": [
+     "Not feeding tool results back to the model",
+     "Letting the model choose the next tool itself",
+     "Having no end condition",
+     "Ignoring stop_reason"
+    ],
+    "a": 1,
+    "e": [
+     "An anti-pattern: the model flies blind.",
+     "Not a mistake: it is the model-driven approach the exam favours.",
+     "An anti-pattern: an infinite loop.",
+     "An anti-pattern: you never know when to stop."
+    ],
+    "w": "Three traps: ignoring stop_reason, an infinite loop, not returning results. (lecture 9)"
+   },
+   {
+    "q": "A coordinator spawns a subagent for analysis. What does the subagent know about the coordinator's earlier conversation?",
+    "o": [
+     "Only the last 20 messages",
+     "Nothing except what the coordinator wrote into its prompt",
+     "Only other subagents' findings",
+     "All of it: context is inherited"
+    ],
+    "a": 1,
+    "e": [
+     "There is no such rule.",
+     "The prompt is the handoff: it holds the goal, the facts and the complete findings.",
+     "It does not see other subagents' findings either unless they are passed in.",
+     "Context is not inherited: the subagent starts blank."
+    ],
+    "w": "A subagent inherits no context. (lecture 9)"
+   },
+   {
+    "q": "Refunds are allowed only after an identity check. Breaking this even once is unacceptable. How do you enforce it?",
+    "o": [
+     "Write the rule in capitals in the system prompt",
+     "Add a few few-shot examples",
+     "Ask the model to double-check itself",
+     "A prerequisite gate in code or a PreToolUse hook that blocks the call without the check"
+    ],
+    "a": 3,
+    "e": [
+     "A prompt gives only probable compliance.",
+     "Examples improve behaviour but guarantee nothing.",
+     "Self-checking is probabilistic too.",
+     "Code and hooks are deterministic: the action physically cannot run without the check."
+    ],
+    "w": "\"Must never break\" means code or a hook, not a prompt. (lecture 9)"
+   },
+   {
+    "q": "The steps of a task are known upfront and always the same: extract, validate, format. Which pattern?",
+    "o": [
+     "One agent with 60 tools",
+     "Prompt chaining",
+     "Adaptive decomposition",
+     "Orchestrator-workers"
+    ],
+    "a": 1,
+    "e": [
+     "Too many tools hurt selection.",
+     "Fixed known steps, each output feeding the next: prompt chaining.",
+     "Adaptive decomposition is for tasks whose steps are unknown (research, debugging).",
+     "An orchestrator is needed when steps are discovered as you go."
+    ],
+    "w": "Can you list the steps upfront? Yes: chain. No: orchestrator. (lecture 9)"
+   },
+   {
+    "q": "A coordinator got a question about \"the creative industries\" and spawned only a visual-arts subagent. What is this mistake called?",
+    "o": [
+     "Narrow decomposition",
+     "Context rot",
+     "False positive",
+     "Stale transcript"
     ],
     "a": 0,
     "e": [
-     "Кілька викликів Task (у новіших версіях Claude Code Agent) в одній відповіді виконуються паралельно.",
-     "Один виклик створює одного субагента.",
-     "Субагент це не копія контексту координатора.",
-     "tool_choice керує тим, чи викликати інструмент, а не паралельністю."
+     "The subtasks do not cover the question: music, film and design were lost.",
+     "That is long-context degradation.",
+     "That is a reviewer's false alarm.",
+     "That is about old results in a resumed session."
     ],
-    "w": "Several Task calls in one turn: parallel. (лекція 9)"
+    "w": "The pieces must add up to the whole question. (lecture 9)"
+   },
+   {
+    "q": "You resumed a session with --resume, but several files have changed since. What is best?",
+    "o": [
+     "Increase the context window",
+     "Start a new session with a short summary of the key facts",
+     "Call fork_session and continue in the copy",
+     "Carry on: the model will notice the changes"
+    ],
+    "a": 1,
+    "e": [
+     "Window size does not make old data fresh.",
+     "A stale session: summarize the key facts and start fresh.",
+     "A fork copies the same stale results.",
+     "The model trusts old tool results and is confidently wrong."
+    ],
+    "w": "Session is stale: summarize and start fresh. (lecture 9)"
+   },
+   {
+    "q": "How does a coordinator run several subagents in parallel?",
+    "o": [
+     "Through tool_choice any",
+     "One Task call with an array of tasks",
+     "A separate API request per subagent with the same context",
+     "Several Task calls in one reply"
+    ],
+    "a": 3,
+    "e": [
+     "tool_choice controls whether a tool is called, not parallelism.",
+     "One call creates one subagent.",
+     "A subagent is not a copy of the coordinator's context.",
+     "Several Task calls (Agent in newer Claude Code) in one reply run in parallel."
+    ],
+    "w": "Several Task calls in one turn: parallel. (lecture 9)"
    }
   ]
  },
@@ -2146,16 +2291,16 @@ const TESTS = [
     "s": "Домен 2: інструменти і MCP",
     "q": "За чим Claude обирає, який інструмент викликати?",
     "o": [
-     "За кодом функції",
-     "За назвою й описом інструмента",
      "За порядком інструментів у списку",
+     "За назвою й описом інструмента",
+     "За кодом функції",
      "Випадково, якщо описи схожі"
     ],
     "a": 1,
     "e": [
-     "Код модель не бачить.",
-     "Опис це механізм вибору: що робить, коли використовувати й коли ні, параметри, приклад.",
      "Порядок не є механізмом вибору.",
+     "Опис це механізм вибору: що робить, коли використовувати й коли ні, параметри, приклад.",
+     "Код модель не бачить.",
      "Схожі описи дають плутанину, але вибір усе одно за описом."
     ],
     "w": "The description is how Claude picks. (лекція 10)"
@@ -2163,51 +2308,51 @@ const TESTS = [
    {
     "q": "Пошук замовлень нічого не знайшов. Що має повернути інструмент?",
     "o": [
-     "isError false і 0 результатів",
      "isError true, категорія validation",
+     "isError true, isRetryable true",
      "Виняток з текстом «not found»",
-     "isError true, isRetryable true"
+     "isError false і 0 результатів"
     ],
-    "a": 0,
+    "a": 3,
     "e": [
-     "Порожній результат це успішна відповідь «нічого не знайдено».",
      "Вхід був правильний, помилки нема.",
+     "Тоді агент повторюватиме успішний запит.",
      "Виняток стає низькорівневою помилкою протоколу.",
-     "Тоді агент повторюватиме успішний запит."
+     "Порожній результат це успішна відповідь «нічого не знайдено»."
     ],
     "w": "Empty is an answer, failure is not. (лекція 10)"
    },
    {
     "q": "Повернення коштів перевищує бізнес-ліміт. Яке значення isRetryable?",
     "o": [
-     "true, з паузою 5 секунд",
-     "true, бо ліміт може змінитись",
+     "false: повтор дасть ту саму відмову",
      "Поле не потрібне для бізнес-помилок",
-     "false: повтор дасть ту саму відмову"
+     "true, з паузою 5 секунд",
+     "true, бо ліміт може змінитись"
     ],
-    "a": 3,
+    "a": 0,
     "e": [
-     "Пауза допомагає лише transient і rate_limit.",
-     "Повтор нічого не змінить.",
+     "Бізнес-помилка ніколи не повторюється.",
      "Саме тут поле зупиняє сліпі повтори.",
-     "Бізнес-помилка ніколи не повторюється."
+     "Пауза допомагає лише transient і rate_limit.",
+     "Повтор нічого не змінить."
     ],
     "w": "isRetryable false для validation, auth і бізнес-правил. (лекція 10)"
    },
    {
     "q": "Агент має завжди викликати save_report перед завершенням. Яке значення tool_choice?",
     "o": [
+     "any",
      "{type: tool, name: save_report}",
      "none",
-     "auto",
-     "any"
+     "auto"
     ],
-    "a": 0,
+    "a": 1,
     "e": [
+     "any змусить викликати якийсь інструмент, але не обов'язково save_report.",
      "tool змушує викликати саме названий інструмент.",
      "none забороняє інструменти.",
-     "На auto модель може відповісти текстом.",
-     "any змусить викликати якийсь інструмент, але не обов'язково save_report."
+     "На auto модель може відповісти текстом."
     ],
     "w": "Forced tool for always-save. (лекція 10)"
    },
@@ -2215,32 +2360,32 @@ const TESTS = [
     "q": "Де лежить MCP-сервер, яким користується вся команда, і як не закомітити токен?",
     "o": [
      "~/.claude.json, токен прямо в конфігу",
+     ".mcp.json у git, токен прямо в конфігу",
      "~/.claude/CLAUDE.md",
-     ".mcp.json у git, токен через ${GITHUB_TOKEN}",
-     ".mcp.json у git, токен прямо в конфігу"
+     ".mcp.json у git, токен через ${GITHUB_TOKEN}"
     ],
-    "a": 2,
+    "a": 3,
     "e": [
      "Це local або user scope: команда його не побачить.",
+     "Токен потрапить у git: витік.",
      "CLAUDE.md не налаштовує MCP.",
-     "Project scope це .mcp.json у git, а ключ береться зі змінної середовища.",
-     "Токен потрапить у git: витік."
+     "Project scope це .mcp.json у git, а ключ береться зі змінної середовища."
     ],
     "w": "project scope + ${VAR}. (лекція 10)"
    },
    {
     "q": "Однойменний MCP-сервер є в local, project і user scope. Який переможе?",
     "o": [
-     "user",
-     "project",
      "local",
+     "project",
+     "user",
      "Той, що доданий останнім"
     ],
-    "a": 2,
+    "a": 0,
     "e": [
-     "user найслабший.",
-     "project слабший за local.",
      "local > project > user.",
+     "project слабший за local.",
+     "user найслабший.",
      "Порядок додавання не важить."
     ],
     "w": "local > project > user. (лекція 10)"
@@ -2250,15 +2395,15 @@ const TESTS = [
     "o": [
      "Grep",
      "Glob",
-     "Read",
-     "Bash з find"
+     "Bash з find",
+     "Read"
     ],
     "a": 1,
     "e": [
      "Grep шукає всередині файлів.",
      "Glob шукає файли за іменем чи шаблоном шляху.",
-     "Read відкриває вже відомий файл.",
-     "Вбудовані інструменти кращі за Bash: менше запитів дозволу."
+     "Вбудовані інструменти кращі за Bash: менше запитів дозволу.",
+     "Read відкриває вже відомий файл."
     ],
     "w": "Grep: вміст. Glob: імена. (лекція 10)"
    },
@@ -2282,6 +2427,151 @@ const TESTS = [
   ]
  },
  {
+  "id": "d2-en",
+  "title": "Domain 2 (EN): tools and MCP",
+  "sub": "8 questions",
+  "intro": "Tool descriptions, errors, tool_choice, MCP, built-in tools. Based on lectures 9-13 (the 5 exam domains). Not official questions. After checking, every option has an explanation.",
+  "qs": [
+   {
+    "s": "Domain 2: tools and MCP",
+    "q": "How does Claude choose which tool to call?",
+    "o": [
+     "From the order of tools in the list",
+     "From the tool's name and description",
+     "From the function's code",
+     "At random if descriptions are similar"
+    ],
+    "a": 1,
+    "e": [
+     "Order is not a selection mechanism.",
+     "The description is the selection mechanism: what it does, when to use it and when not, parameters, an example.",
+     "The model cannot see the code.",
+     "Similar descriptions cause confusion, but selection still goes by description."
+    ],
+    "w": "The description is how Claude picks. (lecture 10)"
+   },
+   {
+    "q": "An order search found nothing. What should the tool return?",
+    "o": [
+     "isError true, category validation",
+     "isError true, isRetryable true",
+     "An exception with the text \"not found\"",
+     "isError false and 0 results"
+    ],
+    "a": 3,
+    "e": [
+     "The input was valid; there is no error.",
+     "Then the agent will keep retrying a successful query.",
+     "An exception becomes a low-level protocol error.",
+     "An empty result is a successful answer: \"nothing found\"."
+    ],
+    "w": "Empty is an answer, failure is not. (lecture 10)"
+   },
+   {
+    "q": "A refund exceeds the business limit. What is isRetryable?",
+    "o": [
+     "false: a retry gives the same refusal",
+     "The field is not needed for business errors",
+     "true, with a 5-second pause",
+     "true, because the limit might change"
+    ],
+    "a": 0,
+    "e": [
+     "A business-rule error is never retryable.",
+     "This is exactly where the field stops blind retries.",
+     "A pause only helps transient and rate_limit errors.",
+     "A retry changes nothing."
+    ],
+    "w": "isRetryable is false for validation, auth and business rules. (lecture 10)"
+   },
+   {
+    "q": "An agent must always call save_report before finishing. Which tool_choice?",
+    "o": [
+     "any",
+     "{type: tool, name: save_report}",
+     "none",
+     "auto"
+    ],
+    "a": 1,
+    "e": [
+     "any forces some tool, not necessarily save_report.",
+     "tool forces the named tool.",
+     "none forbids tools.",
+     "On auto the model may reply in text."
+    ],
+    "w": "Forced tool for always-save. (lecture 10)"
+   },
+   {
+    "q": "Where does an MCP server for the whole team live, and how do you avoid committing the token?",
+    "o": [
+     "~/.claude.json, token written in the config",
+     ".mcp.json in git, token written in the config",
+     "~/.claude/CLAUDE.md",
+     ".mcp.json in git, token through ${GITHUB_TOKEN}"
+    ],
+    "a": 3,
+    "e": [
+     "That is local or user scope: the team will not see it.",
+     "The token ends up in git: a leak.",
+     "CLAUDE.md does not configure MCP.",
+     "Project scope is .mcp.json in git, and the key comes from an environment variable."
+    ],
+    "w": "project scope + ${VAR}. (lecture 10)"
+   },
+   {
+    "q": "A server with the same name exists in local, project and user scope. Which wins?",
+    "o": [
+     "local",
+     "project",
+     "user",
+     "Whichever was added last"
+    ],
+    "a": 0,
+    "e": [
+     "local > project > user.",
+     "project is weaker than local.",
+     "user is the weakest.",
+     "The order of adding does not matter."
+    ],
+    "w": "local > project > user. (lecture 10)"
+   },
+   {
+    "q": "You need to find every *.test.js file in the repository. Which tool?",
+    "o": [
+     "Grep",
+     "Glob",
+     "Bash with find",
+     "Read"
+    ],
+    "a": 1,
+    "e": [
+     "Grep searches inside files.",
+     "Glob finds files by name or path pattern.",
+     "Built-in tools beat Bash: fewer permission prompts.",
+     "Read opens a file you already know."
+    ],
+    "w": "Grep: contents. Glob: names. (lecture 10)"
+   },
+   {
+    "q": "Edit fails because the string to replace occurs three times in the file. What do you do?",
+    "o": [
+     "Rewrite the file right away with Write",
+     "Widen the surrounding text so the match is unique, or use replace_all",
+     "Delete the file and create it again",
+     "Call Edit again with the same string"
+    ],
+    "a": 1,
+    "e": [
+     "Write is only the last resort.",
+     "The match must be exact and unique: widen the context or replace every occurrence.",
+     "Unnecessary and risky.",
+     "A retry gives the same error."
+    ],
+    "w": "Read before Edit, exact and unique. (lecture 10)"
+   }
+  ]
+ },
+ {
   "id": "d3",
   "title": "Домен 3: Claude Code",
   "sub": "8 питань",
@@ -2291,17 +2581,17 @@ const TESTS = [
     "s": "Домен 3: Claude Code",
     "q": "У вас у ~/.claude/CLAUDE.md відступ 2 пробіли, а в ./CLAUDE.md проєкту 4. Що виконає Claude?",
     "o": [
-     "2 пробіли: user важливіший",
-     "4 пробіли: конкретніший рівень перемагає",
+     "Візьме перший прочитаний",
      "Попросить вибрати",
-     "Візьме перший прочитаний"
+     "4 пробіли: конкретніший рівень перемагає",
+     "2 пробіли: user важливіший"
     ],
-    "a": 1,
+    "a": 2,
     "e": [
-     "User найширший рівень.",
-     "Рівні складаються, а при конфлікті перемагає конкретніший.",
+     "Порядок читання не головне правило.",
      "Claude не питає про це.",
-     "Порядок читання не головне правило."
+     "Рівні складаються, а при конфлікті перемагає конкретніший.",
+     "User найширший рівень."
     ],
     "w": "The more specific rule wins. (лекція 11)"
    },
@@ -2309,65 +2599,65 @@ const TESTS = [
     "q": "Правила для всіх *.test.js у різних папках репозиторію. Як їх задати?",
     "o": [
      "CLAUDE.md у кожній папці з тестами",
+     "Окрема slash-команда",
      "Записати в ~/.claude/CLAUDE.md",
-     "Файл у .claude/rules з paths: [\"**/*.test.js\"]",
-     "Окрема slash-команда"
+     "Файл у .claude/rules з paths: [\"**/*.test.js\"]"
     ],
-    "a": 2,
+    "a": 3,
     "e": [
      "Дублювання й легко пропустити папку.",
+     "Команда запускається на вимогу, а правило має діяти завжди.",
      "Це особисті налаштування, команда їх не отримає.",
-     "Шаблон через увесь репозиторій це rule з paths: вантажиться лише для відповідних файлів.",
-     "Команда запускається на вимогу, а правило має діяти завжди."
+     "Шаблон через увесь репозиторій це rule з paths: вантажиться лише для відповідних файлів."
     ],
     "w": "Glob rule for cross-cutting patterns. (лекція 11)"
    },
    {
     "q": "У навичці стоїть allowed-tools: Read, Grep. Що з іншими інструментами?",
     "o": [
-     "Навичка не запуститься",
      "Вони працюють лише в plan mode",
-     "Вони доступні як звичайно: allowed-tools лише попередньо дозволяє перелічені",
-     "Вони заблоковані"
+     "Вони заблоковані",
+     "Навичка не запуститься",
+     "Вони доступні як звичайно: allowed-tools лише попередньо дозволяє перелічені"
     ],
-    "a": 2,
+    "a": 3,
     "e": [
-     "Навичка запуститься.",
      "Plan mode тут ні до чого.",
-     "Перелічені виконуються без запиту, решта як звичайно.",
-     "Це найчастіша помилка: allowed-tools не обмежує."
+     "Це найчастіша помилка: allowed-tools не обмежує.",
+     "Навичка запуститься.",
+     "Перелічені виконуються без запиту, решта як звичайно."
     ],
     "w": "allowed-tools pre-approves, does NOT restrict. (лекція 11)"
    },
    {
     "q": "Команда /deploy має побічні дії. Як не дати Claude запустити її самому?",
     "o": [
-     "Написати в описі «не запускай»",
      "allowed-tools: []",
-     "disable-model-invocation: true",
-     "context: fork"
+     "context: fork",
+     "Написати в описі «не запускай»",
+     "disable-model-invocation: true"
     ],
-    "a": 2,
+    "a": 3,
     "e": [
-     "Прохання в описі не гарантує нічого.",
      "Це не забороняє модель викликати навичку.",
-     "Тоді викликати можете лише ви.",
-     "fork лише ізолює контекст."
+     "fork лише ізолює контекст.",
+     "Прохання в описі не гарантує нічого.",
+     "Тоді викликати можете лише ви."
     ],
     "w": "disable-model-invocation for side-effect commands. (лекція 11)"
    },
    {
     "q": "Що робить plan mode з інструментами Write і Edit?",
     "o": [
-     "Нічого, лише просить модель не редагувати",
      "Блокує їх на рівні інструментів до вашого схвалення плану",
+     "Нічого, лише просить модель не редагувати",
      "Видаляє їх із сесії назавжди",
      "Дозволяє лише в папці .claude"
     ],
-    "a": 1,
+    "a": 0,
     "e": [
-     "Це не прохання, а блокування.",
      "Claude читає й планує, редагування після схвалення.",
+     "Це не прохання, а блокування.",
      "Після схвалення вони працюють.",
      "Такого винятку нема."
     ],
@@ -2376,17 +2666,17 @@ const TESTS = [
    {
     "q": "Як запустити Claude Code у CI так, щоб наступний крок надійно прочитав результат?",
     "o": [
-     "claude -p з текстовим виводом і grep",
      "claude --continue",
-     "claude -p з --output-format json і --json-schema",
-     "claude з інтерактивним терміналом"
+     "claude з інтерактивним терміналом",
+     "claude -p з текстовим виводом і grep",
+     "claude -p з --output-format json і --json-schema"
     ],
-    "a": 2,
+    "a": 3,
     "e": [
-     "Текст ненадійно парсити.",
      "--continue відкриває останню сесію, це не про CI.",
-     "-p це headless, json дає результат і метадані, --json-schema гарантує форму.",
-     "У CI немає людини біля терміналу."
+     "У CI немає людини біля терміналу.",
+     "Текст ненадійно парсити.",
+     "-p це headless, json дає результат і метадані, --json-schema гарантує форму."
     ],
     "w": "-p + --output-format json + --json-schema. (лекція 11)"
    },
@@ -2394,16 +2684,16 @@ const TESTS = [
     "q": "Що обмежує запуск Claude Code у CI, де ніхто не дивиться?",
     "o": [
      "--max-turns, --allowedTools, --max-budget-usd",
+     "/compact",
      "CLAUDE.md",
-     "Лише код виходу",
-     "/compact"
+     "Лише код виходу"
     ],
     "a": 0,
     "e": [
      "Обмеження ходів, дозволів і бюджету ставлять наперед.",
+     "/compact стискає контекст.",
      "CLAUDE.md дає контекст, а не ліміти.",
-     "Код виходу треба перевіряти, але він нічого не обмежує.",
-     "/compact стискає контекст."
+     "Код виходу треба перевіряти, але він нічого не обмежує."
     ],
     "w": "Cap turns, tools and budget. (лекція 11)"
    },
@@ -2411,18 +2701,163 @@ const TESTS = [
     "q": "Чому рев'ю коду в CI краще робити окремим екземпляром Claude?",
     "o": [
      "Він дешевший",
+     "Він бачить більше файлів",
      "Так вимагає GitHub",
-     "Він не бачив міркувань автора й не виправдовує своїх рішень",
-     "Він бачить більше файлів"
+     "Він не бачив міркувань автора й не виправдовує своїх рішень"
+    ],
+    "a": 3,
+    "e": [
+     "Ціна тут не головне.",
+     "Кількість файлів та сама.",
+     "Це архітектурне рішення, а не вимога GitHub.",
+     "Окремий контекст дає незалежну думку без упередження автора."
+    ],
+    "w": "Self-review isolation. (лекція 11)"
+   }
+  ]
+ },
+ {
+  "id": "d3-en",
+  "title": "Domain 3 (EN): Claude Code",
+  "sub": "8 questions",
+  "intro": "CLAUDE.md, rules, commands and skills, plan mode, CI. Based on lectures 9-13 (the 5 exam domains). Not official questions. After checking, every option has an explanation.",
+  "qs": [
+   {
+    "s": "Domain 3: Claude Code",
+    "q": "Your ~/.claude/CLAUDE.md says 2-space indent, the project's ./CLAUDE.md says 4. What does Claude follow?",
+    "o": [
+     "Whichever it read first",
+     "It asks you to choose",
+     "4 spaces: the more specific level wins",
+     "2 spaces: user is more important"
     ],
     "a": 2,
     "e": [
-     "Ціна тут не головне.",
-     "Це архітектурне рішення, а не вимога GitHub.",
-     "Окремий контекст дає незалежну думку без упередження автора.",
-     "Кількість файлів та сама."
+     "Reading order is not the rule.",
+     "Claude does not ask about this.",
+     "Levels combine, and on a conflict the more specific one wins.",
+     "User is the broadest level."
     ],
-    "w": "Self-review isolation. (лекція 11)"
+    "w": "The more specific rule wins. (lecture 11)"
+   },
+   {
+    "q": "You need rules for every *.test.js across many folders. How do you set them up?",
+    "o": [
+     "A CLAUDE.md in each test folder",
+     "A separate slash command",
+     "Write them in ~/.claude/CLAUDE.md",
+     "A file in .claude/rules with paths: [\"**/*.test.js\"]"
+    ],
+    "a": 3,
+    "e": [
+     "Duplication, and it is easy to miss a folder.",
+     "A command runs on demand, but a rule should always apply.",
+     "These are personal settings; the team will not get them.",
+     "A pattern across the repo is a rule with paths: it loads only for matching files."
+    ],
+    "w": "Glob rule for cross-cutting patterns. (lecture 11)"
+   },
+   {
+    "q": "A skill has allowed-tools: Read, Grep. What about other tools?",
+    "o": [
+     "They only work in plan mode",
+     "They are blocked",
+     "The skill will not start",
+     "They are available as usual: allowed-tools only pre-approves the listed ones"
+    ],
+    "a": 3,
+    "e": [
+     "Plan mode has nothing to do with it.",
+     "The most common mistake: allowed-tools does not restrict.",
+     "The skill starts.",
+     "The listed ones run without a prompt, the rest as usual."
+    ],
+    "w": "allowed-tools pre-approves, does NOT restrict. (lecture 11)"
+   },
+   {
+    "q": "A /deploy command has side effects. How do you stop Claude from running it on its own?",
+    "o": [
+     "allowed-tools: []",
+     "context: fork",
+     "Write \"do not run\" in the description",
+     "disable-model-invocation: true"
+    ],
+    "a": 3,
+    "e": [
+     "This does not stop the model invoking the skill.",
+     "fork only isolates context.",
+     "A plea in the description guarantees nothing.",
+     "Then only you can trigger it."
+    ],
+    "w": "disable-model-invocation for side-effect commands. (lecture 11)"
+   },
+   {
+    "q": "What does plan mode do to the Write and Edit tools?",
+    "o": [
+     "Blocks them at the tool level until you approve the plan",
+     "Nothing, it only asks the model not to edit",
+     "Removes them from the session for good",
+     "Allows them only in the .claude folder"
+    ],
+    "a": 0,
+    "e": [
+     "Claude reads and plans; edits come after approval.",
+     "It is a block, not a request.",
+     "After approval they work.",
+     "There is no such exception."
+    ],
+    "w": "Plan mode blocks file-modifying tools. (lecture 11)"
+   },
+   {
+    "q": "How do you run Claude Code in CI so the next step can reliably read the result?",
+    "o": [
+     "claude --continue",
+     "claude with an interactive terminal",
+     "claude -p with text output and grep",
+     "claude -p with --output-format json and --json-schema"
+    ],
+    "a": 3,
+    "e": [
+     "--continue opens the last session; it is not about CI.",
+     "Nobody sits at the terminal in CI.",
+     "Text is unreliable to parse.",
+     "-p is headless, json gives result plus metadata, --json-schema guarantees the shape."
+    ],
+    "w": "-p + --output-format json + --json-schema. (lecture 11)"
+   },
+   {
+    "q": "What limits a Claude Code run in CI where nobody is watching?",
+    "o": [
+     "--max-turns, --allowedTools, --max-budget-usd",
+     "/compact",
+     "CLAUDE.md",
+     "Only the exit code"
+    ],
+    "a": 0,
+    "e": [
+     "Turn, permission and budget caps are set upfront.",
+     "/compact shrinks the context.",
+     "CLAUDE.md gives context, not limits.",
+     "Check the exit code, but it limits nothing."
+    ],
+    "w": "Cap turns, tools and budget. (lecture 11)"
+   },
+   {
+    "q": "Why is a code review in CI better done by a separate Claude instance?",
+    "o": [
+     "It is cheaper",
+     "It sees more files",
+     "GitHub requires it",
+     "It never saw the author's reasoning and does not defend its own choices"
+    ],
+    "a": 3,
+    "e": [
+     "Price is not the point here.",
+     "It sees the same files.",
+     "It is an architecture decision, not a GitHub requirement.",
+     "A separate context gives an independent opinion without the author's bias."
+    ],
+    "w": "Self-review isolation. (lecture 11)"
    }
   ]
  },
@@ -2436,33 +2871,33 @@ const TESTS = [
     "s": "Домен 4: промпти і структурований вивід",
     "q": "Рецензент дає 15 зауважень, здебільшого про стиль, і команда перестала їх читати. Що робити?",
     "o": [
-     "Додати в промпт «будь уважнішим»",
      "Звузити або вимкнути шумну категорію й додати рівні серйозності",
-     "Збільшити effort до max",
-     "Запускати рецензента двічі"
+     "Додати в промпт «будь уважнішим»",
+     "Запускати рецензента двічі",
+     "Збільшити effort до max"
     ],
-    "a": 1,
+    "a": 0,
     "e": [
-     "Це не змінює критеріїв.",
      "Менше, але точних зауважень: команда знову діє.",
-     "Більше зусиль не прибирає хибних спрацювань.",
-     "Подвійний шум гірше."
+     "Це не змінює критеріїв.",
+     "Подвійний шум гірше.",
+     "Більше зусиль не прибирає хибних спрацювань."
     ],
     "w": "Tune or disable noisy categories. (лекція 12)"
    },
    {
     "q": "Модель вигадує телефон, коли його немає в документі. Яке виправлення в корені?",
     "o": [
-     "Зробити поле phone nullable або необов'язковим",
      "Додати enum для телефонів",
      "Написати «не вгадуй» у промпті",
+     "Зробити поле phone nullable або необов'язковим",
      "Підняти temperature"
     ],
-    "a": 0,
+    "a": 2,
     "e": [
-     "Обов'язкове поле модель заповнить вигадкою, nullable дає чесний null.",
      "Enum тут не підходить.",
      "Прохання допомагає частково, причина в схемі.",
+     "Обов'язкове поле модель заповнить вигадкою, nullable дає чесний null.",
      "Це лише збільшить випадковість."
     ],
     "w": "Root-cause fix: optional or nullable. (лекція 12)"
@@ -2470,17 +2905,17 @@ const TESTS = [
    {
     "q": "Як отримати від Claude структурований результат за схемою, згідно з курсом до іспиту?",
     "o": [
-     "Інструмент з input_schema і tool_choice any або з назвою інструмента",
-     "Попросити в промпті «відповідай JSON»",
      "stop_sequence після JSON",
-     "Prefill з відкритою дужкою"
+     "Prefill з відкритою дужкою",
+     "Попросити в промпті «відповідай JSON»",
+     "Інструмент з input_schema і tool_choice any або з назвою інструмента"
     ],
-    "a": 0,
+    "a": 3,
     "e": [
-     "Відповідь моделі стає входом інструмента: форма гарантована.",
-     "Модель може додати текст чи markdown.",
      "Це не гарантує форми.",
-     "Prefill на нових моделях дає 400."
+     "Prefill на нових моделях дає 400.",
+     "Модель може додати текст чи markdown.",
+     "Відповідь моделі стає входом інструмента: форма гарантована."
     ],
     "w": "Forced tool use. (лекція 12)"
    },
@@ -2489,32 +2924,32 @@ const TESTS = [
     "o": [
      "Синтаксична, ловить tool_use",
      "Семантична, ловить ваша валідація",
-     "Синтаксична, ловить JSON Schema",
-     "Це не помилка"
+     "Це не помилка",
+     "Синтаксична, ловить JSON Schema"
     ],
     "a": 1,
     "e": [
      "Форма правильна.",
      "Зміст неправильний: його перевіряє ваш код і повертає моделі конкретну помилку.",
-     "Схема перевіряє форму, а не арифметику.",
-     "Числа не сходяться."
+     "Числа не сходяться.",
+     "Схема перевіряє форму, а не арифметику."
     ],
     "w": "Syntax vs semantic. (лекція 12)"
    },
    {
     "q": "Скільки разів повторювати витягання з відгуком про помилку?",
     "o": [
-     "Доки не пройде",
-     "Один раз",
+     "Повтори не допомагають",
      "2-3 рази, потім людині або позначка низької впевненості",
-     "Повтори не допомагають"
+     "Один раз",
+     "Доки не пройде"
     ],
-    "a": 2,
+    "a": 1,
     "e": [
-     "Без ліміту цикл може бути нескінченним.",
-     "Часто треба більше однієї спроби.",
+     "Повтор з конкретною помилкою прибирає більшість помилок.",
      "Ліміт і ескалація.",
-     "Повтор з конкретною помилкою прибирає більшість помилок."
+     "Часто треба більше однієї спроби.",
+     "Без ліміту цикл може бути нескінченним."
     ],
     "w": "Cap retries, then escalate. (лекція 12)"
    },
@@ -2522,31 +2957,31 @@ const TESTS = [
     "q": "Чим характерний Message Batches API?",
     "o": [
      "Миттєва відповідь, але дорожче",
-     "На 50% дешевше, результат протягом 24 годин, без стрімінгу",
+     "Результати приходять у порядку запитів",
      "Лише для Haiku",
-     "Результати приходять у порядку запитів"
+     "На 50% дешевше, результат протягом 24 годин, без стрімінгу"
     ],
-    "a": 1,
+    "a": 3,
     "e": [
      "Навпаки: дешевше й не одразу.",
-     "Для великих нетермінових задач.",
+     "Порядок не гарантований, тому потрібен custom_id.",
      "Обмеження моделлю нема.",
-     "Порядок не гарантований, тому потрібен custom_id."
+     "Для великих нетермінових задач."
     ],
     "w": "Batch: 50% off, up to 24h. (лекція 12)"
    },
    {
     "q": "Для чого custom_id у пакетному запиті?",
     "o": [
-     "Щоб задати пріоритет",
      "Щоб зіставити результат із вхідним документом, бо результати приходять не по порядку",
+     "Щоб задати пріоритет",
      "Для кешування",
      "Це id моделі"
     ],
-    "a": 1,
+    "a": 0,
     "e": [
-     "Пріоритетів у батчі нема.",
      "Беріть свій id запису, наприклад номер заяви.",
+     "Пріоритетів у батчі нема.",
      "До кешу це не стосується.",
      "Модель задається окремо."
     ],
@@ -2555,19 +2990,164 @@ const TESTS = [
    {
     "q": "Скільки few-shot прикладів зазвичай дають і де їх ставлять?",
     "o": [
-     "2-5 різних, в однаковому форматі, перед реальним входом",
-     "Один, після входу",
      "Скільки влізе, будь-де",
-     "20 майже однакових"
+     "20 майже однакових",
+     "Один, після входу",
+     "2-5 різних, в однаковому форматі, перед реальним входом"
+    ],
+    "a": 3,
+    "e": [
+     "Формат і місце важливі.",
+     "Однакові приклади майже нічого не вчать.",
+     "Одного мало, а місце неправильне.",
+     "Зупиняються, коли точність перестає рости. Корисно додати приклад із null."
+    ],
+    "w": "Few, uniform, first. (лекція 12)"
+   }
+  ]
+ },
+ {
+  "id": "d4-en",
+  "title": "Domain 4 (EN): prompts and structured output",
+  "sub": "8 questions",
+  "intro": "Criteria, few-shot, schemas, validation, the Batch API, review. Based on lectures 9-13 (the 5 exam domains). Not official questions. After checking, every option has an explanation.",
+  "qs": [
+   {
+    "s": "Domain 4: prompts and structured output",
+    "q": "A reviewer gives 15 comments, mostly about style, and the team has stopped reading them. What do you do?",
+    "o": [
+     "Tighten or disable the noisy category and add severity levels",
+     "Add \"be more careful\" to the prompt",
+     "Run the reviewer twice",
+     "Raise effort to max"
     ],
     "a": 0,
     "e": [
-     "Зупиняються, коли точність перестає рости. Корисно додати приклад із null.",
-     "Одного мало, а місце неправильне.",
-     "Формат і місце важливі.",
-     "Однакові приклади майже нічого не вчать."
+     "Fewer but precise comments: the team acts again.",
+     "That does not change the criteria.",
+     "Double the noise is worse.",
+     "More effort does not remove false positives."
     ],
-    "w": "Few, uniform, first. (лекція 12)"
+    "w": "Tune or disable noisy categories. (lecture 12)"
+   },
+   {
+    "q": "The model invents a phone number when the document has none. What is the root-cause fix?",
+    "o": [
+     "Add an enum for phone numbers",
+     "Write \"don't guess\" in the prompt",
+     "Make the phone field nullable or optional",
+     "Raise the temperature"
+    ],
+    "a": 2,
+    "e": [
+     "An enum does not fit here.",
+     "A plea helps a little; the cause is in the schema.",
+     "A required field gets an invented value; nullable gives an honest null.",
+     "That only adds randomness."
+    ],
+    "w": "Root-cause fix: optional or nullable. (lecture 12)"
+   },
+   {
+    "q": "According to the exam course, how do you get structured output from Claude that follows a schema?",
+    "o": [
+     "A stop_sequence after the JSON",
+     "Prefill with an opening brace",
+     "Ask in the prompt: \"answer in JSON\"",
+     "A tool with an input_schema and tool_choice any or the tool's name"
+    ],
+    "a": 3,
+    "e": [
+     "That does not guarantee the shape.",
+     "Prefill returns 400 on new models.",
+     "The model may add text or markdown.",
+     "The model's answer becomes the tool's input: the shape is guaranteed."
+    ],
+    "w": "Forced tool use. (lecture 12)"
+   },
+   {
+    "q": "The JSON is valid, but the line items sum to 4,800 while total says 5,000. What kind of error is it, and who catches it?",
+    "o": [
+     "Syntax, caught by tool_use",
+     "Semantic, caught by your validation",
+     "It is not an error",
+     "Syntax, caught by the JSON Schema"
+    ],
+    "a": 1,
+    "e": [
+     "The shape is correct.",
+     "The content is wrong: your code checks it and sends the model the specific error.",
+     "The numbers do not add up.",
+     "A schema checks shape, not arithmetic."
+    ],
+    "w": "Syntax vs semantic. (lecture 12)"
+   },
+   {
+    "q": "How many times should you retry an extraction with error feedback?",
+    "o": [
+     "Retries do not help",
+     "2-3 times, then a human or a low-confidence flag",
+     "Once",
+     "Until it passes"
+    ],
+    "a": 1,
+    "e": [
+     "A retry with the specific error removes most mistakes.",
+     "A cap, then escalation.",
+     "One attempt is often not enough.",
+     "Without a cap the loop can run forever."
+    ],
+    "w": "Cap retries, then escalate. (lecture 12)"
+   },
+   {
+    "q": "What characterises the Message Batches API?",
+    "o": [
+     "Instant answers, but more expensive",
+     "Results come back in request order",
+     "Haiku only",
+     "50% cheaper, results within 24 hours, no streaming"
+    ],
+    "a": 3,
+    "e": [
+     "The opposite: cheaper and not instant.",
+     "Order is not guaranteed, hence custom_id.",
+     "There is no model restriction.",
+     "For large non-urgent jobs."
+    ],
+    "w": "Batch: 50% off, up to 24h. (lecture 12)"
+   },
+   {
+    "q": "What is custom_id for in a batch request?",
+    "o": [
+     "To match each result to its input document, because results come back out of order",
+     "To set a priority",
+     "For caching",
+     "It is the model id"
+    ],
+    "a": 0,
+    "e": [
+     "Use your own record id, for example the claim number.",
+     "Batches have no priorities.",
+     "It has nothing to do with caching.",
+     "The model is set separately."
+    ],
+    "w": "Match results by custom_id. (lecture 12)"
+   },
+   {
+    "q": "How many few-shot examples do you usually give, and where do they go?",
+    "o": [
+     "As many as fit, anywhere",
+     "20 near-identical ones",
+     "One, after the input",
+     "2-5 diverse ones, in the same format, before the real input"
+    ],
+    "a": 3,
+    "e": [
+     "Format and placement matter.",
+     "Identical examples teach almost nothing.",
+     "One is too few, and the place is wrong.",
+     "Stop when accuracy plateaus. Including a null example helps."
+    ],
+    "w": "Few, uniform, first. (lecture 12)"
    }
   ]
  },
@@ -2581,32 +3161,32 @@ const TESTS = [
     "s": "Домен 5: контекст і надійність",
     "q": "Важливий факт був посередині довгої розмови, і модель його пропустила. Як зветься ефект?",
     "o": [
-     "Narrow decomposition",
-     "Prompt injection",
      "Stale transcript",
-     "Lost in the middle"
+     "Prompt injection",
+     "Lost in the middle",
+     "Narrow decomposition"
     ],
-    "a": 3,
+    "a": 2,
     "e": [
-     "Це помилка розбиття задачі.",
-     "Це атака через вхідні дані.",
      "Це про старі результати у відновленій сесії.",
-     "Модель найкраще бачить початок і кінець, середина губиться."
+     "Це атака через вхідні дані.",
+     "Модель найкраще бачить початок і кінець, середина губиться.",
+     "Це помилка розбиття задачі."
     ],
     "w": "Lost in the middle. (лекція 13)"
    },
    {
     "q": "Як не втрачати ключові факти клієнта в довгій розмові підтримки?",
     "o": [
-     "Повторювати їх на початку кожної відповіді",
      "Тримати case-facts block і щоходу додавати його в кінець промпту",
+     "Повторювати їх на початку кожної відповіді",
      "Збільшити max_tokens",
      "Вимкнути compaction"
     ],
-    "a": 1,
+    "a": 0,
     "e": [
-     "Модель найслабше бачить середину, а початок віддаляється з кожним ходом.",
      "Кінець промпту там, де увага найвища.",
+     "Модель найслабше бачить середину, а початок віддаляється з кожним ходом.",
      "max_tokens стосується довжини відповіді.",
      "Це лише переповнить вікно."
     ],
@@ -2615,84 +3195,84 @@ const TESTS = [
    {
     "q": "Клієнт пише: «Хочу поговорити з людиною». Що робить агент?",
     "o": [
-     "Пробує ще раз розв'язати проблему",
-     "Одразу передає людині зі структурованим підсумком",
      "Питає, чому клієнт незадоволений",
-     "Ігнорує, якщо задача проста"
+     "Ігнорує, якщо задача проста",
+     "Пробує ще раз розв'язати проблему",
+     "Одразу передає людині зі структурованим підсумком"
     ],
-    "a": 1,
+    "a": 3,
     "e": [
-     "Явне прохання не обговорюють.",
-     "Явне прохання про людину це тригер ескалації.",
      "Це відкладає ескалацію.",
-     "Простота задачі не скасовує прохання."
+     "Простота задачі не скасовує прохання.",
+     "Явне прохання не обговорюють.",
+     "Явне прохання про людину це тригер ескалації."
     ],
     "w": "Honor an explicit human request. (лекція 13)"
    },
    {
     "q": "Жодне правило політики не покриває випадок клієнта. Що робить агент?",
     "o": [
-     "Вигадує розумне правило",
+     "Відмовляє клієнту",
      "Застосовує найближче правило",
      "Ескалює людині",
-     "Відмовляє клієнту"
+     "Вигадує розумне правило"
     ],
     "a": 2,
     "e": [
-     "Агент не має вигадувати політику.",
+     "Відмова теж рішення без політики.",
      "Найближче правило може бути неправильним.",
      "Прогалина в політиці це тригер ескалації.",
-     "Відмова теж рішення без політики."
+     "Агент не має вигадувати політику."
     ],
     "w": "Policy gap: escalate. (лекція 13)"
    },
    {
     "q": "У системі два клієнти Sharma. Що робить агент?",
     "o": [
-     "Ставить користувачу уточнювальне питання",
      "Об'єднує записи",
+     "Обирає першого",
      "Передає людині",
-     "Обирає першого"
+     "Ставить користувачу уточнювальне питання"
     ],
-    "a": 0,
+    "a": 3,
     "e": [
-     "Одне уточнення запобігає дорогій помилці.",
      "Об'єднання записів це окрема й ризикована дія.",
+     "Ризик діяти на чужому записі.",
      "Це не ескалація, а уточнення.",
-     "Ризик діяти на чужому записі."
+     "Одне уточнення запобігає дорогій помилці."
     ],
     "w": "Clarify multiple matches. (лекція 13)"
    },
    {
     "q": "Субагент дістав лише 2 з 5 джерел. Що він має повернути координатору?",
     "o": [
-     "Лише 2 результати без згадки про решту",
-     "Структуровану помилку: що зламалось, тип збою і часткові результати",
      "Виняток",
-     "Нічого, щоб не засмічувати контекст"
+     "Структуровану помилку: що зламалось, тип збою і часткові результати",
+     "Нічого, щоб не засмічувати контекст",
+     "Лише 2 результати без згадки про решту"
     ],
     "a": 1,
     "e": [
-     "Звіт вийде впевнено неповним.",
-     "Тоді координатор може повторити, пропустити з позначкою чи ескалювати.",
      "Виняток не дає координатору що аналізувати.",
-     "Мовчання найгірший варіант."
+     "Тоді координатор може повторити, пропустити з позначкою чи ескалювати.",
+     "Мовчання найгірший варіант.",
+     "Звіт вийде впевнено неповним."
     ],
     "w": "Never fail silently. (лекція 13)"
    },
    {
     "q": "Ви перевіряєте лише результати з низькою впевненістю. Чого це не зловить?",
     "o": [
-     "Помилок формату",
-     "Випадків, коли модель впевнено неправа",
      "Пакетних запитів",
+     "Випадків, коли модель впевнено неправа",
+     "Помилок формату",
      "Нічого, цього достатньо"
     ],
     "a": 1,
     "e": [
-     "Формат ловить схема.",
-     "Тому роблять stratified sampling: вибірку з усіх рівнів впевненості.",
      "Це тут ні до чого.",
+     "Тому роблять stratified sampling: вибірку з усіх рівнів впевненості.",
+     "Формат ловить схема.",
      "Впевнені помилки пройдуть непоміченими."
     ],
     "w": "Stratified sampling. (лекція 13)"
@@ -2700,19 +3280,164 @@ const TESTS = [
    {
     "q": "Два джерела дають різні цифри. Як писати звіт?",
     "o": [
+     "Взяти новіше без згадки",
      "Показати обидві цифри з джерелами й датами",
      "Усереднити",
-     "Взяти новіше без згадки",
      "Пропустити цифру"
     ],
-    "a": 0,
+    "a": 1,
     "e": [
+     "Тихий вибір теж ховає її.",
      "Provenance і temporal framing: кожне твердження з джерелом і датою.",
      "Усереднення ховає розбіжність.",
-     "Тихий вибір теж ховає її.",
      "Втрата інформації."
     ],
     "w": "Surface conflict, label recency. (лекція 13)"
+   }
+  ]
+ },
+ {
+  "id": "d5-en",
+  "title": "Domain 5 (EN): context and reliability",
+  "sub": "8 questions",
+  "intro": "Long context, escalation, subagent errors, confidence, sources. Based on lectures 9-13 (the 5 exam domains). Not official questions. After checking, every option has an explanation.",
+  "qs": [
+   {
+    "s": "Domain 5: context and reliability",
+    "q": "A key fact sat in the middle of a long conversation and the model missed it. What is this effect called?",
+    "o": [
+     "Stale transcript",
+     "Prompt injection",
+     "Lost in the middle",
+     "Narrow decomposition"
+    ],
+    "a": 2,
+    "e": [
+     "That is about old results in a resumed session.",
+     "That is an attack through input data.",
+     "The model sees the start and the end best; the middle gets lost.",
+     "That is a task-decomposition mistake."
+    ],
+    "w": "Lost in the middle. (lecture 13)"
+   },
+   {
+    "q": "How do you keep a customer's key facts from getting lost in a long support conversation?",
+    "o": [
+     "Keep a case-facts block and re-inject it at the end of the prompt every turn",
+     "Repeat them at the start of every answer",
+     "Raise max_tokens",
+     "Turn off compaction"
+    ],
+    "a": 0,
+    "e": [
+     "The end of the prompt is where attention is highest.",
+     "The middle is weakest, and the start drifts further away every turn.",
+     "max_tokens is about answer length.",
+     "That only overfills the window."
+    ],
+    "w": "Case-facts block at the end. (lecture 13)"
+   },
+   {
+    "q": "A customer writes: \"I want to speak to a person.\" What does the agent do?",
+    "o": [
+     "Asks why the customer is unhappy",
+     "Ignores it if the task is simple",
+     "Tries once more to solve the problem",
+     "Hands over to a human at once, with a structured summary"
+    ],
+    "a": 3,
+    "e": [
+     "That delays the escalation.",
+     "A simple task does not cancel the request.",
+     "An explicit request is not up for debate.",
+     "An explicit request for a human is an escalation trigger."
+    ],
+    "w": "Honor an explicit human request. (lecture 13)"
+   },
+   {
+    "q": "No policy rule covers the customer's case. What does the agent do?",
+    "o": [
+     "Refuses the customer",
+     "Applies the closest rule",
+     "Escalates to a human",
+     "Invents a sensible rule"
+    ],
+    "a": 2,
+    "e": [
+     "A refusal is also a decision without a policy.",
+     "The closest rule may be wrong.",
+     "A policy gap is an escalation trigger.",
+     "The agent must not invent policy."
+    ],
+    "w": "Policy gap: escalate. (lecture 13)"
+   },
+   {
+    "q": "The system has two customers named Sharma. What does the agent do?",
+    "o": [
+     "Merges the records",
+     "Picks the first one",
+     "Hands over to a human",
+     "Asks the user a clarifying question"
+    ],
+    "a": 3,
+    "e": [
+     "Merging records is a separate, risky action.",
+     "Risk of acting on the wrong record.",
+     "This is not an escalation, it is a clarification.",
+     "One clarifying question prevents a costly mistake."
+    ],
+    "w": "Clarify multiple matches. (lecture 13)"
+   },
+   {
+    "q": "A subagent reached only 2 of 5 sources. What should it return to the coordinator?",
+    "o": [
+     "An exception",
+     "A structured error: what failed, the failure type and the partial results",
+     "Nothing, to keep the context clean",
+     "Just the 2 results without mentioning the rest"
+    ],
+    "a": 1,
+    "e": [
+     "An exception gives the coordinator nothing to reason about.",
+     "Then the coordinator can retry, skip with a note or escalate.",
+     "Silence is the worst option.",
+     "The report becomes confidently incomplete."
+    ],
+    "w": "Never fail silently. (lecture 13)"
+   },
+   {
+    "q": "You review only low-confidence results. What will this miss?",
+    "o": [
+     "Batch requests",
+     "Cases where the model is confidently wrong",
+     "Format errors",
+     "Nothing, this is enough"
+    ],
+    "a": 1,
+    "e": [
+     "Unrelated.",
+     "That is why you use stratified sampling across every confidence band.",
+     "The schema catches format.",
+     "Confident mistakes slip through."
+    ],
+    "w": "Stratified sampling. (lecture 13)"
+   },
+   {
+    "q": "Two sources give different figures. How do you write the report?",
+    "o": [
+     "Take the newer one without mention",
+     "Show both figures with their sources and dates",
+     "Average them",
+     "Leave the figure out"
+    ],
+    "a": 1,
+    "e": [
+     "A silent pick hides it too.",
+     "Provenance and temporal framing: every claim with its source and date.",
+     "Averaging hides the disagreement.",
+     "Information is lost."
+    ],
+    "w": "Surface conflict, label recency. (lecture 13)"
    }
   ]
  }
