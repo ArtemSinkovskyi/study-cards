@@ -99,9 +99,11 @@
 <blockquote>
 <p>За курсом до іспиту, домен 2: Tool Design &amp; MCP Integration. Картки груп «Інструменти: дизайн і помилки» та «MCP і вбудовані інструменти», тест «Домен 2».</p>
 </blockquote>
+<h2>Що з цього питають на іспиті</h2>
+<p>Як описати й назвати інструмент, щоб модель не помилилась. Як повертати помилки. Який <code>tool_choice</code> узяти. Де лежить MCP-сервер і як сховати ключ. Grep чи Glob.</p>
 <h2>Головна ідея</h2>
-<p><strong>Модель бачить ваш інструмент лише через назву, опис і помилки, які він повертає.</strong> Погано спроєктований інструмент не падає з помилкою: агент просто тихо поводиться гірше.</p>
-<h2>Крок 1. Опис це механізм вибору</h2>
+<p><strong>Модель знає про твій інструмент лише назву, опис і помилки, які він повертає.</strong> Погано спроєктований інструмент не падає: агент просто тихо працює гірше.</p>
+<h2>Крок 1. За описом модель обирає інструмент</h2>
 <p>Claude не бачить коду функції. Він обирає інструмент за назвою й описом, як покупець за етикеткою на коробці.</p>
 <p>Добрий опис має чотири частини:</p>
 <div class="tw"><table class="two">
@@ -117,7 +119,7 @@
 <td data-label="Приклад">«Шукає замовлення клієнта за email»</td>
 </tr>
 <tr>
-<td data-label="Частина">Коли використовувати і коли ні</td>
+<td data-label="Частина">Коли брати і коли ні</td>
 <td data-label="Приклад">«Не для пошуку за номером замовлення: для цього get_order_by_id»</td>
 </tr>
 <tr>
@@ -130,14 +132,14 @@
 </tr>
 </tbody>
 </table></div>
-<p>Частину «коли ні» найчастіше пропускають, а саме вона не дає моделі взяти не той інструмент.</p>
-<p><strong>Назви.</strong> <code>getData</code> і <code>fetchData</code> звучать однаково, і модель їх плутає. Краще <code>get_order_by_id</code> і <code>search_orders_by_customer</code>. Перекриття назв і описів одна з головних причин виклику не того інструмента.</p>
-<p><strong>Розбити чи об'єднати.</strong> Різні дії розбивайте: замість <code>handle_travel(action, ...)</code> дайте <code>search_flights</code>, <code>book_flight</code>, <code>cancel_booking</code>. Кроки, що завжди йдуть разом, об'єднуйте. Уникайте обох крайнощів: десятків дрібних інструментів і одного «на все».</p>
+<p>Частину «коли ні» найчастіше пропускають, а саме вона не дає моделі схопити не той інструмент.</p>
+<p><strong>Назви.</strong> <code>getData</code> і <code>fetchData</code> звучать однаково, і модель їх плутає. Краще <code>get_order_by_id</code> і <code>search_orders_by_customer</code>. Схожі назви й описи одна з головних причин виклику не того інструмента.</p>
+<p><strong>Розбити чи об'єднати.</strong> Різні дії розбивай: замість <code>handle_travel(action, ...)</code> дай <code>search_flights</code>, <code>book_flight</code>, <code>cancel_booking</code>. Кроки, що завжди йдуть разом, об'єднуй. Уникай обох крайнощів: десятків дрібних інструментів і одного «на все».</p>
 <h2>Крок 2. Помилки, з якими модель може щось зробити</h2>
-<p>«Booking failed» нічого не каже. «Оплата не пройшла: недостатньо коштів, спробуйте інший спосіб» дає моделі наступний крок.</p>
+<p>«Booking failed» нічого не каже. «Оплата не пройшла: недостатньо коштів, спробуйте інший спосіб» підказує моделі наступний крок.</p>
 <ul>
-<li><strong>Повертайте помилку, а не кидайте виняток.</strong> <code>isError: true</code> з поясненням модель бачить і може відреагувати. Виняток стає низькорівневою помилкою протоколу.</li>
-<li><strong>Категорія помилки</strong> (<code>errorCategory</code>) підказує наступний крок:</li>
+<li><strong>Повертай помилку, а не кидай виняток.</strong> <code>isError: true</code> з поясненням модель бачить і може відреагувати. Виняток стає низькорівневою помилкою протоколу.</li>
+<li><strong>Категорія помилки</strong> (<code>errorCategory</code>) підказує, що робити далі:</li>
 </ul>
 <div class="tw"><table class="two">
 <thead>
@@ -153,11 +155,11 @@
 </tr>
 <tr>
 <td data-label="Категорія">auth / permission</td>
-<td data-label="Що робити моделі">Ескалювати</td>
+<td data-label="Що робити моделі">Передати далі (ескалювати)</td>
 </tr>
 <tr>
 <td data-label="Категорія">not_found</td>
-<td data-label="Що робити моделі">Нічого нема, повідомити</td>
+<td data-label="Що робити моделі">Нічого немає, так і сказати</td>
 </tr>
 <tr>
 <td data-label="Категорія">rate_limit / transient</td>
@@ -166,12 +168,12 @@
 </tbody>
 </table></div>
 <ul>
-<li><strong>isRetryable</strong> каже, чи є сенс повторювати: <code>true</code> для transient і rate_limit, <code>false</code> для validation, auth і бізнес-правил. Повернення понад ліміт ніколи не повторюється: відповідь щоразу буде «ні».</li>
-<li><strong>Порожній результат не є помилкою.</strong> <code>isError: false, resultCount: 0</code> означає «нічого не знайдено». Помилка це «не вдалось дістатися бази». Класична пастка: агент повторює успішний порожній запит.</li>
-<li><strong>Текст помилки:</strong> що пробували, що зламалось, що робити далі. Без stack trace: він плутає модель і розкриває внутрішню будову. «no such table: users_v2» замініть на «Запитаний ресурс недоступний».</li>
+<li><strong>isRetryable</strong> каже, чи є сенс пробувати ще раз: <code>true</code> для transient і rate_limit, <code>false</code> для validation, auth і бізнес-правил. Повернення понад ліміт ніколи не повторюють: відповідь щоразу буде «ні».</li>
+<li><strong>Порожній результат не помилка.</strong> <code>isError: false, resultCount: 0</code> означає «нічого не знайдено». Помилка це коли до бази не вдалося дістатися. Класична пастка: агент повторює успішний порожній запит.</li>
+<li><strong>Текст помилки:</strong> що пробував, що зламалось, що робити далі. Без stack trace: він плутає модель і розкриває внутрішню будову. «no such table: users_v2» заміни на «Запитаний ресурс недоступний».</li>
 </ul>
 <h2>Крок 3. Скільки інструментів і tool_choice</h2>
-<p>Дайте агенту 60 інструментів, і точність вибору впаде. Кожна роль отримує лише свої інструменти: агенту звітів не потрібен інструмент повернення коштів.</p>
+<p>Дай агенту 60 інструментів, і точність вибору впаде. Кожна роль отримує лише свої інструменти: агенту звітів не потрібне повернення коштів.</p>
 <p>Набір інструментів це меню. <strong>tool_choice</strong> вирішує, чи можна замовляти і що саме:</p>
 <div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
@@ -190,29 +192,29 @@
 <tr>
 <td data-label="Режим"><code>any</code></td>
 <td data-label="Що робить">Мусить викликати якийсь інструмент</td>
-<td data-label="Коли брати">«Дій, але сам обери як», структурований вивід</td>
+<td data-label="Коли брати">«Дій, але сам обери як», структурована відповідь</td>
 </tr>
 <tr>
 <td data-label="Режим"><code>tool</code></td>
-<td data-label="Що робить">Мусить викликати названий інструмент</td>
-<td data-label="Коли брати">Крок обов'язковий: завжди <code>save_report</code></td>
+<td data-label="Що робить">Мусить викликати названий</td>
+<td data-label="Коли брати">Обов'язковий крок: завжди <code>save_report</code></td>
 </tr>
 <tr>
 <td data-label="Режим"><code>none</code></td>
 <td data-label="Що робить">Без інструментів</td>
-<td data-label="Коли брати">Лише текстова відповідь</td>
+<td data-label="Коли брати">Відповідь лише текстом</td>
 </tr>
 </tbody>
 </table></div>
-<p>За курсом <code>any</code> і <code>tool</code> не поєднуються з extended thinking. Окремо пам'ятайте з лекції 3: на Opus 5.5, Sonnet 5.5, Fable 5.1 і Mythos 5.1 ці два режими дають 400.</p>
+<p>За курсом <code>any</code> і <code>tool</code> не поєднуються з extended thinking. Окремо з документації (лекція 3): на Opus 5.5, Sonnet 5.5, Fable 5.1 і Mythos 5.1 ці два режими дають 400.</p>
 <h2>Крок 4. MCP</h2>
-<p>MCP це USB-C для інструментів: один стандартний роз'єм замість окремого з'єднувача для кожної системи.</p>
+<p>MCP це USB-C для інструментів: один стандартний роз'єм замість окремого кабелю для кожної системи.</p>
 <ul>
 <li><strong>Tools</strong> це дії (<code>create_issue</code>, <code>run_query</code>). <strong>Resources</strong> це дані лише для читання (файл, схема). У Claude Code resource підтягують через <code>@</code>.</li>
 <li><strong>Транспорт:</strong> <code>stdio</code> це локальна програма, яку запускає Claude (<code>command</code>, <code>args</code>). <code>http</code> це віддалений сервер за <code>url</code>.</li>
-<li><strong>Секрети:</strong> не вписуйте ключ у файл. Пишіть <code>${GITHUB_TOKEN}</code> або <code>${VAR:-default}</code>. Працює в <code>command</code>, <code>args</code>, <code>env</code>, <code>url</code>, <code>headers</code>.</li>
+<li><strong>Секрети:</strong> не вписуй ключ у файл. Пиши <code>${GITHUB_TOKEN}</code> або <code>${VAR:-default}</code>. Це працює в <code>command</code>, <code>args</code>, <code>env</code>, <code>url</code>, <code>headers</code>.</li>
 </ul>
-<p>Три scope в Claude Code:</p>
+<p>Три scope у Claude Code:</p>
 <div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
@@ -225,7 +227,7 @@
 <tr>
 <td data-label="Scope">local</td>
 <td data-label="Де лежить"><code>~/.claude.json</code></td>
-<td data-label="Кому видно">Лише вам у цьому проєкті (за замовчуванням)</td>
+<td data-label="Кому видно">Лише тобі в цьому проєкті (за замовчуванням)</td>
 </tr>
 <tr>
 <td data-label="Scope">project</td>
@@ -235,73 +237,73 @@
 <tr>
 <td data-label="Scope">user</td>
 <td data-label="Де лежить"><code>~/.claude.json</code></td>
-<td data-label="Кому видно">Вам у всіх проєктах</td>
+<td data-label="Кому видно">Тобі в усіх проєктах</td>
 </tr>
 </tbody>
 </table></div>
-<p>Однойменний сервер: <strong>local &gt; project &gt; user</strong>. Особистий токен у project scope потрапить до всієї команди. Стан серверів видно в <code>/mcp</code>. Називайте сервери зрозуміло: <code>github</code>, <code>stripe-prod</code>, а не <code>server1</code>.</p>
+<p>Однойменний сервер: <strong>local &gt; project &gt; user</strong>. Особистий токен у project scope побачить уся команда. Стан серверів видно в <code>/mcp</code>. Називай сервери зрозуміло: <code>github</code>, <code>stripe-prod</code>, а не <code>server1</code>.</p>
 <h2>Крок 5. Вбудовані інструменти Claude Code</h2>
 <div class="tw"><table class="two">
 <thead>
 <tr>
 <th>Інструмент</th>
-<th>Робота</th>
+<th>Що робить</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td data-label="Інструмент">Read</td>
-<td data-label="Робота">Відкрити файл</td>
+<td data-label="Що робить">Відкриває файл</td>
 </tr>
 <tr>
 <td data-label="Інструмент">Write</td>
-<td data-label="Робота">Створити або переписати весь файл</td>
+<td data-label="Що робить">Створює або переписує весь файл</td>
 </tr>
 <tr>
 <td data-label="Інструмент">Edit</td>
-<td data-label="Робота">Точна заміна частини файла</td>
+<td data-label="Що робить">Точно замінює частину файла</td>
 </tr>
 <tr>
 <td data-label="Інструмент">Bash</td>
-<td data-label="Робота">Запустити команду</td>
+<td data-label="Що робить">Запускає команду</td>
 </tr>
 <tr>
 <td data-label="Інструмент">Grep</td>
-<td data-label="Робота">Шукати <strong>всередині</strong> файлів</td>
+<td data-label="Що робить">Шукає <strong>всередині</strong> файлів</td>
 </tr>
 <tr>
 <td data-label="Інструмент">Glob</td>
-<td data-label="Робота">Шукати файли <strong>за іменем</strong></td>
+<td data-label="Що робить">Шукає файли <strong>за іменем</strong></td>
 </tr>
 </tbody>
 </table></div>
 <ul>
 <li>Grep чи Glob: вміст чи імена. Іспит перевіряє це напряму.</li>
-<li><strong>Read перед Edit.</strong> Текст для заміни має збігатися точно й бути унікальним. Не унікальний: розширте навколишній текст або <code>replace_all</code>. Read і Write лише як останній варіант.</li>
-<li>Вбудовані інструменти кращі за <code>cat</code>, <code>grep</code>, <code>find</code> у Bash: точніші дозволи й менше запитів. Bash лишайте для запуску тестів і збірки.</li>
-<li>Спершу знайдіть потрібне через Grep чи Glob, потім читайте лише ці файли.</li>
+<li><strong>Read перед Edit.</strong> Текст для заміни має збігатися точно й бути унікальним. Не унікальний: розшир навколишній текст або <code>replace_all</code>. Read і Write лише як останній варіант.</li>
+<li>Вбудовані інструменти кращі за <code>cat</code>, <code>grep</code>, <code>find</code> у Bash: точніші дозволи й менше запитів. Bash лишай для тестів і збірки.</li>
+<li>Спершу знайди потрібне через Grep чи Glob, потім читай лише ці файли.</li>
 </ul>
 <div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ul>
 <li>Модель обирає інструмент за назвою й описом.</li>
 <li>Помилку повертають з <code>isError</code>, категорією та <code>isRetryable</code>, без stack trace.</li>
 <li>Порожній результат це успіх, а не збій.</li>
-<li><code>tool</code> для обов'язкового кроку, <code>any</code> для структурованого виводу.</li>
+<li><code>tool</code> для обов'язкового кроку, <code>any</code> для структурованої відповіді.</li>
 <li>MCP: local &gt; project &gt; user, ключі через <code>${VAR}</code>.</li>
 <li>Grep для вмісту, Glob для імен, Read перед Edit.</li>
 </ul>
-</div><h2>Перевірте себе</h2>
+</div><h2>Перевір себе</h2>
 <ol>
 <li>Яку частину опису найчастіше пропускають?</li>
-<li>Що поверне інструмент, який нічого не знайшов?</li>
-<li>Яке <code>isRetryable</code> для бізнес-помилки?</li>
+<li>Що повертає інструмент, який нічого не знайшов?</li>
+<li>Яке <code>isRetryable</code> у помилки бізнес-правила?</li>
 <li>Де лежить MCP-сервер для всієї команди?</li>
-<li>Чим шукати всі <code>*.test.js</code>?</li>
+<li>Чим знайти всі <code>*.test.js</code>?</li>
 </ol>
 <details>
 <summary>Відповіді</summary>
 <ol>
-<li>Коли використовувати й коли ні.</li>
+<li>Коли брати і коли ні.</li>
 <li><code>isError: false</code> і 0 результатів.</li>
 <li><code>false</code>.</li>
 <li><code>.mcp.json</code> у git (project scope).</li>

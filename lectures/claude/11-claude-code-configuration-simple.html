@@ -97,12 +97,14 @@
 <nav class="bar"><a href="../../claude-hub.html">← Claude General</a><a href="index.html">☰ Усі теми</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="11-claude-code-configuration-simple-en.html">🌐 Read in English</a></nav>
 <h1>Лекція 11: налаштування Claude Code і робочі процеси (домен 3)</h1>
 <blockquote>
-<p>За курсом до іспиту, домен 3: Claude Code Configuration &amp; Workflows. Картки груп «Claude Code: пам'ять і налаштування» та «Claude Code: команди й CI», тест «Домен 3». Деталі про дозволи й hooks у лекції 5.</p>
+<p>За курсом до іспиту, домен 3: Claude Code Configuration &amp; Workflows. Картки груп «Claude Code: пам'ять і налаштування» та «Claude Code: команди й CI», тест «Домен 3». Основа в лекції 5.</p>
 </blockquote>
+<h2>Що з цього питають на іспиті</h2>
+<p>Який рівень CLAUDE.md перемагає. Rule з <code>paths:</code> чи CLAUDE.md у папці. Що насправді робить <code>allowed-tools</code>. Коли потрібен plan mode. Як запустити Claude Code в CI так, щоб наступний крок міг надійно прочитати результат.</p>
 <h2>Головна ідея</h2>
-<p><strong>Пояснюєте проєкт один раз, а не щосесії.</strong> Постійні правила йдуть у CLAUDE.md і <code>.claude/rules</code>, повторювані дії в команди й навички, ризикова робота в plan mode, автоматична в CI.</p>
-<h2>Крок 1. Ієрархія CLAUDE.md</h2>
-<p>CLAUDE.md це записка, яку Claude читає на початку кожної сесії: команди збірки, домовленості, підводні камені.</p>
+<p><strong>Пояснюєш проєкт один раз, а не щосесії.</strong> Постійні правила йдуть у CLAUDE.md і <code>.claude/rules</code>, повторювані дії в команди й навички, ризикова робота в plan mode, автоматична в CI.</p>
+<h2>Крок 1. Рівні CLAUDE.md</h2>
+<p>CLAUDE.md це записка, яку Claude читає на початку кожної сесії: команди збірки, домовленості, пастки.</p>
 <div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
@@ -115,7 +117,7 @@
 <tr>
 <td data-label="Рівень">user</td>
 <td data-label="Де лежить"><code>~/.claude/CLAUDE.md</code></td>
-<td data-label="Для чого">Ваші вподобання в усіх проєктах</td>
+<td data-label="Для чого">Твої вподобання в усіх проєктах</td>
 </tr>
 <tr>
 <td data-label="Рівень">project</td>
@@ -129,19 +131,19 @@
 </tr>
 </tbody>
 </table></div>
-<p>Над усім стоїть політика організації (managed).</p>
+<p>Над усім стоїть політика організації.</p>
 <ul>
 <li>Рівні <strong>складаються</strong> в один контекст, а не замінюють один одного.</li>
-<li>При конфлікті <strong>перемагає конкретніший</strong>. У вас 2 пробіли, у проєкті 4: діє 4.</li>
+<li>При конфлікті <strong>перемагає конкретніший</strong>. У тебе 2 пробіли, у проєкті 4: діє 4.</li>
 <li>Вкладений <code>frontend/CLAUDE.md</code> вантажиться, лише коли Claude працює з файлами цієї папки. Це рятує великі монорепозиторії.</li>
-<li><code>@docs/style.md</code> імпортує інший файл. Імпорт тримає порядок, але контекст не зменшує: імпортоване вантажиться на старті.</li>
+<li><code>@docs/style.md</code> підтягує інший файл. Імпорт тримає порядок, але контекст не зменшує: імпортоване вантажиться на старті.</li>
 <li><code>/memory</code> відкриває файли пам'яті для редагування.</li>
 </ul>
-<p>Що писати: те, чого Claude не вгадає (пастки, відхилення від звичного, причину правила). Що не писати: структуру папок, список залежностей. Тримайте файл до приблизно 200 рядків: роздутий CLAUDE.md виконується гірше.</p>
+<p>Що писати: те, чого Claude не вгадає (пастки, відхилення від звичного, причину правила). Чого не писати: структуру папок і список залежностей. Тримай файл до 200 рядків: роздутий CLAUDE.md виконується гірше.</p>
 <h2>Крок 2. Правила для частини коду: <code>.claude/rules</code></h2>
 <ul>
 <li>Кожен <code>.md</code> у <code>.claude/rules/</code> вантажиться як пам'ять проєкту, з тим самим пріоритетом, що <code>.claude/CLAUDE.md</code>.</li>
-<li>З frontmatter <code>paths:</code> (список glob-шаблонів) правило вантажиться <strong>лише</strong> для відповідних файлів. Наприклад <code>paths: [&quot;src/api/**&quot;]</code>.</li>
+<li>З frontmatter <code>paths:</code> (список glob-шаблонів) правило вантажиться <strong>лише</strong> для відповідних файлів, наприклад <code>paths: [&quot;src/api/**&quot;]</code>.</li>
 <li>Без <code>paths:</code> правило діє завжди.</li>
 </ul>
 <div class="tw"><table class="two">
@@ -162,16 +164,16 @@
 </tr>
 </tbody>
 </table></div>
-<p>Правила за шляхами додаються останніми, тож при конфлікті вони перемагають: від широкого до конкретного.</p>
+<p>Правила за шляхами додаються останніми, тож при конфлікті перемагають вони: від загального до конкретного.</p>
 <h2>Крок 3. Команди й навички</h2>
 <p><strong>Slash-команда</strong> це Markdown-файл:</p>
 <ul>
-<li><code>.claude/commands/</code> для всієї команди (у git) або <code>~/.claude/commands/</code> лише для вас;</li>
-<li>ім'я файла стає командою, тіло стає промптом;</li>
-<li><code>$ARGUMENTS</code> підставляє ваш ввід: <code>fix-issue.md</code> запускають як <code>/fix-issue 123</code>.</li>
+<li><code>.claude/commands/</code> для всієї команди (у git) або <code>~/.claude/commands/</code> лише для тебе;</li>
+<li>ім'я файла стає командою, текст стає промптом;</li>
+<li><code>$ARGUMENTS</code> підставляє твій ввід: <code>fix-issue.md</code> запускаєш як <code>/fix-issue 123</code>.</li>
 </ul>
-<p>Frontmatter команди: <code>description</code> (видно в <code>/help</code>, Claude може запропонувати команду), <code>argument-hint</code>, <code>allowed-tools</code>, <code>model</code>.</p>
-<p><strong>Навичка</strong> це розширена команда: <code>.claude/skills/&lt;name&gt;/SKILL.md</code> теж дає <code>/name</code>, але має папку для додаткових файлів і Claude може викликати її сам. Команди тепер злиті з навичками. Однакові імена: перемагає навичка.</p>
+<p>Frontmatter команди: <code>description</code> (видно в <code>/help</code>, і Claude може сам запропонувати команду), <code>argument-hint</code>, <code>allowed-tools</code>, <code>model</code>.</p>
+<p><strong>Навичка</strong> це розширена команда: <code>.claude/skills/&lt;name&gt;/SKILL.md</code> теж дає <code>/name</code>, але має папку для додаткових файлів, і Claude може викликати її сам. Команди тепер злиті з навичками. Однакові імена: перемагає навичка.</p>
 <p>Три поля, які любить іспит:</p>
 <div class="tw"><table class="two">
 <thead>
@@ -183,75 +185,75 @@
 <tbody>
 <tr>
 <td data-label="Поле"><code>context: fork</code></td>
-<td data-label="Що робить">Запускає навичку в ізольованому контексті</td>
+<td data-label="Що робить">Запускає навичку в окремому контексті</td>
 </tr>
 <tr>
 <td data-label="Поле"><code>allowed-tools</code></td>
-<td data-label="Що робить">Дозволяє перелічені інструменти без запиту. <strong>Інші не блокує</strong></td>
+<td data-label="Що робить">Дозволяє перелічені інструменти без запиту. <strong>Інших не блокує</strong></td>
 </tr>
 <tr>
 <td data-label="Поле"><code>disable-model-invocation: true</code></td>
-<td data-label="Що робить">Викликати можете лише ви: для <code>/commit</code>, <code>/deploy</code></td>
+<td data-label="Що робить">Запускаєш лише ти: для <code>/commit</code>, <code>/deploy</code></td>
 </tr>
 </tbody>
 </table></div>
-<p><strong>CLAUDE.md чи команда?</strong> Постійні домовленості в CLAUDE.md (діють завжди). Повторювані дії як команда чи навичка (на вимогу).</p>
+<p><strong>CLAUDE.md чи команда?</strong> Постійні домовленості в CLAUDE.md, вони діють завжди. Повторювані дії як команда чи навичка, вони запускаються на вимогу.</p>
 <h2>Крок 4. Plan mode</h2>
-<p>Plan mode це режим лише для читання: Claude досліджує й пише план, а <strong>Write і Edit заблоковано на рівні інструментів</strong>, доки ви не схвалите план. Це не прохання, а блокування.</p>
+<p>У plan mode Claude лише читає й пише план, а <strong>Write і Edit заблоковані на рівні інструментів</strong>, доки ти не схвалиш план. Це блокування, а не ввічливе прохання.</p>
 <p>Як увімкнути: Shift+Tab двічі, <code>/plan</code> або <code>--permission-mode plan</code> (працює і з <code>-p</code>).</p>
 <div class="tw"><table class="two">
 <thead>
 <tr>
-<th>Плануйте</th>
+<th>Плануй</th>
 <th>Не треба</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td data-label="Плануйте">Кілька файлів, рефакторинг, міграції</td>
+<td data-label="Плануй">Кілька файлів, рефакторинг, міграції</td>
 <td data-label="Не треба">Правка в одному файлі</td>
 </tr>
 <tr>
-<td data-label="Плануйте">Автентифікація, платежі, продакшн</td>
+<td data-label="Плануй">Автентифікація, платежі, продакшн</td>
 <td data-label="Не треба">Дрібні швидкі зміни</td>
 </tr>
 <tr>
-<td data-label="Плануйте">Незнайомий код, розмита задача</td>
+<td data-label="Плануй">Незнайомий код, розмита задача</td>
 <td data-label="Не треба"></td>
 </tr>
 </tbody>
 </table></div>
-<p>Цикл: дослідити, спланувати, схвалити (або спершу виправити план), виконати, перевірити тестами.</p>
-<p><strong>Explore subagent</strong> це розвідник лише з Read, Grep і Glob. Він читає в окремому контексті й повертає тільки висновки, тож важке читання не засмічує вашу сесію.</p>
+<p>Порядок: дослідити, спланувати, схвалити (або спершу виправити план), виконати, перевірити тестами.</p>
+<p><strong>Explore subagent</strong> це розвідник лише з Read, Grep і Glob. Він читає в окремому контексті й повертає тільки висновки, тож важке читання не засмічує твою сесію.</p>
 <h2>Крок 5. Ітерації</h2>
 <ul>
 <li>Перший результат це чернетка.</li>
-<li>Покажіть <strong>приклад входу й виходу</strong>: це прибирає здогадки краще за довгий опис.</li>
-<li><strong>Interview pattern:</strong> попросіть Claude спершу розпитати вас (фреймворк, помилки, крайні випадки). Розмите прохання стає специфікацією.</li>
-<li><strong>Тест спершу:</strong> напишіть тест, який має пройти, і нехай Claude ітерує до зеленого.</li>
-<li>Незалежні виправлення робіть разом, залежні по черзі.</li>
+<li>Покажи <strong>приклад входу й результату</strong>: це прибирає здогадки краще за довгий опис.</li>
+<li><strong>Interview pattern:</strong> попроси Claude спершу розпитати тебе (фреймворк, обробка помилок, крайні випадки). Розмите прохання стає специфікацією.</li>
+<li><strong>Спершу тест:</strong> напиши тест, який має пройти, і нехай Claude ітерує до зеленого.</li>
+<li>Незалежні виправлення роби разом, залежні по черзі.</li>
 </ul>
 <h2>Крок 6. Claude Code в CI/CD</h2>
 <ul>
-<li><code>claude -p &quot;промпт&quot;</code> це headless-режим: виконує, друкує результат, виходить з кодом статусу.</li>
+<li><code>claude -p &quot;промпт&quot;</code> запускає Claude Code без термінала: виконує задачу, друкує результат і виходить із кодом статусу.</li>
 <li><code>--output-format json</code> дає результат і метадані (cost, session_id), їх читають через <code>jq</code>. Формати: <code>text</code>, <code>json</code>, <code>stream-json</code>.</li>
-<li><code>--json-schema</code> гарантує форму результату в <code>structured_output</code>: беріть його, коли наступний крок вирішує щось за результатом.</li>
-<li>Обмеження, бо ніхто не дивиться: <code>--max-turns</code>, <code>--allowedTools</code>, <code>--max-budget-usd</code>. Перевіряйте зміст результату, а не лише код виходу.</li>
-<li>CLAUDE.md вантажиться і в CI: ваші правила стають контекстом рецензента.</li>
-<li>Рев'ю робить <strong>окремий екземпляр</strong>: він не бачив міркувань автора й не виправдовує своїх рішень.</li>
+<li><code>--json-schema</code> гарантує форму результату в <code>structured_output</code>. Бери його, коли наступний крок вирішує щось за результатом.</li>
+<li>Ліміти, бо ніхто не дивиться: <code>--max-turns</code>, <code>--allowedTools</code>, <code>--max-budget-usd</code>. Перевіряй зміст результату, а не лише код виходу.</li>
+<li>CLAUDE.md вантажиться і в CI: твої правила стають контекстом рецензента.</li>
+<li>Рев'ю робить <strong>окремий екземпляр</strong>: він не бачив міркувань автора й не захищає своїх рішень.</li>
 </ul>
 <div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ul>
-<li>CLAUDE.md: user, project, directory складаються, конкретніший перемагає.</li>
+<li>CLAUDE.md: user, project і directory складаються, конкретніший перемагає.</li>
 <li>Шаблон через репозиторій: rule з <code>paths:</code>. Одна папка: CLAUDE.md у ній.</li>
 <li><code>allowed-tools</code> дозволяє, але не обмежує.</li>
-<li><code>disable-model-invocation: true</code> для команд з побічними діями.</li>
+<li><code>disable-model-invocation: true</code> для команд із побічними діями.</li>
 <li>Plan mode блокує Write і Edit до схвалення.</li>
 <li>CI: <code>-p</code>, <code>--output-format json</code>, <code>--json-schema</code>, ліміти ходів і бюджету.</li>
 </ul>
-</div><h2>Перевірте себе</h2>
+</div><h2>Перевір себе</h2>
 <ol>
-<li>У вас 2 пробіли, у проєкті 4. Що діє?</li>
+<li>У тебе 2 пробіли, у проєкті 4. Що діє?</li>
 <li>Що станеться з іншими інструментами, якщо в навичці <code>allowed-tools: Read</code>?</li>
 <li>Як увімкнути plan mode?</li>
 <li>Як гарантувати форму результату <code>claude -p</code>?</li>
@@ -263,12 +265,12 @@
 <li>4: конкретніший рівень перемагає.</li>
 <li>Нічого: вони доступні як звичайно.</li>
 <li>Shift+Tab двічі, <code>/plan</code> або <code>--permission-mode plan</code>.</li>
-<li><code>--output-format json</code> з <code>--json-schema</code>.</li>
+<li><code>--output-format json</code> разом із <code>--json-schema</code>.</li>
 <li>Він не упереджений рішеннями автора.</li>
 </ol>
 </details>
 
-<nav class="pager"><a href="10-tool-design-and-mcp-simple.html"><small>← Назад</small>Лекція 10: дизайн інструментів і MCP (домен 2)</a><a href="12-prompts-and-structured-output-simple.html"><small>Далі →</small>Лекція 12: промпти, структурований вивід і рев&#x27;ю (домен 4)</a></nav><nav class="tools"><a href="../../claude-hub.html">← Claude General</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="11-claude-code-configuration-simple-en.html">🌐 Read in English</a></nav>
+<nav class="pager"><a href="10-tool-design-and-mcp-simple.html"><small>← Назад</small>Лекція 10: дизайн інструментів і MCP (домен 2)</a><a href="12-prompts-and-structured-output-simple.html"><small>Далі →</small>Лекція 12: промпти, структуровані відповіді й рев&#x27;ю (домен 4)</a></nav><nav class="tools"><a href="../../claude-hub.html">← Claude General</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="11-claude-code-configuration-simple-en.html">🌐 Read in English</a></nav>
 </main>
 <script>
 const tg = window.Telegram && window.Telegram.WebApp;

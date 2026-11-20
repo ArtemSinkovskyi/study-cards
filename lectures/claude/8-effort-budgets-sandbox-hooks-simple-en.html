@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lecture 8: effort, task budget, preserved thinking, sandbox and hooks</title>
+<title>Lecture 8: effort, task budget and preserved thinking</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
@@ -95,14 +95,14 @@
 <body>
 <main>
 <nav class="bar"><a href="../../claude-hub.html">← Claude General</a><a href="index.html">☰ Усі теми</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="8-effort-budgets-sandbox-hooks-simple.html">🌐 Читати українською</a></nav>
-<h1>Lecture 8: effort, task budget, preserved thinking, sandbox and hooks</h1>
+<h1>Lecture 8: effort, task budget and preserved thinking</h1>
 <blockquote>
-<p>Simplified version. The full lecture exists in Ukrainian only.</p>
+<p>Simplified version. The full lecture exists in Ukrainian only. The sandbox and rare hook events were removed from this lecture: they are not on the exam.</p>
 </blockquote>
+<h2>What the exam asks about this</h2>
+<p>How to control spend (effort, budget) and what you must not change in a conversation so you do not break thinking and the cache.</p>
 <h2>The main idea</h2>
-<p><strong>This lecture is about controlling spend (effort, budget), about what you must not break in a conversation (preserved thinking), and about safety boundaries (sandbox, hooks).</strong></p>
-<h2>Why it is designed this way</h2>
-<p>Not every task needs maximum effort, so effort and budgets let you pay only for the depth you need, while the sandbox and hooks protect against dangerous actions.</p>
+<p><strong>Not every task needs maximum effort. Effort and budgets let you pay only for the depth you need. And conversation history can only be appended to, never rewritten.</strong></p>
 <h2>Part 1. Effort</h2>
 <p><strong>Effort</strong> is the <code>output_config.effort</code> parameter: how much work the model puts in. It affects <strong>all tokens</strong>: text, tool calls and thinking.</p>
 <div class="tw"><table class="two">
@@ -217,51 +217,6 @@
 <li><strong>Background compaction:</strong> the summary request runs while the conversation goes on. When the block arrives, <strong>drop exactly the messages you sent</strong>, and keep later turns after the block.</li>
 </ul>
 <p>The condition for both: <code>system</code> and <code>tools</code> do not change, otherwise thinking in the kept turns becomes invalid.</p>
-<h2>Part 5. The sandbox in Claude Code</h2>
-<p>The <strong>sandbox</strong> is an operating-system boundary around shell commands (<strong>Bash, PowerShell, Monitor</strong>) and their child processes.</p>
-<p>What to know:</p>
-<ul>
-<li><strong>Off by default.</strong> Turn it on with <code>/sandbox</code> or <code>sandbox.enabled: true</code>.</li>
-<li>Works on macOS, Linux and WSL2. On plain Windows commands run without the sandbox.</li>
-<li><strong>Outside it:</strong> Claude's file and web tools (Read, Edit, Write, WebFetch, WebSearch), local MCP servers and command hooks. Permission rules protect those.</li>
-<li>By default <strong>reading is open almost everywhere</strong>, including <code>~/.ssh</code> and <code>~/.aws/credentials</code>. Add <code>denyRead</code> if that is a problem.</li>
-<li>Network traffic goes through a proxy with a list of allowed domains. The proxy <strong>does not decrypt TLS</strong>, so a bypass is possible (domain fronting): broad domains like <code>github.com</code> are risky.</li>
-<li>Environment variables (with secrets) are inherited.</li>
-</ul>
-<p>Two sandbox modes:</p>
-<div class="tw"><table class="two">
-<thead>
-<tr>
-<th>Mode</th>
-<th>What</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td data-label="Mode">Auto-allow</td>
-<td data-label="What">Sandboxed commands run without a prompt (not the same as auto mode)</td>
-</tr>
-<tr>
-<td data-label="Mode">Regular</td>
-<td data-label="What">Every command goes through the normal permission flow</td>
-</tr>
-</tbody>
-</table></div>
-<p>How to take a command out of the sandbox: <code>excludedCommands</code> (runs <strong>with no limits</strong>, risky) and a retry with <code>dangerouslyDisableSandbox</code> (turned off with <code>allowUnsandboxedCommands: false</code>).</p>
-<p>For organisations: in managed settings <code>sandbox.enabled</code>, <code>failIfUnavailable: true</code>, <code>allowUnsandboxedCommands: false</code>.</p>
-<p><strong>The sandbox and permissions complement each other.</strong> Rules check a call before it runs, and the sandbox holds even when an allowed command does more than its name suggests.</p>
-<h2>Part 6. Hooks: what else to know</h2>
-<ul>
-<li><strong><code>PreToolUse</code> does not fire on <code>@file</code></strong> in a prompt. Block paths with a <code>Read</code> deny.</li>
-<li><strong><code>updatedInput</code></strong> replaces <strong>the whole</strong> tool input.</li>
-<li><strong><code>PostToolUse</code></strong> cannot undo an action: the tool has already run. In the exam course it is used to shape the result before Claude sees it (for example, normalize dates) and for logging.</li>
-<li><strong><code>PermissionRequest</code>:</strong> only a <strong>command hook</strong> with <code>decision.behavior: &quot;deny&quot;</code> can deny. A prompt hook with <code>ok: false</code> <strong>has no effect</strong> here.</li>
-<li><strong><code>PreCompact</code>:</strong> exit 2 or <code>decision: &quot;block&quot;</code> blocks compaction.</li>
-<li><strong><code>Stop</code> hook:</strong> up to <strong>8 continuations in a row</strong>; check <code>stop_hook_active</code>. There is also a softer <code>additionalContext</code>.</li>
-<li>An <strong>async hook</strong> (<code>&quot;async&quot;: true</code>, <code>command</code> only) <strong>blocks nothing</strong>; its result arrives on the next turn.</li>
-<li>A <strong>prompt hook</strong> returns <code>{&quot;ok&quot;: true|false, &quot;reason&quot;}</code>; for <code>Stop</code>, <code>ok: false</code> makes Claude keep working, for <code>PreToolUse</code> it denies the call.</li>
-<li><strong>Security:</strong> command hooks run <strong>with all of your user's rights</strong>. In <code>-p</code> mode (no trust dialog) hooks from the repository's <code>.claude/settings.json</code> <strong>run without a trust check</strong>. Before scripting <code>claude -p</code> over someone else's repository, review its <code>.claude/</code>.</li>
-</ul>
 <h2>Glossary</h2>
 <div class="tw"><table class="two">
 <thead>
@@ -280,43 +235,30 @@
 <td data-label="What it is">an advisory token limit for the whole agent loop, visible to the model</td>
 </tr>
 <tr>
-<td data-label="Term"><strong>Sandbox</strong></td>
-<td data-label="What it is">isolating Bash commands from files and network beyond what is allowed</td>
+<td data-label="Term"><strong>Append-only</strong></td>
+<td data-label="What it is">history is only added to at the end, nothing is rewritten</td>
 </tr>
 <tr>
-<td data-label="Term"><strong>Command / Prompt hook</strong></td>
-<td data-label="What it is">a hook that runs a command, or a hook that asks a model</td>
-</tr>
-<tr>
-<td data-label="Term"><strong>Stop hook</strong></td>
-<td data-label="What it is">fires when the agent wants to stop, can make it continue</td>
-</tr>
-<tr>
-<td data-label="Term"><strong>PreCompact / PostToolUse</strong></td>
-<td data-label="What it is">events before compaction and after a tool call</td>
+<td data-label="Term"><strong>Per-message effort</strong></td>
+<td data-label="What it is">changing effort through a message, without invalidating the cache</td>
 </tr>
 </tbody>
 </table></div>
-<h2>🖼 Схема: Claude: effort, бюджет, sandbox, hooks</h2><div class="dg"><div class="dtitle">Effort: рівні</div><div class="tw"><table class="two"><thead><tr><th>Рівень</th><th>Коли</th></tr></thead><tbody><tr><td>low</td><td>прості завдання, швидкість, субагенти</td></tr><tr><td>medium</td><td>баланс швидкості й якості</td></tr><tr><td>high</td><td>складні завдання (типово)</td></tr><tr><td>xhigh</td><td>довгі агентні й кодові завдання</td></tr><tr><td>max</td><td>найглибше мислення без обмежень</td></tr></tbody></table></div><div class="dnote">Effort це сигнал, а не жорсткий бюджет: жорстка стеля це max_tokens. adaptive не рівень effort, а режим thinking. На Opus 5.5 і Haiku 5.5 типово medium.</div><div class="dtitle">Зміна effort у розмові</div><div class="dcols"><div class="dcol red"><b>Нове верхнє значення</b><ul><li>скидає кеш</li></ul></div><div class="dcol green"><b>Per-message effort (beta)</b><ul><li>повідомлення role system з output_config.effort</li><li>зберігає кеш</li></ul></div></div><div class="dtitle">Task budget</div><div class="dgroup blue"><b>Дорадчий бюджет токенів на весь цикл агента</b><div class="dkids"><div class="dbox blue">мінімум 20 000 токенів, менше дає 400</div><div class="dbox blue">модель бачить зворотний відлік</div><div class="dbox blue">жорстка стеля лишається max_tokens</div><div class="dbox blue">не підтримується в Claude Code</div></div></div><div class="dtitle">Збережені роздуми: працюйте append-only</div><div class="dcols"><div class="dcol green"><b>Дозволено</b><ul><li>додати повідомлення в кінець</li><li>змінити effort, max_tokens, tool_choice</li><li>додати чи прибрати cache_control</li><li>серверне ущільнення, context editing</li></ul></div><div class="dcol red"><b>Ламає блоки</b><ul><li>змінити system</li><li>змінити набір інструментів</li><li>змінити чи видалити раніші повідомлення</li><li>скоротити раніший tool_result</li></ul></div></div><div class="dnote">Зміни system робіть повідомленням role system в кінці, зміни інструментів через tool_addition і tool_removal. Логуйте input_transformations на кожному ході.</div><div class="dtitle">Sandbox у Claude Code</div><div class="dgroup green"><b>Усередині sandbox</b><div class="dkids"><div class="dbox green">Bash, PowerShell, Monitor і їхні дочірні процеси</div></div></div><div class="dgroup red"><b>Поза sandbox</b><div class="dkids"><div class="dbox red">Read, Edit, Write, WebFetch, WebSearch</div><div class="dbox red">локальні MCP-сервери</div><div class="dbox red">command hooks</div></div></div><div class="dnote">Вимкнений за замовчуванням. macOS, Linux, WSL2. Читання відкрите майже всюди (~/.ssh, ~/.aws), додайте denyRead. Проксі не розшифровує TLS. Дозволи й sandbox доповнюють одне одного.</div><div class="dtitle">Hooks: що ще знати</div><div class="tw"><table class="two"><thead><tr><th>Подія</th><th>Суть</th></tr></thead><tbody><tr><td>PreToolUse</td><td>не спрацьовує на @file, блокуйте через Read deny</td></tr><tr><td>PostToolUse</td><td>не скасує дію, вона вже виконана</td></tr><tr><td>PermissionRequest</td><td>забороняє лише command hook</td></tr><tr><td>Stop</td><td>до 8 продовжень поспіль, перевіряйте stop_hook_active</td></tr><tr><td>Async hook</td><td>нічого не блокує</td></tr></tbody></table></div></div><div class="remember"><h2>What to remember for the exam</h2>
+<h2>🖼 Схема: Claude: effort, бюджет, збережені роздуми</h2><div class="dg"><div class="dtitle">Effort: рівні</div><div class="tw"><table class="two"><thead><tr><th>Рівень</th><th>Коли</th></tr></thead><tbody><tr><td>low</td><td>прості завдання, швидкість, субагенти</td></tr><tr><td>medium</td><td>баланс швидкості й якості</td></tr><tr><td>high</td><td>складні завдання (типово)</td></tr><tr><td>xhigh</td><td>довгі агентні й кодові завдання</td></tr><tr><td>max</td><td>найглибше мислення без обмежень</td></tr></tbody></table></div><div class="dnote">Effort це сигнал, а не жорсткий бюджет: жорстка стеля це max_tokens. adaptive не рівень effort, а режим thinking. На Opus 5.5 і Haiku 5.5 типово medium.</div><div class="dtitle">Зміна effort у розмові</div><div class="dcols"><div class="dcol red"><b>Нове верхнє значення</b><ul><li>скидає кеш</li></ul></div><div class="dcol green"><b>Per-message effort (beta)</b><ul><li>повідомлення role system з output_config.effort</li><li>зберігає кеш</li></ul></div></div><div class="dtitle">Task budget</div><div class="dgroup blue"><b>Дорадчий бюджет токенів на весь цикл агента</b><div class="dkids"><div class="dbox blue">мінімум 20 000 токенів, менше дає 400</div><div class="dbox blue">модель бачить зворотний відлік</div><div class="dbox blue">жорстка стеля лишається max_tokens</div><div class="dbox blue">не підтримується в Claude Code</div></div></div><div class="dtitle">Збережені роздуми: лише append-only</div><div class="dcols"><div class="dcol green"><b>Дозволено</b><ul><li>додати повідомлення в кінець</li><li>змінити effort, max_tokens, tool_choice</li><li>додати чи прибрати cache_control</li><li>серверне ущільнення, context editing</li></ul></div><div class="dcol red"><b>Ламає блоки</b><ul><li>змінити system</li><li>змінити набір інструментів</li><li>змінити чи видалити раніші повідомлення</li><li>скоротити раніший tool_result</li></ul></div></div><div class="dnote">Зміни system роби повідомленням role system у кінці, зміни інструментів через tool_addition і tool_removal. Логуй input_transformations на кожному ході.</div></div><div class="remember"><h2>What to remember for the exam</h2>
 <ol>
 <li>Effort defaults to <code>high</code>, on Opus 5.5 and Haiku 5.5 to <code>medium</code>. It is a signal; the hard ceiling is <code>max_tokens</code>.</li>
 <li>Changing the top-level effort invalidates the cache, per-message effort does not.</li>
 <li>Task budget: advisory, minimum 20,000, not in Claude Code.</li>
 <li>Preserved thinking: append-only. Changing <code>system</code> or <code>tools</code> breaks the blocks.</li>
 <li>Log <code>input_transformations</code> every turn.</li>
-<li>The sandbox is off by default, covers only shell commands, reading is open.</li>
-<li><code>PreToolUse</code> does not see <code>@file</code>. <code>PostToolUse</code> cannot undo anything.</li>
-<li>An async hook does not block. A prompt hook on <code>PermissionRequest</code> has no effect.</li>
-<li>In <code>-p</code> mode hooks from the repository run without a trust dialog.</li>
 </ol>
 </div><h2>Check yourself</h2>
 <ol>
 <li>What is the default effort on Opus 5.5?</li>
 <li>What is the minimum <code>task_budget.total</code>?</li>
 <li>What breaks preserved thinking blocks?</li>
-<li>What does the sandbox cover and what not?</li>
-<li>Can an async hook block an action?</li>
 <li>Why is per-message effort better than changing the top-level value?</li>
+<li>Where may you cut the history in keep-tail?</li>
 </ol>
 <details>
 <summary>Answers</summary>
@@ -324,9 +266,8 @@
 <li><code>medium</code>.</li>
 <li>20,000 tokens.</li>
 <li>Changing <code>system</code>, the tools or earlier messages.</li>
-<li>It covers Bash, PowerShell and Monitor. Not Read, Edit, Write, MCP or hooks.</li>
-<li>No.</li>
 <li>It keeps the cache.</li>
+<li>Where no tool call is left open.</li>
 </ol>
 </details>
 

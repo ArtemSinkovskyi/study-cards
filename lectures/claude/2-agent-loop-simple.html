@@ -97,19 +97,19 @@
 <nav class="bar"><a href="../../claude-hub.html">← Claude General</a><a href="index.html">☰ Усі теми</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="2-agent-loop-simple-en.html">🌐 Read in English</a></nav>
 <h1>Лекція 2: як агент працює з інструментами</h1>
 <blockquote>
-<p>Спрощена версія. Усі факти ті самі, що в повній лекції: ../2-agentic-loop-and-tool-use.md.</p>
+<p>Спрощена версія. Повна: ../2-agentic-loop-and-tool-use.md. Погляд курсу на цикл агента в лекції 9.</p>
 </blockquote>
+<h2>Що з цього питають на іспиті</h2>
+<p>Коли цикл продовжується, а коли зупиняється. Як повертати результати кількох інструментів. Що робити, коли інструмент упав.</p>
 <h2>Головна ідея</h2>
-<p><strong>Модель нічого не виконує. Вона повертає запит, а ваш код його виконує.</strong></p>
-<p>Звичайно клієнт кличе ваш контролер. Тут навпаки: <strong>модель це клієнт</strong>, який надсилає вам запит «виклич такий метод», а ваш код виконує його й повертає результат. Сама модель до вашої бази чи API не дотягнеться.</p>
-<h2>Навіщо це так задумано</h2>
-<p>Модель сама нічого не виконує: вона лише каже «потрібен інструмент». Ваш код виконує його й повертає результат, тому цикл і stop_reason потрібні, щоб знати, коли продовжувати.</p>
+<p><strong>Модель нічого не виконує. Вона просить, а виконує твій код.</strong></p>
+<p>Зазвичай клієнт кличе твій контролер. Тут навпаки: модель це клієнт, який надсилає тобі запит «виклич такий метод». Твій код його виконує й повертає результат. Сама модель до твоєї бази чи API не дотягнеться.</p>
 <h2>Крок 1. Що таке інструмент</h2>
-<p>Інструмент це ваша функція, яку ви описали для моделі: назва, що робить і які параметри приймає.</p>
-<p>Приклад: <code>get_weather</code>, «дає поточну погоду», параметр <code>city</code>.</p>
-<p>Модель не бачить вашого коду, лише цей опис. Тому <strong>чим краще описано, тим точніше вона викликає</strong>. Це як OpenAPI-контракт: клієнт знає лише його.</p>
-<h2>Крок 2. Один круг розмови</h2>
-<p>Питання користувача: «Яка погода в Києві?»</p>
+<p>Інструмент це твоя функція, описана для моделі: назва, що вона робить і які параметри приймає.</p>
+<p>Приклад: <code>get_weather</code>, «повертає поточну погоду», параметр <code>city</code>.</p>
+<p>Модель бачить лише опис, а не код. Що точніший опис, то точніше вона викликає інструмент. Це як OpenAPI-контракт: клієнт знає тільки його.</p>
+<h2>Крок 2. Одне коло розмови</h2>
+<p>Користувач питає: «Яка погода в Києві?»</p>
 <div class="tw"><table class="two">
 <thead>
 <tr>
@@ -119,20 +119,20 @@
 </thead>
 <tbody>
 <tr>
-<td data-label="Хто">Ви</td>
-<td data-label="Що відбувається">Надсилаєте питання й описи інструментів</td>
+<td data-label="Хто">Ти</td>
+<td data-label="Що відбувається">Надсилаєш питання й описи інструментів</td>
 </tr>
 <tr>
 <td data-label="Хто">Модель</td>
 <td data-label="Що відбувається">Відповідає блоком <strong>tool_use</strong>: «виклич get_weather, місто Київ»</td>
 </tr>
 <tr>
-<td data-label="Хто">Ваш код</td>
-<td data-label="Що відбувається">Реально викликає погодний сервіс: +15, хмарно</td>
+<td data-label="Хто">Твій код</td>
+<td data-label="Що відбувається">Справді звертається до погодного сервісу: +15, хмарно</td>
 </tr>
 <tr>
-<td data-label="Хто">Ви</td>
-<td data-label="Що відбувається">Надсилаєте блок <strong>tool_result</strong> із цим результатом</td>
+<td data-label="Хто">Ти</td>
+<td data-label="Що відбувається">Надсилаєш блок <strong>tool_result</strong> із цим результатом</td>
 </tr>
 <tr>
 <td data-label="Хто">Модель</td>
@@ -140,42 +140,42 @@
 </tr>
 </tbody>
 </table></div>
-<p>Модель сказала, що хоче, <strong>але не виконала</strong>. Виконали ви.</p>
-<p>У <code>tool_use</code> є <code>id</code>, а в <code>tool_result</code> ви вказуєте той самий <code>tool_use_id</code>, щоб модель знала, на який запит це відповідь.</p>
-<h2>Крок 3. Як знати, що робити далі: stop_reason</h2>
-<p>Кожна відповідь моделі має поле <code>stop_reason</code>, схоже на статус результату.</p>
+<p>Модель сказала, чого хоче, але нічого не виконала. Виконав твій код.</p>
+<p>У <code>tool_use</code> є <code>id</code>. У <code>tool_result</code> ти вказуєш той самий <code>tool_use_id</code>, щоб модель знала, на який запит це відповідь.</p>
+<h2>Крок 3. Як зрозуміти, що далі: stop_reason</h2>
+<p>Кожна відповідь моделі має поле <code>stop_reason</code>, щось на зразок статусу.</p>
 <div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
 <th>Значення</th>
-<th>Що це означає</th>
-<th>Що робите</th>
+<th>Що означає</th>
+<th>Що робиш</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td data-label="Значення"><code>tool_use</code></td>
-<td data-label="Що це означає">Модель просить виклик</td>
-<td data-label="Що робите">Виконуєте інструмент, надсилаєте результат</td>
+<td data-label="Що означає">Модель просить виклик</td>
+<td data-label="Що робиш">Виконуєш інструмент, надсилаєш результат</td>
 </tr>
 <tr>
 <td data-label="Значення"><code>end_turn</code></td>
-<td data-label="Що це означає">Модель закінчила</td>
-<td data-label="Що робите">Показуєте відповідь, <strong>вихід</strong></td>
+<td data-label="Що означає">Модель закінчила</td>
+<td data-label="Що робиш">Показуєш відповідь і <strong>виходиш</strong></td>
 </tr>
 <tr>
 <td data-label="Значення"><code>max_tokens</code></td>
-<td data-label="Що це означає">Відповідь обрізана через ліміт</td>
-<td data-label="Що робите">Збільшіть ліміт</td>
+<td data-label="Що означає">Відповідь обрізав ліміт</td>
+<td data-label="Що робиш">Збільшуєш ліміт</td>
 </tr>
 <tr>
 <td data-label="Значення"><code>refusal</code></td>
-<td data-label="Що це означає">Модель відмовилась</td>
-<td data-label="Що робите">Дивіться <code>stop_details</code></td>
+<td data-label="Що означає">Модель відмовилась</td>
+<td data-label="Що робиш">Дивишся <code>stop_details</code></td>
 </tr>
 </tbody>
 </table></div>
-<p>Цикл у вигляді Java:</p>
+<p>Цикл на Java:</p>
 <pre><code class="language-java">Response response = client.send(messages);
 while (&quot;tool_use&quot;.equals(response.stopReason())) {
     List&lt;ToolResult&gt; results = executeAll(response.toolUses());
@@ -185,11 +185,11 @@ while (&quot;tool_use&quot;.equals(response.stopReason())) {
 }
 show(response);
 </code></pre>
-<p>Читається так: <strong>поки модель просить виклик, виконуємо й питаємо знову</strong>.</p>
+<p>Читається просто: поки модель просить виклик, виконуємо й питаємо знову.</p>
 <h2>Крок 4. Три правила, на яких помиляються</h2>
-<p><strong>Правило 1. Кілька інструментів за раз.</strong> Модель може повернути три <code>tool_use</code> в одній відповіді. Ви виконуєте всі й повертаєте <strong>всі результати одним повідомленням</strong>. Якщо надсилати окремими, модель «відучується» просити кілька за раз.</p>
-<p><strong>Правило 2. Інструмент упав.</strong> Не мовчіть і не падайте. Поверніть <code>tool_result</code> з <code>is_error: true</code> і зрозумілим текстом, наприклад: «Сервіс недоступний, повтори за 60 секунд». Тоді модель може спробувати інакше.</p>
-<p><strong>Правило 3. Ліміт кругів.</strong> Документація не обмежує кількість кругів. Якщо модель постійно просить інструменти, ваш <code>while</code> крутитиметься вічно. Поставте <strong>свій ліміт</strong>, наприклад 10. Це те саме, що <code>maxAttempts</code> у retry.</p>
+<p><strong>Кілька інструментів за раз.</strong> Модель може повернути три <code>tool_use</code> в одній відповіді. Виконуєш усі й повертаєш усі результати одним повідомленням. Якщо слати окремо, модель відвикає просити кілька викликів одночасно.</p>
+<p><strong>Інструмент упав.</strong> Не мовчи й не падай. Поверни <code>tool_result</code> з <code>is_error: true</code> і зрозумілим текстом, наприклад «Сервіс недоступний, повтори за 60 секунд». Тоді модель спробує інакше.</p>
+<p><strong>Ліміт кіл.</strong> Документація кількість кіл не обмежує. Якщо модель без кінця просить інструменти, твій <code>while</code> крутитиметься вічно. Постав свій ліміт, наприклад 10, як <code>maxAttempts</code> у retry.</p>
 <h2>Крок 5. Хто виконує інструмент</h2>
 <div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
@@ -201,13 +201,13 @@ show(response);
 </thead>
 <tbody>
 <tr>
-<td data-label="Вид">Ваші власні</td>
-<td data-label="Хто виконує"><strong>Ви</strong></td>
-<td data-label="Приклади"><code>get_weather</code>, запит у вашу базу</td>
+<td data-label="Вид">Твої власні</td>
+<td data-label="Хто виконує"><strong>Ти</strong></td>
+<td data-label="Приклади"><code>get_weather</code>, запит у твою базу</td>
 </tr>
 <tr>
 <td data-label="Вид">Готові від Anthropic</td>
-<td data-label="Хто виконує"><strong>Ви</strong></td>
+<td data-label="Хто виконує"><strong>Ти</strong></td>
 <td data-label="Приклади"><code>bash</code>, <code>text_editor</code>, <code>memory</code></td>
 </tr>
 <tr>
@@ -217,11 +217,11 @@ show(response);
 </tr>
 </tbody>
 </table></div>
-<p>Для серверних ви лише вмикаєте інструмент, а результат приходить уже в готовій відповіді.</p>
+<p>Серверний інструмент ти лише вмикаєш, а результат приходить уже в готовій відповіді.</p>
 <h2>Крок 6. Дві рідкісні речі</h2>
 <ul>
-<li><strong>pause_turn.</strong> Серверні інструменти мають свій внутрішній цикл, обмежений 10 кругами. Коли він упирається в ліміт, приходить <code>pause_turn</code>: «ще не закінчено». Просто надішліть розмову знову.</li>
-<li><strong>disable_parallel_tool_use.</strong> Вимикає паралельні виклики. Параметр лежить <strong>всередині <code>tool_choice</code></strong>, а не окремо.</li>
+<li><strong>pause_turn.</strong> Серверні інструменти мають власний цикл до 10 кіл. Коли він вичерпується, приходить <code>pause_turn</code>: «ще не закінчено». Просто надішли розмову знову.</li>
+<li><strong>disable_parallel_tool_use.</strong> Вимикає паралельні виклики. Параметр лежить усередині <code>tool_choice</code>, а не окремо.</li>
 </ul>
 <h2>Словник</h2>
 <div class="tw"><table class="two">
@@ -238,11 +238,11 @@ show(response);
 </tr>
 <tr>
 <td data-label="Термін"><strong>stop_reason</strong></td>
-<td data-label="Що це">чому модель зупинилася: <code>tool_use</code>, <code>end_turn</code>, <code>max_tokens</code> тощо</td>
+<td data-label="Що це">чому модель зупинилась: <code>tool_use</code>, <code>end_turn</code>, <code>max_tokens</code> тощо</td>
 </tr>
 <tr>
 <td data-label="Термін"><strong>tool_use / tool_result</strong></td>
-<td data-label="Що це">блок, у якому модель просить інструмент, і блок з результатом</td>
+<td data-label="Що це">блок, де модель просить інструмент, і блок із результатом</td>
 </tr>
 <tr>
 <td data-label="Термін"><strong>Паралельні виклики</strong></td>
@@ -250,35 +250,31 @@ show(response);
 </tr>
 <tr>
 <td data-label="Термін"><strong>pause_turn</strong></td>
-<td data-label="Що це">серверний інструмент призупинив хід, треба продовжити</td>
-</tr>
-<tr>
-<td data-label="Термін"><strong>Клієнтський / серверний інструмент</strong></td>
-<td data-label="Що це">виконує ваш код чи виконує Anthropic</td>
+<td data-label="Що це">серверний інструмент зробив паузу, треба продовжити</td>
 </tr>
 </tbody>
 </table></div>
-<h2>🖼 Схема: Claude: цикл агента і stop_reason</h2><div class="dg"><div class="dtitle">Модель просить, ваш код виконує</div><div class="dflow"><div class="dbox aws">Ви: питання й описи інструментів</div><div class="darrow">↓</div><div class="dbox yellow">Модель: блок tool_use (id, ім&#x27;я, вхід)</div><div class="darrow">↓</div><div class="dbox blue">Ваш код: реально виконує інструмент</div><div class="darrow">↓</div><div class="dbox green">Ви: блок tool_result з тим самим tool_use_id</div><div class="darrow">↓</div><div class="dbox aws">Модель: відповідь користувачу (end_turn)</div></div><div class="dnote">Модель сказала, що хоче, але не виконала. Виконали ви.</div><div class="dtitle">stop_reason: що робити далі</div><div class="tw"><table class="two"><thead><tr><th>Значення</th><th>Що робите</th></tr></thead><tbody><tr><td>tool_use</td><td>виконати інструмент, надіслати результат, питати знову</td></tr><tr><td>end_turn</td><td>показати відповідь, вихід із циклу</td></tr><tr><td>max_tokens</td><td>відповідь обрізана, збільшити ліміт</td></tr><tr><td>refusal</td><td>модель відмовилась, дивитись stop_details</td></tr></tbody></table></div><div class="dnote">Цикл: поки stop_reason це tool_use, виконуємо й питаємо знову. Поставте власний ліміт кругів, наприклад 10.</div><div class="dtitle">Три правила, на яких помиляються</div><div class="dcols"><div class="dcol blue"><b>Кілька tool_use за раз</b><ul><li>виконати всі</li><li>повернути всі результати одним повідомленням</li></ul></div><div class="dcol red"><b>Інструмент упав</b><ul><li>tool_result з is_error: true</li><li>зрозумілий текст: «повтори за 60 секунд»</li></ul></div><div class="dcol yellow"><b>Ліміт кругів</b><ul><li>документація його не ставить</li><li>свій ліміт у циклі</li></ul></div></div><div class="dtitle">Хто виконує інструмент</div><div class="dgroup green"><b>Виконуєте ви</b><div class="dkids"><div class="dbox green">власні: get_weather, запит у вашу базу</div><div class="dbox green">готові від Anthropic: bash, text_editor, memory</div></div></div><div class="dgroup blue"><b>Виконує Anthropic (серверні)</b><div class="dkids"><div class="dbox blue">web_search</div><div class="dbox blue">web_fetch</div><div class="dbox blue">code_execution</div></div></div><div class="dnote">pause_turn: внутрішній цикл серверних інструментів упирається в 10 кругів, надішліть розмову знову. disable_parallel_tool_use лежить усередині tool_choice.</div></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
+<h2>🖼 Схема: Claude: цикл агента і stop_reason</h2><div class="dg"><div class="dtitle">Модель просить, твій код виконує</div><div class="dflow"><div class="dbox aws">Ви: питання й описи інструментів</div><div class="darrow">↓</div><div class="dbox yellow">Модель: блок tool_use (id, ім&#x27;я, вхід)</div><div class="darrow">↓</div><div class="dbox blue">Ваш код: реально виконує інструмент</div><div class="darrow">↓</div><div class="dbox green">Ви: блок tool_result з тим самим tool_use_id</div><div class="darrow">↓</div><div class="dbox aws">Модель: відповідь користувачу (end_turn)</div></div><div class="dnote">Модель сказала, що хоче, але не виконала. Виконали ви.</div><div class="dtitle">stop_reason: що робити далі</div><div class="tw"><table class="two"><thead><tr><th>Значення</th><th>Що робите</th></tr></thead><tbody><tr><td>tool_use</td><td>виконати інструмент, надіслати результат, питати знову</td></tr><tr><td>end_turn</td><td>показати відповідь, вихід із циклу</td></tr><tr><td>max_tokens</td><td>відповідь обрізана, збільшити ліміт</td></tr><tr><td>refusal</td><td>модель відмовилась, дивитись stop_details</td></tr></tbody></table></div><div class="dnote">Цикл: поки stop_reason це tool_use, виконуємо й питаємо знову. Поставте власний ліміт кругів, наприклад 10.</div><div class="dtitle">Три правила, на яких помиляються</div><div class="dcols"><div class="dcol blue"><b>Кілька tool_use за раз</b><ul><li>виконати всі</li><li>повернути всі результати одним повідомленням</li></ul></div><div class="dcol red"><b>Інструмент упав</b><ul><li>tool_result з is_error: true</li><li>зрозумілий текст: «повтори за 60 секунд»</li></ul></div><div class="dcol yellow"><b>Ліміт кругів</b><ul><li>документація його не ставить</li><li>свій ліміт у циклі</li></ul></div></div><div class="dtitle">Хто виконує інструмент</div><div class="dgroup green"><b>Виконуєте ви</b><div class="dkids"><div class="dbox green">власні: get_weather, запит у твою базу</div><div class="dbox green">готові від Anthropic: bash, text_editor, memory</div></div></div><div class="dgroup blue"><b>Виконує Anthropic (серверні)</b><div class="dkids"><div class="dbox blue">web_search</div><div class="dbox blue">web_fetch</div><div class="dbox blue">code_execution</div></div></div><div class="dnote">pause_turn: внутрішній цикл серверних інструментів упирається в 10 кругів, надішліть розмову знову. disable_parallel_tool_use лежить усередині tool_choice.</div></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
-<li>Модель просить, ваш код виконує.</li>
-<li>Цикл іде, поки <code>stop_reason</code> дорівнює <code>tool_use</code>.</li>
-<li>Усі результати одного ходу одним повідомленням.</li>
+<li>Модель просить, твій код виконує.</li>
+<li>Цикл триває, поки <code>stop_reason</code> дорівнює <code>tool_use</code>.</li>
+<li>Усі результати одного ходу йдуть одним повідомленням.</li>
 <li>Помилка інструмента: <code>is_error: true</code> і зрозумілий текст.</li>
-<li>Ліміт кругів ставите самі.</li>
-<li><code>pause_turn</code> означає «надішли знову».</li>
+<li>Ліміт кіл ставиш сам.</li>
+<li><code>pause_turn</code> означає «надішли ще раз».</li>
 </ol>
-</div><h2>Перевірте себе</h2>
+</div><h2>Перевір себе</h2>
 <ol>
 <li>Хто насправді виконує <code>get_weather</code>?</li>
 <li>Що робити, коли <code>stop_reason</code> дорівнює <code>end_turn</code>?</li>
 <li>Модель попросила три інструменти. Скільки повідомлень із результатами?</li>
-<li>Інструмент упав. Що повертаєте моделі?</li>
-<li>Навіщо власний ліміт кругів?</li>
+<li>Інструмент упав. Що повертаєш моделі?</li>
+<li>Навіщо власний ліміт кіл?</li>
 </ol>
 <details>
 <summary>Відповіді</summary>
 <ol>
-<li>Ваш код. Модель лише просить.</li>
+<li>Твій код. Модель лише просить.</li>
 <li>Показати відповідь і вийти з циклу.</li>
 <li>Одне, з трьома результатами.</li>
 <li><code>tool_result</code> з <code>is_error: true</code> і зрозумілим текстом.</li>
@@ -288,7 +284,7 @@ show(response);
 <hr />
 <p><em>Повна версія:</em> 2-agentic-loop-and-tool-use.md.</p>
 
-<nav class="pager"><a href="1-start-simple.html"><small>← Назад</small>Лекція 1: що за іспит і з чого починати</a><a href="3-tools-and-mcp-simple.html"><small>Далі →</small>Лекція 3: як описувати інструменти і що таке MCP</a></nav><nav class="tools"><a href="../../claude-hub.html">← Claude General</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="2-agent-loop-simple-en.html">🌐 Read in English</a></nav>
+<nav class="pager"><a href="1-start-simple.html"><small>← Назад</small>Лекція 1: що за іспит і з чого почати</a><a href="3-tools-and-mcp-simple.html"><small>Далі →</small>Лекція 3: як описувати інструменти і що таке MCP</a></nav><nav class="tools"><a href="../../claude-hub.html">← Claude General</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="2-agent-loop-simple-en.html">🌐 Read in English</a></nav>
 </main>
 <script>
 const tg = window.Telegram && window.Telegram.WebApp;

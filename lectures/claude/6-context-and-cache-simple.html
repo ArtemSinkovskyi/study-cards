@@ -97,33 +97,33 @@
 <nav class="bar"><a href="../../claude-hub.html">← Claude General</a><a href="index.html">☰ Усі теми</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="6-context-and-cache-simple-en.html">🌐 Read in English</a></nav>
 <h1>Лекція 6: контекст, кеш і токени</h1>
 <blockquote>
-<p>Спрощена версія. Повна: ../6-context-caching-and-token-counting.md. Повні списки моделей і рідкісні параметри лишились лише там.</p>
+<p>Спрощена версія. Повна: ../6-context-caching-and-token-counting.md. Повні списки моделей і рідкісні параметри лишились там. Погляд курсу на довгий контекст у лекції 13.</p>
 </blockquote>
+<h2>Що з цього питають на іспиті</h2>
+<p>Що займає вікно контексту і чому більше не означає краще. Як працює кеш, скільки він коштує і що його скидає.</p>
 <h2>Головна ідея</h2>
-<p><strong>Вікно контексту це «робоча пам'ять» моделі. Воно обмежене, і що більше в ньому, то гірше модель пам'ятає. Кеш дозволяє не платити за повторюваний початок промпта.</strong></p>
-<h2>Навіщо це так задумано</h2>
-<p>Контекст дорогий і обмежений. Кеш дозволяє не платити за одне й те саме знову, а підрахунок токенів дає передбачити вартість.</p>
+<p><strong>Вікно контексту це робоча пам'ять моделі. Воно обмежене, і що більше в ньому лежить, то гірше модель пам'ятає. Кеш дає не платити щоразу за однаковий початок промпту.</strong></p>
 <h2>Крок 1. Що займає вікно</h2>
-<p>Усе в запиті:</p>
+<p>Усе, що є в запиті:</p>
 <ul>
 <li>системний промпт;</li>
-<li>усі повідомлення (з результатами інструментів, зображеннями, документами);</li>
-<li><strong>описи інструментів</strong>;</li>
-<li>відповідь моделі, включно з роздумами.</li>
+<li>усі повідомлення, разом із результатами інструментів, зображеннями й документами;</li>
+<li>описи інструментів;</li>
+<li>відповідь моделі, разом із роздумами.</li>
 </ul>
-<p>Розмір: <strong>1 мільйон токенів</strong> на більшості нових моделей, відповідь до <strong>128 тисяч</strong>. Старіші моделі мають 200 тисяч.</p>
+<p>Розмір: 1 мільйон токенів на більшості нових моделей, відповідь до 128 тисяч. Старіші моделі мають 200 тисяч.</p>
 <h2>Крок 2. Чому більше не краще</h2>
-<p>Є явище <strong>context rot</strong>: чим довший контекст, тим гірші точність і згадування. Тому добирати, що класти в контекст, так само важливо, як мати для нього місце.</p>
-<p>Ще одне: модель найкраще бачить початок і кінець, а факт посередині може загубитись (<strong>lost in the middle</strong>). Ключові факти тримайте в короткому блоці в кінці промпту (лекція 13).</p>
+<p><strong>Context rot</strong>: чим довший контекст, тим гірші точність і згадування. Тож добирати, що покласти в контекст, так само важливо, як мати для цього місце.</p>
+<p>Окремий ефект: модель найкраще бачить початок і кінець, а факт посередині може пропустити (<strong>lost in the middle</strong>). Ключові факти тримай у короткому блоці в кінці промпту (лекція 13).</p>
 <h2>Крок 3. Коли вікно переповнене</h2>
 <ul>
-<li>Якщо <strong>лише вхід</strong> уже більший за вікно: помилка <strong>400</strong> («prompt is too long»).</li>
-<li>Якщо вхід плюс <code>max_tokens</code> більші за вікно, на Claude 4.5+ запит <strong>приймається</strong>, а коли генерація впирається в межу, приходить <code>stop_reason: model_context_window_exceeded</code>. Відповідь обрізана, але валідна.</li>
+<li>Якщо вже сам вхід більший за вікно, буде 400 («prompt is too long»).</li>
+<li>Якщо вхід плюс <code>max_tokens</code> більші за вікно, на Claude 4.5+ запит приймається. Коли відповідь упирається в межу, приходить <code>stop_reason: model_context_window_exceeded</code>: відповідь обрізана, але придатна.</li>
 </ul>
 <h2>Крок 4. Як працює кеш</h2>
-<p>Кеш запам'ятовує вже оброблений <strong>початок</strong> промпта (префікс). Наступний запит із тим самим початком не оплачується повністю.</p>
-<p>Префікс кешується в такому порядку: <strong>tools, потім system, потім messages</strong>. Змінили щось на одному рівні, скинулось усе від нього й далі.</p>
-<p>Як увімкнути: додати <code>cache_control: {&quot;type&quot;: &quot;ephemeral&quot;}</code>. Можна один автоматичний верхній маркер або до <strong>4 явних точок</strong>.</p>
+<p>Кеш запам'ятовує вже оброблений початок промпту (префікс). Наступний запит із тим самим початком не оплачується повністю.</p>
+<p>Префікс кешується в такому порядку: <strong>tools, потім system, потім messages</strong>. Змінив щось на одному рівні, і скидається все від нього й далі.</p>
+<p>Як увімкнути: додати <code>cache_control: {&quot;type&quot;: &quot;ephemeral&quot;}</code>. Можна одну автоматичну позначку або до 4 явних точок.</p>
 <h2>Крок 5. Скільки це коштує</h2>
 <div class="tw"><table class="two">
 <thead>
@@ -134,11 +134,11 @@
 </thead>
 <tbody>
 <tr>
-<td data-label="Що">Запис кешу на 5 хвилин</td>
+<td data-label="Що">Запис у кеш на 5 хвилин</td>
 <td data-label="Множник ціни входу"><strong>1,25x</strong></td>
 </tr>
 <tr>
-<td data-label="Що">Запис кешу на 1 годину</td>
+<td data-label="Що">Запис у кеш на годину</td>
 <td data-label="Множник ціни входу"><strong>2x</strong></td>
 </tr>
 <tr>
@@ -147,34 +147,34 @@
 </tr>
 </tbody>
 </table></div>
-<p>Виняток для читання: 0,025x на Fable 5.1 і Mythos 5.1, 0,05x на Opus 5.5 і Sonnet 5.5.</p>
-<p>Час життя: <strong>5 хвилин</strong> за замовчуванням (кожне використання продовжує), <strong>1 година</strong> з <code>&quot;ttl&quot;: &quot;1h&quot;</code>.</p>
-<p>Мінімальна довжина префікса: 512 токенів на найновіших моделях, до 4 096 на старіших. Коротший префікс просто не кешується, <strong>без помилки</strong>.</p>
-<h2>Крок 6. Рахуємо вартість (3 кроки)</h2>
+<p>Винятки для читання: 0,025x на Fable 5.1 і Mythos 5.1, 0,05x на Opus 5.5 і Sonnet 5.5.</p>
+<p>Кеш живе 5 хвилин (кожне використання продовжує), а з <code>&quot;ttl&quot;: &quot;1h&quot;</code> годину.</p>
+<p>Мінімальний префікс: 512 токенів на найновіших моделях, до 4 096 на старіших. Коротший просто не кешується, без жодної помилки.</p>
+<h2>Крок 6. Рахуємо вартість за 3 кроки</h2>
 <p><strong>Рецепт:</strong></p>
 <ol>
-<li>Порахуйте вартість <strong>без кешу</strong>: кількість запитів × токени префікса × ціна.</li>
-<li>Порахуйте <strong>з кешем</strong>: один запис + (запитів мінус один) читань.</li>
-<li>Порівняйте.</li>
+<li>Порахуй <strong>без кешу</strong>: кількість запитів × токени префікса × ціна.</li>
+<li>Порахуй <strong>з кешем</strong>: один запис плюс (запитів мінус один) читань.</li>
+<li>Порівняй.</li>
 </ol>
-<p>Ціни з документації для <strong>Opus 5</strong>: база <strong>$5</strong> за мільйон токенів, запис на 5 хвилин <strong>$6,25</strong>, читання <strong>$0,50</strong>.</p>
+<p>Ціни для Opus 5: база $5 за мільйон токенів, запис на 5 хвилин $6,25, читання $0,50.</p>
 <p><strong>Приклад 1.</strong> Префікс 10 000 токенів, 5 запитів.</p>
 <ol>
 <li>Без кешу: 5 × 10 000 = 50 000 токенів × $5 / 1 000 000 = <strong>$0,25</strong>.</li>
-<li>З кешем: запис 10 000 × $6,25 / 1 000 000 = $0,0625; читань 4 × 10 000 × $0,50 / 1 000 000 = $0,02. Разом <strong>$0,0825</strong>.</li>
+<li>З кешем: запис 10 000 × $6,25 / 1 000 000 = $0,0625; чотири читання 4 × 10 000 × $0,50 / 1 000 000 = $0,02. Разом <strong>$0,0825</strong>.</li>
 <li>Економія приблизно 67%.</li>
 </ol>
 <p><strong>Приклад 2.</strong> Префікс 20 000 токенів, 4 запити.</p>
 <ol>
 <li>Без кешу: 4 × 20 000 = 80 000 × $5 / 1 000 000 = <strong>$0,40</strong>.</li>
-<li>З кешем: запис 20 000 × $6,25 / 1 000 000 = $0,125; читань 3 × 20 000 × $0,50 / 1 000 000 = $0,03. Разом <strong>$0,155</strong>.</li>
+<li>З кешем: запис 20 000 × $6,25 / 1 000 000 = $0,125; три читання 3 × 20 000 × $0,50 / 1 000 000 = $0,03. Разом <strong>$0,155</strong>.</li>
 <li>Економія приблизно 61%.</li>
 </ol>
-<p>Висновок: кеш виграє вже <strong>з другого запиту</strong>, бо 1,25 + 0,1 = 1,35 менше за 2.</p>
-<p><strong>Задача для вас.</strong> Префікс 30 000 токенів, 6 запитів, ті самі ціни. Скільки з кешем і без?</p>
+<p>Висновок: кеш окупається вже з другого запиту, бо 1,25 + 0,1 = 1,35 менше за 2.</p>
+<p><strong>Задача.</strong> Префікс 30 000 токенів, 6 запитів, ті самі ціни. Скільки з кешем і без?</p>
 <details>
 <summary>Відповідь</summary>
-<p>Без кешу: 6 × 30 000 = 180 000 × $5 / 1 000 000 = $0,90. З кешем: запис 30 000 × $6,25 / 1 000 000 = $0,1875; читань 5 × 30 000 × $0,50 / 1 000 000 = $0,075. Разом $0,2625.</p>
+<p>Без кешу: 6 × 30 000 = 180 000 × $5 / 1 000 000 = $0,90. З кешем: запис 30 000 × $6,25 / 1 000 000 = $0,1875; п'ять читань 5 × 30 000 × $0,50 / 1 000 000 = $0,075. Разом $0,2625.</p>
 </details>
 <h2>Крок 7. Що скидає кеш</h2>
 <div class="tw"><table class="two">
@@ -207,7 +207,7 @@
 </tr>
 </tbody>
 </table></div>
-<p>Типова помилка: <strong>поставити точку кешу на блок із міткою часу</strong>, що змінюється щоразу. Хеш ніколи не збігається, тож кожен запит платить за запис і ніколи не читає. Ставте точку на <strong>останньому незмінному блоці</strong>.</p>
+<p>Типова помилка: поставити точку кешу на блок із міткою часу, яка щоразу інша. Хеш ніколи не збігається, тож кожен запит платить за запис і жодного разу не читає. Точку став на останньому блоці, який не змінюється.</p>
 <h2>Крок 8. Як читати usage</h2>
 <div class="tw"><table class="two">
 <thead>
@@ -231,15 +231,15 @@
 </tr>
 </tbody>
 </table></div>
-<p><strong>Загальний вхід = сума цих трьох.</strong> Якщо обидва кешові лічильники нульові, промпт не кешувався.</p>
+<p><strong>Увесь вхід = сума цих трьох.</strong> Якщо обидва лічильники кешу нульові, промпт не кешувався.</p>
 <h2>Крок 9. Підрахунок токенів</h2>
-<p>Ендпоінт <code>count_tokens</code> оцінює токени до відправки. Він <strong>безкоштовний</strong>, але це лише оцінка, і він <strong>не знає про кеш</strong>.</p>
-<p>Він <strong>не приймає</strong> серверні інструменти й MCP connector (дає помилку). У цих випадках дивіться <code>usage</code> у відповіді.</p>
-<p>Claude 4.7+ мають новий токенізатор: той самий текст дає приблизно на <strong>30% більше</strong> токенів. Перераховуйте промпти для моделі, яку плануєте.</p>
+<p>Ендпоінт <code>count_tokens</code> оцінює кількість токенів до відправки. Він безкоштовний, але це лише оцінка, і про кеш він нічого не знає.</p>
+<p>Серверні інструменти й MCP connector він не приймає, повертає помилку. Тоді дивись <code>usage</code> у відповіді.</p>
+<p>Claude 4.7+ мають новий токенізатор: той самий текст дає приблизно на 30% більше токенів. Перераховуй промпти під модель, яку збираєшся брати.</p>
 <h2>Крок 10. Як зменшити контекст</h2>
 <ul>
-<li><strong>Context editing:</strong> стратегія <code>clear_tool_uses</code> прибирає старі результати інструментів (параметри: <code>trigger</code> 100 000, <code>keep</code> 3, <code>clear_at_least</code>, <code>exclude_tools</code>). Стратегія <code>clear_thinking</code> чистить старі роздуми й у списку <code>edits</code> має стояти <strong>першою</strong>.</li>
-<li><strong>Compaction:</strong> сервер підсумовує старе (докладно в лекції 7).</li>
+<li><strong>Context editing:</strong> стратегія <code>clear_tool_uses</code> прибирає старі результати інструментів (параметри <code>trigger</code> 100 000, <code>keep</code> 3, <code>clear_at_least</code>, <code>exclude_tools</code>). Стратегія <code>clear_thinking</code> чистить старі роздуми й у списку <code>edits</code> має стояти першою.</li>
+<li><strong>Compaction:</strong> сервер підсумовує стару частину розмови (лекція 7).</li>
 </ul>
 <h2>Словник</h2>
 <div class="tw"><table class="two">
@@ -251,12 +251,12 @@
 </thead>
 <tbody>
 <tr>
-<td data-label="Термін"><strong>Контекстне вікно</strong></td>
+<td data-label="Термін"><strong>Вікно контексту</strong></td>
 <td data-label="Що це">скільки токенів модель бачить за один запит</td>
 </tr>
 <tr>
 <td data-label="Термін"><strong>Context rot</strong></td>
-<td data-label="Що це">якість падає, коли вікно переповнене зайвим</td>
+<td data-label="Що це">якість падає, коли у вікні багато зайвого</td>
 </tr>
 <tr>
 <td data-label="Термін"><strong>Prompt caching</strong></td>
@@ -264,11 +264,7 @@
 </tr>
 <tr>
 <td data-label="Термін"><strong>cache_control</strong></td>
-<td data-label="Що це">позначка, до якого місця префікс кешується</td>
-</tr>
-<tr>
-<td data-label="Термін"><strong>Cache read / write</strong></td>
-<td data-label="Що це">читання з кешу (дешево) і запис у кеш (дорожче базової ціни)</td>
+<td data-label="Що це">позначка, до якого місця кешувати префікс</td>
 </tr>
 <tr>
 <td data-label="Термін"><strong>usage</strong></td>
@@ -278,31 +274,26 @@
 <td data-label="Термін"><strong>Context editing</strong></td>
 <td data-label="Що це">автоматичне прибирання старих результатів інструментів</td>
 </tr>
-<tr>
-<td data-label="Термін"><strong>Compaction</strong></td>
-<td data-label="Що це">стиснення розмови в короткий підсумок</td>
-</tr>
 </tbody>
 </table></div>
 <h2>🖼 Схема: Claude: контекст і кеш</h2><div class="dg"><div class="dtitle">Що займає вікно</div><div class="drow"><div class="dbox aws">системний промпт</div><div class="dbox aws">повідомлення: результати інструментів, зображення, документи</div><div class="dbox aws">описи інструментів</div><div class="dbox aws">відповідь моделі з роздумами</div></div><div class="dnote">1 мільйон токенів на нових моделях, відповідь до 128 тисяч. Context rot: чим довший контекст, тим гірша точність.</div><div class="dtitle">Порядок префікса кешу</div><div class="dflow"><div class="dbox blue">1. tools</div><div class="darrow">↓</div><div class="dbox yellow">2. system</div><div class="darrow">↓</div><div class="dbox green">3. messages</div></div><div class="dnote">Змінили щось на одному рівні: скидається все від нього й далі. Точок кешу до 4 явних чи один автоматичний маркер.</div><div class="dtitle">Ціна кешу (множник ціни входу)</div><div class="tw"><table class="two"><thead><tr><th>Що</th><th>Множник</th></tr></thead><tbody><tr><td>запис на 5 хвилин</td><td>1,25x</td></tr><tr><td>запис на 1 годину</td><td>2x</td></tr><tr><td>читання з кешу</td><td>0,1x</td></tr></tbody></table></div><div class="dnote">Кеш виграє вже з другого запиту: 1,25 + 0,1 менше за 2. Час життя 5 хвилин (кожне використання продовжує) чи 1 година з ttl 1h. Занадто короткий префікс просто не кешується, без помилки.</div><div class="dtitle">Що скидає кеш</div><div class="tw"><table class="two"><thead><tr><th>Зміна</th><th>Скидається</th></tr></thead><tbody><tr><td>визначення інструментів</td><td>tools, system, messages</td></tr><tr><td>tool_choice</td><td>лише messages</td></tr><tr><td>зображення додані чи прибрані</td><td>messages</td></tr><tr><td>thinking чи effort</td><td>messages (tools і system залежить від моделі)</td></tr><tr><td>перемикач speed</td><td>system, messages</td></tr></tbody></table></div><div class="dnote">Не ставте точку кешу на блок із міткою часу, що змінюється щоразу. Ставте на останньому незмінному блоці.</div><div class="dtitle">usage: як читати</div><div class="dcols"><div class="dcol yellow"><b>cache_creation_input_tokens</b><ul><li>записано в кеш</li></ul></div><div class="dcol green"><b>cache_read_input_tokens</b><ul><li>прочитано з кешу</li></ul></div><div class="dcol blue"><b>input_tokens</b><ul><li>токени після останньої точки кешу</li></ul></div></div><div class="dnote">Загальний вхід це сума трьох. Якщо обидва кешові лічильники нульові, промпт не кешувався.</div><div class="dtitle">Як зменшити контекст</div><div class="dgroup blue"><b>Context editing</b><div class="dkids"><div class="dbox blue">clear_tool_uses: прибирає старі результати інструментів</div><div class="dbox blue">clear_thinking: чистить старі роздуми, у edits першою</div></div></div><div class="dgroup yellow"><b>Compaction</b><div class="dkids"><div class="dbox yellow">сервер підсумовує старе (лекція 7)</div></div></div><div class="dnote">count_tokens безкоштовний, але лише оцінка, не знає про кеш і не приймає серверні інструменти й MCP connector.</div></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
 <li>У вікні все, включно з описами інструментів і відповіддю.</li>
+<li>Довгий контекст гіршає: context rot і lost in the middle.</li>
 <li>Префікс кешується в порядку tools, system, messages.</li>
-<li>Запис 1,25x (5 хв) чи 2x (1 год), читання 0,1x.</li>
-<li>До 4 точок кешу.</li>
-<li><code>tool_choice</code> скидає лише messages.</li>
-<li>Точка на змінному блоці дає лише записи без читань.</li>
-<li>Загальний вхід = <code>cache_read</code> + <code>cache_creation</code> + <code>input_tokens</code>.</li>
-<li><code>count_tokens</code> безкоштовний, оцінковий, не приймає MCP connector.</li>
+<li>Запис 1,25x (5 хв) чи 2x (година), читання 0,1x.</li>
+<li>До 4 точок кешу, <code>tool_choice</code> скидає лише messages.</li>
+<li>Точка на блоці, що змінюється, дає лише записи без читань.</li>
+<li>Увесь вхід = <code>cache_read</code> + <code>cache_creation</code> + <code>input_tokens</code>.</li>
 </ol>
-</div><h2>Перевірте себе</h2>
+</div><h2>Перевір себе</h2>
 <ol>
 <li>Що займає вікно контексту?</li>
 <li>У якому порядку кешується префікс?</li>
-<li>Який множник має читання кешу?</li>
+<li>Скільки коштує читання з кешу?</li>
 <li>Що скидає зміна <code>tool_choice</code>?</li>
 <li>Чому точка кешу на мітці часу не працює?</li>
-<li>Чи рахує <code>count_tokens</code> кеш?</li>
+<li>Чи враховує <code>count_tokens</code> кеш?</li>
 </ol>
 <details>
 <summary>Відповіді</summary>
@@ -312,13 +303,13 @@
 <li>0,1x (з винятками 0,025x і 0,05x).</li>
 <li>Лише кеш messages.</li>
 <li>Хеш префікса щоразу інший.</li>
-<li>Ні, він не використовує кешування.</li>
+<li>Ні.</li>
 </ol>
 </details>
 <hr />
 <p><em>Повна версія:</em> 6-context-caching-and-token-counting.md.</p>
 
-<nav class="pager"><a href="5-claude-code-simple.html"><small>← Назад</small>Лекція 5: Claude Code</a><a href="7-compaction-thinking-memory-simple.html"><small>Далі →</small>Лекція 7: ущільнення розмови, роздуми й пам&#x27;ять</a></nav><nav class="tools"><a href="../../claude-hub.html">← Claude General</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="6-context-and-cache-simple-en.html">🌐 Read in English</a></nav>
+<nav class="pager"><a href="5-claude-code-simple.html"><small>← Назад</small>Лекція 5: Claude Code, основа</a><a href="7-compaction-thinking-memory-simple.html"><small>Далі →</small>Лекція 7: ущільнення розмови, роздуми й пам&#x27;ять</a></nav><nav class="tools"><a href="../../claude-hub.html">← Claude General</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="6-context-and-cache-simple-en.html">🌐 Read in English</a></nav>
 </main>
 <script>
 const tg = window.Telegram && window.Telegram.WebApp;

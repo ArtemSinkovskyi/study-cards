@@ -97,15 +97,15 @@
 <nav class="bar"><a href="../../claude-hub.html">← Claude General</a><a href="index.html">☰ Усі теми</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="7-compaction-thinking-memory-simple-en.html">🌐 Read in English</a></nav>
 <h1>Лекція 7: ущільнення розмови, роздуми й пам'ять</h1>
 <blockquote>
-<p>Спрощена версія. Повна: ../7-compaction-thinking-and-memory-tool.md. Повні таблиці моделей і коди помилок лишились лише там.</p>
+<p>Спрощена версія. Повна: ../7-compaction-thinking-and-memory-tool.md. Повні таблиці моделей і коди помилок лишились там.</p>
 </blockquote>
+<h2>Що з цього питають на іспиті</h2>
+<p>Як ущільнити довгу розмову і не загубити важливе. Як поводитись із блоками роздумів. Що зберігати в пам'яті між сесіями.</p>
 <h2>Головна ідея</h2>
-<p><strong>Довга розмова не влазить у вікно, тому стару частину замінюють коротким підсумком. Роздуми моделі мають свої строгі правила повернення. А пам'ять зберігає те, що має пережити підсумок.</strong></p>
-<h2>Навіщо це так задумано</h2>
-<p>Довга розмова не вміщується в контекст, тому стару частину стискають у підсумок (compaction), а важливе зберігають у зовнішній пам'яті.</p>
+<p><strong>Довга розмова не влазить у вікно, тож стару частину замінюють коротким підсумком. Роздуми моделі мають суворі правила повернення. А пам'ять зберігає те, що має пережити підсумок.</strong></p>
 <h2>Частина 1. Ущільнення (compaction)</h2>
-<p>Сервер сам пише підсумок старої частини розмови, і ви не пишете жодного коду підсумовування.</p>
-<p>Є <strong>два режими</strong>:</p>
+<p>Підсумок старої частини розмови пише сервер, тобі не треба писати код підсумовування.</p>
+<p>Є два режими:</p>
 <div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
@@ -117,13 +117,13 @@
 <tbody>
 <tr>
 <td data-label="">Хто вирішує, коли</td>
-<td data-label="За запитом (on-demand)">Ви</td>
-<td data-label="За порогом (threshold)">API, коли вхід сягає порогу</td>
+<td data-label="За запитом (on-demand)">Ти</td>
+<td data-label="За порогом (threshold)">API, коли вхід доходить до порогу</td>
 </tr>
 <tr>
-<td data-label="">Як вмикається</td>
+<td data-label="">Як увімкнути</td>
 <td data-label="За запитом (on-demand)">Верхній параметр <code>compaction</code></td>
-<td data-label="За порогом (threshold)">Редагування <code>compact_20260112</code> у <code>context_management</code></td>
+<td data-label="За порогом (threshold)"><code>compact_20260112</code> у <code>context_management</code></td>
 </tr>
 <tr>
 <td data-label="">Beta-заголовок</td>
@@ -133,42 +133,42 @@
 <tr>
 <td data-label="">Де блок підсумку</td>
 <td data-label="За запитом (on-demand)"><strong>Першим</strong> у <code>messages</code></td>
-<td data-label="За порогом (threshold)">Після підсумованого, API сам відкидає старе</td>
+<td data-label="За порогом (threshold)">Після підсумованого, старе API відкидає саме</td>
 </tr>
 </tbody>
 </table></div>
-<p>Документація радить <strong>режим за запитом</strong>, де він доступний. Обидва в beta.</p>
+<p>Документація радить режим за запитом там, де він є. Обидва в beta.</p>
 <h3>Режим за запитом</h3>
 <ol>
-<li>Надсилаєте розмову з <code>&quot;compaction&quot;: {&quot;type&quot;: &quot;summarize&quot;}</code>.</li>
-<li>Відповідь: <strong>один блок <code>compaction</code></strong> і <code>stop_reason: &quot;compaction&quot;</code>. Відповіді моделі нема.</li>
-<li>Ставите цей блок <strong>першим</strong> у <code>messages</code> і <strong>прибираєте підсумовані повідомлення</strong>.</li>
-<li>Блок шлете <strong>точно як отримали</strong>, з підписом. Рівно один блок на запит.</li>
+<li>Надсилаєш розмову з <code>&quot;compaction&quot;: {&quot;type&quot;: &quot;summarize&quot;}</code>.</li>
+<li>У відповіді один блок <code>compaction</code> і <code>stop_reason: &quot;compaction&quot;</code>. Звичайної відповіді моделі немає.</li>
+<li>Ставиш цей блок першим у <code>messages</code> і прибираєш підсумовані повідомлення.</li>
+<li>Блок шлеш точно таким, як отримав, із підписом. Рівно один блок на запит.</li>
 </ol>
-<p>Дві помилки, які не дають жодного повідомлення:</p>
+<p>Дві помилки, про які API нічого не скаже:</p>
 <ul>
-<li>підсумовані повідомлення лишились <strong>після</strong> блока: API знову відправить їх моделі;</li>
+<li>підсумовані повідомлення лишились <strong>після</strong> блоку: API знову надішле їх моделі;</li>
 <li>блок <strong>не додали</strong> в наступний запит: модель не бачить підсумку.</li>
 </ul>
-<p>Якщо підсумовані повідомлення лишились <strong>перед</strong> блоком, буде 400.</p>
+<p>Якщо ж підсумовані повідомлення лишились <strong>перед</strong> блоком, буде 400.</p>
 <p>Ще правила:</p>
 <ul>
-<li><code>compaction</code> і <code>context_management</code> <strong>не можна</strong> в одному запиті;</li>
-<li>свій промпт підсумку: <code>instructions</code> до <strong>16 384 символів</strong>, він <strong>повністю замінює</strong> стандартний. Скажіть, що зберегти, і <strong>не викликати інструментів</strong>;</li>
-<li>якщо підсумку не вийшло, відповідь усе одно <strong>200 із порожнім вмістом</strong>, тож перевіряйте <code>stop_reason</code>;</li>
-<li>зображення, документи, завантаження й отримані URL у підсумованому <strong>зникають</strong>.</li>
+<li><code>compaction</code> і <code>context_management</code> в одному запиті не можна;</li>
+<li>власний промпт підсумку <code>instructions</code> до 16 384 символів <strong>повністю замінює</strong> стандартний. Скажи, що зберегти, і заборони викликати інструменти;</li>
+<li>якщо підсумку не вийшло, відповідь однаково 200, але з порожнім вмістом, тож перевіряй <code>stop_reason</code>;</li>
+<li>зображення, документи, завантаження й отримані URL у підсумованій частині зникають.</li>
 </ul>
 <h3>Режим за порогом</h3>
 <ul>
-<li>Поріг за замовчуванням <strong>150 000</strong> вхідних токенів, мінімум <strong>50 000</strong>.</li>
-<li>Блок приходить на початку відповіді; додавайте повний <code>response.content</code> разом із ним.</li>
-<li>Якщо в запиті є <code>tools</code>, модель інколи викликає інструмент замість підсумку, і блок має <code>content: null</code>. Тоді в <code>instructions</code> <strong>забороніть виклики інструментів</strong>.</li>
-<li>Можна зупинитись після підсумку (<code>pause_after_compaction</code>), щоб зберегти останні повідомлення.</li>
+<li>Поріг за замовчуванням 150 000 вхідних токенів, мінімум 50 000.</li>
+<li>Блок приходить на початку відповіді. Додавай увесь <code>response.content</code> разом із ним.</li>
+<li>Якщо в запиті є <code>tools</code>, модель інколи викликає інструмент замість підсумку, і блок має <code>content: null</code>. Тоді в <code>instructions</code> заборони виклики інструментів.</li>
+<li>Можна зупинитись одразу після підсумку (<code>pause_after_compaction</code>), щоб зберегти останні повідомлення.</li>
 </ul>
 <h3>Вартість</h3>
-<p>Підсумовування теж коштує. <strong>Рахуйте суму <code>usage.iterations</code></strong>, а не верхні <code>input_tokens</code> і <code>output_tokens</code> (вони не включають ущільнення).</p>
+<p>Підсумовування теж коштує. Рахуй <strong>суму <code>usage.iterations</code></strong>, а не верхні <code>input_tokens</code> і <code>output_tokens</code>: ущільнення в них не входить.</p>
 <h2>Частина 2. Роздуми (thinking)</h2>
-<p>Нові моделі мають <strong>adaptive thinking</strong>: модель сама вирішує, думати й скільки. Блок <code>thinking</code> іде перед текстом і має <code>signature</code>: зашифровану копію повних роздумів.</p>
+<p>Нові моделі мають <strong>adaptive thinking</strong>: модель сама вирішує, чи думати і скільки. Блок <code>thinking</code> іде перед текстом і має <code>signature</code>, зашифровану копію повних роздумів.</p>
 <h3>Як показувати роздуми: display</h3>
 <div class="tw"><table class="two">
 <thead>
@@ -184,38 +184,38 @@
 </tr>
 <tr>
 <td data-label="Значення"><code>omitted</code></td>
-<td data-label="Що дає">Блок приходить порожнім, підпис лишається (на моделях Claude 5 і новіших це значення за замовчуванням)</td>
+<td data-label="Що дає">Блок приходить порожнім, підпис лишається (на моделях Claude 5 і новіших за замовчуванням)</td>
 </tr>
 <tr>
 <td data-label="Значення"><code>updates</code> (beta)</td>
-<td data-label="Що дає">Короткі оновлення прогресу між викликами</td>
+<td data-label="Що дає">Короткі повідомлення про хід роботи між викликами</td>
 </tr>
 </tbody>
 </table></div>
-<p><code>omitted</code> дає <strong>менше затримки до першого токена тексту, а вартість та сама</strong>. Платите за <strong>повні</strong> згенеровані роздуми, а не за видимий підсумок.</p>
-<h3>Що не можна</h3>
+<p><code>omitted</code> скорочує час до першого токена тексту, а ціна та сама. Платиш ти за повні роздуми, а не за видимий підсумок.</p>
+<h3>Чого не можна</h3>
 <ul>
-<li><code>thinking: enabled</code> з <code>budget_tokens</code> на нових моделях (Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable, Mythos, Opus 5, Sonnet 5, Opus 4.8 і 4.7) дає <strong>400</strong>.</li>
-<li>Перемикати режим thinking <strong>посеред ходу з викликами інструментів</strong> не можна: API мовчки вимкне роздуми для того запиту. Перемикайте між ходами.</li>
-<li><strong>З версії API 2026-10-21</strong> будь-яке значення <code>temperature</code>, <code>top_p</code>, <code>top_k</code> дає 400 на кожній моделі.</li>
+<li><code>thinking: enabled</code> з <code>budget_tokens</code> на нових моделях (Opus 5.5, Sonnet 5.5, Haiku 5.5, Fable, Mythos, Opus 5, Sonnet 5, Opus 4.8 і 4.7) дає 400.</li>
+<li>Перемикати режим thinking посеред ходу з викликами інструментів не можна: API мовчки вимкне роздуми для цього запиту. Перемикай між ходами.</li>
+<li>Починаючи з версії API 2026-10-21, будь-яке значення <code>temperature</code>, <code>top_p</code> чи <code>top_k</code> дає 400 на кожній моделі.</li>
 </ul>
 <h3>Як повертати блоки</h3>
 <ul>
-<li>У межах ходу з інструментами блоки thinking <strong>обов'язково</strong> повертають без змін.</li>
+<li>Усередині ходу з інструментами блоки thinking обов'язково повертай без змін.</li>
 <li>Змінений блок дає 400.</li>
-<li>Є також <code>redacted_thinking</code>: зашифровані блоки без тексту, їх теж повертають без змін. Типова помилка: фільтр <code>block.type == &quot;thinking&quot;</code> мовчки губить їх і ламає протокол.</li>
+<li>Є ще <code>redacted_thinking</code>: зашифровані блоки без тексту. Їх теж повертай без змін. Типова помилка: фільтр <code>block.type == &quot;thinking&quot;</code> мовчки їх губить і ламає протокол.</li>
 </ul>
 <h2>Частина 3. Memory tool</h2>
-<p>Це інструмент, яким Claude зберігає й читає файли між розмовами.</p>
-<p>Він <strong>клієнтський</strong>: Claude лише просить операцію, а виконує ваш застосунок над сховищем, яке ви контролюєте.</p>
+<p>Інструмент, яким Claude зберігає й читає файли між розмовами.</p>
+<p>Він <strong>клієнтський</strong>: Claude лише просить операцію, а виконує її твій застосунок над сховищем, яке контролюєш ти.</p>
 <ul>
-<li>Файли лежать у каталозі <code>/memories</code> (ваш код відображає його на реальне сховище).</li>
+<li>Файли лежать у каталозі <code>/memories</code> (твій код відображає його на справжнє сховище).</li>
 <li>Команди: <code>view</code>, <code>create</code>, <code>str_replace</code>, <code>insert</code>, <code>delete</code>, <code>rename</code>.</li>
-<li>Кореневий <code>/memories</code> <strong>не можна</strong> видалити чи перейменувати.</li>
+<li>Кореневий <code>/memories</code> видалити чи перейменувати не можна.</li>
 </ul>
-<p><strong>Безпека лежить на вас.</strong> Шлях типу <code>/memories/../../secrets.env</code> виходить за каталог (path traversal). Перевіряйте кожен шлях: починається з <code>/memories</code>, канонізуйте, відхиляйте <code>../</code> і <code>%2e%2e%2f</code>.</p>
-<p>Пам'ять поєднують із ущільненням: підсумок зберігає загальне, а пам'ять усе, що <strong>має</strong> пережити підсумок.</p>
-<p><strong>Багатосесійний шаблон:</strong> перша сесія створює журнал прогресу й чекліст, кожна наступна починає з їх читання, наприкінці оновлює журнал. Функцію позначайте завершеною лише після наскрізної перевірки.</p>
+<p><strong>Безпека на тобі.</strong> Шлях на кшталт <code>/memories/../../secrets.env</code> виходить за межі каталогу (path traversal). Перевіряй кожен шлях: він має починатися з <code>/memories</code>, приводь його до канонічного вигляду, відхиляй <code>../</code> і <code>%2e%2e%2f</code>.</p>
+<p>Пам'ять поєднують з ущільненням: підсумок зберігає загальну картину, а пам'ять усе, що <strong>має</strong> пережити підсумок.</p>
+<p><strong>Шаблон для кількох сесій:</strong> перша сесія створює журнал прогресу й чекліст, кожна наступна починає з їх читання й наприкінці оновлює журнал. Функцію познач готовою лише після перевірки від початку до кінця.</p>
 <h2>Словник</h2>
 <div class="tw"><table class="two">
 <thead>
@@ -227,7 +227,7 @@
 <tbody>
 <tr>
 <td data-label="Термін"><strong>Compaction block</strong></td>
-<td data-label="Що це">блок з підсумком, що замінює стару частину розмови</td>
+<td data-label="Що це">блок із підсумком, що замінює стару частину розмови</td>
 </tr>
 <tr>
 <td data-label="Термін"><strong>Thinking</strong></td>
@@ -243,33 +243,28 @@
 </tr>
 <tr>
 <td data-label="Термін"><strong>Клієнтський інструмент</strong></td>
-<td data-label="Що це">виконує ваш код, безпека на вас</td>
-</tr>
-<tr>
-<td data-label="Термін"><strong>Інструкції ущільнення</strong></td>
-<td data-label="Що це">підказка, що саме зберегти в підсумку</td>
+<td data-label="Що це">виконує твій код, безпека на тобі</td>
 </tr>
 </tbody>
 </table></div>
-<h2>🖼 Схема: Claude: compaction, thinking, memory</h2><div class="dg"><div class="dtitle">Compaction: два режими</div><div class="tw"><table><thead><tr><th></th><th>За запитом</th><th>За порогом</th></tr></thead><tbody><tr><td>Хто вирішує</td><td>ви</td><td>API, коли вхід сягає порогу</td></tr><tr><td>Як вмикається</td><td>верхній параметр compaction</td><td>compact_20260112 у context_management</td></tr><tr><td>Beta-заголовок</td><td>compact-2026-09-04</td><td>compact-2026-01-12</td></tr><tr><td>Блок підсумку</td><td>першим у messages</td><td>після підсумованого</td></tr></tbody></table></div><div class="dnote">Документація радить режим за запитом, де він доступний. Поріг за замовчуванням 150 000 токенів, мінімум 50 000.</div><div class="dtitle">За запитом: чотири кроки</div><div class="dflow"><div class="dbox aws">1. Надсилаєте розмову з compaction: summarize</div><div class="darrow">↓</div><div class="dbox yellow">2. Відповідь: один блок compaction і stop_reason compaction</div><div class="darrow">↓</div><div class="dbox blue">3. Блок ставите першим у messages, підсумовані повідомлення прибираєте</div><div class="darrow">↓</div><div class="dbox green">4. Блок шлете точно як отримали, один на запит</div></div><div class="dcols"><div class="dcol red"><b>Тихі помилки</b><ul><li>підсумовані повідомлення лишились після блока</li><li>блок не додали в наступний запит</li></ul></div><div class="dcol gray"><b>Одразу 400</b><ul><li>підсумовані повідомлення лишились перед блоком</li><li>compaction разом з context_management</li></ul></div></div><div class="dtitle">Thinking: як показувати (display)</div><div class="dgroup blue"><b>display</b><div class="dkids"><div class="dbox blue">summarized: видно короткий підсумок</div><div class="dbox blue">omitted: порожній блок, підпис лишається, менше затримки, вартість та сама; на Claude 5+ це типове значення</div><div class="dbox blue">updates (beta): оновлення прогресу між викликами</div></div></div><div class="dcols"><div class="dcol red"><b>Не можна</b><ul><li>thinking enabled з budget_tokens на нових моделях: 400</li><li>перемикати thinking посеред ходу з інструментами</li><li>temperature, top_p, top_k з API 2026-10-21: 400</li></ul></div><div class="dcol green"><b>Обов&#x27;язково</b><ul><li>повертати thinking і redacted_thinking без змін</li><li>змінений блок: 400</li></ul></div></div><div class="dtitle">Memory tool</div><div class="dgroup green"><b>Клієнтський: виконує ваш застосунок</b><div class="dkids"><div class="dbox green">каталог /memories</div><div class="dbox green">команди: view, create, str_replace, insert, delete, rename</div><div class="dbox green">безпека на вас: перевіряйте шляхи (path traversal)</div></div></div><div class="dnote">Підсумок зберігає загальне, пам&#x27;ять зберігає те, що має пережити підсумок. Платите за повні згенеровані роздуми, а не за видимий підсумок.</div></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
+<h2>🖼 Схема: Claude: compaction, thinking, memory</h2><div class="dg"><div class="dtitle">Compaction: два режими</div><div class="tw"><table><thead><tr><th></th><th>За запитом</th><th>За порогом</th></tr></thead><tbody><tr><td>Хто вирішує</td><td>ви</td><td>API, коли вхід сягає порогу</td></tr><tr><td>Як вмикається</td><td>верхній параметр compaction</td><td>compact_20260112 у context_management</td></tr><tr><td>Beta-заголовок</td><td>compact-2026-09-04</td><td>compact-2026-01-12</td></tr><tr><td>Блок підсумку</td><td>першим у messages</td><td>після підсумованого</td></tr></tbody></table></div><div class="dnote">Документація радить режим за запитом, де він доступний. Поріг за замовчуванням 150 000 токенів, мінімум 50 000.</div><div class="dtitle">За запитом: чотири кроки</div><div class="dflow"><div class="dbox aws">1. Надсилаєте розмову з compaction: summarize</div><div class="darrow">↓</div><div class="dbox yellow">2. Відповідь: один блок compaction і stop_reason compaction</div><div class="darrow">↓</div><div class="dbox blue">3. Блок ставите першим у messages, підсумовані повідомлення прибираєте</div><div class="darrow">↓</div><div class="dbox green">4. Блок шлете точно як отримали, один на запит</div></div><div class="dcols"><div class="dcol red"><b>Тихі помилки</b><ul><li>підсумовані повідомлення лишились після блока</li><li>блок не додали в наступний запит</li></ul></div><div class="dcol gray"><b>Одразу 400</b><ul><li>підсумовані повідомлення лишились перед блоком</li><li>compaction разом з context_management</li></ul></div></div><div class="dtitle">Thinking: як показувати (display)</div><div class="dgroup blue"><b>display</b><div class="dkids"><div class="dbox blue">summarized: видно короткий підсумок</div><div class="dbox blue">omitted: порожній блок, підпис лишається, менше затримки, вартість та сама; на Claude 5+ це типове значення</div><div class="dbox blue">updates (beta): оновлення прогресу між викликами</div></div></div><div class="dcols"><div class="dcol red"><b>Не можна</b><ul><li>thinking enabled з budget_tokens на нових моделях: 400</li><li>перемикати thinking посеред ходу з інструментами</li><li>temperature, top_p, top_k з API 2026-10-21: 400</li></ul></div><div class="dcol green"><b>Обов&#x27;язково</b><ul><li>повертати thinking і redacted_thinking без змін</li><li>змінений блок: 400</li></ul></div></div><div class="dtitle">Memory tool</div><div class="dgroup green"><b>Клієнтський: виконує твій застосунок</b><div class="dkids"><div class="dbox green">каталог /memories</div><div class="dbox green">команди: view, create, str_replace, insert, delete, rename</div><div class="dbox green">безпека на вас: перевіряйте шляхи (path traversal)</div></div></div><div class="dnote">Підсумок зберігає загальне, пам&#x27;ять зберігає те, що має пережити підсумок. Платите за повні згенеровані роздуми, а не за видимий підсумок.</div></div><div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
-<li>Два режими ущільнення: за запитом (блок першим, ви прибираєте підсумовані) і за порогом (150 000, мінімум 50 000).</li>
+<li>Два режими ущільнення: за запитом (блок першим, підсумоване прибираєш ти) і за порогом (150 000, мінімум 50 000).</li>
 <li>Вартість це сума <code>usage.iterations</code>.</li>
-<li>Без підсумку приходить 200 із порожнім вмістом: перевіряйте <code>stop_reason</code>.</li>
-<li><code>display: omitted</code> економить затримку, не гроші.</li>
+<li>Немає підсумку, а відповідь 200 з порожнім вмістом: перевіряй <code>stop_reason</code>.</li>
+<li><code>display: omitted</code> економить час, а не гроші.</li>
 <li><code>enabled</code> з <code>budget_tokens</code> на нових моделях дає 400.</li>
 <li>Thinking не перемикають посеред ходу з інструментами.</li>
-<li><code>temperature</code> у версії API 2026-10-21 дає 400 на всіх моделях.</li>
 <li><code>redacted_thinking</code> теж повертають без змін.</li>
-<li>Memory tool клієнтський: path traversal захищаєте ви.</li>
+<li>Memory tool клієнтський: від path traversal захищаєш ти.</li>
 </ol>
-</div><h2>Перевірте себе</h2>
+</div><h2>Перевір себе</h2>
 <ol>
-<li>Де має стояти блок <code>compaction</code> у режимі за запитом?</li>
-<li>Як порахувати вартість із ущільненням?</li>
-<li>Що станеться, якщо підсумовані повідомлення лишились <strong>після</strong> блока?</li>
+<li>Де стоїть блок <code>compaction</code> у режимі за запитом?</li>
+<li>Як порахувати вартість з ущільненням?</li>
+<li>Що буде, якщо підсумовані повідомлення лишились <strong>після</strong> блоку?</li>
 <li>Що економить <code>display: omitted</code>?</li>
-<li>Що буде, якщо перемкнути thinking посеред ходу з інструментами?</li>
+<li>Що станеться, якщо перемкнути thinking посеред ходу з інструментами?</li>
 <li>Хто виконує операції memory tool?</li>
 <li>Яка найважливіша перевірка в його обробнику?</li>
 </ol>
@@ -278,17 +273,17 @@
 <ol>
 <li>Першим у <code>messages</code>, підсумовані повідомлення прибрати.</li>
 <li>Сума записів <code>usage.iterations</code>.</li>
-<li>Помилки не буде, API знову надішле їх моделі.</li>
-<li>Затримку до першого токена. Вартість та сама.</li>
-<li>API мовчки вимкне роздуми для того запиту.</li>
-<li>Ваш застосунок.</li>
-<li>Що шлях лишається в <code>/memories</code> (канонізація, відмова <code>../</code>).</li>
+<li>Помилки не буде, але API знову надішле їх моделі.</li>
+<li>Час до першого токена. Ціна та сама.</li>
+<li>API мовчки вимкне роздуми для цього запиту.</li>
+<li>Твій застосунок.</li>
+<li>Що шлях лишається в <code>/memories</code>.</li>
 </ol>
 </details>
 <hr />
 <p><em>Повна версія:</em> 7-compaction-thinking-and-memory-tool.md.</p>
 
-<nav class="pager"><a href="6-context-and-cache-simple.html"><small>← Назад</small>Лекція 6: контекст, кеш і токени</a><a href="8-effort-budgets-sandbox-hooks-simple.html"><small>Далі →</small>Лекція 8: effort, бюджет завдання, збережені роздуми, sandbox і hooks</a></nav><nav class="tools"><a href="../../claude-hub.html">← Claude General</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="7-compaction-thinking-memory-simple-en.html">🌐 Read in English</a></nav>
+<nav class="pager"><a href="6-context-and-cache-simple.html"><small>← Назад</small>Лекція 6: контекст, кеш і токени</a><a href="8-effort-budgets-sandbox-hooks-simple.html"><small>Далі →</small>Лекція 8: effort, бюджет задачі та збережені роздуми</a></nav><nav class="tools"><a href="../../claude-hub.html">← Claude General</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="7-compaction-thinking-memory-simple-en.html">🌐 Read in English</a></nav>
 </main>
 <script>
 const tg = window.Telegram && window.Telegram.WebApp;

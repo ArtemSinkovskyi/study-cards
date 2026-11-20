@@ -75,9 +75,9 @@ const TESTS = [
     "a": 1,
     "e": [
      "end_turn означає, що модель завершила відповідь: цикл виходить.",
-     "Поки stop_reason дорівнює tool_use, ви виконуєте інструменти й продовжуєте розмову.",
+     "Поки stop_reason дорівнює tool_use, ти виконуєш інструменти й продовжуєш розмову.",
      "pause_turn стосується серверного циклу, що вперся в ліміт ітерацій, а не клієнтського виклику інструмента.",
-     "stop_sequence означає, що спрацювала ваша стоп-послідовність: це вихід із циклу."
+     "stop_sequence означає, що спрацював твій стоп-рядок: це вихід із циклу."
     ],
     "w": "Цикл іде, поки stop_reason == tool_use. (лекція 2)"
    },
@@ -110,7 +110,7 @@ const TESTS = [
     "e": [
      "Робота не завершена: pause_turn означає, що серверний цикл упирається в ліміт ітерацій.",
      "Причина не в max_tokens, а в ліміті ітерацій.",
-     "Додайте відповідь без змін (і id контейнера, якщо є) і надішліть знову.",
+     "Додай відповідь без змін (і id контейнера, якщо він є) і надішли знову.",
      "Скасовувати нічого: це штатний стан."
     ],
     "w": "Ліміт серверного циклу 10 ітерацій. (лекція 2)"
@@ -133,7 +133,7 @@ const TESTS = [
     "w": "(лекція 2)"
    },
    {
-    "q": "Ваш інструмент кинув виняток. Що найкраще повернути моделі?",
+    "q": "Твій інструмент кинув виняток. Що найкраще повернути моделі?",
     "o": [
      "Нічого, пропустити результат",
      "Стек виклику, як є",
@@ -167,16 +167,16 @@ const TESTS = [
     "w": "(лекція 2)"
    },
    {
-    "q": "Цикл із туторіалу не має ліміту ітерацій. Що це означає для вашого коду?",
+    "q": "Цикл із туторіалу не має ліміту ітерацій. Що це означає для твого коду?",
     "o": [
-     "Модель, що постійно просить інструменти, зациклить програму, тож ліміт додаєте самі",
+     "Модель, яка весь час просить інструменти, зациклить програму, тож ліміт ставиш сам",
      "API сам зупинить після кількох ітерацій",
      "Цикл завершиться через 10 ітерацій",
      "Запит поверне 400"
     ],
     "a": 0,
     "e": [
-     "У прочитаних кільцях туторіалу ліміту нема, тож додайте свій.",
+     "У туторіалі ліміту немає, тож постав свій.",
      "API не зупиняє клієнтський цикл.",
      "Число 10 стосується серверного циклу (pause_turn).",
      "Це не помилка запиту."
@@ -245,7 +245,7 @@ const TESTS = [
     ],
     "a": 0,
     "e": [
-     "Вимкніть інструменти запису в mcp_toolset: це примусове обмеження.",
+     "Вимкни інструменти запису в mcp_toolset: це технічна заборона, а не прохання.",
      "Промпт лише радить і нічого не забороняє технічно.",
      "authorization_token це автентифікація, а не права на запис.",
      "max_tokens ніяк не пов'язаний із правами."
@@ -263,7 +263,7 @@ const TESTS = [
     "a": 3,
     "e": [
      "strict не змушує модель викликати інструмент.",
-     "Результат формує ваш код, strict лише про вхід.",
+     "Результат формує твій код, strict стосується лише входу.",
      "До кешу strict не має стосунку.",
      "Grammar-constrained sampling гарантує відповідність входу схемі."
     ],
@@ -297,7 +297,7 @@ const TESTS = [
     "a": 1,
     "e": [
      "Серверні інструменти й MCP connector там не підтримуються.",
-     "Так: це invalid_request_error; використовуйте usage відповіді.",
+     "Так, це invalid_request_error. Дивись usage у відповіді.",
      "Запит не «обрізається», а відхиляється.",
      "Від сімейства моделі це не залежить."
     ],
@@ -319,7 +319,7 @@ const TESTS = [
      "Не ігнорується, а відхиляється.",
      "Довжина відповіді тут ні до чого."
     ],
-    "w": "Замінюйте structured outputs чи інструкціями. (лекція 4)"
+    "w": "Заміна: structured outputs, інструмент зі схемою або інструкція. (лекції 4, 12)"
    },
    {
     "q": "Де розмістити довгі документи й запит у промпті з багатьма документами?",
@@ -368,7 +368,7 @@ const TESTS = [
      "Раніше так, на 4.7+ ні.",
      "Не ігнорується, а відхиляється.",
      "Таких властивостей нема.",
-     "На 4.7+ це 400; використовуйте effort чи max_tokens."
+     "На 4.7+ це 400. Бери effort або max_tokens."
     ],
     "w": "(лекція 4)"
    }
@@ -377,11 +377,11 @@ const TESTS = [
  {
   "id": "t1b",
   "title": "Тест 1: частина 2",
-  "sub": "18 питань",
+  "sub": "13 питань",
   "intro": "Базові факти з лекцій 2-7. Не офіційні питання. Після перевірки під кожним варіантом є пояснення.",
   "qs": [
    {
-    "q": "Ваш промпт для Opus 4.6 містить «CRITICAL: You MUST use this tool». Яка ймовірна проблема?",
+    "q": "Твій промпт для Opus 4.6 містить «CRITICAL: You MUST use this tool». Яка ймовірна проблема?",
     "o": [
      "Інструмент ніколи не викликатиметься",
      "Запит отримає 400",
@@ -416,106 +416,21 @@ const TESTS = [
    },
    {
     "s": "Claude Code",
-    "q": "Вам треба ГАРАНТУВАТИ, що Claude не змінить .env. Що обрати?",
+    "q": "Треба ГАРАНТУВАТИ, що Claude ніколи не змінить .env. Що обрати?",
     "o": [
      "Рядок у CLAUDE.md «ніколи не змінюй .env»",
      "Поправити системний промпт",
      "Попросити в чаті",
-     "permissions.deny на Read і Edit для .env чи PreToolUse hook із exit 2"
+     "PreToolUse hook, який блокує будь-яку зміну .env"
     ],
     "a": 3,
     "e": [
-     "CLAUDE.md це контекст, а не примусова конфігурація.",
+     "CLAUDE.md це контекст, тобто порада, а не гарантія.",
      "Системний промпт теж лише порада.",
      "Прохання в чаті ще слабше.",
-     "Правила дозволів і hooks виконує Claude Code, а не модель."
+     "Hook спрацьовує щоразу: «не можна ніколи» означає hook або код."
     ],
-    "w": "(лекція 5)"
-   },
-   {
-    "q": "PreToolUse hook завершився з кодом виходу 1. Що відбудеться?",
-    "o": [
-     "Виклик заблоковано",
-     "Claude зупиниться",
-     "Помилка не блокувальна, дія триває",
-     "Hook буде видалено"
-    ],
-    "a": 2,
-    "e": [
-     "Блокує лише код 2, не 1.",
-     "Claude не зупиняється.",
-     "Код 1 це неблокувальна помилка: показується повідомлення, дія триває.",
-     "Hook не видаляється автоматично."
-    ],
-    "w": "(лекція 5)"
-   },
-   {
-    "q": "У deny стоїть Bash(aws *), а в allow Bash(aws s3 ls). Команда aws s3 ls:",
-    "o": [
-     "Буде заблокована: порядок deny, ask, allow, перший збіг вирішує",
-     "Виконається, бо allow конкретніший",
-     "Запитає підтвердження",
-     "Залежить від режиму"
-    ],
-    "a": 0,
-    "e": [
-     "Порядок deny, ask, allow; перший збіг вирішує.",
-     "Специфічність порядку не змінює: allow не вирізає виняток із deny.",
-     "Deny виграє, а не питає.",
-     "Deny діє в усіх режимах."
-    ],
-    "w": "(лекція 5)"
-   },
-   {
-    "q": "Bash(curl *) у deny. Чи зупинить це sh -c 'curl https://example.com'?",
-    "o": [
-     "Так",
-     "Ні, правило Bash не є межею безпеки; потрібна пісочниця чи hook",
-     "Так, але лише в auto mode",
-     "Лише якщо додати WebFetch"
-    ],
-    "a": 1,
-    "e": [
-     "Правило зіставляє текст команди, а sh -c її обходить.",
-     "Правило бачить sh -c, а не curl усередині. Для надійності пісочниця чи hook.",
-     "Режим цього не змінює.",
-     "WebFetch не обмежує Bash."
-    ],
-    "w": "(лекція 5)"
-   },
-   {
-    "q": "У репозиторії є AGENTS.md і CLAUDE.md, який НЕ імпортує AGENTS.md. Що читає Claude Code за замовчуванням?",
-    "o": [
-     "Обидва",
-     "Лише AGENTS.md",
-     "Лише CLAUDE.md",
-     "Жодного"
-    ],
-    "a": 2,
-    "e": [
-     "Обидва лише з налаштуванням чи імпортом.",
-     "AGENTS.md ігнорується, коли є CLAUDE.md.",
-     "Лише CLAUDE.md, якщо він не імпортує AGENTS.md.",
-     "CLAUDE.md читається."
-    ],
-    "w": "(лекція 5)"
-   },
-   {
-    "q": "Скільки MEMORY.md auto memory вантажиться на старті?",
-    "o": [
-     "Увесь файл",
-     "Перші 50 рядків",
-     "Лише заголовки",
-     "Перші 200 рядків чи 25 КБ, що настане раніше"
-    ],
-    "a": 3,
-    "e": [
-     "Не весь файл: понад ліміт обрізається.",
-     "Ліміт 200 рядків, не 50.",
-     "Вантажаться перші рядки, а не заголовки.",
-     "Перші 200 рядків чи 25 КБ; файли тем читаються на вимогу."
-    ],
-    "w": "(лекція 5)"
+    "w": "Промпт сподівається, hook гарантує. (лекції 5, 9)"
    },
    {
     "q": "Яка основна користь субагента?",
@@ -621,7 +536,7 @@ const TESTS = [
     "w": "(лекція 6)"
    },
    {
-    "q": "Ви поставили cache_control на блок із міткою часу, що змінюється щоразу. Результат?",
+    "q": "cache_control стоїть на блоці з міткою часу, яка щоразу інша. Що буде?",
     "o": [
      "Кеш ніколи не влучить, кожен запит платить за запис",
      "Кеш працює краще",
@@ -638,7 +553,7 @@ const TESTS = [
     "w": "(лекція 6)"
    },
    {
-    "q": "Ви ущільнили розмову режимом on-demand. Де в messages має стояти блок compaction і як порахувати вартість?",
+    "q": "Розмову ущільнено в режимі on-demand. Де в messages має стояти блок compaction і як порахувати вартість?",
     "o": [
      "Останнім; з верхніх input_tokens",
      "У системному промпті; з верхніх output_tokens",
@@ -684,7 +599,7 @@ const TESTS = [
     "e": [
      "Розмір відповіді не захищає від виходу за каталог.",
      "Мова файла не пов'язана з безпекою шляху.",
-     "Захист від path traversal лежить на вашому боці.",
+     "Захист від path traversal на твоєму боці.",
      "Версія SDK не захищає шляхи."
     ],
     "w": "(лекція 7)"
@@ -695,7 +610,7 @@ const TESTS = [
   "id": "t2",
   "title": "Тест 2: частина 1",
   "sub": "19 питань",
-  "intro": "Compaction, thinking, memory tool, effort, task budgets, sandbox і hooks. Не офіційні питання.",
+  "intro": "Compaction, thinking, memory tool, effort і task budgets. Не офіційні питання.",
   "qs": [
    {
     "s": "Compaction",
@@ -847,7 +762,7 @@ const TESTS = [
      "Не доповнює, а замінює.",
      "Ліміт 16 384.",
      "Ліміт є.",
-     "Замінює повністю: скажіть, що зберегти, і не викликати інструментів."
+     "Замінює повністю: скажи, що зберегти, і заборони викликати інструменти."
     ],
     "w": "(лекція 7)"
    },
@@ -855,7 +770,7 @@ const TESTS = [
     "q": "Що повертає API, коли підсумку не вийшло (on-demand)?",
     "o": [
      "400",
-     "200 із порожнім content; спершу перевіряйте stop_reason",
+     "200 із порожнім content, тож спершу перевір stop_reason",
      "529",
      "Блок із текстом помилки"
     ],
@@ -938,7 +853,7 @@ const TESTS = [
     "w": "(лекція 7)"
    },
    {
-    "q": "Ви перемкнули режим thinking посеред ходу з інструментами. Що станеться?",
+    "q": "Режим thinking перемкнули посеред ходу з інструментами. Що станеться?",
     "o": [
      "400",
      "Хід перезапуститься",
@@ -992,7 +907,7 @@ const TESTS = [
     "s": "Memory tool",
     "q": "Хто виконує операції memory tool?",
     "o": [
-     "Ваш застосунок над сховищем, яке ви контролюєте",
+     "Твій застосунок, у сховищі, яке ти контролюєш",
      "Anthropic на своїх серверах",
      "Браузер",
      "Окремий MCP-сервер"
@@ -1000,7 +915,7 @@ const TESTS = [
     "a": 0,
     "e": [
      "Інструмент клієнтський: Claude лише просить операції.",
-     "Anthropic не зберігає ваші файли пам'яті.",
+     "Anthropic не зберігає твої файли пам'яті.",
      "Браузер тут ні до чого.",
      "MCP не потрібен."
     ],
@@ -1028,8 +943,8 @@ const TESTS = [
  {
   "id": "t2b",
   "title": "Тест 2: частина 2",
-  "sub": "19 питань",
-  "intro": "Compaction, thinking, memory tool, effort, task budgets, sandbox і hooks. Не офіційні питання.",
+  "sub": "12 питань",
+  "intro": "Compaction, thinking, memory tool, effort і task budgets. Не офіційні питання.",
   "qs": [
    {
     "q": "Яка найважливіша перевірка в обробнику memory tool?",
@@ -1236,134 +1151,14 @@ const TESTS = [
      "Модель підсумовування та сама."
     ],
     "w": "(лекція 8)"
-   },
-   {
-    "s": "Sandbox і hooks",
-    "q": "Який стан Claude Code sandbox за замовчуванням?",
-    "o": [
-     "Увімкнений",
-     "Вимкнений",
-     "Лише на Windows",
-     "Лише в plan mode"
-    ],
-    "a": 1,
-    "e": [
-     "Вимкнений за замовчуванням.",
-     "Вмикається /sandbox чи sandbox.enabled.",
-     "На Windows взагалі без sandbox (потрібен WSL2).",
-     "Не залежить від plan mode."
-    ],
-    "w": "(лекція 8)"
-   },
-   {
-    "q": "Що охоплює Claude Code sandbox?",
-    "o": [
-     "Read, Edit і Write",
-     "MCP-інструменти",
-     "hooks",
-     "Bash, PowerShell і Monitor та їхні дочірні процеси"
-    ],
-    "a": 3,
-    "e": [
-     "Файлові інструменти поза sandbox.",
-     "MCP поза sandbox.",
-     "hooks поза sandbox.",
-     "Охоплює shell-команди й їхні дочірні процеси."
-    ],
-    "w": "(лекція 8)"
-   },
-   {
-    "q": "Скільки продовжень Stop hook допускає поспіль, перш ніж Claude Code перекриє?",
-    "o": [
-     "3",
-     "5",
-     "8",
-     "20"
-    ],
-    "a": 2,
-    "e": [
-     "Не 3.",
-     "Не 5.",
-     "8; скрипт має перевіряти stop_hook_active.",
-     "20 це інший ліміт (auto mode)."
-    ],
-    "w": "(лекції 5, 8)"
-   },
-   {
-    "q": "Що робить код виходу 2 у PreCompact hook?",
-    "o": [
-     "Блокує ущільнення",
-     "Нічого",
-     "Видаляє розмову",
-     "Лише логує"
-    ],
-    "a": 0,
-    "e": [
-     "Блокує ущільнення (також decision: block).",
-     "Блокує.",
-     "Не видаляє.",
-     "Не лише логує."
-    ],
-    "w": "(лекція 8)"
-   },
-   {
-    "q": "Чи може async hook заблокувати дію?",
-    "o": [
-     "Так",
-     "Лише Stop",
-     "Ні, async hook не може блокувати",
-     "Лише PreToolUse"
-    ],
-    "a": 2,
-    "e": [
-     "decision і permissionDecision у async ігноруються.",
-     "Не лише Stop.",
-     "Async не може керувати поведінкою Claude.",
-     "Не лише PreToolUse."
-    ],
-    "w": "(лекція 8)"
-   },
-   {
-    "q": "Чи спрацьовує PreToolUse на файл, доданий через @file у промпті?",
-    "o": [
-     "Так",
-     "Ні, потрібне правило Read deny",
-     "Лише в plan mode",
-     "Лише в auto mode"
-    ],
-    "a": 1,
-    "e": [
-     "@-файли вставляються без виклику інструмента.",
-     "Блокуйте через Read deny чи CLAUDE_CODE_DISABLE_FILE_MENTIONS.",
-     "Не залежить від plan.",
-     "Не залежить від auto."
-    ],
-    "w": "(лекція 8)"
-   },
-   {
-    "q": "Що робить ok: false у prompt hook на події PermissionRequest?",
-    "o": [
-     "Забороняє виклик",
-     "Завершує хід",
-     "Блокує сесію",
-     "Нічого, потрібен command hook із decision.behavior deny"
-    ],
-    "a": 3,
-    "e": [
-     "Не забороняє.",
-     "Не завершує хід.",
-     "Не блокує сесію.",
-     "PermissionRequest і PermissionDenied ігнорують ok: false."
-    ],
-    "w": "(лекція 8)"
    }
   ]
  },
  {
   "id": "t3",
   "title": "Тест 3",
-  "sub": "сценарії, 21 питання",
-  "intro": "Ситуації з практики: оберіть найкраще рішення. Не офіційні питання.",
+  "sub": "сценарії, 18 питань",
+  "intro": "Ситуації з практики: обери найкраще рішення. Не офіційні питання.",
   "qs": [
    {
     "q": "Агент має кілька незалежних інструментів читання, але викликає їх по одному. Найімовірніша причина в коді?",
@@ -1400,21 +1195,21 @@ const TESTS = [
     "w": "(лекція 3)"
    },
    {
-    "q": "CLAUDE.md каже «ніколи не змінюй .env», але Claude його змінив. Що зробити, щоб це точно не повторилося?",
+    "q": "CLAUDE.md каже «ніколи не змінюй .env», але Claude його змінив. Як зробити, щоб це точно не повторилося?",
     "o": [
      "Дописати вимогу капсом у CLAUDE.md",
      "Додати інструкцію в системний промпт",
      "Підвищити effort",
-     "Додати deny на Edit для .env чи PreToolUse hook із exit 2"
+     "Додати PreToolUse hook, що блокує зміну .env"
     ],
     "a": 3,
     "e": [
-     "CLAUDE.md лише контекст, голос не додає гарантії.",
+     "CLAUDE.md лише контекст: капс не дає гарантії.",
      "Системний промпт теж лише порада.",
      "effort не про заборони.",
-     "Правила й hooks виконує Claude Code, а не модель."
+     "Hook виконує Claude Code, а не модель, тож правило діє завжди."
     ],
-    "w": "(лекція 5)"
+    "w": "(лекції 5, 9)"
    },
    {
     "q": "Кеш діагностики ніколи не влучає: на початку статичного префікса стоїть поточний час. Найкраще виправлення?",
@@ -1485,7 +1280,7 @@ const TESTS = [
     "w": "(лекція 6)"
    },
    {
-    "q": "Ваш код шле prefill на Claude Opus 4.6, щоб отримати чистий JSON. Що станеться і що робити?",
+    "q": "Твій код шле prefill на Claude Opus 4.6, щоб отримати чистий JSON. Що станеться і що робити?",
     "o": [
      "Працює як раніше",
      "400; використати structured outputs чи інструкції",
@@ -1495,7 +1290,7 @@ const TESTS = [
     "a": 1,
     "e": [
      "На 4.6+ не працює.",
-     "Prefill дає 400; замінюйте structured outputs.",
+     "Prefill дає 400. Заміна: structured outputs або інструмент зі схемою.",
      "Не ігнорується, а відхиляється.",
      "Це не про швидкість."
     ],
@@ -1517,40 +1312,6 @@ const TESTS = [
      "Ручне дорожче й повільніше."
     ],
     "w": "(лекція 4)"
-   },
-   {
-    "q": "CI має запустити Claude Code без людини й відмовляти у всьому, що не дозволено правилами. Який режим?",
-    "o": [
-     "bypassPermissions",
-     "auto",
-     "plan",
-     "dontAsk"
-    ],
-    "a": 3,
-    "e": [
-     "bypassPermissions пропускає запити, це небезпечно.",
-     "auto дозволяє більше з класифікатором.",
-     "plan для дослідження, не для CI.",
-     "dontAsk відмовляє у всьому, що питало б."
-    ],
-    "w": "(лекція 5)"
-   },
-   {
-    "q": "Яке рішення блокує git push навіть у bypassPermissions?",
-    "o": [
-     "Рядок у CLAUDE.md",
-     "Правило allow",
-     "Правило deny Bash(git push *) чи PreToolUse hook із deny",
-     "Prompt hook на PermissionRequest"
-    ],
-    "a": 2,
-    "e": [
-     "CLAUDE.md лише порада.",
-     "У bypassPermissions allow не має ефекту.",
-     "Deny діє в усіх режимах, зокрема в bypass.",
-     "Prompt hook на PermissionRequest ok: false ігнорується."
-    ],
-    "w": "(лекції 5, 8)"
    },
    {
     "q": "Промпт: 100 тисяч токенів документів і одне питання. Як упорядкувати?",
@@ -1587,7 +1348,7 @@ const TESTS = [
     "w": "(лекція 8)"
    },
    {
-    "q": "Вам треба порахувати токени запиту з MCP connector. Що робити?",
+    "q": "Треба порахувати токени запиту з MCP connector. Що робити?",
     "o": [
      "Використати count_tokens",
      "Збільшити ліміт запитів",
@@ -1655,23 +1416,6 @@ const TESTS = [
     "w": "(лекція 5)"
    },
    {
-    "q": "Hook друкує валідний JSON з рішенням, але рішення не діє й помилок нема. Типова причина?",
-    "o": [
-     "Таймаут",
-     "Забагато hooks",
-     "Профіль оболонки друкує текст перед JSON, тож вивід не починається з {",
-     "Код виходу 1"
-    ],
-    "a": 2,
-    "e": [
-     "Таймаут дав би помітний наслідок.",
-     "Кількість не причина.",
-     "Вивід не починається з {, тож іде як звичайний текст.",
-     "Код 1 показав би неблокувальну помилку."
-    ],
-    "w": "(лекція 5)"
-   },
-   {
     "q": "Відповіді обриваються зі stop_reason max_tokens, коли thinking високий. Що зробити?",
     "o": [
      "Підвищити temperature",
@@ -1689,7 +1433,7 @@ const TESTS = [
     "w": "(лекція 8)"
    },
    {
-    "q": "У Python ви повертаєте блок compaction через model_dump() і отримуєте 400 Extra inputs are not permitted. Причина?",
+    "q": "У Python ти повертаєш блок compaction через model_dump() і отримуєш 400 Extra inputs are not permitted. Причина?",
     "o": [
      "Старий SDK",
      "model_dump додає text: null і citations: null",
@@ -1699,14 +1443,14 @@ const TESTS = [
     "a": 1,
     "e": [
      "Версія SDK не причина.",
-     "model_dump додає зайві поля; використайте to_dict() чи exclude_none.",
+     "model_dump додає зайві поля. Використай to_dict() або exclude_none.",
      "Блок не застаріває.",
      "Відсутній заголовок дає іншу 400."
     ],
     "w": "(лекція 7)"
    },
    {
-    "q": "Ви хочете, щоб агент не перевищував витрати на завдання, але не обривався різко. Що додати поверх max_tokens?",
+    "q": "Треба, щоб агент не перевищував витрат на задачу, але й не обривався різко. Що додати поверх max_tokens?",
     "o": [
      "task_budget (дорадчий, мінімум 20 000)",
      "Підвищити effort",
@@ -1727,7 +1471,7 @@ const TESTS = [
  {
   "id": "t4",
   "title": "Test 4 (English)",
-  "sub": "Scenario questions on the Claude API and Claude Code, 15 questions",
+  "sub": "10 questions",
   "intro": "Each question has one correct answer. Read the scenario, pick the best option, then check: every option comes with an explanation.",
   "qs": [
    {
@@ -1816,92 +1560,6 @@ const TESTS = [
      "Separate requests lose the cross-document context."
     ],
     "w": "(lecture 4)"
-   },
-   {
-    "s": "Claude Code",
-    "q": "A team must make sure Claude Code can never read the .env file in a project, even if someone asks it to. Which is the MOST reliable approach?",
-    "o": [
-     "Add a line to CLAUDE.md saying never to read .env",
-     "Add the file to .claudeignore",
-     "Add the rule Read(./.env) to permissions.deny in settings.json",
-     "Rename the file to .env.local"
-    ],
-    "a": 2,
-    "e": [
-     "CLAUDE.md is guidance for the model, not an enforced rule.",
-     "A .claudeignore file is not what Claude Code uses to block reads.",
-     "Correct. A deny rule is enforced by Claude Code regardless of what the model is asked to do. Deny wins over allow.",
-     "Renaming does not prevent reading the file."
-    ],
-    "w": "(lecture 5)"
-   },
-   {
-    "q": "A PreToolUse hook script must block a dangerous command. Which result stops the tool call?",
-    "o": [
-     "Exiting with code 1 and writing a warning",
-     "Exiting with code 2",
-     "Writing nothing and exiting with code 0",
-     "Writing the warning to a log file"
-    ],
-    "a": 1,
-    "e": [
-     "Exit code 1 is a non-blocking error: the warning is shown but the action still runs.",
-     "Correct. Exit code 2 blocks the action, and the message written to stderr is sent to the model.",
-     "Exit code 0 allows the action.",
-     "A log file has no effect on the tool call."
-    ],
-    "w": "(lecture 5)"
-   },
-   {
-    "q": "The same setting is defined in the user settings, the shared project settings, the local project settings and the managed settings. Which value does Claude Code use?",
-    "o": [
-     "The user settings",
-     "The shared project settings",
-     "The local project settings",
-     "The managed settings"
-    ],
-    "a": 3,
-    "e": [
-     "User settings have the lowest priority of the four.",
-     "Shared project settings are overridden by local and managed settings.",
-     "Local settings override the shared and user levels but not the managed level.",
-     "Correct. Managed settings (set by the organization) have the highest priority and cannot be overridden by users."
-    ],
-    "w": "(lecture 5)"
-   },
-   {
-    "q": "A PreToolUse hook should rewrite the Bash command before it runs. Where should the new command be returned?",
-    "o": [
-     "In the top-level field updatedInput of the JSON output",
-     "In hookSpecificOutput as updatedInput",
-     "In stderr with exit code 2",
-     "In an environment variable"
-    ],
-    "a": 1,
-    "e": [
-     "Fields that are placed at the wrong level are silently ignored.",
-     "Correct. permissionDecision, updatedInput and additionalContext belong inside hookSpecificOutput.",
-     "Exit code 2 blocks the call. It does not rewrite it.",
-     "Environment variables are not read back from hooks."
-    ],
-    "w": "(lecture 5)"
-   },
-   {
-    "q": "A Stop hook forces Claude to keep working until tests pass, but sometimes it loops forever. What should the hook script check?",
-    "o": [
-     "The tool name",
-     "The stop_hook_active field in its input, and exit when it is true",
-     "The current time",
-     "The size of the transcript"
-    ],
-    "a": 1,
-    "e": [
-     "The tool name is not relevant for a Stop hook.",
-     "Correct. stop_hook_active is true when Claude is already continuing because of a stop hook. Exiting in that case prevents an infinite loop.",
-     "Time-based checks are fragile and do not detect a loop.",
-     "Size says nothing about whether the hook already forced a continuation."
-    ],
-    "w": "(lecture 8)"
    },
    {
     "s": "Context and cost",
@@ -1999,7 +1657,7 @@ const TESTS = [
   "qs": [
    {
     "s": "Домен 1: агентна архітектура",
-    "q": "Агент повернув відповідь зі stop_reason tool_use. Що робить ваш код?",
+    "q": "Агент повернув відповідь зі stop_reason tool_use. Що робить твій код?",
     "o": [
      "Чекає, поки модель сама виконає інструмент",
      "Збільшує max_tokens і повторює запит",
@@ -2008,7 +1666,7 @@ const TESTS = [
     ],
     "a": 2,
     "e": [
-     "Модель нічого не виконує сама: інструмент запускає ваш код.",
+     "Модель нічого не виконує сама: інструмент запускає твій код.",
      "Це реакція на max_tokens.",
      "tool_use означає: модель чекає результат. Виконали, повернули tool_result, цикл триває.",
      "Так роблять на end_turn, а не на tool_use."
@@ -2101,7 +1759,7 @@ const TESTS = [
     "w": "Частини мають разом давати ціле питання. (лекція 9)"
    },
    {
-    "q": "Ви відновили сесію через --resume, але з того часу кілька файлів змінились. Що найкраще?",
+    "q": "Сесію відновили через --resume, а кілька файлів відтоді змінились. Що найкраще?",
     "o": [
      "Збільшити контекстне вікно",
      "Почати нову сесію з коротким підсумком ключових фактів",
@@ -2418,7 +2076,7 @@ const TESTS = [
     "a": 1,
     "e": [
      "Write лише останній варіант.",
-     "Збіг має бути точним і унікальним: розширте контекст або замініть усі входження.",
+     "Збіг має бути точним і унікальним: розшир навколишній текст або заміни всі входження.",
      "Це зайве й ризиковано.",
      "Повтор дасть ту саму помилку."
     ],
@@ -2579,7 +2237,7 @@ const TESTS = [
   "qs": [
    {
     "s": "Домен 3: Claude Code",
-    "q": "У вас у ~/.claude/CLAUDE.md відступ 2 пробіли, а в ./CLAUDE.md проєкту 4. Що виконає Claude?",
+    "q": "У ~/.claude/CLAUDE.md відступ 2 пробіли, а в ./CLAUDE.md проєкту 4. Що виконає Claude?",
     "o": [
      "Візьме перший прочитаний",
      "Попросить вибрати",
@@ -2642,14 +2300,14 @@ const TESTS = [
      "Це не забороняє модель викликати навичку.",
      "fork лише ізолює контекст.",
      "Прохання в описі не гарантує нічого.",
-     "Тоді викликати можете лише ви."
+     "Тоді запускаєш лише ти."
     ],
     "w": "disable-model-invocation for side-effect commands. (лекція 11)"
    },
    {
     "q": "Що робить plan mode з інструментами Write і Edit?",
     "o": [
-     "Блокує їх на рівні інструментів до вашого схвалення плану",
+     "Блокує їх на рівні інструментів до твого схвалення плану",
      "Нічого, лише просить модель не редагувати",
      "Видаляє їх із сесії назавжди",
      "Дозволяє лише в папці .claude"
@@ -2923,14 +2581,14 @@ const TESTS = [
     "q": "JSON валідний, але сума позицій 4 800, а total 5 000. Яка це помилка й хто її ловить?",
     "o": [
      "Синтаксична, ловить tool_use",
-     "Семантична, ловить ваша валідація",
+     "Семантична, ловить твоя перевірка",
      "Це не помилка",
      "Синтаксична, ловить JSON Schema"
     ],
     "a": 1,
     "e": [
      "Форма правильна.",
-     "Зміст неправильний: його перевіряє ваш код і повертає моделі конкретну помилку.",
+     "Зміст неправильний: його перевіряє твій код і повертає моделі конкретну помилку.",
      "Числа не сходяться.",
      "Схема перевіряє форму, а не арифметику."
     ],
@@ -2980,7 +2638,7 @@ const TESTS = [
     ],
     "a": 0,
     "e": [
-     "Беріть свій id запису, наприклад номер заяви.",
+     "Бери свій id запису, наприклад номер заяви.",
      "Пріоритетів у батчі нема.",
      "До кешу це не стосується.",
      "Модель задається окремо."
@@ -3261,7 +2919,7 @@ const TESTS = [
     "w": "Never fail silently. (лекція 13)"
    },
    {
-    "q": "Ви перевіряєте лише результати з низькою впевненістю. Чого це не зловить?",
+    "q": "Перевіряєш лише результати з низькою впевненістю. Чого це не зловить?",
     "o": [
      "Пакетних запитів",
      "Випадків, коли модель впевнено неправа",
@@ -3490,7 +3148,7 @@ function render() {
     const sc = score(t);
     const pct = Math.round(100 * sc / t.qs.length);
     html += "<div class='result'><h2>Результат: " + sc + " з " + t.qs.length + " (" + pct + "%)</h2>";
-    html += "<div>Зелений це правильний варіант, червоний ваш неправильний. Під кожним варіантом пояснення, чому так.</div>";
+    html += "<div>Зелений це правильний варіант, червоний твій неправильний. Під кожним варіантом пояснення, чому так.</div>";
     if (s.history.length) {
       html += "<ul class='hist'>" + s.history.slice().reverse().map(h => "<li>" + h.date + ": " + h.score + " з " + t.qs.length + "</li>").join("") + "</ul>";
     }
@@ -3514,7 +3172,7 @@ function render() {
       html += "<label class='" + cls + "'><div class='row'><input type='radio' name='q" + i + "' value='" + j + "'" + (j === chosen ? " checked" : "") + (rev ? " disabled" : "") + "><span>" + o + "</span></div>" + ex + "</label>";
     });
     if (rev) {
-      const mark = chosen === undefined ? "Без відповіді." : (chosen === q.a ? "Ви відповіли правильно." : "Ви відповіли неправильно.");
+      const mark = chosen === undefined ? "Без відповіді." : (chosen === q.a ? "Відповідь правильна." : "Відповідь неправильна.");
       html += "<div class='why'><b>" + mark + "</b> Джерело: " + q.w + "</div>";
     }
     html += "</div>";

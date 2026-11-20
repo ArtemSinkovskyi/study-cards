@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Лекція 1: що за іспит і з чого починати</title>
+<title>Лекція 1: що за іспит і з чого почати</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   body { margin:0; background:#f7f5f0; color:#1d1d1f; font:16px/1.6 system-ui, Segoe UI, Roboto, sans-serif; overflow-wrap:break-word; hyphens:none; }
@@ -95,12 +95,12 @@
 <body>
 <main>
 <nav class="bar"><a href="../../claude-hub.html">← Claude General</a><a href="index.html">☰ Усі теми</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="1-start-simple-en.html">🌐 Read in English</a></nav>
-<h1>Лекція 1: що за іспит і з чого починати</h1>
+<h1>Лекція 1: що за іспит і з чого почати</h1>
 <blockquote>
 <p>Спрощена версія. Повна: ../1-claude-architect-reading-map.md.</p>
 </blockquote>
 <h2>Що це за іспит</h2>
-<p><strong>Claude Certified Architect, Foundations (CCA-F)</strong> це сертифікація Anthropic. Дані з сторонніх сайтів, офіційного посібника я не знайшов, тож перевірте на офіційній сторінці Anthropic перед записом.</p>
+<p><strong>Claude Certified Architect, Foundations (CCA-F)</strong> це сертифікація Anthropic. Цифри нижче я взяв зі сторонніх сайтів, офіційного посібника не знайшов, тож перед записом звір їх на сторінці Anthropic.</p>
 <div class="tw"><table class="two">
 <thead>
 <tr>
@@ -111,10 +111,10 @@
 <tbody>
 <tr>
 <td data-label="Що">Питань</td>
-<td data-label="Значення">60 тестових</td>
+<td data-label="Значення">60, з вибором відповіді</td>
 </tr>
 <tr>
-<td data-label="Що">Часу</td>
+<td data-label="Що">Час</td>
 <td data-label="Значення">120 хвилин</td>
 </tr>
 <tr>
@@ -122,75 +122,75 @@
 <td data-label="Значення">720 з 1000</td>
 </tr>
 <tr>
-<td data-label="Що">Вартість</td>
+<td data-label="Що">Ціна</td>
 <td data-label="Значення">99 або 125 доларів (джерела розходяться)</td>
 </tr>
 </tbody>
 </table></div>
-<h2>Навіщо це так задумано</h2>
-<p>Сертифікація перевіряє не знання API напам'ять, а вміння проєктувати надійні системи з моделлю. Тому в питаннях рішення й пастки.</p>
-<h2>П'ять тем іспиту</h2>
-<p>Ваги з сторонньої сторінки, вагу п'ятої теми не підтверджено.</p>
+<h2>Що насправді перевіряють</h2>
+<p>Іспит не про те, чи ти пам'ятаєш API напам'ять. Він про рішення: який патерн обрати, де потрібна гарантія, а де вистачить промпту, коли кликати людину. Більшість питань це короткий сценарій і чотири варіанти, з яких три виглядають правдоподібно.</p>
+<h2>П'ять доменів</h2>
+<p>Ваги зі сторонньої сторінки, вагу п'ятого домену не підтверджено.</p>
 <div class="scrollhint">таблицю можна гортати вбік →</div><div class="tw"><table>
 <thead>
 <tr>
-<th>Тема (домен курсу)</th>
+<th>Домен</th>
 <th>Вага</th>
 <th>Лекції</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td data-label="Тема (домен курсу)">Агентна архітектура (1: Agentic Architecture &amp; Orchestration)</td>
+<td data-label="Домен">1. Агентна архітектура й оркестрація</td>
 <td data-label="Вага">27%</td>
 <td data-label="Лекції">2, 9</td>
 </tr>
 <tr>
-<td data-label="Тема (домен курсу)">Claude Code (3: Claude Code Configuration &amp; Workflows)</td>
-<td data-label="Вага">20%</td>
-<td data-label="Лекції">5, 8, 11</td>
-</tr>
-<tr>
-<td data-label="Тема (домен курсу)">Промпти (4: Prompt Engineering &amp; Structured Output)</td>
-<td data-label="Вага">20%</td>
-<td data-label="Лекції">4, 12</td>
-</tr>
-<tr>
-<td data-label="Тема (домен курсу)">Інструменти й MCP (2: Tool Design &amp; MCP Integration)</td>
+<td data-label="Домен">2. Інструменти й MCP</td>
 <td data-label="Вага">18%</td>
 <td data-label="Лекції">3, 10</td>
 </tr>
 <tr>
-<td data-label="Тема (домен курсу)">Контекст (5: Context Management &amp; Reliability)</td>
+<td data-label="Домен">3. Налаштування Claude Code і робочі процеси</td>
+<td data-label="Вага">20%</td>
+<td data-label="Лекції">5, 11</td>
+</tr>
+<tr>
+<td data-label="Домен">4. Промпти й структуровані відповіді</td>
+<td data-label="Вага">20%</td>
+<td data-label="Лекції">4, 12</td>
+</tr>
+<tr>
+<td data-label="Домен">5. Контекст і надійність</td>
 <td data-label="Вага">не підтверджено</td>
-<td data-label="Лекції">6, 7, 13</td>
+<td data-label="Лекції">6, 7, 8, 13</td>
 </tr>
 </tbody>
 </table></div>
-<p>Лекції 9-13 написані за курсом до іспиту, по одній на домен. Там рішення й пастки, які іспит перевіряє найчастіше.</p>
-<p>Агентна архітектура найважча й найважливіша, з неї й починайте.</p>
-<h2>Одна фраза про кожну тему</h2>
+<p>Лекції 9-13 написані за курсом до іспиту, по одній на домен. У них рішення й пастки, які іспит перевіряє найчастіше. Лекції 2-8 дають основу з документації.</p>
+<p>Почни з домену 1: він найбільший і на ньому тримаються всі інші.</p>
+<h2>Кожен домен одним реченням</h2>
 <ul>
-<li><strong>Агентна архітектура:</strong> як модель просить інструменти, а ваш код виконує (цикл).</li>
-<li><strong>Інструменти й MCP:</strong> як описувати інструменти й підключати зовнішні системи.</li>
-<li><strong>Промпти:</strong> як писати інструкції й перевіряти, що вони працюють.</li>
-<li><strong>Claude Code:</strong> що лише радить (CLAUDE.md), а що гарантує (дозволи, hooks).</li>
-<li><strong>Контекст:</strong> що займає вікно, як зменшувати його й як економити на кеші.</li>
+<li><strong>Агентна архітектура:</strong> модель просить інструменти, твій код їх виконує, а координатор роздає роботу субагентам.</li>
+<li><strong>Інструменти й MCP:</strong> як описати інструмент, щоб модель обрала правильний, і як повертати помилки.</li>
+<li><strong>Claude Code:</strong> що лише радить (CLAUDE.md), а що гарантує (hooks), і як запускати Claude Code в CI.</li>
+<li><strong>Промпти:</strong> чіткі критерії, приклади, схема для відповіді й перевірка змісту.</li>
+<li><strong>Контекст і надійність:</strong> як не загубити важливе в довгій розмові і коли передати справу людині.</li>
 </ul>
 <h2>Як вчити</h2>
 <ol>
-<li>Читайте лекції в порядку 2-8, потім 9-13 (домени курсу). Кожна займає 15-20 хвилин.</li>
-<li>Після кожної лекції відповідайте на питання в кінці.</li>
-<li>Щодня 5-10 хвилин на картки (<code>cards.html</code>). Не вчіть усі 156 відразу, беріть по одній групі.</li>
-<li>Наприкінці проходьте тести (<code>tests.html</code>), серед них п'ять тестів за доменами. Помилки повертайте в картки.</li>
+<li>Читай лекції 2-8, потім 9-13. Кожна на 15-20 хвилин.</li>
+<li>Після лекції відповідай на питання в кінці, не підглядаючи.</li>
+<li>Щодня 5-10 хвилин карток. Не бери всі 124 одразу, вчи по групі.</li>
+<li>Наприкінці проходь тести, зокрема п'ять тестів за доменами. Помилки повертай у картки.</li>
 </ol>
-<h2>Офіційна документація (де читати докладніше)</h2>
+<h2>Офіційна документація</h2>
 <ul>
 <li>Інструменти: <a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview.md">Tool use overview</a>, <a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/how-tool-use-works.md">How tool use works</a>, <a href="https://platform.claude.com/docs/en/agents-and-tools/tool-use/define-tools.md">Define tools</a></li>
 <li>MCP: <a href="https://platform.claude.com/docs/en/agents-and-tools/mcp-connector.md">MCP connector</a>, <a href="https://code.claude.com/docs/en/mcp.md">MCP у Claude Code</a></li>
 <li>Промпти: <a href="https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices.md">Prompting best practices</a>, <a href="https://platform.claude.com/docs/en/test-and-evaluate/develop-tests.md">Evaluations</a></li>
 <li>Контекст: <a href="https://platform.claude.com/docs/en/build-with-claude/context-windows.md">Context windows</a>, <a href="https://platform.claude.com/docs/en/build-with-claude/prompt-caching.md">Prompt caching</a>, <a href="https://platform.claude.com/docs/en/build-with-claude/compaction.md">Compaction</a></li>
-<li>Claude Code: <a href="https://code.claude.com/docs/en/memory.md">Memory</a>, <a href="https://code.claude.com/docs/en/hooks.md">Hooks</a>, <a href="https://code.claude.com/docs/en/permissions.md">Permissions</a>, <a href="https://code.claude.com/docs/en/skills.md">Skills</a>, <a href="https://code.claude.com/docs/en/sub-agents.md">Subagents</a></li>
+<li>Claude Code: <a href="https://code.claude.com/docs/en/memory.md">Memory</a>, <a href="https://code.claude.com/docs/en/hooks.md">Hooks</a>, <a href="https://code.claude.com/docs/en/skills.md">Skills</a>, <a href="https://code.claude.com/docs/en/sub-agents.md">Subagents</a></li>
 </ul>
 <h2>Словник</h2>
 <div class="tw"><table class="two">
@@ -202,12 +202,12 @@
 </thead>
 <tbody>
 <tr>
-<td data-label="Термін"><strong>Агентна архітектура</strong></td>
-<td data-label="Що це">модель у циклі викликає інструменти, доки не закінчить</td>
+<td data-label="Термін"><strong>Агент</strong></td>
+<td data-label="Що це">модель, що в циклі викликає інструменти, доки не закінчить</td>
 </tr>
 <tr>
 <td data-label="Термін"><strong>Інструмент (tool)</strong></td>
-<td data-label="Що це">функція, яку модель може попросити виконати</td>
+<td data-label="Що це">функція, яку модель просить виконати</td>
 </tr>
 <tr>
 <td data-label="Термін"><strong>MCP</strong></td>
@@ -219,23 +219,21 @@
 </tr>
 <tr>
 <td data-label="Термін"><strong>Токен</strong></td>
-<td data-label="Що це">одиниця тексту, у яких рахують вхід, вихід і ціну</td>
+<td data-label="Що це">одиниця тексту, в якій рахують вхід, вихід і ціну</td>
 </tr>
 <tr>
 <td data-label="Термін"><strong>Промпт</strong></td>
-<td data-label="Що це">інструкції й дані, які ви даєте моделі</td>
+<td data-label="Що це">інструкції й дані, які ти даєш моделі</td>
 </tr>
 </tbody>
 </table></div>
-<h2>Що запам'ятати</h2>
+<div class="remember"><h2>Що запам'ятати на іспит</h2>
 <ol>
-<li>Іспит: 60 питань, 120 хвилин, 720 з 1000.</li>
-<li>П'ять тем: агентна архітектура, інструменти й MCP, промпти, Claude Code, контекст.</li>
-<li>Це дані зі сторонніх сайтів, офіційну сторінку перевірте перед записом.</li>
+<li>60 питань, 120 хвилин, прохідний 720 з 1000.</li>
+<li>П'ять доменів, найбільший агентна архітектура.</li>
+<li>Іспит перевіряє рішення, а не пам'ять на параметри.</li>
 </ol>
-<hr />
-<p><em>Повна версія:</em> 1-claude-architect-reading-map.md.</p>
-
+</div>
 <nav class="pager"><span></span><a href="2-agent-loop-simple.html"><small>Далі →</small>Лекція 2: як агент працює з інструментами</a></nav><nav class="tools"><a href="../../claude-hub.html">← Claude General</a><a href="../../claude.html">🃏 Картки</a><a class="lang" href="1-start-simple-en.html">🌐 Read in English</a></nav>
 </main>
 <script>

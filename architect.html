@@ -447,7 +447,7 @@ function setMode(m) {
 function progress() {
   const p = pool(), n = p.filter(mastered).length;
   document.getElementById("fill").style.width = (100 * n / p.length) + "%";
-  document.getElementById("st").textContent = "Вивчено " + n + " з " + p.length + " · у черзі " + queue.length + (cur ? " +1" : "") + ". Картка вивчена, коли ви двічі поспіль відповіли «Знаю».";
+  document.getElementById("st").textContent = "Вивчено " + n + " з " + p.length + " · у черзі " + queue.length + (cur ? " +1" : "") + ". Картка вивчена після двох «Знаю» поспіль.";
 }
 
 function esc(t) {
@@ -476,8 +476,8 @@ function render() {
   let html = "";
   if (!flipped) {
     html += "<div class='card' id='card'><div class='group'>" + gi(cur.g) + "</div>";
-    if (mode === 1) html += "<div class='term q'>" + (cur.q || cur.t) + "</div><div class='hint'>Згадайте відповідь, потім клацніть, щоб перевернути.</div>";
-    else html += "<div class='back'>" + body(cur) + "</div><div class='hint'>Яке питання це відповідає? Клацніть, щоб перевернути.</div>";
+    if (mode === 1) html += "<div class='term q'>" + (cur.q || cur.t) + "</div><div class='hint'>Згадай відповідь і натисни, щоб перевернути.</div>";
+    else html += "<div class='back'>" + body(cur) + "</div><div class='hint'>До якого питання ця відповідь? Натисни, щоб перевернути.</div>";
     html += "</div>";
   } else {
     html += "<div class='card' id='card'><div class='group'>" + gi(cur.g) + "</div>";
