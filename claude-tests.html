@@ -8,8 +8,19 @@
   :root { --bg:#f7f5f0; --card:#fff; --ink:#1d1d1f; --mut:#6b6b70; --line:#e3dfd6; --acc:#24466b; --ok:#1e7a46; --okbg:#e6f4ec; --bad:#b3261e; --badbg:#fbeae8; }
   * { box-sizing: border-box; }
   body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui, Segoe UI, Roboto, sans-serif; }
-  header { position:sticky; top:0; z-index:5; background:var(--card); border-bottom:1px solid var(--line); padding:.75rem 1rem; }
   .wrap { max-width:52rem; margin:0 auto; }
+  header { position:sticky; top:0; z-index:5; background:var(--card); border-bottom:1px solid var(--line); padding:.6rem 1rem; }
+  .top { display:flex; align-items:center; gap:.6rem; }
+  .top h1 { font-size:1rem; margin:0; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .back { border:1px solid var(--line); background:var(--bg); border-radius:.5rem; padding:.4rem .7rem; font:inherit; font-size:.9rem; cursor:pointer; flex:none; }
+  .group-title { margin:1.2rem 0 .5rem; font-size:.85rem; text-transform:uppercase; letter-spacing:.04em; color:var(--mut); }
+  .list { display:grid; gap:.6rem; }
+  .pick { display:block; width:100%; text-align:left; border:1px solid var(--line); background:var(--card); border-radius:.7rem; padding:.8rem 1rem; font:inherit; color:var(--ink); cursor:pointer; }
+  .pick:active { border-color:var(--acc); }
+  .pick b { display:block; font-size:1rem; }
+  .pick small { display:block; color:var(--mut); font-size:.82rem; margin-top:.2rem; }
+  .pick .score { color:var(--acc); font-weight:600; }
+  .note { margin:.6rem 0; padding:.6rem .8rem; border-radius:.5rem; background:var(--badbg); font-size:.9rem; }
   .tabs { display:flex; gap:.5rem; flex-wrap:wrap; }
   .tab { border:1px solid var(--line); background:var(--bg); padding:.45rem .8rem; border-radius:.5rem; cursor:pointer; font:inherit; text-align:left; }
   .tab.on { background:var(--acc); color:#fff; border-color:var(--acc); }
@@ -49,9 +60,11 @@
 </head>
 <body>
 <header><div class="wrap">
-  <div class="tabs" id="tabs"></div>
-  <div class="bar"><i id="barfill"></i></div>
-  <div class="status"><span id="st-left"></span><span id="st-right"></span></div>
+  <div class="top"><button class="back" id="toList" hidden>← Тести</button><h1 id="heading">Тести</h1></div>
+  <div id="progress" hidden>
+    <div class="bar"><i id="barfill"></i></div>
+    <div class="status"><span id="st-left"></span><span id="st-right"></span></div>
+  </div>
 </div></header>
 <main><div class="wrap" id="app"></div></main>
 
@@ -2521,12 +2534,12 @@ const TESTS = [
  },
  {
   "id": "d4",
-  "title": "Домен 4: промпти і структурований вивід",
+  "title": "Домен 4: промпти і структуровані відповіді",
   "sub": "8 питань",
   "intro": "Критерії, few-shot, схема, валідація, Batch API, рев'ю. За лекціями 9-13 (5 доменів іспиту). Не офіційні питання. Після перевірки під кожним варіантом є пояснення.",
   "qs": [
    {
-    "s": "Домен 4: промпти і структурований вивід",
+    "s": "Домен 4: промпти і структуровані відповіді",
     "q": "Рецензент дає 15 зауважень, здебільшого про стиль, і команда перестала їх читати. Що робити?",
     "o": [
      "Звузити або вимкнути шумну категорію й додати рівні серйозності",
@@ -3105,53 +3118,88 @@ const KEY = "cca_tests_v2";
 let store = {};
 try { store = JSON.parse(localStorage.getItem(KEY) || localStorage.getItem("cca_tests_v1") || "{}"); } catch (e) { store = {}; }
 if (!store.settings) store.settings = { instant: false };
-let current = TESTS[0].id;
+let current = null;
+let pendingCheck = false;
+const tg = window.Telegram && window.Telegram.WebApp;
 
-function save() { localStorage.setItem(KEY, JSON.stringify(store)); }
+const GROUPS = [
+  ["Домени іспиту, українською", t => /^d\d$/.test(t.id)],
+  ["Exam domains, in English", t => /^d\d-en$/.test(t.id)],
+  ["Основа з документації", t => /^t\d/.test(t.id) && t.id !== "t4"],
+  ["Scenarios, in English", t => t.id === "t4"],
+];
+
+function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
 function state(id) { if (!store[id]) store[id] = { answers: {}, checked: false, history: [] }; return store[id]; }
 function score(t) { const s = state(t.id); let n = 0; t.qs.forEach((q, i) => { if (s.answers[i] === q.a) n++; }); return n; }
 function answered(t) { return Object.keys(state(t.id).answers).length; }
+function english(t) { return t.id === "t4" || t.id.endsWith("-en"); }
+function test() { return TESTS.find(x => x.id === current); }
 
-function renderTabs() {
-  const el = document.getElementById("tabs");
-  el.innerHTML = "";
-  TESTS.forEach(t => {
-    const s = state(t.id);
-    const b = document.createElement("button");
-    b.className = "tab" + (t.id === current ? " on" : "");
-    const last = s.history.length ? " · остання спроба " + s.history[s.history.length - 1].score + "/" + t.qs.length : "";
-    b.innerHTML = "<b>" + t.title + "</b><small>" + t.sub + " · відмічено " + answered(t) + "/" + t.qs.length + last + "</small>";
-    b.onclick = () => { current = t.id; render(); window.scrollTo(0, 0); };
-    el.appendChild(b);
+function open(id) { current = id; pendingCheck = false; render(); window.scrollTo(0, 0); }
+function close() { current = null; pendingCheck = false; render(); window.scrollTo(0, 0); }
+
+function renderList() {
+  document.getElementById("heading").textContent = "Тести: Claude General";
+  document.getElementById("toList").hidden = true;
+  document.getElementById("progress").hidden = true;
+  const used = new Set();
+  let html = "<p class='intro'>Обери тест. Відповіді зберігаються, можна повернутись пізніше.</p>";
+  GROUPS.forEach(([title, match]) => {
+    const items = TESTS.filter(t => match(t) && !used.has(t.id));
+    if (!items.length) return;
+    items.forEach(t => used.add(t.id));
+    html += "<div class='group-title'>" + title + "</div><div class='list'>" + items.map(pickHtml).join("") + "</div>";
   });
+  const rest = TESTS.filter(t => !used.has(t.id));
+  if (rest.length) html += "<div class='group-title'>Інші</div><div class='list'>" + rest.map(pickHtml).join("") + "</div>";
+  const app = document.getElementById("app");
+  app.innerHTML = html;
+  app.querySelectorAll(".pick").forEach(b => { b.onclick = () => open(b.dataset.id); });
+}
+
+function pickHtml(t) {
+  const s = state(t.id);
+  const en = english(t);
+  const last = s.history.length ? " · <span class='score'>" + (en ? "last try " : "остання спроба ") + s.history[s.history.length - 1].score + "/" + t.qs.length + "</span>" : "";
+  return "<button class='pick' data-id='" + t.id + "'><b>" + t.title + "</b><small>" + t.sub + (en ? " · answered " : " · відмічено ") + answered(t) + "/" + t.qs.length + last + "</small></button>";
 }
 
 function renderBar() {
-  const t = TESTS.find(x => x.id === current);
+  const t = test();
   const n = answered(t);
   document.getElementById("barfill").style.width = (100 * n / t.qs.length) + "%";
   document.getElementById("st-left").textContent = "Відмічено " + n + " з " + t.qs.length;
   const s = state(t.id);
-  document.getElementById("st-right").textContent = s.checked ? "Результат: " + score(t) + " з " + t.qs.length : "Відповіді зберігаються автоматично";
+  document.getElementById("st-right").textContent = s.checked ? "Результат: " + score(t) + " з " + t.qs.length : "Відповіді зберігаються самі";
 }
 
 function revealed(s, i) { return s.checked || (store.settings.instant && s.answers[i] !== undefined); }
 
-function render() {
-  const t = TESTS.find(x => x.id === current);
+function check(t, s) {
+  s.checked = true;
+  pendingCheck = false;
+  s.history.push({ date: new Date().toLocaleString("uk-UA"), score: score(t) });
+  save(); render(); window.scrollTo(0, 0);
+}
+
+function renderTest() {
+  const t = test();
   const s = state(t.id);
+  const en = english(t);
+  document.getElementById("heading").textContent = t.title;
+  document.getElementById("toList").hidden = false;
+  document.getElementById("progress").hidden = false;
   const app = document.getElementById("app");
   let html = "<p class='intro'>" + t.intro + "</p>";
-  html += "<label class='mode'><input type='checkbox' id='instant'" + (store.settings.instant ? " checked" : "") + "> Показувати пояснення одразу після вибору відповіді (відповідь тоді блокується)</label>";
+  html += "<label class='mode'><input type='checkbox' id='instant'" + (store.settings.instant ? " checked" : "") + "> Показувати пояснення одразу після вибору (відповідь тоді не зміниш)</label>";
 
   if (s.checked) {
     const sc = score(t);
     const pct = Math.round(100 * sc / t.qs.length);
     html += "<div class='result'><h2>Результат: " + sc + " з " + t.qs.length + " (" + pct + "%)</h2>";
-    html += "<div>Зелений це правильний варіант, червоний твій неправильний. Під кожним варіантом пояснення, чому так.</div>";
-    if (s.history.length) {
-      html += "<ul class='hist'>" + s.history.slice().reverse().map(h => "<li>" + h.date + ": " + h.score + " з " + t.qs.length + "</li>").join("") + "</ul>";
-    }
+    html += "<div>Зелений це правильний варіант, червоний твій неправильний. Під кожним варіантом пояснення.</div>";
+    if (s.history.length) html += "<ul class='hist'>" + s.history.slice().reverse().map(h => "<li>" + h.date + ": " + h.score + " з " + t.qs.length + "</li>").join("") + "</ul>";
     html += "</div>";
   }
 
@@ -3165,28 +3213,32 @@ function render() {
       let cls = "opt";
       let ex = "";
       if (rev) {
-        if (j === q.a) { cls += " good"; ex = "<div class='ex'><b>Правильно.</b> " + q.e[j] + "</div>"; }
-        else if (j === chosen) { cls += " wrong"; ex = "<div class='ex'><b>Ваш вибір, неправильно.</b> " + q.e[j] + "</div>"; }
-        else { ex = "<div class='ex'><b>Не те.</b> " + q.e[j] + "</div>"; }
+        if (j === q.a) { cls += " good"; ex = "<div class='ex'><b>" + (en ? "Correct." : "Правильно.") + "</b> " + q.e[j] + "</div>"; }
+        else if (j === chosen) { cls += " wrong"; ex = "<div class='ex'><b>" + (en ? "Your choice, wrong." : "Твій вибір, неправильно.") + "</b> " + q.e[j] + "</div>"; }
+        else { ex = "<div class='ex'><b>" + (en ? "Not this one." : "Не те.") + "</b> " + q.e[j] + "</div>"; }
       } else if (j === chosen) cls += " sel";
       html += "<label class='" + cls + "'><div class='row'><input type='radio' name='q" + i + "' value='" + j + "'" + (j === chosen ? " checked" : "") + (rev ? " disabled" : "") + "><span>" + o + "</span></div>" + ex + "</label>";
     });
     if (rev) {
-      const mark = chosen === undefined ? "Без відповіді." : (chosen === q.a ? "Відповідь правильна." : "Відповідь неправильна.");
-      html += "<div class='why'><b>" + mark + "</b> Джерело: " + q.w + "</div>";
+      const mark = chosen === undefined ? (en ? "No answer." : "Без відповіді.") : (chosen === q.a ? (en ? "Correct." : "Відповідь правильна.") : (en ? "Wrong." : "Відповідь неправильна."));
+      html += "<div class='why'><b>" + mark + "</b> " + (en ? "Source: " : "Джерело: ") + q.w + "</div>";
     }
     html += "</div>";
   });
 
   html += "<div class='actions'>";
   if (!s.checked) {
-    html += "<button class='btn' id='check'>Перевірити тест</button>";
-    html += "<button class='btn sec' id='clear'>Очистити відмітки</button>";
+    if (pendingCheck) {
+      const missing = t.qs.length - answered(t);
+      html += "<div class='note'>Без відповіді лишилось " + missing + ". Перевірити все одно?</div>";
+      html += "<button class='btn' id='confirmCheck'>Так, перевірити</button><button class='btn sec' id='cancelCheck'>Ні, доповню</button>";
+    } else {
+      html += "<button class='btn' id='check'>Перевірити тест</button><button class='btn sec' id='clear'>Очистити відмітки</button>";
+    }
   } else {
-    html += "<button class='btn' id='retry'>Пройти знову</button>";
-    html += "<button class='btn sec' id='back'>Повернутись до відміток</button>";
+    html += "<button class='btn' id='retry'>Пройти знову</button><button class='btn sec' id='back'>Повернутись до відміток</button>";
   }
-  html += "</div>";
+  html += "<button class='btn sec' id='list'>До списку тестів</button></div>";
   app.innerHTML = html;
 
   app.querySelectorAll("input[type=radio]").forEach(r => {
@@ -3195,39 +3247,36 @@ function render() {
       state(t.id).answers[i] = Number(e.target.value);
       save();
       if (store.settings.instant) { const y = window.scrollY; render(); window.scrollTo(0, y); return; }
-      renderTabs(); renderBar();
+      renderBar();
       e.target.closest(".q").querySelectorAll(".opt").forEach(o => o.classList.remove("sel"));
       e.target.closest(".opt").classList.add("sel");
     });
   });
 
   const byId = id => document.getElementById(id);
-  byId("instant").onchange = e => { store.settings.instant = e.target.checked; save(); const y = window.scrollY; render(); window.scrollTo(0, y); };
-  if (byId("check")) byId("check").onclick = () => {
-    const missing = t.qs.length - answered(t);
-    if (missing > 0 && !confirm("Без відповіді лишилось " + missing + ". Перевірити все одно?")) return;
-    s.checked = true;
-    s.history.push({ date: new Date().toLocaleString("uk-UA"), score: score(t) });
-    save(); render(); window.scrollTo(0, 0);
-  };
-  if (byId("clear")) byId("clear").onclick = () => {
-    if (!confirm("Очистити всі відмітки цього тесту?")) return;
-    s.answers = {}; save(); render();
-  };
+  const keep = () => { const y = window.scrollY; render(); window.scrollTo(0, y); };
+  byId("instant").onchange = e => { store.settings.instant = e.target.checked; save(); keep(); };
+  if (byId("check")) byId("check").onclick = () => { if (answered(t) < t.qs.length) { pendingCheck = true; keep(); } else check(t, s); };
+  if (byId("confirmCheck")) byId("confirmCheck").onclick = () => check(t, s);
+  if (byId("cancelCheck")) byId("cancelCheck").onclick = () => { pendingCheck = false; keep(); };
+  if (byId("clear")) byId("clear").onclick = () => { s.answers = {}; save(); keep(); };
   if (byId("retry")) byId("retry").onclick = () => { s.answers = {}; s.checked = false; save(); render(); window.scrollTo(0, 0); };
   if (byId("back")) byId("back").onclick = () => { s.checked = false; save(); render(); };
-
-  renderTabs(); renderBar();
+  byId("list").onclick = close;
+  renderBar();
 }
 
-const tg = window.Telegram && window.Telegram.WebApp;
+function render() { if (current && test()) renderTest(); else { current = null; renderList(); } }
+
+document.getElementById("toList").onclick = close;
+
 if (tg) {
   tg.ready();
   tg.expand();
   tg.setHeaderColor("#ffffff");
   tg.setBackgroundColor("#f7f5f0");
   tg.BackButton.show();
-  tg.BackButton.onClick(() => { location.href = "claude-hub.html"; });
+  tg.BackButton.onClick(() => { if (current) close(); else location.href = "claude-hub.html"; });
 }
 
 render();
